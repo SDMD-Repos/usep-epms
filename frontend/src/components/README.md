@@ -1,0 +1,2 @@
+Use this folder for a new or copied (modified) clean components or widgets from @airuiui or @kit.
+We recommend that you do not touch the @airuiui and @kit folders to easily update components in the future.
