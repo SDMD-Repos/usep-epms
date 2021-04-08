@@ -4,18 +4,18 @@
       <air-search />
     </div>
     <div class="mr-auto d-none d-md-block">
-      <air-issues-history />
+      <!-- <air-issues-history /> -->
     </div>
     <div class="mb-0 mr-4 d-xl-block d-none">
-      <air-status />
+      <!-- <air-status /> -->
     </div>
     <div class="mr-4 d-none d-sm-block">
-      <air-language-switcher />
+      <!-- <air-language-switcher /> -->
     </div>
     <div class="mr-4 d-none d-sm-block">
-      <air-actions />
+      <!-- <air-actions /> -->
     </div>
-    <div class>
+    <div class="d-none d-md-block">
       <air-user-menu />
     </div>
   </div>
@@ -23,19 +23,11 @@
 
 <script>
 import AirSearch from '@/@airui/layout/TopBar/Search'
-import AirIssuesHistory from '@/@airui/layout/TopBar/IssuesHistory'
-import AirStatus from '@/@airui/layout/TopBar/Status'
-import AirLanguageSwitcher from '@/@airui/layout/TopBar/LanguageSwitcher'
-import AirActions from '@/@airui/layout/TopBar/Actions'
 import AirUserMenu from '@/@airui/layout/TopBar/UserMenu'
 
 export default {
   components: {
     AirSearch,
-    AirIssuesHistory,
-    AirStatus,
-    AirLanguageSwitcher,
-    AirActions,
     AirUserMenu,
   },
 }

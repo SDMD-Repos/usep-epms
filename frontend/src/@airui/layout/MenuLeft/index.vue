@@ -61,17 +61,12 @@
           <span />
           <span />
         </a>
-        <a href="javascript: void(0);" :class="$style.air__menuLeft__logo">
-          <div :class="$style.air__menuLeft__logo__letter">E</div>
-          <div :class="$style.air__menuLeft__logo__name">{{ settings.logo }}</div>
-          <div :class="$style.air__menuLeft__logo__descr">{{ settings.acronym }}</div>
-        </a>
         <a href="javascript: void(0);" :class="$style.air__menuLeft__user">
           <div :class="$style.air__menuLeft__user__avatar">
-            <img src="resources/images/avatars/avatar.png" alt="David Beckham" />
+            <img src="resources/images/avatars/avatar-2.png" :alt="fullname" />
           </div>
-          <div :class="$style.air__menuLeft__user__name">David Beckham</div>
-          <div :class="$style.air__menuLeft__user__role">Administrator</div>
+          <div :class="$style.air__menuLeft__user__name">Hi, {{ this.user.firstName }}</div>
+          <div :class="$style.air__menuLeft__user__role">{{ this.user.role }}</div>
         </a>
         <vue-custom-scrollbar>
           <div :class="$style.air__menuLeft__container">
@@ -112,6 +107,7 @@
 
 <script>
 import vueCustomScrollbar from 'vue-custom-scrollbar'
+import 'vue-custom-scrollbar/dist/vueScrollbar.css'
 import _ from 'lodash'
 import { mapState } from 'vuex'
 import { getMenuData } from '@/services/menu'
@@ -123,12 +119,16 @@ export default {
   name: 'menu-left',
   components: { vueCustomScrollbar, SubMenu, Item, Category },
   computed: {
-    ...mapState(['settings']),
+    ...mapState(['user', 'settings']),
+    fullname() {
+      return this.user.firstName + ' ' + this.user.lastName
+    },
     flyoutActive() {
       return (this.settings.menuType === 'flyout' || this.settings.menuType === 'compact' || this.settings.isMenuCollapsed) && !this.settings.isMobileView
     },
   },
   mounted() {
+    console.log(this.user)
     this.setActiveItems()
   },
   data() {

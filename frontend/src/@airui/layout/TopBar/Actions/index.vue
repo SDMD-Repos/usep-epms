@@ -15,11 +15,11 @@
 </template>
 
 <script>
-import List3 from '@/@kit/widgets/Lists/3'
+// import List3 from '@/@kit/widgets/Lists/3'
 
 export default {
   components: {
-    List3,
+    // List3,
   },
 }
 </script>

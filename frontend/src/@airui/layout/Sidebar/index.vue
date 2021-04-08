@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div
+    <!-- <div
       :class="{[$style.air__sidebar]: true, [$style.air__sidebar__toggled]: settings.isSidebarOpen}"
     >
       <vue-custom-scrollbar :style="{ height: '100%' }">
@@ -258,7 +258,7 @@
           </div>
         </div>
       </vue-custom-scrollbar>
-    </div>
+    </div> -->
     <!-- <a-tooltip placement="left">
       <template slot="title">
         <span>Settings</span>
@@ -329,13 +329,13 @@
 </template>
 
 <script>
-import vueCustomScrollbar from 'vue-custom-scrollbar'
+// import vueCustomScrollbar from 'vue-custom-scrollbar'
 import { mapState } from 'vuex'
 import throttle from 'lodash/throttle'
-import AirColorPicker from '@/@airui/layout/Sidebar/partials/colorPicker'
+// import AirColorPicker from '@/@airui/layout/Sidebar/partials/colorPicker'
 
 export default {
-  components: { vueCustomScrollbar, AirColorPicker },
+  // components: { vueCustomScrollbar, AirColorPicker },
   computed: {
     ...mapState(['settings']),
     primaryColor() {
@@ -379,7 +379,7 @@ export default {
       this.$store.commit('SET_THEME', { theme: nextTheme })
       this.$store.commit('CHANGE_SETTING', {
         setting: 'menuColor',
-        value: nextTheme === 'dark' ? 'dark' : 'light',
+        value: nextTheme === 'dark' ? 'dark' : 'gray',
       })
     },
     selectColor: throttle(function (color) {

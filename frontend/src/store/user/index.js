@@ -26,9 +26,10 @@ export default {
   namespaced: true,
   state: {
     id: '',
-    name: '',
-    role: '',
+    lastName: '',
+    firstName: '',
     pmapsId: '',
+    role: '',
     avatar: '',
     authorized: process.env.VUE_APP_AUTHENTICATED || false, // false is default value
     loading: false,
@@ -93,11 +94,12 @@ export default {
       const currentAccount = mapAuthProviders[rootState.settings.authProvider].currentAccount
       currentAccount().then(response => {
         if (response) {
-          const { id, email, name, avatar, role } = response
+          const { id, lastName, firstName, pmapsId, avatar, role } = response
           commit('SET_STATE', {
             id,
-            name,
-            email,
+            lastName,
+            firstName,
+            pmapsId,
             avatar,
             role,
             authorized: true,

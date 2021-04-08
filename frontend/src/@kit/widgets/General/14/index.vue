@@ -45,6 +45,7 @@
 </template>
 <script>
 import vueCustomScrollbar from 'vue-custom-scrollbar'
+import 'vue-custom-scrollbar/dist/vueScrollbar.css'
 export default {
   name: 'KitGeneral14',
   components: { vueCustomScrollbar },
