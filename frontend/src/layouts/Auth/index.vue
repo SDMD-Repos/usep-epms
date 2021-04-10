@@ -2,7 +2,6 @@
   <a-layout>
     <a-layout-content>
       <air-sidebar />
-      <!-- <air-support-chat /> -->
       <div
         :class="{
           [$style.container]: true,
@@ -43,7 +42,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import AirSidebar from '@/@airui/layout/Sidebar'
+import AirSidebar from '@/components/layout/Sidebar'
 
 export default {
   name: 'AuthLayout',

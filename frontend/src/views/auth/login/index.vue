@@ -1,13 +1,13 @@
 <template>
   <div>
-    <air-login />
+    <epms-login />
   </div>
 </template>
 <script>
-import AirLogin from '@/@airui/system/Auth/Login'
+import EpmsLogin from '@/components/system/Auth/Login'
 export default {
   components: {
-    AirLogin,
+    EpmsLogin,
   },
 }
 </script>

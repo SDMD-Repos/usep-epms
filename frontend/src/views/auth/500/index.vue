@@ -1,13 +1,13 @@
 <template>
   <div>
-    <air-error-500 />
+    <component-error-500 />
   </div>
 </template>
 <script>
-import AirError500 from '@/@airui/system/Errors/500'
+import ComponentError500 from '@/components/system/Errors/500'
 export default {
   components: {
-    AirError500,
+    ComponentError500,
   },
 }
 </script>

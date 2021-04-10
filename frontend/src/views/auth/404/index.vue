@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import AirError404 from '@/@airui/system/Errors/404'
+import AirError404 from '@/components/system/Errors/404'
 export default {
   components: {
     AirError404,

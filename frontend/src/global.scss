@@ -4,13 +4,13 @@
 @import '~quill/dist/quill.core.css';
 @import '~quill/dist/quill.snow.css';
 
-@import '@kit/vendors/antd/style';
-@import '@kit/vendors/bootstrap/style';
-@import '@kit/vendors/nprogress/style';
-@import '@kit/vendors/chartist/style';
-@import '@kit/vendors/chartist-tooltip-plugin/style';
-@import '@kit/vendors/perfect-scrollbar/style';
-@import '@kit/vendors/quill/style';
+@import 'components/Kit/vendors/antd/style';
+@import 'components/Kit/vendors/bootstrap/style';
+@import 'components/Kit/vendors/nprogress/style';
+@import 'components/Kit/vendors/chartist/style';
+@import 'components/Kit/vendors/chartist-tooltip-plugin/style';
+@import 'components/Kit/vendors/perfect-scrollbar/style';
+@import 'components/Kit/vendors/quill/style';
 
-@import '@kit/core/style'; // KIT styles
-@import '@airui/styles/style'; // AIR UI styles
+@import 'components/Kit/core/style'; // KIT styles
+@import 'components/styles/style'; // AIR UI styles

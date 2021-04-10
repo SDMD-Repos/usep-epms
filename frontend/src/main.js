@@ -1,6 +1,6 @@
 import 'ant-design-vue/lib/style/index.less' // antd core styles
-import './@kit/vendors/antd/themes/default.less' // default theme antd components
-import './@kit/vendors/antd/themes/dark.less' // dark theme antd components
+import './components/Kit/vendors/antd/themes/default.less' // default theme antd components
+import './components/Kit/vendors/antd/themes/dark.less' // dark theme antd components
 import './global.scss' // app & third-party component styles
 
 import Vue from 'vue'

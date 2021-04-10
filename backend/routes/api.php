@@ -22,11 +22,18 @@ Route::group([
     'prefix' => 'auth'
 ], function () {
     Route::post('/login', 'UserController@login');
-  
+
     Route::group([
       'middleware' => 'auth:api'
     ], function() {
         Route::get('/logout', 'UserController@logout');
         Route::get('/account', 'UserController@account');
     });
+});
+
+Route::group([
+    'prefix' => 'settings',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('/settings', 'UserController@logout');
 });

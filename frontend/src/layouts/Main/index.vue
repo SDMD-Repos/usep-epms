@@ -44,15 +44,15 @@
 
 <script>
 import { mapState } from 'vuex'
-import AirTopbar from '@/@airui/layout/TopBar'
-import AirTopbarDark from '@/@airui/layout/TopBarDark'
-import AirSubbar from '@/@airui/layout/SubBar'
-import AirMenuLeft from '@/@airui/layout/MenuLeft'
-import AirMenuTop from '@/@airui/layout/MenuTop'
-import AirFooter from '@/@airui/layout/Footer'
-import AirFooterDark from '@/@airui/layout/FooterDark'
+import AirTopbar from '@/components/layout/TopBar'
+import AirTopbarDark from '@/components/layout/TopBarDark'
+import AirSubbar from '@/components/layout/SubBar'
+import AirMenuLeft from '@/components/layout/MenuLeft'
+import AirMenuTop from '@/components/layout/MenuTop'
+import AirFooter from '@/components/layout/Footer'
+import AirFooterDark from '@/components/layout/FooterDark'
 // import AirSupportChat from '@/@airui/layout/SupportChat'
-import AirSidebar from '@/@airui/layout/Sidebar'
+import AirSidebar from '@/components/layout/Sidebar'
 
 export default {
   name: 'MainLayout',
