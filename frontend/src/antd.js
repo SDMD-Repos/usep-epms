@@ -2,7 +2,7 @@ import Vue from 'vue'
 import {
   Avatar, TreeSelect, Rate, Breadcrumb, InputNumber, Steps,
   Upload, Button, Layout, Table, Icon, Progress, Radio, Dropdown, Menu,
-  Carousel, Input, Calendar, Badge, Slider, Form, Tooltip, Select, Switch,
+  Carousel, Input, Calendar, Badge, Slider, Form, FormModel, Tooltip, Select, Switch,
   Tag, Affix, Spin, Alert, Checkbox, Tabs, Pagination, notification, Drawer,
   Cascader, DatePicker, TimePicker, Divider, Anchor, AutoComplete, BackTop, Collapse, Card, List, Popover,
   Tree, Timeline, Row, Col, Transfer, Modal, message, Popconfirm, Skeleton, ConfigProvider, Comment,
@@ -38,6 +38,7 @@ Vue.use(Calendar)
 Vue.use(Badge)
 Vue.use(Slider)
 Vue.use(Form)
+Vue.use(FormModel)
 Vue.use(Tooltip)
 Vue.use(Select)
 Vue.use(Tag)

@@ -20,26 +20,6 @@ export async function login(pmapsId, password) {
     .catch(err => console.log(err))
 }
 
-export async function register(email, password, name) {
-  return apiClient
-    .post('/auth/register', {
-      email,
-      password,
-      name,
-    })
-    .then(response => {
-      if (response) {
-        const { accessToken } = response.data
-        if (accessToken) {
-          store.set('accessToken', accessToken)
-        }
-        return response.data
-      }
-      return false
-    })
-    .catch(err => console.log(err))
-}
-
 export async function currentAccount() {
   return apiClient
     .get('/auth/account')

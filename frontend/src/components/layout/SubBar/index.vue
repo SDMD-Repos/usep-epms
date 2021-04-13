@@ -12,8 +12,12 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 
 export default {
+  computed: {
+    ...mapState(['user']),
+  },
   methods: {
     logout() {
       this.$store.dispatch('user/LOGOUT')

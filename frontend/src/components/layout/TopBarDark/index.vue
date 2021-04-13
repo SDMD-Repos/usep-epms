@@ -28,12 +28,12 @@
 
 <script>
 import { mapState } from 'vuex'
-import AirMenuDashboards from '@/@airui/layout/TopBarDark/MenuDashboards'
-import AirMenuPages from '@/@airui/layout/TopBarDark/MenuPages'
-import AirStatus from '@/@airui/layout/TopBarDark/Status'
-import AirLanguageSwitcher from '@/@airui/layout/TopBarDark/LanguageSwitcher'
-import AirActions from '@/@airui/layout/TopBarDark/Actions'
-import AirUserMenu from '@/@airui/layout/TopBarDark/UserMenu'
+import AirMenuDashboards from '@/components/layout/TopBarDark/MenuDashboards'
+import AirMenuPages from '@/components/layout/TopBarDark/MenuPages'
+import AirStatus from '@/components/layout/TopBarDark/Status'
+import AirLanguageSwitcher from '@/components/layout/TopBarDark/LanguageSwitcher'
+import AirActions from '@/components/layout/TopBarDark/Actions'
+import AirUserMenu from '@/components/layout/TopBarDark/UserMenu'
 
 export default {
   components: {

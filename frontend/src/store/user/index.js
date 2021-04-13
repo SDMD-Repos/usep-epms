@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from '@/router'
+// import router from '@/router'
 
 import * as firebase from '@/services/firebase'
 import * as jwt from '@/services/jwt'
@@ -14,7 +14,6 @@ const mapAuthProviders = {
   },
   jwt: {
     login: jwt.login,
-    register: jwt.register,
     currentAccount: jwt.currentAccount,
     logout: jwt.logout,
   },
@@ -64,28 +63,6 @@ export default {
         }
       })
     },
-    REGISTER({ commit, dispatch, rootState }, { payload }) {
-      const { email, password, name } = payload
-      commit('SET_STATE', {
-        loading: true,
-      })
-
-      const register = mapAuthProviders[rootState.settings.authProvider].register
-      register(email, password, name).then(success => {
-        if (success) {
-          dispatch('LOAD_CURRENT_ACCOUNT')
-          Vue.prototype.$notification.success({
-            message: 'Succesful Registered',
-            description: 'You have successfully registered!',
-          })
-        }
-        if (!success) {
-          commit('SET_STATE', {
-            loading: false,
-          })
-        }
-      })
-    },
     LOAD_CURRENT_ACCOUNT({ commit, rootState }) {
       commit('SET_STATE', {
         loading: true,
@@ -122,7 +99,7 @@ export default {
           authorized: false,
           loading: false,
         })
-        router.push('/auth/login')
+        location.href = '/'
       })
     },
   },

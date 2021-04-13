@@ -36,7 +36,14 @@ const router = new Router({
           meta: {
             title: 'Settings Form',
           },
-          component: () => import('./views/settings/form'),
+          component: () => import('./views/appsettings/form'),
+        },
+        {
+          path: '/settings/measures',
+          meta: {
+            title: 'Settings Measures',
+          },
+          component: () => import('./views/appsettings/measures'),
         },
       ],
     },
@@ -67,13 +74,6 @@ const router = new Router({
             title: 'Sign In',
           },
           component: () => import('./views/auth/login'),
-        },
-        {
-          path: '/auth/lockscreen',
-          meta: {
-            title: 'Lockscreen',
-          },
-          component: () => import('./views/auth/lockscreen'),
         },
       ],
     },

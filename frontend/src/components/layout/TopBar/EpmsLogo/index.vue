@@ -1,6 +1,8 @@
 <template>
   <div>
-    <img src="resources/images/ePMS.png" alt="ePMS Branding" height="40px">
+    <a class="navbar-brand" href="/" exact>
+      <img src="resources/images/ePMS.png" alt="ePMS Branding" height="40px">
+    </a>
   </div>
 </template>
 

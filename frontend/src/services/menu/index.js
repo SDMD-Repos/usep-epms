@@ -20,14 +20,14 @@ export const getMenuData = [
         url: '/settings/form',
       },
       {
-        title: 'Groups',
-        key: 'settingsGroups',
-        url: '/settings/groups',
-      },
-      {
         title: 'Measures',
         key: 'settingsMeasures',
         url: '/settings/measures',
+      },
+      {
+        title: 'Signatories',
+        key: 'settingsSignatories',
+        url: '/settings/signatories',
       },
       {
         title: 'Others',

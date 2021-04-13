@@ -49,9 +49,6 @@ export default {
     }
   },
   methods: {
-    changeAuthProvider(value) {
-      this.$store.commit('CHANGE_SETTING', { setting: 'authProvider', value })
-    },
     handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {

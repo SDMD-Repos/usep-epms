@@ -35,5 +35,18 @@ Route::group([
     'prefix' => 'settings',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('/settings', 'UserController@logout');
+    Route::get('/get-all-functions', 'SettingController@getFunctions');
+
+    Route::get('/get-all-programs', 'SettingController@getPrograms');
+    Route::post('/create-program', 'SettingController@createProgram');
+    Route::post('/delete-program/{id}', 'SettingController@deleteProgram');
+
+    Route::get('/get-sub-categories', 'SettingController@getSubCategories');
+    Route::post('/create-sub-category', 'SettingController@createSubCategory');
+    Route::post('/delete-sub-category/{id}', 'SettingController@deleteSubCategory');
+
+    Route::get('/get-all-measures', 'SettingController@getMeasures');
+    Route::post('/create-measure', 'SettingController@createMeasure');
+    Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
+    Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
 });
