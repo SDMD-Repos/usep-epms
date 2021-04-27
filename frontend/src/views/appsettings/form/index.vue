@@ -5,13 +5,15 @@
         <div class="card">
           <div class="card-header card-header-flex flex-column">
             <a-tabs defaultActiveKey="1" class="kit-tabs kit-tabs-bold" @change="callback">
-              <a-tab-pane tab="Programs" key="1" />
+              <a-tab-pane tab="Functions" key="1" />
               <a-tab-pane tab="Sub Categories" key="2" />
+              <a-tab-pane tab="Programs" key="3" />
             </a-tabs>
           </div>
           <div class="card-body">
-            <programs-form v-if="activeKey === '1'" />
+            <categories-form v-if="activeKey === '1'" />
             <sub-categories-form v-if="activeKey === '2'" />
+            <programs-form v-if="activeKey === '3'" />
           </div>
         </div>
       </div>
@@ -19,11 +21,13 @@
   </div>
 </template>
 <script>
-import ProgramsForm from '@/components/system/AppSettings/Form/Programs'
 import SubCategoriesForm from '@/components/system/AppSettings/Form/SubCategories'
+import CategoriesForm from '@/components/system/AppSettings/Form/Categories'
+import ProgramsForm from '@/components/system/AppSettings/Form/Programs'
 export default {
   components: {
     ProgramsForm,
+    CategoriesForm,
     SubCategoriesForm,
   },
   data() {

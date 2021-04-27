@@ -6,16 +6,6 @@
       <sourceFolder url="file://$MODULE_DIR$/backend/tests" isTestSource="true" packagePrefix="Tests\" />
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/tijsverkoyen/css-to-inline-styles" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nunomaduro/collision" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nesbot/carbon" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/var-dumper" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/translation" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/string" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/mime" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-kernel" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpspec/prophecy" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fakerphp/faker" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/monolog/monolog" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/error-handler" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/lcobucci/clock" />
@@ -125,6 +115,16 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/php-http/message-factory" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/firebase/php-jwt" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/dragonmantank/cron-expression" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/tijsverkoyen/css-to-inline-styles" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nunomaduro/collision" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nesbot/carbon" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/var-dumper" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/translation" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/string" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/mime" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-kernel" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpspec/prophecy" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fakerphp/faker" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

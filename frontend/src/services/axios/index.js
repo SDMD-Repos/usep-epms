@@ -21,6 +21,7 @@ apiClient.interceptors.response.use(undefined, error => {
   // Errors handling
   const { response } = error
   const { data } = response
+
   if (data && response.status !== 401) {
     notification.warning({
       message: data,

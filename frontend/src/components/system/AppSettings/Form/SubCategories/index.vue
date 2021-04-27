@@ -24,7 +24,6 @@
               v-model="parentId"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              dropdownClassName="treeSelectDropDown"
               :tree-data="parentSubs"
               placeholder="Select Parent Sub Category"
               :replace-fields="normalizer"

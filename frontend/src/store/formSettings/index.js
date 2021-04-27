@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-// import store from 'store'
 
 import * as appSettings from '@/services/appSettings'
 
 const mapApiProviders = {
   getFunctions: appSettings.getFunctions,
+  createFunction: appSettings.createNewFunction,
+  deleteFunction: appSettings.deleteFunction,
   getPrograms: appSettings.getPrograms,
   createProgram: appSettings.addNewProgram,
   deleteProgram: appSettings.deleteProgram,
@@ -16,6 +17,12 @@ const mapApiProviders = {
   createMeasure: appSettings.createMeasure,
   updateMeasure: appSettings.updateMeasure,
   deleteMeasure: appSettings.deleteMeasure,
+  getAllForms: appSettings.getAllForms,
+  getAllPositions: appSettings.getAllPositions,
+  getYearSignatories: appSettings.getYearSignatories,
+  saveSignatories: appSettings.saveSignatories,
+  updateSignatories: appSettings.updateSignatory,
+  deleteSignatory: appSettings.deleteSignatory,
 }
 
 Vue.use(Vuex)
@@ -27,6 +34,9 @@ export default {
     programs: [],
     subCategories: [],
     measures: [],
+    forms: [],
+    positions: [],
+    signatories: [],
     loading: false,
   },
   mutations: {
@@ -37,7 +47,7 @@ export default {
     },
   },
   actions: {
-    FETCH_FUNCTIONS({ commit, rootState }) {
+    FETCH_FUNCTIONS({ commit }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -48,6 +58,45 @@ export default {
           const { categories } = response
           commit('SET_STATE', {
             functions: categories,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CREATE_FUNCTION({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const createFunction = mapApiProviders.createFunction
+      createFunction(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_FUNCTIONS')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Function created successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DELETE_FUNCTION({ commit, dispatch }, { payload }) {
+      const id = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const deleteFunction = mapApiProviders.deleteFunction
+      deleteFunction(id).then(response => {
+        if (response) {
+          dispatch('FETCH_FUNCTIONS')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Function deleted successfully',
           })
         }
         commit('SET_STATE', {
@@ -88,7 +137,7 @@ export default {
         if (response) {
           dispatch('FETCH_PROGRAMS')
           Vue.prototype.$notification.success({
-            message: 'Created',
+            message: 'Success',
             description: 'Program created successfully',
           })
         }
@@ -108,7 +157,7 @@ export default {
         if (response) {
           dispatch('FETCH_PROGRAMS')
           Vue.prototype.$notification.success({
-            message: 'Deleted',
+            message: 'Success',
             description: 'Program deleted successfully',
           })
         }
@@ -150,7 +199,7 @@ export default {
         if (response) {
           dispatch('FETCH_SUB_CATEGORIES')
           Vue.prototype.$notification.success({
-            message: 'Created',
+            message: 'Success',
             description: 'Sub category created successfully',
           })
         }
@@ -170,7 +219,7 @@ export default {
         if (response) {
           dispatch('FETCH_SUB_CATEGORIES')
           Vue.prototype.$notification.success({
-            message: 'Deleted',
+            message: 'Success',
             description: 'Sub category deleted successfully',
           })
         }
@@ -211,7 +260,7 @@ export default {
         if (response) {
           dispatch('FETCH_MEASURES')
           Vue.prototype.$notification.success({
-            message: 'Created',
+            message: 'Success',
             description: 'Measure created successfully',
           })
         }
@@ -236,7 +285,7 @@ export default {
         if (response) {
           dispatch('FETCH_MEASURES')
           Vue.prototype.$notification.success({
-            message: 'Updated',
+            message: 'Success',
             description: 'Measure updated successfully',
           })
         }
@@ -256,8 +305,121 @@ export default {
         if (response) {
           dispatch('FETCH_MEASURES')
           Vue.prototype.$notification.success({
-            message: 'Deleted',
+            message: 'Success',
             description: 'Measure deleted successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_ALL_FORMS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getAllForms = mapApiProviders.getAllForms
+      getAllForms().then(response => {
+        if (response) {
+          const { forms } = response
+          commit('SET_STATE', {
+            forms: forms,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_ALL_POSITIONS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getAllPositions = mapApiProviders.getAllPositions
+      getAllPositions().then(response => {
+        if (response) {
+          const { positions } = response
+          commit('SET_STATE', {
+            positions: positions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_YEAR_SIGNATORIES({ commit }, { payload }) {
+      const { year, formId } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getYearSignatories = mapApiProviders.getYearSignatories
+      getYearSignatories(year, formId).then(response => {
+        if (response) {
+          const { signatories } = response
+          commit('SET_STATE', {
+            signatories: signatories,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    SAVE_POSITION_SIGNATORIES({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const saveSignatories = mapApiProviders.saveSignatories
+      saveSignatories(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Your changes were saved successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE_POSITION_SIGNATORIES({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const updateSignatories = mapApiProviders.updateSignatories
+      updateSignatories(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Signatory updated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DELETE_POSITION_SIGNATORY({ commit, dispatch }, { payload }) {
+      const { id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const deleteSignatory = mapApiProviders.deleteSignatory
+      deleteSignatory(id).then(response => {
+        if (response) {
+          dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Personnel deleted successfully',
           })
         }
         commit('SET_STATE', {

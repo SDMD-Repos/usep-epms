@@ -45,6 +45,13 @@ const router = new Router({
           },
           component: () => import('./views/appsettings/measures'),
         },
+        {
+          path: '/settings/signatories',
+          meta: {
+            title: 'Settings Signatories',
+          },
+          component: () => import('./views/appsettings/signatory'),
+        },
       ],
     },
 

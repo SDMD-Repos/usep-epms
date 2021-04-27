@@ -18,7 +18,7 @@ class CreateMeasureItemsTable extends Migration
             $table->integer('measure_id');
             $table->integer('rate');
             $table->string('description', 150);
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();

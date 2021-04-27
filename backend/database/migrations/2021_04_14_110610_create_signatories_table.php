@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMeasuresTable extends Migration
+class CreateSignatoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,24 @@ class CreateMeasuresTable extends Migration
      */
     public function up()
     {
-        Schema::create('measures', function (Blueprint $table) {
+        Schema::create('signatories', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->string('name', 50);
+            $table->year('year');
+            $table->string('position_id', 15);
+            $table->string('form_id', 15);
+            $table->string('personnel_id', 30);
+            $table->string('personnel_name', 150);
+            $table->string('office_id', 30);
+            $table->string('office_name', 150);
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();
             $table->softDeletes();
             $table->text('history');
+
+            $table->foreign('position_id')->references('id')->on('positions')->onUpdate('cascade');
+            $table->foreign('form_id')->references('id')->on('forms')->onUpdate('cascade');
         });
     }
 
@@ -32,6 +41,6 @@ class CreateMeasuresTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('measures');
+        Schema::dropIfExists('signatories');
     }
 }

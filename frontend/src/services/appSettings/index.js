@@ -9,6 +9,24 @@ export async function getFunctions() {
     .catch(err => console.log(err))
 }
 
+export function createNewFunction(data) {
+  return apiClient
+    .post('/settings/create-function', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export function deleteFunction(id) {
+  return apiClient
+    .post('/settings/delete-category/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function getPrograms() {
   return apiClient
     .get('/settings/get-all-programs')
@@ -93,6 +111,60 @@ export async function updateMeasure(data, id) {
 export async function deleteMeasure(id) {
   return apiClient
     .post('/settings/delete-measure/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getAllForms() {
+  return apiClient
+    .get('/settings/get-all-forms')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getAllPositions() {
+  return apiClient
+    .get('/settings/get-all-positions')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getYearSignatories(year, formId) {
+  return apiClient
+    .get('/settings/get-year-signatories/' + year + '/' + formId)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function saveSignatories(data) {
+  return apiClient
+    .post('/settings/save-signatories', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function updateSignatory(data) {
+  return apiClient
+    .post('/settings/update-signatories', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function deleteSignatory(id) {
+  return apiClient
+    .post('/settings/delete-signatory/' + id)
     .then(response => {
       return response.data
     })

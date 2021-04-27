@@ -60,4 +60,10 @@ trait ConverterTrait {
 
         return $out;
     }
+
+    public function getFullName($person)
+    {
+        return $person['firstName'] . " " . $person['lastName'];
+    }
+
 }

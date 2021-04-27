@@ -36,6 +36,8 @@ Route::group([
     'middleware' => 'auth:api'
 ], function () {
     Route::get('/get-all-functions', 'SettingController@getFunctions');
+    Route::post('/create-function', 'SettingController@createFunction');
+    Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
 
     Route::get('/get-all-programs', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
@@ -49,4 +51,21 @@ Route::group([
     Route::post('/create-measure', 'SettingController@createMeasure');
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
+
+    Route::get('/get-all-forms', 'SettingController@getAllForms');
+
+    Route::get('/get-all-positions', 'SettingController@getAllPositions');
+
+    Route::get('/get-year-signatories/{year}/{formId}', 'SettingController@getYearSignatories');
+    Route::post('/save-signatories', 'SettingController@saveSignatories');
+    Route::post('/update-signatories', 'SettingController@updateSignatories');
+    Route::post('/delete-signatory/{id}', 'SettingController@deleteSignatory');
+});
+
+Route::group([
+    'prefix' => 'hris',
+    'middleware' => 'auth:api'
+], function() {
+    Route::get('/get-main-offices', 'SettingController@getMainOffices');
+    Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
 });

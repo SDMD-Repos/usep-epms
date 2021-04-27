@@ -187,7 +187,6 @@ export default {
       this.form.items.splice(index, 1)
       this.itemsText.splice(index, 1)
       if (this.action === 'update' && (typeof (item.status) === 'undefined' || item.status !== 'new')) {
-        console.log(item.id)
         this.form.deleted.push(item.id)
       }
     },
