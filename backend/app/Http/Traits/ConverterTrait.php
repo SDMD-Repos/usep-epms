@@ -36,7 +36,7 @@ trait ConverterTrait {
         return $result;
     }
 
-    public function getNestedChildren($arr, $parent=null, $level=1)
+    public function getNestedChildren($arr, $parent=null)
     {
         $out = [];
 
@@ -44,12 +44,12 @@ trait ConverterTrait {
             $arr[$i]->key = $value->id;
 
             if ($arr[$i]->parent_id === $parent) {
-                $arr[$i]->level = $level;
 
                 $children = $this->getNestedChildren($arr, $arr[$i]->id);
 
                 if (count($children)) {
                     $arr[$i]->children = $children;
+                    $arr[$i]->selectable = false;
                 }
 
                 $arr[$i]->isOpen = false;

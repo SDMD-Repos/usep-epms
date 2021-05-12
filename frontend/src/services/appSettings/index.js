@@ -119,7 +119,7 @@ export async function deleteMeasure(id) {
 
 export async function getAllForms() {
   return apiClient
-    .get('/settings/get-all-forms')
+    .get('/settings/get-all-spms-forms')
     .then(response => {
       return response.data
     })
@@ -165,6 +165,15 @@ export async function updateSignatory(data) {
 export async function deleteSignatory(id) {
   return apiClient
     .post('/settings/delete-signatory/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getCascadingLevels() {
+  return apiClient
+    .get('/settings/get-all-cascading-levels')
     .then(response => {
       return response.data
     })

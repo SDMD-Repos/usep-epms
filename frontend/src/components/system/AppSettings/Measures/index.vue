@@ -210,7 +210,6 @@ export default {
     },
     submitForm() {
       const that = this
-      console.log(that.form)
       that.$refs.measureForm.validate(valid => {
         if (valid) {
           if (that.form.items.length < 3) {

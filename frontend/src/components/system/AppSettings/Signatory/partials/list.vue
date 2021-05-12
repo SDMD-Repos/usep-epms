@@ -42,7 +42,8 @@ export default {
   },
 }
 </script>
-<style>
+
+<style lang="scss">
 th.column-personnel,
 th.column-office,
 th.column-action {

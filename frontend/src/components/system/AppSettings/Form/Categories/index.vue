@@ -1,13 +1,9 @@
 <template>
   <div>
-    <div v-if="!createNew">
-      <a-button type="primary" @click="createNew = !createNew" icon="plus">New Function</a-button>
-      <br />
-    </div>
-    <a-form :form="form" @submit="handleSubmit" v-if="createNew">
+    <a-form :form="form" @submit="handleSubmit">
       <div class="row">
-        <div class="col-lg-6">
-          <a-form-item label="Category Name">
+        <div class="col-lg-5">
+          <a-form-item label="Function Name">
             <a-input v-decorator="['name', { rules: [{ required: true, message: 'This field is required' }] }]" />
           </a-form-item>
         </div>
@@ -17,10 +13,9 @@
                             v-decorator="['percentage', { rules: [{ required: true, message: 'This field is required' }] }]"/>
           </a-form-item>
         </div>
-      </div>
-      <div class="form-actions mt-0">
-        <a-button type="primary" htmlType="submit" class="mr-3">Create</a-button>
-        <a-button class="mr-3" @click="createNew = !createNew">Cancel</a-button>
+        <div class="col-lg-1 mt-lg-5 ml-lg-n5">
+          <a-button type="primary" htmlType="submit" class="mr-3">Add</a-button>
+        </div>
       </div>
     </a-form>
     <br />
@@ -44,7 +39,6 @@ export default {
   data() {
     return {
       form: this.$form.createForm(this),
-      createNew: false,
     }
   },
   methods: {

@@ -131,7 +131,8 @@ export default {
   },
 }
 </script>
-<style scoped>
+
+<style>
 .spin-content {
   padding: 30px;
 }

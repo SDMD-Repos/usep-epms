@@ -98,7 +98,7 @@ export default {
   data() {
     const formName = this.formName
     return {
-      year: '2021',
+      year: new Date().getFullYear(),
       formId: formName,
       activeKey: '0',
       details: [],

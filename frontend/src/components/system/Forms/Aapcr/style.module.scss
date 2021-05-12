@@ -1,0 +1,27 @@
+@import '@/mixins.scss';
+
+//////////////////////////////////////////////////////////////////////////////////////////
+/* AAPCR */
+
+th.column-category,
+th.column-sub-category,
+th.column-pi-name,
+th.column-is-header,
+td.column-is-header,
+th.column-success-indicator,
+th.column-target,
+th.column-target-year,
+th.column-measures,
+th.column-allocated-budget,
+th.column-in-php,
+th.column-targets-basis,
+th.column-cascading-level,
+th.column-office-accountable,
+th.column-implementing,
+th.column-supporting,
+th.column-other-remarks,
+th.column-action{
+  text-align: center !important;
+}
+
+.ant-table td { white-space: pre-wrap; }

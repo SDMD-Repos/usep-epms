@@ -16,9 +16,6 @@ import { i18n } from './localization'
 import './antd'
 import './registerServiceWorker'
 
-// mocking api
-import './services/axios/fakeApi'
-
 Vue.use(BootstrapVue)
 Vue.use(VueLayers)
 

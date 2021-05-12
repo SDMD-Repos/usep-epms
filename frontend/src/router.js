@@ -52,6 +52,21 @@ const router = new Router({
           },
           component: () => import('./views/appsettings/signatory'),
         },
+        // AAPCR Form
+        {
+          path: '/aapcr/new',
+          meta: {
+            title: 'AAPCR Create New',
+          },
+          component: () => import('./views/forms/aapcr/new'),
+        },
+        {
+          path: '/aapcr/list',
+          meta: {
+            title: 'AAPCR List',
+          },
+          component: () => import('./views/forms/aapcr/list'),
+        },
       ],
     },
 

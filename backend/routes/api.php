@@ -52,7 +52,7 @@ Route::group([
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
 
-    Route::get('/get-all-forms', 'SettingController@getAllForms');
+    Route::get('/get-all-spms-forms', 'SettingController@getAllForms');
 
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
 
@@ -60,6 +60,8 @@ Route::group([
     Route::post('/save-signatories', 'SettingController@saveSignatories');
     Route::post('/update-signatories', 'SettingController@updateSignatories');
     Route::post('/delete-signatory/{id}', 'SettingController@deleteSignatory');
+
+    Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
 });
 
 Route::group([

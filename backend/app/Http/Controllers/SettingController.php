@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\CascadingLevel;
 use App\Category;
 use App\Form;
 use App\Http\Requests\StoreCategory;
@@ -463,7 +464,7 @@ class SettingController extends Controller
         $forms = Form::orderBy('ordering', 'ASC')->get();
 
         return response()->json([
-            'forms' => $forms
+            'spmsForms' => $forms
         ], 200);
     }
 
@@ -660,5 +661,14 @@ class SettingController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
+    }
+
+    public function getAllCascadingLevels()
+    {
+        $cascadingLevels = CascadingLevel::orderBy('ordering', 'ASC')->get();
+
+        return response()->json([
+            'cascadingLevels' => $cascadingLevels
+        ], 200);
     }
 }

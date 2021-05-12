@@ -23,6 +23,7 @@ const mapApiProviders = {
   saveSignatories: appSettings.saveSignatories,
   updateSignatories: appSettings.updateSignatory,
   deleteSignatory: appSettings.deleteSignatory,
+  getCascadingLevels: appSettings.getCascadingLevels,
 }
 
 Vue.use(Vuex)
@@ -37,6 +38,7 @@ export default {
     forms: [],
     positions: [],
     signatories: [],
+    cascadingLevels: [],
     loading: false,
   },
   mutations: {
@@ -322,9 +324,9 @@ export default {
       const getAllForms = mapApiProviders.getAllForms
       getAllForms().then(response => {
         if (response) {
-          const { forms } = response
+          const { spmsForms } = response
           commit('SET_STATE', {
-            forms: forms,
+            forms: spmsForms,
           })
         }
         commit('SET_STATE', {
@@ -420,6 +422,24 @@ export default {
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'Personnel deleted successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_CASCADING_LEVELS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getCascadingLevels = mapApiProviders.getCascadingLevels
+      getCascadingLevels().then(response => {
+        if (response) {
+          const { cascadingLevels } = response
+          commit('SET_STATE', {
+            cascadingLevels: cascadingLevels,
           })
         }
         commit('SET_STATE', {

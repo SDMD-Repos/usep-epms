@@ -1,0 +1,121 @@
+export const getFormColumns = [
+  {
+    title: 'Sub Category',
+    key: 'subCategory',
+    dataIndex: 'subCategory',
+    className: 'column-sub-category',
+    width: 280,
+    scopedSlots: { customRender: 'subCategory' },
+  },
+  {
+    title: 'Performance Indicator',
+    key: 'name',
+    dataIndex: 'name',
+    className: 'column-pi-name',
+    width: 450,
+  },
+  {
+    title: 'is Header PI?',
+    key: 'isHeader',
+    dataIndex: 'isHeader',
+    className: 'column-is-header',
+    width: 100,
+    scopedSlots: { customRender: 'isHeaderPI' },
+  },
+  {
+    title: 'Success Indicators',
+    className: 'column-success-indicator',
+    width: 450,
+    children: [
+      {
+        title: 'Target (per Fiscal Year)',
+        className: 'column-target',
+        children: [
+          {
+            key: 'target',
+            dataIndex: 'target',
+            className: 'column-target-year',
+            width: 225,
+            slots: {
+              title: 'targetYearColumn',
+            },
+          },
+        ],
+      },
+      {
+        title: 'Measures',
+        key: 'measures',
+        dataIndex: 'measures',
+        className: 'column-measures',
+        width: 225,
+        scopedSlots: { customRender: 'measures' },
+      },
+    ],
+  },
+  {
+    title: 'Allocated Budget (F-101)',
+    className: 'column-allocated-budget',
+    children: [
+      {
+        title: '(in Php \'000)',
+        key: 'budget',
+        dataIndex: 'budget',
+        className: 'column-in-php',
+        width: 150,
+        scopedSlots: { customRender: 'budget' },
+      },
+    ],
+  },
+  {
+    title: 'Targets Basis',
+    key: 'targetsBasis',
+    dataIndex: 'targetsBasis',
+    className: 'column-targets-basis',
+    width: 250,
+  },
+  {
+    title: 'Cascading Level',
+    key: 'cascadingLevel',
+    dataIndex: 'cascadingLevel',
+    className: 'column-cascading-level',
+    width: 190,
+    scopedSlots: { customRender: 'cascadingLevel' },
+  },
+  {
+    title: 'Office/s Accountable',
+    className: 'column-office-accountable',
+    children: [
+      {
+        title: 'Implementing Office',
+        key: 'implementing',
+        dataIndex: 'implementing',
+        className: 'column-implementing',
+        width: 350,
+        scopedSlots: { customRender: 'implementing' },
+      },
+      {
+        title: 'Supporting Office',
+        key: 'supporting',
+        dataIndex: 'supporting',
+        className: 'column-supporting',
+        width: 350,
+        scopedSlots: { customRender: 'supporting' },
+      },
+    ],
+  },
+  {
+    title: 'Other Remarks',
+    key: 'otherRemarks',
+    dataIndex: 'otherRemarks',
+    className: 'column-other-remarks',
+    width: 200,
+    ellipsis: true,
+  },
+  {
+    title: 'Action',
+    key: 'operation',
+    fixed: 'right',
+    width: 100,
+    scopedSlots: { customRender: 'action' },
+  },
+]

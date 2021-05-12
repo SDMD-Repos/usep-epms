@@ -29,16 +29,11 @@ export const getMenuData = [
         key: 'settingsSignatories',
         url: '/settings/signatories',
       },
-      {
-        title: 'Others',
-        key: 'settingsOthers',
-        url: '/settings/others',
-      },
     ],
   },
   {
     category: true,
-    title: 'Form Manager',
+    title: 'Forms',
   },
   {
     title: 'AAPCR',
