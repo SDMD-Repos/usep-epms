@@ -22,12 +22,17 @@
           </a-radio-group>
         </a-form-model-item>
 
-        <a-form-model-item label="Parent PI"
-                           prop="parentDetails"
-                           :label-col="formItemLayout.labelCol"
-                           :wrapper-col="formItemLayout.wrapperCol" v-if="form.type === 'sub'">
-          <a-textarea v-model="otherData.parentDetails.name" auto-size disabled/>
-        </a-form-model-item>
+        <div v-if="form.type === 'sub'">
+          <a-row type="flex">
+            <a-col :span="3" :offset="3">
+              <label>Parent PI: </label>
+            </a-col>
+            <a-col :span="14">
+              <a-textarea v-model="otherData.parentDetails.name" auto-size disabled/>
+            </a-col>
+          </a-row>
+          <br>
+        </div>
 
         <a-form-model-item label="Sub Category"
                            prop="subCategory"

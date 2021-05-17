@@ -185,7 +185,14 @@ export default {
       if (data.type === 'pi') {
         count = this.dataSource.length
       } else {
-        console.log('sssss')
+        const parentKey = this.form.parentDetails.key
+        const parentData = this.dataSource.filter(item => parentKey === item.key)[0]
+        const parentIndex = this.dataSource.findIndex(item => parentKey === item.key)[0]
+        parentData.children = []
+        parentData.children.push({
+          name: 'Sub PI',
+        })
+        console.log(parentIndex)
       }
       const key = 'new_' + count
       const newData = {
