@@ -87,9 +87,13 @@
       </a-table>
         <drawer-pi-form
           :form-object="form"
-          :pi-form-data="piFormData"
+          :open="open"
+          :ok-text="okText"
+          :modal-title="modalTitle"
+          :targets-basis-list="targetsBasisList"
           :function-id="functionId"
           :categories="categories"
+          :update-id="updateId"
           @add-table-item="addTableItem"
           @update-table-item="updateTableItem"
           @close-modal="resetModalData"/>
@@ -124,14 +128,11 @@ export default {
       displayPiList: 0,
       mainCategory: undefined,
       dataSource: [],
-      piFormData: {
-        targetsBasisList: [],
-        open: false,
-        okText: '',
-        modalTitle: '',
-        updateId: null,
-        parentDetails: undefined,
-      },
+      targetsBasisList: [],
+      open: false,
+      okText: '',
+      modalTitle: '',
+      updateId: null,
       form: {
         type: 'pi',
         subCategory: undefined,
@@ -146,6 +147,7 @@ export default {
         supporting: [],
         otherRemarks: '',
       },
+      parentDetails: undefined,
     }
   },
   created() {
@@ -161,31 +163,33 @@ export default {
       }
     },
     openModal(action) {
-      this.piFormData.open = !this.piFormData.open
+      this.open = !this.open
       if (action === 'Add') {
-        this.piFormData.okText = action
-        this.piFormData.modalTitle = 'Add New'
-        this.piFormData.updateId = null
+        this.okText = action
+        this.modalTitle = 'Add New'
+        this.updateId = null
       } else if (action === 'Update') {
-        this.piFormData.okText = action
-        this.piFormData.modalTitle = 'Update Details'
+        this.okText = action
+        this.modalTitle = 'Update Details'
       } else if (action === 'newsub') {
-        this.piFormData.okText = 'Add Sub PI'
-        this.piFormData.modalTitle = 'New Sub PI'
-        this.piFormData.updateId = null
+        this.okText = 'Add Sub PI'
+        this.modalTitle = 'New Sub PI'
+        this.updateId = null
       }
     },
     addTableItem(data) {
       let count = null
+      let tempParent = null
       if (!data.isHeader) {
-        if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.piFormData.targetsBasisList.indexOf(data.targetsBasis) === -1) {
-          this.piFormData.targetsBasisList.push(data.targetsBasis)
+        if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(data.targetsBasis) === -1) {
+          this.targetsBasisList.push(data.targetsBasis)
         }
       }
       if (data.type === 'pi') {
         count = this.dataSource.length
       } else {
-        console.log('sssss')
+        tempParent = this.dataSource.filter(item => item.key === data.parentDetails.key)[0]
+        console.log(tempParent)
       }
       const key = 'new_' + count
       const newData = {
@@ -213,12 +217,12 @@ export default {
       Object.assign(newData[details.updateId], details.formData)
     },
     resetModalData() {
-      this.piFormData.open = !this.piFormData.open
+      this.open = !this.open
     },
     handleEdit(key) {
       const newData = this.dataSource.filter(item => key === item.key)[0]
       this.form = { ...newData }
-      this.piFormData.updateId = this.dataSource.findIndex((record, i) => record.key === key)
+      this.updateId = this.dataSource.findIndex((record, i) => record.key === key)
       this.openModal('Update')
     },
     handleDelete(key) {
@@ -227,7 +231,7 @@ export default {
     },
     handleAddSub(key) {
       const newData = this.dataSource.filter(item => key === item.key)[0]
-      this.piFormData.parentDetails = { ...newData }
+      this.form.parentDetails = { ...newData }
       this.form.type = 'sub'
       this.form.subCategory = newData.subCategory
       if (!newData.isHeader) {

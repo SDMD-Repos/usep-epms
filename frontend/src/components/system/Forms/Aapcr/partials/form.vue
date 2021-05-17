@@ -1,8 +1,8 @@
 <template>
   <span>
-    <a-drawer :title="modalTitle"
+    <a-drawer :title="otherData.modalTitle"
               :width="800"
-              :visible="isOpen"
+              :visible="otherData.open"
               :mask-closable="false"
               :closable="false"
               :body-style="{ paddingBottom: '80px' }"
@@ -25,8 +25,8 @@
         <a-form-model-item label="Parent PI"
                            prop="parentDetails"
                            :label-col="formItemLayout.labelCol"
-                           :wrapper-col="formItemLayout.wrapperCol" v-if="isSubPI">
-          <a-textarea v-model="form.parentDetails.name" auto-size disabled/>
+                           :wrapper-col="formItemLayout.wrapperCol" v-if="form.type === 'sub'">
+          <a-textarea v-model="otherData.parentDetails.name" auto-size disabled/>
         </a-form-model-item>
 
         <a-form-model-item label="Sub Category"
@@ -43,6 +43,7 @@
             allow-clear
             tree-default-expand-all
             label-in-value
+            :disabled="form.type === 'sub'"
           ></a-tree-select>
         </a-form-model-item>
 
@@ -56,7 +57,7 @@
         <a-form-model-item label="Header PI?"
                            prop="isHeader"
                            :label-col="formItemLayout.labelCol"
-                           :wrapper-col="formItemLayout.wrapperCol">
+                           :wrapper-col="formItemLayout.wrapperCol" v-if="form.type === 'pi'">
           <a-switch v-model="form.isHeader"/>
         </a-form-model-item>
 
@@ -72,7 +73,12 @@
                              prop="measures"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
-            <a-select v-model="form.measures" mode="multiple" placeholder="Select" style="width: 100%" label-in-value>
+            <a-select v-model="form.measures"
+                      mode="multiple"
+                      placeholder="Select"
+                      style="width: 100%"
+                      label-in-value
+                      :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader">
               <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
                 {{ measure.name }}
               </a-select-option>
@@ -97,8 +103,9 @@
                              :wrapper-col="formItemLayout.wrapperCol">
             <a-auto-complete
               v-model="form.targetsBasis"
-              :data-source="targetsBasisList"
+              :data-source="otherData.targetsBasisList"
               :filter-option="filterBasisOption"
+              :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader"
             />
           </a-form-model-item>
 
@@ -106,7 +113,11 @@
                              prop="cascadingLevel"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
-            <a-select v-model="form.cascadingLevel" placeholder="Select" style="width: 100%" label-in-value>
+            <a-select v-model="form.cascadingLevel"
+                      placeholder="Select"
+                      style="width: 100%"
+                      label-in-value
+                      :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader">
               <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
                 {{ levelItem.name }}
               </a-select-option>
@@ -197,7 +208,7 @@
           Cancel
         </a-button>
         <a-button type="primary" @click="okModalAction" :loading="isSubmmiting">
-          {{ okText }}
+          {{ otherData.okText }}
         </a-button>
       </div>
     </a-drawer>
@@ -245,28 +256,14 @@ export default {
     formObject: {
       type: Object,
     },
-    open: {
-      type: Boolean,
-      required: true,
-    },
-    okText: {
-      type: String,
-      required: true,
-    },
-    modalTitle: {
-      type: String,
-    },
-    targetsBasisList: {
-      type: Array,
+    piFormData: {
+      type: Object,
     },
     functionId: {
       type: String,
     },
     categories: {
       type: Array,
-    },
-    updateId: {
-      type: Number,
     },
   },
   computed: {
@@ -297,14 +294,13 @@ export default {
         callback()
       }
     }
-    const open = this.open
+    const piFormData = this.piFormData
     const formObject = this.formObject
     return {
       formItemLayout,
       SHOW_PARENT,
       isSubmmiting: false,
-      isOpen: open,
-      isSubPI: false,
+      otherData: piFormData,
       normalizer: {
         title: 'name',
         value: 'id',
@@ -335,8 +331,8 @@ export default {
     }
   },
   watch: {
-    open(val) {
-      this.isOpen = val
+    piFormData(val) {
+      this.otherData = val
     },
     formObject(val) {
       this.form = val
@@ -358,7 +354,6 @@ export default {
       )
     },
     okModalAction() {
-      console.log(this.form)
       this.isSubmmiting = !this.isSubmmiting
       const tempImplementing = this.mappedOfficeList(this.form.implementing, 'implementing')
       const tempSupporting = this.mappedOfficeList(this.form.supporting, 'supporting')
@@ -369,11 +364,11 @@ export default {
         this.$refs.spmsForm.validate(valid => {
           if (valid) {
             let msgContent = ''
-            if (this.updateId === null) {
+            if (this.otherData.updateId === null) {
               this.$emit('add-table-item', this.form)
               msgContent = 'Added!'
             } else {
-              this.$emit('update-table-item', { formData: this.form, updateId: this.updateId })
+              this.$emit('update-table-item', { formData: this.form, updateId: this.otherData.updateId })
               msgContent = 'Updated!'
             }
             this.$refs.spmsForm.resetFields()
@@ -425,14 +420,6 @@ export default {
         container.cascadeTo = tempCascadeTo
         return container
       })
-    },
-    toggleType(e) {
-      const value = e.target.value
-      if (value === 'sub') {
-        this.isSubPI = true
-      } else {
-        this.isSubPI = false
-      }
     },
     // Modal for managing where PI should be cascaded
     handleOk() {
