@@ -9,10 +9,9 @@
               @close="resetFormData">
       <a-form-model ref="spmsForm" :model="form" :rules="rules" layout="horizontal" :hide-required-mark="true">
         <a-form-model-item label="Type"
-                           prop="type"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
-          <a-radio-group v-model="form.type" disabled>
+          <a-radio-group v-model="otherData.type" disabled>
             <a-radio value="pi">
               PI
             </a-radio>
@@ -22,13 +21,13 @@
           </a-radio-group>
         </a-form-model-item>
 
-        <div v-if="form.type === 'sub'">
+        <div v-if="otherData.type === 'sub'">
           <a-row type="flex">
             <a-col :span="3" :offset="3">
               <label>Parent PI: </label>
             </a-col>
             <a-col :span="14">
-              <a-textarea v-model="otherData.parentDetails.name" auto-size disabled/>
+              <p class="withNewLine">{{ otherData.parentDetails.name }}</p>
             </a-col>
           </a-row>
           <br>
@@ -48,7 +47,7 @@
             allow-clear
             tree-default-expand-all
             label-in-value
-            :disabled="form.type === 'sub'"
+            :disabled="otherData.type === 'sub'"
           ></a-tree-select>
         </a-form-model-item>
 
@@ -62,8 +61,8 @@
         <a-form-model-item label="Header PI?"
                            prop="isHeader"
                            :label-col="formItemLayout.labelCol"
-                           :wrapper-col="formItemLayout.wrapperCol" v-if="form.type === 'pi'">
-          <a-switch v-model="form.isHeader"/>
+                           :wrapper-col="formItemLayout.wrapperCol">
+          <a-switch v-model="form.isHeader" :disabled="otherData.type === 'sub'" @change="toggleIsHeader"/>
         </a-form-model-item>
 
         <template v-if="!form.isHeader">
@@ -83,7 +82,7 @@
                       placeholder="Select"
                       style="width: 100%"
                       label-in-value
-                      :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader">
+                      :disabled="otherData.type === 'sub' && !otherData.parentDetails.isHeader">
               <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
                 {{ measure.name }}
               </a-select-option>
@@ -108,9 +107,9 @@
                              :wrapper-col="formItemLayout.wrapperCol">
             <a-auto-complete
               v-model="form.targetsBasis"
-              :data-source="otherData.targetsBasisList"
+              :data-source="targetsBasisList"
               :filter-option="filterBasisOption"
-              :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader"
+              :disabled="otherData.type === 'sub' && !otherData.parentDetails.isHeader"
             />
           </a-form-model-item>
 
@@ -122,7 +121,7 @@
                       placeholder="Select"
                       style="width: 100%"
                       label-in-value
-                      :disabled="form.type === 'sub' && !otherData.parentDetails.isHeader">
+                      :disabled="otherData.type === 'sub' && !otherData.parentDetails.isHeader">
               <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
                 {{ levelItem.name }}
               </a-select-option>
@@ -172,7 +171,7 @@
                   placeholder="Select an office/s"
                   :show-checked-strategy="SHOW_PARENT"
                   :max-tag-count="6"
-                  show-search
+                  allow-clear
                   tree-checkable
                   label-in-value
                 />
@@ -270,6 +269,9 @@ export default {
     categories: {
       type: Array,
     },
+    targetsBasisList: {
+      type: Array,
+    },
   },
   computed: {
     ...mapState({
@@ -358,25 +360,55 @@ export default {
         option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
       )
     },
+    toggleIsHeader(checked) {
+      if (checked) {
+        const { form } = this
+        form.target = ''
+        form.measures = []
+        form.budget = null
+        form.targetsBasis = undefined
+        form.cascadingLevel = undefined
+        form.implementing = []
+        form.supporting = []
+        form.otherRemarks = ''
+      }
+    },
     okModalAction() {
       this.isSubmmiting = !this.isSubmmiting
-      const tempImplementing = this.mappedOfficeList(this.form.implementing, 'implementing')
-      const tempSupporting = this.mappedOfficeList(this.form.supporting, 'supporting')
-      this.form.implementing = tempImplementing
-      this.form.supporting = tempSupporting
+      const { otherData, form } = this
+      const tempImplementing = this.mappedOfficeList(form.implementing, 'implementing')
+      const tempSupporting = this.mappedOfficeList(form.supporting, 'supporting')
+      form.implementing = tempImplementing
+      form.supporting = tempSupporting
       const that = this
       setTimeout(() => {
         this.$refs.spmsForm.validate(valid => {
           if (valid) {
             let msgContent = ''
-            if (this.otherData.updateId === null) {
-              this.$emit('add-table-item', this.form)
+            if (otherData.updateId === null) {
+              this.$emit('add-table-item', form)
               msgContent = 'Added!'
             } else {
-              this.$emit('update-table-item', { formData: this.form, updateId: this.otherData.updateId })
+              this.$emit('update-table-item', { formData: form, updateId: otherData.updateId })
               msgContent = 'Updated!'
             }
-            this.$refs.spmsForm.resetFields()
+            if (otherData.type === 'pi') {
+              this.$refs.spmsForm.resetFields()
+            } else {
+              const { parentDetails } = otherData
+              form.name = ''
+              form.target = ''
+              form.budget = ''
+              form.implementing = parentDetails.implementing
+              form.supporting = parentDetails.supporting
+              form.otherRemarks = ''
+              if (parentDetails.isHeader) {
+                form.measures = []
+                form.targetsBasis = undefined
+                form.cascadingLevel = undefined
+              }
+              this.form = form
+            }
             this.$message.success({ content: msgContent, messageKey, duration: 2 })
               .then(() => {
                 that.isSubmmiting = !that.isSubmmiting

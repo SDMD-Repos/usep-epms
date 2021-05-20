@@ -28,10 +28,10 @@
 
         <!-- Custom data row render-->
         <span slot="subCategory" slot-scope="text, record">
-          {{ record.subCategory.label }}
+          {{ record.type === 'pi' ? record.subCategory.label : ''}}
         </span>
 
-        <template slot="isHeaderPI" slot-scope="text, record">
+        <template slot="isHeaderPI" slot-scope="text, record" v-if="record.type === 'pi'">
           <a-icon type="check-circle"
                   theme="filled"
                   :style="{ fontSize: '18px', color: '#2b5c17' }"
@@ -71,10 +71,12 @@
         </template>
 
         <template slot="action" slot-scope="text, record">
-          <a-icon type="edit" theme="filled" @click="handleEdit(record.key)"/>
+          <a-icon type="edit" theme="filled" @click="handleEdit(record.key, record.type)"/>
           <a-divider type="vertical" />
-          <a-icon type="plus-circle" theme="filled" @click="handleAddSub(record.key)"/>
-          <a-divider type="vertical" />
+          <template v-if="record.type === 'pi'">
+            <a-icon type="plus-circle" theme="filled" @click="handleAddSub(record.key)"/>
+            <a-divider type="vertical" />
+          </template>
           <a-popconfirm
             title="Are you sure you want to delete this?"
             @confirm="handleDelete(record.key)"
@@ -90,6 +92,7 @@
           :pi-form-data="piFormData"
           :function-id="functionId"
           :categories="categories"
+          :targets-basis-list="targetsBasisList"
           @add-table-item="addTableItem"
           @update-table-item="updateTableItem"
           @close-modal="resetModalData"/>
@@ -98,8 +101,22 @@
 </template>
 <script>
 import { mapState } from 'vuex'
+import { Modal } from 'ant-design-vue'
 import DrawerPiForm from './form'
 import { getFormColumns } from '@/services/formColumns'
+
+const getPiFormDataDefault = () => {
+  return {
+    open: false,
+    okText: '',
+    modalTitle: '',
+    updateId: null,
+    type: 'pi',
+    parentDetails: undefined,
+  }
+}
+
+const addtlFromData = getPiFormDataDefault()
 
 export default {
   props: ['year', 'functionId', 'categories'],
@@ -123,17 +140,11 @@ export default {
       getFormColumns,
       displayPiList: 0,
       mainCategory: undefined,
+      count: 0,
       dataSource: [],
-      piFormData: {
-        targetsBasisList: [],
-        open: false,
-        okText: '',
-        modalTitle: '',
-        updateId: null,
-        parentDetails: undefined,
-      },
+      targetsBasisList: [],
+      piFormData: addtlFromData,
       form: {
-        type: 'pi',
         subCategory: undefined,
         name: '',
         isHeader: false,
@@ -161,43 +172,35 @@ export default {
       }
     },
     openModal(action) {
-      this.piFormData.open = !this.piFormData.open
+      const { piFormData } = this
+      piFormData.open = true
       if (action === 'Add') {
-        this.piFormData.okText = action
-        this.piFormData.modalTitle = 'Add New'
-        this.piFormData.updateId = null
+        piFormData.okText = action
+        piFormData.modalTitle = 'Add New'
+        piFormData.updateId = null
+        piFormData.type = 'pi'
       } else if (action === 'Update') {
-        this.piFormData.okText = action
-        this.piFormData.modalTitle = 'Update Details'
+        piFormData.okText = action
+        piFormData.modalTitle = 'Update Details'
       } else if (action === 'newsub') {
-        this.piFormData.okText = 'Add Sub PI'
-        this.piFormData.modalTitle = 'New Sub PI'
-        this.piFormData.updateId = null
+        piFormData.okText = 'Add Sub PI'
+        piFormData.modalTitle = 'New Sub PI'
+        piFormData.updateId = null
+        piFormData.type = 'sub'
       }
     },
     addTableItem(data) {
-      let count = null
+      const { dataSource, count, piFormData } = this
       if (!data.isHeader) {
-        if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.piFormData.targetsBasisList.indexOf(data.targetsBasis) === -1) {
-          this.piFormData.targetsBasisList.push(data.targetsBasis)
+        if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(data.targetsBasis) === -1) {
+          this.targetsBasisList.push(data.targetsBasis)
         }
-      }
-      if (data.type === 'pi') {
-        count = this.dataSource.length
-      } else {
-        const parentKey = this.form.parentDetails.key
-        const parentData = this.dataSource.filter(item => parentKey === item.key)[0]
-        const parentIndex = this.dataSource.findIndex(item => parentKey === item.key)[0]
-        parentData.children = []
-        parentData.children.push({
-          name: 'Sub PI',
-        })
-        console.log(parentIndex)
       }
       const key = 'new_' + count
       const newData = {
         key: key,
         id: key,
+        type: piFormData.type,
         subCategory: data.subCategory,
         program: this.mainCategory,
         name: data.name,
@@ -211,21 +214,77 @@ export default {
         supporting: data.supporting,
         otherRemarks: data.otherRemarks,
       }
-      if (data.type === 'pi') {
-        this.dataSource.push(newData)
+      if (piFormData.type === 'pi') {
+        this.dataSource = [...dataSource, newData]
+        if (data.isHeader) {
+          const that = this
+          Modal.confirm({
+            title: 'Do you want to add sub PI?',
+            content: '',
+            onOk() {
+              that.handleAddSub(key)
+            },
+            onCancel() {},
+          })
+        }
+      } else {
+        const { parentDetails } = piFormData
+        const source = [...this.dataSource]
+        const target = source.filter(item => parentDetails.key === item.key)[0]
+        if (typeof target.children === 'undefined') {
+          target.children = []
+        }
+        target.children.push(newData)
+        this.dataSource = source
       }
+      this.count = count + 1
     },
     updateTableItem(details) {
       const newData = [...this.dataSource]
       Object.assign(newData[details.updateId], details.formData)
     },
     resetModalData() {
-      this.piFormData.open = !this.piFormData.open
+      const { type } = this.piFormData
+      Object.assign(this.piFormData, getPiFormDataDefault())
+      if (type === 'sub') {
+        this.openModal('Add')
+      }
     },
-    handleEdit(key) {
-      const newData = this.dataSource.filter(item => key === item.key)[0]
-      this.form = { ...newData }
-      this.piFormData.updateId = this.dataSource.findIndex((record, i) => record.key === key)
+    handleEdit(key, type) {
+      const { dataSource } = this
+      let editData = null
+      if (type === 'pi') {
+        editData = dataSource.filter(item => key === item.key)[0]
+        this.piFormData.updateId = dataSource.findIndex((record, i) => record.key === key)
+      } else {
+        let shouldBreak = false
+        dataSource.forEach((item, index) => {
+          const temp = item.children.filter(i => i.key === key)
+          if (shouldBreak) {
+            return
+          }
+          if (temp.length) {
+            editData = temp[0]
+            shouldBreak = true
+            console.log(index)
+            return
+          }
+          console.log(temp)
+        })
+      }
+      this.form = {
+        subCategory: editData.subCategory,
+        name: editData.name,
+        isHeader: editData.isHeader,
+        target: editData.target,
+        measures: editData.measures,
+        budget: editData.budget,
+        targetsBasis: editData.targetsBasis,
+        cascadingLevel: editData.cascadingLevel,
+        implementing: editData.implementing,
+        supporting: editData.supporting,
+        otherRemarks: editData.otherRemarks,
+      }
       this.openModal('Update')
     },
     handleDelete(key) {
@@ -233,17 +292,18 @@ export default {
       this.dataSource.splice(recordKey, 1)
     },
     handleAddSub(key) {
+      const { form } = this
       const newData = this.dataSource.filter(item => key === item.key)[0]
       this.piFormData.parentDetails = { ...newData }
-      this.form.type = 'sub'
-      this.form.subCategory = newData.subCategory
+      form.subCategory = newData.subCategory
       if (!newData.isHeader) {
-        this.form.measures = newData.measures
-        this.form.targetsBasis = newData.targetsBasis
-        this.form.cascadingLevel = newData.cascadingLevel
-        this.form.implementing = newData.implementing
-        this.form.supporting = newData.supporting
+        form.measures = newData.measures
+        form.targetsBasis = newData.targetsBasis
+        form.cascadingLevel = newData.cascadingLevel
+        form.implementing = newData.implementing
+        form.supporting = newData.supporting
       }
+      this.form = form
       this.openModal('newsub')
     },
   },
