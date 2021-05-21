@@ -62,7 +62,12 @@
                            prop="isHeader"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
-          <a-switch v-model="form.isHeader" :disabled="otherData.type === 'sub'" @change="toggleIsHeader"/>
+          <template v-if="!form.isHeader && otherData.type !== 'sub'">
+            <a-tooltip placement="right" :title="tooltipHeaderText">
+              <a-switch v-model="form.isHeader" :disabled="otherData.type === 'sub'" @change="toggleIsHeader"/>
+            </a-tooltip>
+          </template>
+          <a-switch v-else v-model="form.isHeader" :disabled="otherData.type === 'sub'" @change="toggleIsHeader"/>
         </a-form-model-item>
 
         <template v-if="!form.isHeader">
@@ -208,9 +213,24 @@
           zIndex: 1,
         }"
       >
-        <a-button :style="{ marginRight: '8px' }" @click="resetFormData">
+        <a-button :style="{ marginRight: '8px' }" @click="resetFormData(0)" :loading="isSubmmiting"
+                  v-if="otherData.type === 'pi' || (otherData.type !== 'pi' && otherData.updateId !== null)">
           Cancel
         </a-button>
+        <template v-else>
+          <a-popconfirm
+            title="Create a new parent PI?"
+            placement="top"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="resetFormData(1)"
+            @cancel="resetFormData(0)"
+          >
+            <a-button :style="{ marginRight: '8px' }" :loading="isSubmmiting" >
+              Cancel
+            </a-button>
+          </a-popconfirm>
+        </template>
         <a-button type="primary" @click="okModalAction" :loading="isSubmmiting">
           {{ otherData.okText }}
         </a-button>
@@ -308,6 +328,7 @@ export default {
       SHOW_PARENT,
       isSubmmiting: false,
       otherData: piFormData,
+      tooltipHeaderText: 'Check to disable editing of Target to Other Remarks',
       normalizer: {
         title: 'name',
         value: 'id',
@@ -324,10 +345,6 @@ export default {
         targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
         cascadingLevel: [{ validator: validateNonHeader, trigger: 'blur' }],
         implementing: [
-          { validator: validateNonHeader, trigger: 'blur' },
-          { type: 'array' },
-        ],
-        supporting: [
           { validator: validateNonHeader, trigger: 'blur' },
           { type: 'array' },
         ],
@@ -421,9 +438,9 @@ export default {
         })
       }, 500)
     },
-    resetFormData() {
+    resetFormData(newPI) {
       this.officesList = []
-      this.$emit('close-modal')
+      this.$emit('close-modal', newPI)
       this.$refs.spmsForm.resetFields()
     },
     viewOfficeList(field) {

@@ -1,8 +1,13 @@
 <template>
   <div class="row">
     <div class="col-xl-12 col-lg-12">
-      <div class="col-xl-4 col-lg-4">
-        <a-select v-model="mainCategory" placeholder="Select" style="width: 100%" @change="loadPIs" :loading="loading">
+      <div>
+        <a-select v-model="mainCategory"
+                  placeholder="Select"
+                  style="width: 30%"
+                  :loading="loading"
+                  @change="loadPIs"
+                  label-in-value>
           <template v-for="(y, i) in filteredProgram">
             <a-select-option :value="y.id" :key="i">
               {{ y.name }}
@@ -22,6 +27,22 @@
         <template slot="title">
           <a-button type="primary" @click="openModal('Add')">New</a-button>
         </template>
+        <template slot="footer" v-if="filteredDataSource.length">
+          <a-row type="flex" align="middle" :gutter="[16,16]">
+            <a-col :span="2" >
+              <label>Budget: </label>
+            </a-col>
+            <a-col :span="5">
+              <a-input-number v-model="categoryBudget" style="width: 100%"
+                              :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                              :parser="value => value.replace(/\$\s?|(,*)/g, '')"
+                              :min="0"/>
+            </a-col>
+            <a-col :span="2">
+              <a-icon type="check" :style="{ fontSize: '20px' }" @click="saveProgramBudget"/>
+            </a-col>
+          </a-row>
+        </template>
         <template slot="targetYearColumn">
           {{ year }}
         </template>
@@ -40,6 +61,10 @@
                   theme="filled"
                   :style="{ fontSize: '18px', color: '#eb2f2f' }"
                   v-else/>
+        </template>
+
+        <template slot="budget" slot-scope="type, record">
+          {{ numbersWithCommas(record.budget) }}
         </template>
 
         <template slot="measures" slot-scope="type, record">
@@ -79,7 +104,7 @@
           </template>
           <a-popconfirm
             title="Are you sure you want to delete this?"
-            @confirm="handleDelete(record.key)"
+            @confirm="handleDelete(record.key, record.type)"
             okText="Yes"
             cancelText="No"
           >
@@ -104,6 +129,7 @@ import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import DrawerPiForm from './form'
 import { getFormColumns } from '@/services/formColumns'
+import { numbersWithCommas } from '@/services/filters'
 
 const getPiFormDataDefault = () => {
   return {
@@ -119,7 +145,7 @@ const getPiFormDataDefault = () => {
 const addtlFromData = getPiFormDataDefault()
 
 export default {
-  props: ['year', 'functionId', 'categories'],
+  props: ['year', 'functionId', 'categories', 'piSource'],
   components: {
     DrawerPiForm,
   },
@@ -132,16 +158,18 @@ export default {
       return this.programList.filter(i => i.category_id === this.functionId)
     },
     filteredDataSource() {
-      return this.dataSource.filter(i => i.program === this.mainCategory)
+      return this.dataSource.filter(i => i.program === this.mainCategory.key)
     },
   },
   data() {
+    const piSource = this.piSource
     return {
       getFormColumns,
       displayPiList: 0,
       mainCategory: undefined,
+      categoryBudget: null,
       count: 0,
-      dataSource: [],
+      dataSource: piSource,
       targetsBasisList: [],
       piFormData: addtlFromData,
       form: {
@@ -159,10 +187,16 @@ export default {
       },
     }
   },
+  watch: {
+    piSource(val) {
+      this.dataSource = val
+    },
+  },
   created() {
     this.onLoad()
   },
   methods: {
+    numbersWithCommas,
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_PROGRAMS')
     },
@@ -202,7 +236,7 @@ export default {
         id: key,
         type: piFormData.type,
         subCategory: data.subCategory,
-        program: this.mainCategory,
+        program: this.mainCategory.key,
         name: data.name,
         isHeader: data.isHeader,
         target: data.target,
@@ -221,6 +255,8 @@ export default {
           Modal.confirm({
             title: 'Do you want to add sub PI?',
             content: '',
+            okText: 'Yes',
+            cancelText: 'No',
             onOk() {
               that.handleAddSub(key)
             },
@@ -241,12 +277,20 @@ export default {
     },
     updateTableItem(details) {
       const newData = [...this.dataSource]
-      Object.assign(newData[details.updateId], details.formData)
+      const { piFormData } = this
+      if (piFormData.type === 'pi') {
+        Object.assign(newData[details.updateId], details.formData)
+      } else {
+        const { parentDetails } = this.piFormData
+        const parentIndex = newData.findIndex(i => i.key === parentDetails.key)
+        const { children } = newData[parentIndex]
+        Object.assign(children[details.updateId], details.formData)
+      }
+      this.resetModalData(0)
     },
-    resetModalData() {
-      const { type } = this.piFormData
+    resetModalData(newPI) {
       Object.assign(this.piFormData, getPiFormDataDefault())
-      if (type === 'sub') {
+      if (newPI) {
         this.openModal('Add')
       }
     },
@@ -255,21 +299,25 @@ export default {
       let editData = null
       if (type === 'pi') {
         editData = dataSource.filter(item => key === item.key)[0]
-        this.piFormData.updateId = dataSource.findIndex((record, i) => record.key === key)
+        this.piFormData.updateId = dataSource.findIndex(record => record.key === key)
       } else {
+        this.piFormData.type = type
         let shouldBreak = false
-        dataSource.forEach((item, index) => {
-          const temp = item.children.filter(i => i.key === key)
-          if (shouldBreak) {
-            return
+        dataSource.forEach(item => {
+          if (typeof item.children !== 'undefined') {
+            const temp = item.children.filter(i => i.key === key)
+            if (shouldBreak) {
+              return
+            }
+            if (temp.length) {
+              editData = temp[0]
+              shouldBreak = true
+              this.piFormData.updateId = item.children.findIndex(i => i.key === key)
+              this.piFormData.parentDetails = { ...item }
+              return
+            }
+            console.log(temp)
           }
-          if (temp.length) {
-            editData = temp[0]
-            shouldBreak = true
-            console.log(index)
-            return
-          }
-          console.log(temp)
         })
       }
       this.form = {
@@ -287,9 +335,28 @@ export default {
       }
       this.openModal('Update')
     },
-    handleDelete(key) {
-      const recordKey = this.dataSource.findIndex((record, i) => record.key === key)
-      this.dataSource.splice(recordKey, 1)
+    handleDelete(key, type) {
+      if (type === 'pi') {
+        const recordKey = this.dataSource.findIndex((record, i) => record.key === key)
+        this.dataSource.splice(recordKey, 1)
+      } else {
+        const source = [...this.dataSource]
+        source.forEach((item, index) => {
+          if (typeof item.children !== 'undefined') {
+            const recordKey = item.children.findIndex(i => i.key === key)
+            if (recordKey !== -1) {
+              item.children.splice(recordKey, 1)
+              if (!item.children.length) {
+                delete item.children
+              }
+              return
+            }
+            console.log(recordKey)
+          }
+        })
+        this.dataSource = source
+        console.log(source)
+      }
     },
     handleAddSub(key) {
       const { form } = this
@@ -305,6 +372,18 @@ export default {
       }
       this.form = form
       this.openModal('newsub')
+    },
+    saveProgramBudget() {
+      const { mainCategory, categoryBudget } = this
+      if (!categoryBudget) {
+        Modal.error({
+          title: 'No data was saved!',
+          content: 'Please input a valid amount',
+        })
+      } else {
+        this.$emit('add-budget-list-item', { mainCategory, categoryBudget })
+        this.categoryBudget = null
+      }
     },
   },
 }

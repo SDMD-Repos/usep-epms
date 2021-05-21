@@ -22,9 +22,18 @@
             <div class="mt-4">
               <a-collapse v-model="activeKey">
                 <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-                  <item-list :year="year" :function-id="category.id" :categories="categories"/>
+                  <item-list :year="year" :function-id="category.id" :categories="categories" :pi-source="dataSource" @add-budget-list-item="addBudgetListItem"/>
                 </a-collapse-panel>
               </a-collapse>
+            </div>
+            <div class="mt-4" v-if="budgetList.length">
+              <a-list item-layout="horizontal" :data-source="budgetList">
+                <a-list-item slot="renderItem" slot-scope="item">
+                  <a-list-item-meta :description="item.categoryBudget">
+                    <span slot="title">{{ item.mainCategory.label }}</span>
+                  </a-list-item-meta>
+                </a-list-item>
+              </a-list>
             </div>
           </div>
         </div>
@@ -44,6 +53,7 @@ export default {
     return {
       year: new Date().getFullYear(),
       dataSource: [],
+      budgetList: [],
       activeKey: '0',
     }
   },
@@ -67,6 +77,9 @@ export default {
   methods: {
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
+    },
+    addBudgetListItem(data) {
+      this.budgetList.push(data)
     },
   },
 }
