@@ -7,7 +7,7 @@
               :closable="false"
               :body-style="{ paddingBottom: '80px' }"
               @close="resetFormData">
-      <a-form-model ref="spmsForm" :model="form" :rules="rules" layout="horizontal" :hide-required-mark="true">
+      <a-form-model :ref="`${functionId}`" :model="form" :rules="rules" layout="horizontal" :hide-required-mark="true">
         <a-form-model-item label="Type"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
@@ -48,6 +48,7 @@
             tree-default-expand-all
             label-in-value
             :disabled="otherData.type === 'sub'"
+            @change="changeNullValue($event, 'subCategory')"
           ></a-tree-select>
         </a-form-model-item>
 
@@ -87,6 +88,7 @@
                       placeholder="Select"
                       style="width: 100%"
                       label-in-value
+                      allow-clear
                       :disabled="otherData.type === 'sub' && !otherData.parentDetails.isHeader">
               <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
                 {{ measure.name }}
@@ -277,21 +279,11 @@ const messageKey = 'updatable'
 export default {
   name: 'drawer-pi-form',
   props: {
-    formObject: {
-      type: Object,
-    },
-    piFormData: {
-      type: Object,
-    },
-    functionId: {
-      type: String,
-    },
-    categories: {
-      type: Array,
-    },
-    targetsBasisList: {
-      type: Array,
-    },
+    formObject: Object,
+    piFormData: Object,
+    functionId: String,
+    categories: Array,
+    targetsBasisList: Array,
   },
   computed: {
     ...mapState({
@@ -313,11 +305,19 @@ export default {
         if (value === '' || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
           callback(new Error('This field is required'))
         } else {
-          this.$refs.spmsForm.validateField(rule.field)
+          this.$refs[this.functionId].validateField(rule.field)
           callback()
         }
       } else {
-        this.$refs.spmsForm.validateField(rule.field)
+        this.$refs[this.functionId].validateField(rule.field)
+        callback()
+      }
+    }
+    const subCategoryValidator = (rule, value, callback) => {
+      if ((this.functionId !== 'support_functions') && typeof value === 'undefined') {
+        callback(new Error('Please select at least one'))
+      } else {
+        this.$refs[this.functionId].validateField(rule.field)
         callback()
       }
     }
@@ -336,7 +336,7 @@ export default {
       form: formObject,
       rules: {
         subCategory: [
-          { required: true, message: 'Please select at least one', trigger: 'blur' },
+          { validator: subCategoryValidator, trigger: 'blur' },
           { type: 'object' },
         ],
         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
@@ -367,7 +367,14 @@ export default {
   },
   methods: {
     onLoad() {
-      this.$store.dispatch('external/FETCH_MAIN_OFFICES') // needs to load first
+      let params = {
+        checkable: {
+          allColleges: true,
+          mains: true,
+        },
+      }
+      params = encodeURIComponent(JSON.stringify(params))
+      this.$store.dispatch('external/FETCH_MAIN_OFFICES', { payload: params }) // needs to load first
       this.$store.dispatch('formSettings/FETCH_SUB_CATEGORIES')
       this.$store.dispatch('formSettings/FETCH_MEASURES')
       this.$store.dispatch('formSettings/FETCH_CASCADING_LEVELS')
@@ -383,11 +390,16 @@ export default {
         form.target = ''
         form.measures = []
         form.budget = null
-        form.targetsBasis = undefined
-        form.cascadingLevel = undefined
+        form.targetsBasis = ''
+        form.cascadingLevel = ''
         form.implementing = []
         form.supporting = []
         form.otherRemarks = ''
+      }
+    },
+    changeNullValue(value, label) {
+      if (typeof value === 'undefined' || value === 0) {
+        this.form[label] = null
       }
     },
     okModalAction() {
@@ -399,7 +411,7 @@ export default {
       form.supporting = tempSupporting
       const that = this
       setTimeout(() => {
-        this.$refs.spmsForm.validate(valid => {
+        this.$refs[this.functionId].validate(valid => {
           if (valid) {
             let msgContent = ''
             if (otherData.updateId === null) {
@@ -409,22 +421,11 @@ export default {
               this.$emit('update-table-item', { formData: form, updateId: otherData.updateId })
               msgContent = 'Updated!'
             }
-            if (otherData.type === 'pi') {
-              this.$refs.spmsForm.resetFields()
-            } else {
+
+            this.$emit('reset-form')
+            if (otherData.type !== 'pi') {
               const { parentDetails } = otherData
-              form.name = ''
-              form.target = ''
-              form.budget = ''
-              form.implementing = parentDetails.implementing
-              form.supporting = parentDetails.supporting
-              form.otherRemarks = ''
-              if (parentDetails.isHeader) {
-                form.measures = []
-                form.targetsBasis = undefined
-                form.cascadingLevel = undefined
-              }
-              this.form = form
+              this.$emit('add-sub-pi', parentDetails.key)
             }
             this.$message.success({ content: msgContent, messageKey, duration: 2 })
               .then(() => {
@@ -441,7 +442,6 @@ export default {
     resetFormData(newPI) {
       this.officesList = []
       this.$emit('close-modal', newPI)
-      this.$refs.spmsForm.resetFields()
     },
     viewOfficeList(field) {
       const list = this.form[field]

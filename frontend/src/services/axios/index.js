@@ -20,9 +20,12 @@ apiClient.interceptors.request.use(request => {
 apiClient.interceptors.response.use(undefined, error => {
   // Errors handling
   const { response } = error
-  const { data } = response
+  let { data } = response
 
   if (data && response.status !== 401) {
+    if (typeof data.message !== 'undefined') {
+      data = data.message
+    }
     notification.warning({
       message: data,
     })

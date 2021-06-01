@@ -116,11 +116,21 @@ export default {
     this.form = this.$form.createForm(this, { name: 'signatory_form' })
   },
   mounted() {
-    this.$store.dispatch('external/FETCH_MAIN_OFFICES')
-    this.$store.dispatch('formSettings/FETCH_ALL_POSITIONS')
+    this.onLoad()
     this.fetchSignatories()
   },
   methods: {
+    onLoad() {
+      let params = {
+        selectable: {
+          allColleges: false,
+          mains: false,
+        },
+      }
+      params = encodeURIComponent(JSON.stringify(params))
+      this.$store.dispatch('external/FETCH_MAIN_OFFICES', { payload: params })
+      this.$store.dispatch('formSettings/FETCH_ALL_POSITIONS')
+    },
     fetchSignatories() {
       const data = {
         year: this.year,

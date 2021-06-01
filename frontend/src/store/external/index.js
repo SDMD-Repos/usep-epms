@@ -25,13 +25,12 @@ export default {
     },
   },
   actions: {
-    FETCH_MAIN_OFFICES({ commit }) {
+    FETCH_MAIN_OFFICES({ commit }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
-
       const getMainOffices = mapApiProviders.getMainOffices
-      getMainOffices().then(response => {
+      getMainOffices(payload).then(response => {
         if (response) {
           const { mainOffices } = response
           commit('SET_STATE', {

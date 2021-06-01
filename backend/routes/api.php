@@ -65,9 +65,23 @@ Route::group([
 });
 
 Route::group([
+    'prefix' => 'forms',
+    'middleware' => 'auth:api'
+], function() {
+
+    # AAPCR Controller routes
+
+    Route::group([
+        'prefix' => 'aapcr',
+    ], function() {
+        Route::post('/save', 'Form\AapcrController@save');
+    });
+});
+
+Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
 ], function() {
-    Route::get('/get-main-offices', 'SettingController@getMainOffices');
+    Route::get('/get-main-offices/{nodeStatus}', 'SettingController@getMainOffices');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
 });

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <aapcr-form />
+    <aapcr-form :form-id="`aapcr`"/>
   </div>
 </template>
 <script>

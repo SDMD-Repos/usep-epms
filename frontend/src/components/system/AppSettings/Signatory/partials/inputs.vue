@@ -39,15 +39,12 @@
   </span>
 </template>
 <script>
-import { mapState } from 'vuex'
 import * as hris from '@/services/hris'
 
 export default {
   name: 'signatory-input',
   props: {
-    value: {
-      type: Object,
-    },
+    value: Object,
     index: {
       required: true,
     },
@@ -57,11 +54,6 @@ export default {
     officeList: {
       required: true,
     },
-  },
-  computed: {
-    ...mapState({
-      personnelList: state => state.external.personnel,
-    }),
   },
   data() {
     const value = this.value || []

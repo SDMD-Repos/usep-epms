@@ -12,10 +12,9 @@
           />
         </a-form-item>
         <a-form-item>
-          <a-input
+          <a-input-password
             size="large"
             placeholder="Password"
-            type="password"
             v-decorator="['password', {rules: [{ required: true, message: 'Please input your Password!' }]}]"
           />
         </a-form-item>

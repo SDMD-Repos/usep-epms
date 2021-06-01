@@ -29,17 +29,22 @@
         </template>
         <template slot="footer" v-if="filteredDataSource.length">
           <a-row type="flex" align="middle" :gutter="[16,16]">
-            <a-col :span="2" >
+            <a-col :xs="{ span: 5 }" :sm="{ span: 5 }" :md="{ span: 5 }" :lg="{ span: 2}">
               <label>Budget: </label>
             </a-col>
-            <a-col :span="5">
-              <a-input-number v-model="categoryBudget" style="width: 100%"
-                              :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                              :parser="value => value.replace(/\$\s?|(,*)/g, '')"
-                              :min="0"/>
-            </a-col>
-            <a-col :span="2">
-              <a-icon type="check" :style="{ fontSize: '20px' }" @click="saveProgramBudget"/>
+            <template  v-if="!programBudget.length">
+              <a-col :xs="{ span: 12}" :sm="{ span: 12 }" :md="{ span: 8 }" :lg="{ span: 5 }">
+                <a-input-number v-model="categoryBudget" style="width: 100%"
+                                :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                                :parser="value => value.replace(/\$\s?|(,*)/g, '')"
+                                :min="0" />
+              </a-col>
+              <a-col :span="2">
+                <a-icon type="plus" :style="{ fontSize: '20px' }" @click="saveProgramBudget"/>
+              </a-col>
+            </template>
+            <a-col :xs="{ span: 12 }" :sm="{ span: 12 }" :lg="{ span: 4 }" v-else>
+              <label><b>₱ {{ numbersWithCommas(programBudget[0].categoryBudget) }}</b></label>
             </a-col>
           </a-row>
         </template>
@@ -49,7 +54,7 @@
 
         <!-- Custom data row render-->
         <span slot="subCategory" slot-scope="text, record">
-          {{ record.type === 'pi' ? record.subCategory.label : ''}}
+          {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
         </span>
 
         <template slot="isHeaderPI" slot-scope="text, record" v-if="record.type === 'pi'">
@@ -64,7 +69,7 @@
         </template>
 
         <template slot="budget" slot-scope="type, record">
-          {{ numbersWithCommas(record.budget) }}
+          {{ numbersWithCommasDecimal(record.budget) }}
         </template>
 
         <template slot="measures" slot-scope="type, record">
@@ -113,6 +118,7 @@
         </template>
       </a-table>
         <drawer-pi-form
+          v-if="openDrawer === functionId"
           :form-object="form"
           :pi-form-data="piFormData"
           :function-id="functionId"
@@ -120,7 +126,9 @@
           :targets-basis-list="targetsBasisList"
           @add-table-item="addTableItem"
           @update-table-item="updateTableItem"
-          @close-modal="resetModalData"/>
+          @close-modal="changeModalState"
+          @reset-form="resetForm"
+          @add-sub-pi="handleAddSub"/>
     </div>
   </div>
 </template>
@@ -129,9 +137,9 @@ import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import DrawerPiForm from './form'
 import { getFormColumns } from '@/services/formColumns'
-import { numbersWithCommas } from '@/services/filters'
+import { numbersWithCommasDecimal, numbersWithCommas } from '@/services/filters'
 
-const getPiFormDataDefault = () => {
+const getAddtlFormDataDefault = () => {
   return {
     open: false,
     okText: '',
@@ -142,10 +150,38 @@ const getPiFormDataDefault = () => {
   }
 }
 
-const addtlFromData = getPiFormDataDefault()
+const addtlFromData = getAddtlFormDataDefault()
+
+const getDefaultFormData = () => {
+  return {
+    subCategory: null,
+    name: '',
+    isHeader: false,
+    target: '',
+    measures: [],
+    budget: null,
+    targetsBasis: '',
+    cascadingLevel: '',
+    implementing: [],
+    supporting: [],
+    otherRemarks: '',
+  }
+}
+
+const formData = getDefaultFormData()
 
 export default {
-  props: ['year', 'functionId', 'categories', 'piSource'],
+  name: 'item-list',
+  props: {
+    year: Number,
+    functionId: String,
+    categories: Array,
+    piSource: Array,
+    budgetList: Array,
+    targetsBasisList: Array,
+    drawer: String,
+    counter: Number,
+  },
   components: {
     DrawerPiForm,
   },
@@ -160,36 +196,38 @@ export default {
     filteredDataSource() {
       return this.dataSource.filter(i => i.program === this.mainCategory.key)
     },
+    programBudget() {
+      return this.budgetList.filter(i => i.mainCategory.label === this.mainCategory.label)
+    },
   },
   data() {
     const piSource = this.piSource
+    const drawer = this.drawer
+    const counter = this.counter
     return {
       getFormColumns,
       displayPiList: 0,
+      openDrawer: drawer,
       mainCategory: undefined,
       categoryBudget: null,
-      count: 0,
+      count: counter,
       dataSource: piSource,
-      targetsBasisList: [],
       piFormData: addtlFromData,
-      form: {
-        subCategory: undefined,
-        name: '',
-        isHeader: false,
-        target: '',
-        measures: [],
-        budget: null,
-        targetsBasis: undefined,
-        cascadingLevel: undefined,
-        implementing: [],
-        supporting: [],
-        otherRemarks: '',
-      },
+      form: formData,
     }
   },
   watch: {
     piSource(val) {
       this.dataSource = val
+    },
+    mainCategory(val) {
+      this.mainCategory = val
+    },
+    drawer(val) {
+      this.openDrawer = val
+    },
+    counter(val) {
+      this.count = val
     },
   },
   created() {
@@ -197,6 +235,7 @@ export default {
   },
   methods: {
     numbersWithCommas,
+    numbersWithCommasDecimal,
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_PROGRAMS')
     },
@@ -207,6 +246,7 @@ export default {
     },
     openModal(action) {
       const { piFormData } = this
+      this.$emit('update-drawer-status', this.functionId)
       piFormData.open = true
       if (action === 'Add') {
         piFormData.okText = action
@@ -224,10 +264,10 @@ export default {
       }
     },
     addTableItem(data) {
-      const { dataSource, count, piFormData } = this
+      const { count, piFormData } = this
       if (!data.isHeader) {
         if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(data.targetsBasis) === -1) {
-          this.targetsBasisList.push(data.targetsBasis)
+          this.$emit('add-targets-basis-item', data.targetsBasis)
         }
       }
       const key = 'new_' + count
@@ -249,11 +289,11 @@ export default {
         otherRemarks: data.otherRemarks,
       }
       if (piFormData.type === 'pi') {
-        this.dataSource = [...dataSource, newData]
+        this.dataSource.push(newData)
         if (data.isHeader) {
           const that = this
           Modal.confirm({
-            title: 'Do you want to add sub PI?',
+            title: 'Do you want to add a sub PI?',
             content: '',
             okText: 'Yes',
             cancelText: 'No',
@@ -271,14 +311,20 @@ export default {
           target.children = []
         }
         target.children.push(newData)
-        this.dataSource = source
+        this.$emit('update-data-source', source)
       }
-      this.count = count + 1
+      this.$emit('update-counter', count + 1)
     },
     updateTableItem(details) {
       const newData = [...this.dataSource]
       const { piFormData } = this
       if (piFormData.type === 'pi') {
+        if (!details.formData.isHeader) {
+          const { targetsBasis } = details.formData
+          if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(targetsBasis) === -1) {
+            this.$emit('add-targets-basis-list', targetsBasis)
+          }
+        }
         Object.assign(newData[details.updateId], details.formData)
       } else {
         const { parentDetails } = this.piFormData
@@ -286,12 +332,18 @@ export default {
         const { children } = newData[parentIndex]
         Object.assign(children[details.updateId], details.formData)
       }
-      this.resetModalData(0)
+      this.changeModalState(0)
     },
-    resetModalData(newPI) {
-      Object.assign(this.piFormData, getPiFormDataDefault())
+    resetForm() {
+      Object.assign(this.form, getDefaultFormData())
+    },
+    changeModalState(newPI) {
+      Object.assign(this.piFormData, getAddtlFormDataDefault())
+      this.resetForm()
       if (newPI) {
         this.openModal('Add')
+      } else {
+        this.$emit('update-drawer-status', '')
       }
     },
     handleEdit(key, type) {
@@ -354,8 +406,7 @@ export default {
             console.log(recordKey)
           }
         })
-        this.dataSource = source
-        console.log(source)
+        this.$emit('update-data-source', source)
       }
     },
     handleAddSub(key) {
@@ -377,7 +428,7 @@ export default {
       const { mainCategory, categoryBudget } = this
       if (!categoryBudget) {
         Modal.error({
-          title: 'No data was saved!',
+          title: 'No data was saved',
           content: 'Please input a valid amount',
         })
       } else {

@@ -1,8 +1,8 @@
 import apiClient from '@/services/axios'
 
-export async function getMainOffices() {
+export async function getMainOffices(data) {
   return apiClient
-    .get('/hris/get-main-offices')
+    .get('/hris/get-main-offices/' + data)
     .then(response => {
       return response.data
     })

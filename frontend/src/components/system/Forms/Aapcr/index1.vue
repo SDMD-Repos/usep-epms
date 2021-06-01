@@ -20,23 +20,29 @@
               </template>
             </a-select>
             <div class="mt-4">
-              <a-collapse v-model="activeKey" accordion>
-                <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-                  <item-list v-bind:key="`${key}`" :year="year"
-                             :function-id="category.id"
-                             :categories="categories"
-                             :pi-source="dataSource"
-                             :budget-list="budgetList"
-                             :targets-basis-list="targetsBasisList"
-                             :drawer="drawer"
-                             :counter="counter"
-                             @update-counter="updateSourceCount"
-                             @add-budget-list-item="addBudgetListItem"
-                             @add-targets-basis-item="addTargetsBasisItem"
-                             @update-data-source="updateDataSource"
-                             @update-drawer-status="updateDrawerStatus"/>
-                </a-collapse-panel>
-              </a-collapse>
+              <a-tabs defaultActiveKey="0" @change="tabCallback">
+                <template v-for="(category, key) in categories">
+                  <a-tab-pane :key="`${key}`" :tab="category.name">
+                    <a-button @click="showDrawer">Click me</a-button>
+                    <div :ref="saveContainer">
+                      <a-drawer
+                        :key="category.id"
+                        :get-container="sampleRef"
+                        title="Basic Drawer"
+                        placement="right"
+                        :closable="false"
+                        :visible="visible"
+                        :after-visible-change="afterVisibleChange"
+                        @close="onClose"
+                      >
+                        <p v-for="f in filteredSubCategory(category.id)" v-bind:key="f.id">
+                          {{ f.name }}
+                        </p>
+                      </a-drawer>
+                    </div>
+                  </a-tab-pane>
+                </template>
+              </a-tabs>
             </div>
             <div class="mt-4" v-if="budgetList.length">
               <a-list item-layout="horizontal" :data-source="budgetList">
@@ -58,16 +64,13 @@
                       </a>
                     </a-list-item-meta>
                     <a slot="actions" @click="updateBudget(index)">update</a>
-                    <a slot="actions" @click="cancelEdit(index)">cancel</a>
                   </template>
                   <template v-else>
                     <span>
                     {{ item.mainCategory.label }} - <b>₱ {{ numbersWithCommas(item.categoryBudget) }}</b>
                   </span>
-                    <template v-if="editingKey === ''" >
-                      <a slot="actions" @click="editBudget(index)">edit</a>
-                      <a slot="actions" @click="deleteBudget(index)">delete</a>
-                    </template>
+                    <a slot="actions" @click="editBudget(index)">edit</a>
+                    <a slot="actions" @click="deleteBudget(index)">delete</a>
                   </template>
                 </a-list-item>
               </a-list>
@@ -75,10 +78,10 @@
             <div class="mt-4">
               <a-row type="flex" justify="center" align="middle">
                 <a-col :lg="{ span: 3 }">
-                  <a-button type="primary" ghost @click="validateForm(0)">Save as draft</a-button>
+                  <a-button type="primary" ghost @click="handleSave(0)">Save as draft</a-button>
                 </a-col>
                 <a-col :lg="{ span: 4 }">
-                  <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
+                  <a-button type="primary" @click="handleSave(1)">Finalize</a-button>
                 </a-col>
               </a-row>
             </div>
@@ -90,31 +93,30 @@
 </template>
 <script>
 import { mapState } from 'vuex'
-import ItemList from './partials/itemList'
 import { numbersWithCommas } from '@/services/filters'
 import { Modal } from 'ant-design-vue'
 
 export default {
   props: ['formId'],
   components: {
-    ItemList,
   },
   data() {
     return {
+      sampleRef: () => {
+
+      },
       year: new Date().getFullYear(),
       dataSource: [],
       budgetList: [],
       targetsBasisList: [],
-      drawer: null,
-      counter: 0,
-      editingKey: '',
-      edited: {},
       activeKey: '0',
+      visible: false,
     }
   },
   computed: {
     ...mapState({
       categories: state => state.formSettings.functions,
+      subCategoryList: state => state.formSettings.subCategories,
     }),
     years() {
       const now = new Date().getFullYear()
@@ -131,37 +133,50 @@ export default {
   },
   methods: {
     numbersWithCommas,
+    tabCallback(key) {
+      this.activeKey = key
+    },
+    afterVisibleChange(val) {
+      console.log('visible', val)
+    },
+    showDrawer() {
+      this.visible = true
+    },
+    onClose() {
+      this.visible = false
+    },
+    filteredSubCategory(functionId) {
+      return this.subCategoryList.filter((i) => {
+        return i.category_id === functionId && i.parent_id === null
+      })
+    },
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
+      this.$store.dispatch('formSettings/FETCH_SUB_CATEGORIES')
+    },
+    updateDataSource(data) {
+      this.dataSource = data
+    },
+    addBudgetListItem(data) {
+      this.budgetList.push(data)
+    },
+    addTargetsBasisItem(data) {
+      this.targetsBasisList.push(data)
     },
     editBudget(index) {
       const editData = [...this.budgetList]
       const target = editData[index]
       if (target) {
-        Object.assign(this.edited, this.budgetList[index])
-        this.editingKey = index
         target.editable = true
         this.budgetList = editData
-      }
-    },
-    cancelEdit(index) {
-      const editData = [...this.budgetList]
-      const target = editData[index]
-      if (target) {
-        this.editingKey = ''
-        target.categoryBudget = this.edited.categoryBudget
-        delete target.editable
-        this.edited = {}
       }
     },
     updateBudget(index) {
       const editData = [...this.budgetList]
       const target = editData[index]
       if (target) {
-        this.editingKey = ''
         delete target.editable
         this.budgetList = editData
-        this.edited = {}
       }
     },
     deleteBudget(index) {
@@ -177,73 +192,57 @@ export default {
         onCancel() {},
       })
     },
-    validateForm(isFinal) {
-      const { dataSource, budgetList } = this
-      const self = this
+    handleSave(isFinal) {
+      const { dataSource, budgetList, year } = this
+      let proceed = 1
       if (!dataSource.length) {
         Modal.error({
-          title: 'Unable to save the form',
-          content: 'No PIs were added to the list',
+          title: 'Unable to save form!',
+          content: 'No PIs were added on the list',
         })
+        proceed = 0
       } else if (!budgetList.length) {
         Modal.confirm({
-          title: 'Budget for each program was not indicated. Do you want to proceed?',
-          content: '',
-          okText: 'Yes',
+          title: 'Budget for each program was not indicated',
+          content: 'Do you want to proceed?',
+          okText: 'Yes, proceed',
           cancelText: 'No',
-          onOk() {
-            self.handleSave(isFinal)
+          onOk() {},
+          onCancel() {
+            proceed = 0
           },
-          onCancel() {},
         })
       } else {
         let title = ''
         if (isFinal) {
-          title = 'This will finalize and save your form'
+          title = 'This is will finalize and save your data'
         } else {
-          title = 'This will save your form as draft'
+          title = 'This is will save your data as draft'
         }
         Modal.confirm({
           title: title,
-          content: 'Are you sure you want to proceed?',
-          okText: 'Yes',
+          content: 'Are you sure do you want to proceed?',
+          okText: 'Yes, proceed',
           cancelText: 'No',
-          onOk() {
-            self.handleSave(isFinal)
+          onOk() {},
+          onCancel() {
+            proceed = 0
           },
-          onCancel() {},
         })
       }
-    },
-    handleSave(isFinal) {
-      const { dataSource, budgetList, year } = this
-      const documentName = this.formId.toUpperCase() + '_' + year
-      const details = {
-        dataSource: dataSource,
-        fiscalYear: year,
-        isFinalized: isFinal,
-        documentName: documentName,
-        programBudgets: budgetList,
-      }
-      this.$store.dispatch('aapcr/SAVE_AAPCR', { payload: details })
-      console.log(details)
-    },
 
-    // ItemList component events
-    updateSourceCount(data) {
-      this.counter = data
-    },
-    updateDataSource(data) {
-      this.dataSource = data
-    },
-    addBudgetListItem(data) {
-      this.budgetList.push(data)
-    },
-    addTargetsBasisItem(data) {
-      this.targetsBasisList.push(data)
-    },
-    updateDrawerStatus(data) {
-      this.drawer = data
+      if (proceed) {
+        const documentName = this.formId.toUpperCase() + '_' + year
+        const data = {
+          dataSource: dataSource,
+          fiscalYear: year,
+          isFinalized: isFinal,
+          documentName: documentName,
+          programBudgets: budgetList,
+        }
+        this.$store.dispatch('aapcr/SAVE_AAPCR', { payload: data })
+        console.log(data)
+      }
     },
   },
 }

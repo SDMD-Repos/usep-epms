@@ -7,8 +7,18 @@ use Illuminate\Support\Facades\Http;
 trait OfficeTrait {
     use ConverterTrait;
 
-    public function getMainOffices($params=array())
+    public function getMainOffices($nodeStatus, $params=array())
     {
+        $status = json_decode($nodeStatus);
+        $checkable = null;
+        $selectable = null;
+
+        if(isset($status->checkable)) {
+            $checkable = $status->checkable;
+        } elseif(isset($status->selectable)) {
+            $selectable = $status->selectable;
+        }
+
         try {
             $values = array();
 
@@ -17,10 +27,14 @@ trait OfficeTrait {
             $data->id = "allColleges";
             $data->value = "All Colleges" . "_" . "allColleges";
             $data->title = "All Colleges";
-            $data->selectable = false;
             $data->cascadeTo = null;
             $data->children = $this->getChildOffices("allColleges",1);
 
+            if($checkable) {
+                $data->checkable = $checkable->allColleges;
+            } elseif($selectable) {
+                $data->selectable = $selectable->allColleges;
+            }
             array_push($values, $data);
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
@@ -37,9 +51,14 @@ trait OfficeTrait {
                     $data->id = $vpoffice->id;
                     $data->value = $vpoffice->Acronym . "_" . $vpoffice->id;
                     $data->title = $vpoffice->Acronym;
-                    $data->selectable = false;
                     $data->cascadeTo = null;
                     $data->children = $this->getChildOffices($vpoffice->id,1);
+
+                    if($checkable) {
+                        $data->checkable = $checkable->mains;
+                    } elseif($selectable) {
+                        $data->selectable = $selectable->mains;
+                    }
 
                     array_push($values, $data);
                 }

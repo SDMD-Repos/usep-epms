@@ -567,6 +567,7 @@ class ComposerStaticInitb2bf617b47291c6f8e2cc3ee8e047e36
     );
 
     public static $classMap = array (
+        'App\\CascadingLevel' => __DIR__ . '/../..' . '/app/CascadingLevel.php',
         'App\\Category' => __DIR__ . '/../..' . '/app/Category.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
@@ -3281,6 +3282,7 @@ class ComposerStaticInitb2bf617b47291c6f8e2cc3ee8e047e36
         'Nyholm\\Psr7\\Stream' => __DIR__ . '/..' . '/nyholm/psr7/src/Stream.php',
         'Nyholm\\Psr7\\UploadedFile' => __DIR__ . '/..' . '/nyholm/psr7/src/UploadedFile.php',
         'Nyholm\\Psr7\\Uri' => __DIR__ . '/..' . '/nyholm/psr7/src/Uri.php',
+        'OfficeTypesSeeder' => __DIR__ . '/../..' . '/database/seeds/OfficeTypesSeeder.php',
         'Opis\\Closure\\Analyzer' => __DIR__ . '/..' . '/opis/closure/src/Analyzer.php',
         'Opis\\Closure\\ClosureContext' => __DIR__ . '/..' . '/opis/closure/src/ClosureContext.php',
         'Opis\\Closure\\ClosureScope' => __DIR__ . '/..' . '/opis/closure/src/ClosureScope.php',

@@ -34,7 +34,6 @@ class SettingController extends Controller
      */
     public function __construct()
     {
-//        $this->middleware('auth:api');
 
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();

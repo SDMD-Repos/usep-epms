@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\CascadingLevel' => $baseDir . '/app/CascadingLevel.php',
     'App\\Category' => $baseDir . '/app/Category.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
@@ -2720,6 +2721,7 @@ return array(
     'Nyholm\\Psr7\\Stream' => $vendorDir . '/nyholm/psr7/src/Stream.php',
     'Nyholm\\Psr7\\UploadedFile' => $vendorDir . '/nyholm/psr7/src/UploadedFile.php',
     'Nyholm\\Psr7\\Uri' => $vendorDir . '/nyholm/psr7/src/Uri.php',
+    'OfficeTypesSeeder' => $baseDir . '/database/seeds/OfficeTypesSeeder.php',
     'Opis\\Closure\\Analyzer' => $vendorDir . '/opis/closure/src/Analyzer.php',
     'Opis\\Closure\\ClosureContext' => $vendorDir . '/opis/closure/src/ClosureContext.php',
     'Opis\\Closure\\ClosureScope' => $vendorDir . '/opis/closure/src/ClosureScope.php',
