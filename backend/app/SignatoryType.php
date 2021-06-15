@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Position extends Model
+class SignatoryType extends Model
 {
     /**
      * The "type" of the auto-incrementing ID.

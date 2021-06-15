@@ -6,6 +6,7 @@ import * as hris from '@/services/hris'
 const mapApiProviders = {
   getMainOffices: hris.getMainOffices,
   getPersonnelList: hris.getPersonnelByOffice,
+  getAllPositions: hris.getAllPositions,
 }
 
 Vue.use(Vuex)
@@ -15,6 +16,7 @@ export default {
   state: {
     mainOffices: [],
     personnel: [],
+    positionList: [],
     loading: false,
   },
   mutations: {
@@ -54,6 +56,24 @@ export default {
           const { personnel } = response
           commit('SET_STATE', {
             personnel: personnel,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_ALL_POSITIONS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getAllPositions = mapApiProviders.getAllPositions
+      getAllPositions().then(response => {
+        if (response) {
+          const { positionList } = response
+          commit('SET_STATE', {
+            positionList: positionList,
           })
         }
         commit('SET_STATE', {

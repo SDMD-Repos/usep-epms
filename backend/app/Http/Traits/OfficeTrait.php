@@ -155,7 +155,7 @@ trait OfficeTrait {
                     $firstName = mb_strtolower($list->FirstName);
                     $middleName = mb_strtolower($list->MiddleName);
 
-                    $fullName = $lastName . ", " . $firstName . " " . $middleName;
+                    $fullName = $firstName . " " . substr($middleName,0,1) . ". " . $lastName;
 
                     $obj = new \stdClass();
 
@@ -184,5 +184,26 @@ trait OfficeTrait {
                 'error' => $e->getMessage()
             ], 400);
         }
+    }
+
+    public function getAllPositions()
+    {
+        $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/position/list', [
+            "token" => env("DATA_HRIS_API_TOKEN")
+        ]);
+
+        $data = json_decode($response->body());
+
+        $positionList = [];
+
+        foreach($data as $list) {
+            if(!in_array($list->Name, $positionList)) {
+                array_push($positionList, $list->Name);
+            }
+        }
+
+        return response()->json([
+            'positionList' => $positionList
+        ], 200);
     }
 }

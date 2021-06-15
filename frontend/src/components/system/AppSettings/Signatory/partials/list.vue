@@ -20,6 +20,7 @@
 const columns = [
   { title: 'Personnel', className: 'column-personnel', dataIndex: 'personnel_name', key: 'personnelName' },
   { title: 'Office/College', className: 'column-office', dataIndex: 'office_name', key: 'officeName' },
+  { title: 'Position', className: 'column-position', dataIndex: 'position', key: 'position' },
   { title: 'Action', className: 'column-action', dataIndex: '', key: 'x', scopedSlots: { customRender: 'action' } },
 ]
 

@@ -2,7 +2,24 @@
 
 namespace App\Http\Traits;
 
+use App\SubCategory;
+
 trait ConverterTrait {
+
+    private $parentSubCategories = [];
+
+    private $targetsBasisList = [];
+
+    public function array_any(callable $f, $data, $compareArr=array())
+    {
+        foreach ($data as $datum){
+            if ($f($datum, $compareArr)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public function integerToRomanNumeral($integer)
     {
@@ -61,9 +78,94 @@ trait ConverterTrait {
         return $out;
     }
 
-    public function getFullName($person)
+    public function getParentSubCategories($parent_id, $count=1)
     {
-        return $person['firstName'] . " " . $person['lastName'];
+        $parents = SubCategory::where('id', $parent_id)->get();
+
+        foreach($parents as $key => $parent) {
+
+            array_push($this->parentSubCategories, $parent->name);
+
+            if($parent->parent_id !== NULL) {
+                $count++;
+
+                $this->getParentSubCategories($parent->parent_id, $count);
+
+            }
+        }
+
+    }
+
+    public function splitPIOffices($data, $splitCollege=0)
+    {
+        $offices = array();
+
+        foreach($data as $datum) {
+
+            $officeType = $datum->office_type_id;
+
+            $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
+
+            if(isset($datum->personnel_id) && $datum->personnel_id !== NULL) {
+                $officeId = (int)$datum->personnel_id !== 0 ? (int)$datum->personnel_id : $datum->personnel_id;
+                $officeName = $datum->personnel_name;
+            }else{
+                $officeId = $datum->office_name. "_".$datum->office_id;
+                $officeName = $datum->office_name;
+            }
+
+            /*$ipcrPeriod = IpcrPeriod::select('id')->pluck('id');
+
+            if(isset($datum->periods)){
+                $ipcrPeriod = $datum->periods->pluck('id');
+            }elseif(isset($datum->ipcrPeriod)) {
+                $ipcrPeriod = $datum->ipcrPeriod;
+            }*/
+
+            $offices[$datum->office_type_id][$counter] = array(
+                'label' => $officeName,
+                'value' => $officeId,
+                'cascadeTo' => $datum->cascade_to,
+//                'ipcrPeriod' => $ipcrPeriod
+            );
+
+            if($splitCollege && $officeId === "allColleges") {
+                $temp = explode("_", $officeId);
+
+                $offices[$datum->office_type_id][$counter]['id'] = $temp[1];
+                $offices[$datum->office_type_id][$counter]['parentId'] = $officeId;
+                $offices[$datum->office_type_id][$counter]['acronym'] = $officeName;
+            }
+
+            $trimOfficeId = mb_strtolower(substr($datum->office_type_id, 0,3));
+
+            $viewIndex = $trimOfficeId."Text";
+
+            $offices[$viewIndex][$counter] = $datum->office_name; # used for view only PIs
+
+            if($datum->vp_office_id){
+                $offices[$datum->office_type_id][$counter]['parentId'] = $datum->vp_office_id;
+
+                $offices[$datum->office_type_id][$counter]['acronym'] = $datum->office_name; # used for view only PIs
+            }else{
+                $offices[$datum->office_type_id][$counter]['children'] = null;
+            }
+        }
+
+        return $offices;
+    }
+
+    public function getTargetsBasisList($targetsBasis)
+    {
+        if($targetsBasis) {
+            $suggestExists = $this->array_any(function($x, $compare){
+                return $x === $compare;
+            }, $this->targetsBasisList, $targetsBasis);
+
+            if(!$suggestExists){
+                array_push($this->targetsBasisList, $targetsBasis);
+            }
+        }
     }
 
 }

@@ -142,27 +142,57 @@
             <div class="row">
               <div class="col-sm-9 col-lg-10">
                 <a-tree-select
-                  v-model="form.implementing"
+                  v-model="form.options.implementing"
                   style="width: 100%"
                   :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                   :tree-data="mainOfficesList"
                   placeholder="Select an office/s"
                   :show-checked-strategy="SHOW_PARENT"
                   :max-tag-count="6"
+                  :disabled="form.implementing.length > 0"
                   allow-clear
                   tree-checkable
-                  label-in-value />
+                  label-in-value
+                  @change="onOfficeChange(...arguments, 'implementing')" />
               </div>
               <div class="col-sm-2 col-lg-2">
-                <a-tooltip title="View List">
-                  <a-icon type="edit"
-                          theme="filled"
+                <a-tooltip :title="!form.implementing.length ? 'Save List' : 'Edit List'">
+                  <a-icon v-if="!form.implementing.length"
+                          type="check"
                           :style="{ fontSize: '18px', cursor: 'pointer' }"
-                          @click="viewOfficeList('implementing')"/>
+                          @click="saveOfficeList('implementing')"/>
+                  <a-icon v-else
+                          type="edit"
+                          :style="{ fontSize: '18px', cursor: 'pointer' }"
+                          @click="updateOfficeList('implementing')"/>
                 </a-tooltip>
               </div>
             </div>
           </a-form-model-item>
+
+          <div v-if="form.implementing.length">
+            <div v-for="(office, index) in form.implementing" v-bind:key="index">
+              <a-row type="flex" align="middle">
+                <a-col :span="3" :offset="4">
+                  <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
+                </a-col>
+                <a-col :span="8">
+                  <a-select v-model="form.implementing[index].cascadeTo" style="width: 100%">
+                    <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
+                      {{ category.name }}
+                    </a-select-option>
+                  </a-select>
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-icon type="delete"
+                          theme="filled"
+                          :style="{ fontSize: '18px'}"
+                          @click="deleteOfficeItem('implementing', index)"/>
+                </a-col>
+              </a-row>
+              <br />
+            </div>
+          </div>
 
           <a-form-model-item label="Supporting Office"
                              prop="supporting"
@@ -171,28 +201,57 @@
             <div class="row">
               <div class="col-sm-9 col-lg-10">
                 <a-tree-select
-                  v-model="form.supporting"
+                  v-model="form.options.supporting"
                   style="width: 100%"
                   :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                   :tree-data="mainOfficesList"
                   placeholder="Select an office/s"
                   :show-checked-strategy="SHOW_PARENT"
                   :max-tag-count="6"
+                  :disabled="form.supporting.length > 0"
                   allow-clear
                   tree-checkable
                   label-in-value
+                  @change="onOfficeChange(...arguments, 'supporting')"
                 />
               </div>
               <div class="col-sm-2 col-lg-2">
-                <a-tooltip title="View List">
-                  <a-icon type="edit"
-                          theme="filled"
+                <a-tooltip :title="!form.supporting.length ? 'Save List' : 'Edit List'">
+                  <a-icon v-if="!form.supporting.length" type="check"
                           :style="{ fontSize: '18px', cursor: 'pointer' }"
-                          @click="viewOfficeList('supporting')"/>
+                          @click="saveOfficeList('supporting')"/>
+                  <a-icon v-else
+                          type="edit"
+                          :style="{ fontSize: '18px', cursor: 'pointer' }"
+                          @click="updateOfficeList('supporting')"/>
                 </a-tooltip>
               </div>
             </div>
           </a-form-model-item>
+
+          <div v-if="form.supporting.length" >
+            <div v-for="(office, index) in form.supporting" v-bind:key="index">
+              <a-row type="flex" align="middle">
+                <a-col :span="3" :offset="4">
+                  <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
+                </a-col>
+                <a-col :span="8">
+                  <a-select v-model="form.supporting[index].cascadeTo" style="width: 100%">
+                    <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
+                      {{ category.name }}
+                    </a-select-option>
+                  </a-select>
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-icon type="delete"
+                          theme="filled"
+                          :style="{ fontSize: '18px'}"
+                          @click="deleteOfficeItem('supporting', index)"/>
+                </a-col>
+              </a-row>
+              <br />
+            </div>
+          </div>
 
           <a-form-model-item label="Other Remarks"
                              prop="otherRemarks"
@@ -233,34 +292,11 @@
             </a-button>
           </a-popconfirm>
         </template>
-        <a-button type="primary" @click="okModalAction" :loading="isSubmmiting">
+        <a-button type="primary" @click="validateFields" :loading="isSubmmiting">
           {{ otherData.okText }}
         </a-button>
       </div>
     </a-drawer>
-
-    <!-- View Offices List Modal -->
-    <a-modal v-model="openList"
-             title="Office List"
-             :closable="false"
-             ok-text="Save"
-             @ok="handleOk"
-             @cancel="handleCancel">
-      <template v-if="officesList.length">
-        <div class="row mb-2" v-for="(office, i) in officesList" v-bind:key="i">
-          <div class="col-sm-6 col-lg-6">
-            <span>{{ office.label }}</span>
-          </div>
-          <div class="col-sm-6 col-lg-6">
-            <a-select v-model="officesList[i].cascadeTo" style="width: 100%">
-              <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
-                {{ category.name }}
-              </a-select-option>
-            </a-select>
-          </div>
-        </div>
-      </template>
-    </a-modal>
   </span>
 </template>
 
@@ -303,7 +339,11 @@ export default {
     const validateNonHeader = (rule, value, callback) => {
       if (!this.form.isHeader) {
         if (value === '' || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
-          callback(new Error('This field is required'))
+          if (rule.field === 'implementing' && this.form.options.implementing.length) {
+            callback(new Error('Please click the check icon to save the data'))
+          } else {
+            callback(new Error('This field is required'))
+          }
         } else {
           this.$refs[this.functionId].validateField(rule.field)
           callback()
@@ -314,7 +354,7 @@ export default {
       }
     }
     const subCategoryValidator = (rule, value, callback) => {
-      if ((this.functionId !== 'support_functions') && typeof value === 'undefined') {
+      if ((this.functionId !== 'support_functions') && value === null) {
         callback(new Error('Please select at least one'))
       } else {
         this.$refs[this.functionId].validateField(rule.field)
@@ -334,6 +374,14 @@ export default {
         value: 'id',
       },
       form: formObject,
+      cachedOffice: {
+        implementing: [],
+        supporting: [],
+      },
+      storedOffices: {
+        implementing: [],
+        supporting: [],
+      },
       rules: {
         subCategory: [
           { validator: subCategoryValidator, trigger: 'blur' },
@@ -349,9 +397,6 @@ export default {
           { type: 'array' },
         ],
       },
-      openList: false,
-      officeType: '',
-      officesList: [],
     }
   },
   watch: {
@@ -379,6 +424,19 @@ export default {
       this.$store.dispatch('formSettings/FETCH_MEASURES')
       this.$store.dispatch('formSettings/FETCH_CASCADING_LEVELS')
     },
+    onOfficeChange() {
+      const args = [...arguments] /* 0 - value, 1 - label, 2 - extra, 3 - field */
+      const extra = args[2]
+      const field = args[3]
+      this.storedOffices[field] = []
+      const { allCheckedNodes } = extra
+      if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
+        allCheckedNodes.forEach(item => {
+          const { dataRef } = (typeof item.node !== 'undefined') ? item.node.data.props : item.data.props
+          this.storedOffices[field].push(dataRef)
+        })
+      }
+    },
     filterBasisOption(input, option) {
       return (
         option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
@@ -402,88 +460,124 @@ export default {
         this.form[label] = null
       }
     },
-    okModalAction() {
+    validateFields() {
       this.isSubmmiting = !this.isSubmmiting
-      const { otherData, form } = this
+      const { form } = this
       const tempImplementing = this.mappedOfficeList(form.implementing, 'implementing')
       const tempSupporting = this.mappedOfficeList(form.supporting, 'supporting')
       form.implementing = tempImplementing
       form.supporting = tempSupporting
-      const that = this
+      const self = this
       setTimeout(() => {
         this.$refs[this.functionId].validate(valid => {
           if (valid) {
-            let msgContent = ''
-            if (otherData.updateId === null) {
-              this.$emit('add-table-item', form)
-              msgContent = 'Added!'
-            } else {
-              this.$emit('update-table-item', { formData: form, updateId: otherData.updateId })
-              msgContent = 'Updated!'
-            }
-
-            this.$emit('reset-form')
-            if (otherData.type !== 'pi') {
-              const { parentDetails } = otherData
-              this.$emit('add-sub-pi', parentDetails.key)
-            }
-            this.$message.success({ content: msgContent, messageKey, duration: 2 })
-              .then(() => {
-                that.isSubmmiting = !that.isSubmmiting
+            if (form.options.supporting.length) {
+              Modal.confirm({
+                title: 'The Supporting Office was not saved',
+                content: 'Data will be lost if you proceed. Do you still want to continue?',
+                okText: 'Yes',
+                cancelText: 'No',
+                onOk() {
+                  self.saveForm()
+                },
+                onCancel() {
+                  self.isSubmmiting = !self.isSubmmiting
+                },
               })
+            } else {
+              self.saveForm()
+            }
           } else {
             console.log('errror')
-            that.isSubmmiting = !that.isSubmmiting
+            self.isSubmmiting = !self.isSubmmiting
             return false
           }
         })
       }, 500)
     },
+    saveForm() {
+      const { otherData, form } = this
+      let msgContent = ''
+      const self = this
+      for (var office in this.storedOffices) {
+        self.storedOffices[office] = []
+      }
+      if (otherData.updateId === null) {
+        this.$emit('add-table-item', form)
+        msgContent = 'Added!'
+      } else {
+        this.$emit('update-table-item', { formData: form, updateId: otherData.updateId })
+        msgContent = 'Updated!'
+      }
+
+      this.$emit('reset-form')
+      if (otherData.type !== 'pi') {
+        const { parentDetails } = otherData
+        this.$emit('add-sub-pi', parentDetails.key)
+      }
+      this.$message.success({ content: msgContent, messageKey, duration: 2 })
+        .then(() => {
+          self.isSubmmiting = !self.isSubmmiting
+        })
+    },
     resetFormData(newPI) {
-      this.officesList = []
       this.$emit('close-modal', newPI)
     },
-    viewOfficeList(field) {
-      const list = this.form[field]
-      if (list.length) {
-        this.openList = !this.openList
-        const mappedList = this.mappedOfficeList(list, field)
-        this.officeType = field
-        this.officesList = mappedList
-      } else {
-        const modal = Modal.warning({
-          title: 'Please select at least one (1) office',
-          content: '',
-        })
-        setTimeout(() => {
-          modal.destroy()
-        }, 2500)
+    saveOfficeList(field) {
+      const { form, cachedOffice, storedOffices } = this
+      const list = storedOffices[field]
+      form[field] = this.mappedOfficeList(list, field)
+      form.options[field] = []
+      if (cachedOffice[field].length) {
+        cachedOffice[field] = []
+        storedOffices[field] = []
       }
+    },
+    updateOfficeList(field) {
+      const { form, cachedOffice, storedOffices } = this
+      form.options[field] = form[field]
+      cachedOffice[field] = form[field]
+      storedOffices[field] = form[field]
+      form[field] = []
+    },
+    deleteOfficeItem(field, index) {
+      const { form } = this
+      Modal.confirm({
+        title: 'Are you sure you want to delete this?',
+        content: '',
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk() {
+          form[field].splice(index, 1)
+        },
+        onCancel() {},
+      })
     },
     mappedOfficeList(list, field) {
       const cascadeTo = field === 'implementing' ? 'core_functions' : 'support_functions'
+      const { cachedOffice } = this
       return list.map(item => {
         const container = {}
         let tempCascadeTo = ''
         container.value = item.value
-        container.label = item.label
-        tempCascadeTo = cascadeTo
-        if (typeof (item.cascadeTo) !== 'undefined') {
+        container.label = typeof item.title !== 'undefined' ? item.title : item.label
+        if (typeof item.children !== 'undefined') {
+          container.children = true
+        } else {
+          container.acronym = item.acronym
+          container.pId = item.pId
+        }
+        const hasCached = cachedOffice[field].filter(i => i.value === item.value)
+        if (hasCached.length) {
+          tempCascadeTo = hasCached[0].cascadeTo
+        } else if (typeof (item.cascadeTo) !== 'undefined' && item.cascadeTo) {
           tempCascadeTo = item.cascadeTo
+        } else {
+          tempCascadeTo = cascadeTo
         }
         container.cascadeTo = tempCascadeTo
         return container
       })
-    },
-    // Modal for managing where PI should be cascaded
-    handleOk() {
-      this.openList = !this.openList
-      this.form[this.officeType] = this.officesList
-      this.officesList = []
-    },
-    handleCancel() {
-      this.openList = !this.openList
-      this.officesList = []
     },
   },
 }

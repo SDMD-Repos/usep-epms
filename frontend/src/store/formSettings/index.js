@@ -18,7 +18,7 @@ const mapApiProviders = {
   updateMeasure: appSettings.updateMeasure,
   deleteMeasure: appSettings.deleteMeasure,
   getAllForms: appSettings.getAllForms,
-  getAllPositions: appSettings.getAllPositions,
+  getAllSignatoryTypes: appSettings.getAllSignatoryTypes,
   getYearSignatories: appSettings.getYearSignatories,
   saveSignatories: appSettings.saveSignatories,
   updateSignatories: appSettings.updateSignatory,
@@ -36,7 +36,7 @@ export default {
     subCategories: [],
     measures: [],
     forms: [],
-    positions: [],
+    signatoryTypes: [],
     signatories: [],
     cascadingLevels: [],
     loading: false,
@@ -334,17 +334,17 @@ export default {
         })
       })
     },
-    FETCH_ALL_POSITIONS({ commit }) {
+    FETCH_ALL_SIGNATORY_TYPES({ commit }) {
       commit('SET_STATE', {
         loading: true,
       })
 
-      const getAllPositions = mapApiProviders.getAllPositions
-      getAllPositions().then(response => {
+      const getAllSignatoryTypes = mapApiProviders.getAllSignatoryTypes
+      getAllSignatoryTypes().then(response => {
         if (response) {
-          const { positions } = response
+          const { signatoryTypes } = response
           commit('SET_STATE', {
-            positions: positions,
+            signatoryTypes: signatoryTypes,
           })
         }
         commit('SET_STATE', {

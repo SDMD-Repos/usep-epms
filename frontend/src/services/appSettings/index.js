@@ -126,9 +126,9 @@ export async function getAllForms() {
     .catch(err => console.log(err))
 }
 
-export async function getAllPositions() {
+export async function getAllSignatoryTypes() {
   return apiClient
-    .get('/settings/get-all-positions')
+    .get('/settings/get-all-signatory-types')
     .then(response => {
       return response.data
     })

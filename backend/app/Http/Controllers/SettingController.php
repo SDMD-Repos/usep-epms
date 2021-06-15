@@ -13,9 +13,9 @@ use App\Http\Requests\StoreSubCategory;
 use App\Http\Traits\OfficeTrait;
 use App\Measure;
 use App\MeasureItem;
-use App\Position;
 use App\Program;
 use App\Signatory;
+use App\SignatoryType;
 use App\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +37,10 @@ class SettingController extends Controller
 
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
+
+            if ($this->login_user) {
+                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
+            }
 
             return $next($request);
         });
@@ -74,7 +78,7 @@ class SettingController extends Controller
             $category->percentage = $validated['percentage'];
             $category->order = ++$order;
             $category->create_id = $this->login_user->pmaps_id;
-            $category->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $category->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if(!$category->save()) {
                 DB::rollBack();
@@ -99,7 +103,7 @@ class SettingController extends Controller
 
             $category->modify_id = $this->login_user->pmaps_id;
             $category->updated_at = Carbon::now();
-            $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$category->save()) {
                 DB::rollBack();
@@ -149,7 +153,7 @@ class SettingController extends Controller
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
             $subcategory->create_id = $this->login_user->pmaps_id;
-            $subcategory->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$subcategory->save()) {
                 DB::rollBack();
@@ -184,7 +188,7 @@ class SettingController extends Controller
             foreach ($subcategory as $sub) {
                 $sub->modify_id = $this->login_user->pmaps_id;
                 $sub->updated_at = Carbon::now();
-                $sub->history = $sub->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                $sub->history = $sub->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                 if (!$sub->save()) {
                     DB::rollBack();
@@ -234,7 +238,7 @@ class SettingController extends Controller
             $program->category_id = $validated['category_id'];
             $program->percentage = $validated['percentage'];
             $program->create_id = $this->login_user->pmaps_id;
-            $program->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -264,7 +268,7 @@ class SettingController extends Controller
 
             $program->modify_id = $this->login_user->pmaps_id;
             $program->updated_at = Carbon::now();
-            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -311,7 +315,7 @@ class SettingController extends Controller
 
             $measure->name = $validated['name'];
             $measure->create_id = $this->login_user->pmaps_id;
-            $measure->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if ($measure->save()) {
                 foreach ($validated['items'] as $item) {
@@ -321,7 +325,7 @@ class SettingController extends Controller
                     $measureItem->rate = (int)$item['rate'];
                     $measureItem->description = $item['description'];
                     $measureItem->create_id = $this->login_user->pmaps_id;
-                    $measureItem->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                    $measureItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                     if (!$measureItem->save()) {
                         DB::rollBack();
@@ -362,7 +366,7 @@ class SettingController extends Controller
                 $changes = " from '" . $measure->name . "' to '" . $validated['name'] . "'";
             }
 
-            $measure->history = $measure->history . "Updated " . Carbon::now() . $changes . " by " . $this->getFullName($this->login_user) . "\n";
+            $measure->history = $measure->history . "Updated " . Carbon::now() . $changes . " by " . $this->login_user->fullName . "\n";
             $measure->name = $validated['name'];
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
@@ -376,7 +380,7 @@ class SettingController extends Controller
                         $measureItem->rate = (int)$item['rate'];
                         $measureItem->description = $item['description'];
                         $measureItem->create_id = $this->login_user->pmaps_id;
-                        $measureItem->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                        $measureItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                         if (!$measureItem->save()) {
                             DB::rollBack();
@@ -393,7 +397,7 @@ class SettingController extends Controller
 
                     $measureItem->modify_id = $this->login_user->pmaps_id;
                     $measureItem->updated_at = Carbon::now();
-                    $measureItem->history = $measureItem->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                    $measureItem->history = $measureItem->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                     if (!$measureItem->save()) {
                         DB::rollBack();
@@ -432,7 +436,7 @@ class SettingController extends Controller
 
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
-            $measure->history = $measure->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $measure->history = $measure->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$measure->save()) {
                 DB::rollBack();
@@ -467,12 +471,12 @@ class SettingController extends Controller
         ], 200);
     }
 
-    public function getAllPositions()
+    public function getAllSignatoryTypes()
     {
-        $positions = Position::all();
+        $signatoryTypes = SignatoryType::all();
 
         return response()->json([
-            'positions' => $positions
+            'signatoryTypes' => $signatoryTypes
         ], 200);
     }
 
@@ -498,28 +502,40 @@ class SettingController extends Controller
 
             $year = $validated['year'];
 
-            $positionId = $validated['positionId'];
+            $typeId = $validated['typeId'];
 
             $formId = $validated['formId'];
 
             $signatories = $validated['signatories'];
 
             foreach($signatories as $signatory) {
-                list($officeName, $officeId) = explode('_', $signatory['officeId']);
 
-                list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
+                if(strpos($signatory['officeId'], '_') !== false) {
+                    list($officeName, $officeId) = explode('_', $signatory['officeId']);
+                } else {
+                    $officeId = null;
+                    $officeName = $signatory['officeId'];
+                }
+
+                if(strpos($signatory['personnelId'], '_') !== false) {
+                    list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
+                } else {
+                    $personnelId = null;
+                    $personnelName = $signatory['personnelId'];
+                }
 
                 $newSignatory = new Signatory();
 
                 $newSignatory->year = $year;
-                $newSignatory->position_id = $positionId;
+                $newSignatory->type_id = $typeId;
                 $newSignatory->form_id = $formId;
                 $newSignatory->personnel_id = $personnelId;
                 $newSignatory->personnel_name = $personnelName;
                 $newSignatory->office_id = $officeId;
                 $newSignatory->office_name = $officeName;
+                $newSignatory->position = $signatory['position'];
                 $newSignatory->create_id = $this->login_user->pmaps_id;
-                $newSignatory->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                 if(!$newSignatory->save()) {
                     DB::rollBack();
@@ -549,7 +565,7 @@ class SettingController extends Controller
 
             $year = $validated['year'];
 
-            $positionId = $validated['positionId'];
+            $typeId = $validated['typeId'];
 
             $formId = $validated['formId'];
 
@@ -572,13 +588,18 @@ class SettingController extends Controller
                     if ($check->office_id !== $officeId) {
                         $check->office_id = $officeId;
                         $check->office_name = $officeName;
-                        $history .= "Updated office from '" . $original['office_name'] . "' to '" . $officeName . "' " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                        $history .= "Updated office from '" . $original['office_name'] . "' to '" . $officeName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
                     }
 
                     if($check->personnel_id !== $personnelId) {
                         $check->personnel_id = $personnelId;
                         $check->personnel_name = $personnelName;
-                        $history .= "Updated personnel from '" . $original['personnel_name'] . "' to '" . $personnelName . "' " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                        $history .= "Updated personnel from '" . $original['personnel_name'] . "' to '" . $personnelName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    }
+
+                    if($check->position !== $signatory['position']) {
+                        $check->position = $signatory['position'];
+                        $history .= "Updated position from '" . $original['position'] . "' to '" . $signatory['position'] . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
                     }
 
                     if($history !== '') {
@@ -594,14 +615,15 @@ class SettingController extends Controller
                     $newSignatory = new Signatory();
 
                     $newSignatory->year = $year;
-                    $newSignatory->position_id = $positionId;
+                    $newSignatory->position_id = $typeId;
                     $newSignatory->form_id = $formId;
                     $newSignatory->personnel_id = $personnelId;
                     $newSignatory->personnel_name = $personnelName;
                     $newSignatory->office_id = $officeId;
                     $newSignatory->office_name = $officeName;
+                    $newSignatory->position = $signatory['position'];
                     $newSignatory->create_id = $this->login_user->pmaps_id;
-                    $newSignatory->history = "Created " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+                    $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                     if(!$newSignatory->save()) {
                         DB::rollBack();
@@ -636,7 +658,7 @@ class SettingController extends Controller
 
             $signatory->modify_id = $this->login_user->pmaps_id;
             $signatory->updated_at = Carbon::now();
-            $signatory->history = $signatory->history . "Deleted " . Carbon::now() . " by " . $this->getFullName($this->login_user) . "\n";
+            $signatory->history = $signatory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if (!$signatory->save()) {
                 DB::rollBack();

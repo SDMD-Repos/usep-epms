@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="aapcr_summary" language="groovy" pageWidth="898" pageHeight="572" orientation="Landscape" columnWidth="898" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="5db2b6d3-1d5b-4c79-8f19-18631db8ee93">
+	<property name="ireport.zoom" value="3.4522712143931056"/>
+	<property name="ireport.x" value="1685"/>
+	<property name="ireport.y" value="0"/>
+	<field name="categoryName" class="java.lang.String"/>
+	<field name="categoryPercentage" class="java.lang.String"/>
+	<field name="programName" class="java.lang.String"/>
+	<field name="programPercentage" class="java.lang.String"/>
+	<group name="CategoryGroup">
+		<groupExpression><![CDATA[$F{categoryName}]]></groupExpression>
+		<groupHeader>
+			<band height="10">
+				<staticText>
+					<reportElement uuid="e54a6eee-80a4-4c7e-a4f9-426bc8adb863" mode="Opaque" x="0" y="0" width="808" height="10" backcolor="#AEABAB"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" size="6"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="baa09599-9fab-4d29-afaa-da261b466cb0" x="0" y="0" width="239" height="10"/>
+					<box leftPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font fontName="DejaVu Sans" size="6" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{categoryName} + " (" + $F{categoryPercentage}+"%)"]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="6bad9d1c-a153-4210-8122-2ec9f4fd2790" x="808" y="0" width="90" height="10"/>
+					<box>
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="DejaVu Sans" size="6" isBold="true"/>
+					</textElement>
+					<text><![CDATA[]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="10" splitType="Stretch">
+			<textField>
+				<reportElement uuid="46dafb4f-f1dd-443b-96ec-abe63cc0d74d" x="0" y="0" width="808" height="10"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{programName} + " ("+$F{programPercentage}+"%)"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="6bad9d1c-a153-4210-8122-2ec9f4fd2790" x="808" y="0" width="90" height="10"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

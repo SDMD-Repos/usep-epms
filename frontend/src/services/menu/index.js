@@ -39,12 +39,11 @@ export const getMenuData = [
     title: 'AAPCR',
     key: 'aapcr',
     icon: 'fe fe-globe',
-    url: '/manager/aapcr',
     children: [
       {
-        title: 'Create New',
-        key: 'aapcrNew',
-        url: '/aapcr/new',
+        title: 'Form',
+        key: 'aapcrForm',
+        url: '/aapcr/form',
       },
       {
         title: 'List',
@@ -57,7 +56,6 @@ export const getMenuData = [
     title: 'OPCR (VP)',
     key: 'vpopcr',
     icon: 'fe fe-file-text',
-    url: '/manager/opcrvp',
     children: [
       {
         title: 'Create New',

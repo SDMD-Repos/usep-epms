@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSignatory extends FormRequest
+class UpdateAapcr extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,11 +24,12 @@ class StoreSignatory extends FormRequest
     public function rules()
     {
         return [
-            'signatories' => 'required|array|max:3',
-            'year' => 'required',
-            'typeId' => 'required',
-            'formId' => 'required',
-            'position' => ''
+            'dataSource' => 'required|array',
+            'fiscalYear' => 'required|digits:4',
+            'isFinalized' => 'boolean',
+            'documentName' => 'required|string',
+            'programBudgets' => 'array',
+            'deletedIds' => 'array'
         ];
     }
 }

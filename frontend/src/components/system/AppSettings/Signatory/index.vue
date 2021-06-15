@@ -10,34 +10,42 @@
       </a-select>
       <div class="mt-4">
         <a-collapse v-model="activeKey" accordion>
-          <a-collapse-panel v-for="(position, key) in positionList" :key="`${key}`" :header="position.name">
+          <a-collapse-panel v-for="(type, key) in signatoryTypes" :key="`${key}`" :header="type.name">
             <div class="spin-content">
-              <a-form :form="form" @submit="handleSubmit($event, position.id)" v-if="displayInput && formActive === position.id">
+              <a-form :form="form" @submit="handleSubmit($event, type.id)" v-if="displayInput && formActive === type.id">
                 <template v-for="(data, i) in details">
-                  <a-row :key="i">
-                    <a-col :xs="{ span: 2, offset: 1 }" :lg="{ span: 2, offset: 1 }" style="padding-top: 10px">
-                      # {{ i + 1 }}
-                    </a-col>
-                    <a-col :xs="{ span: 20, offset: 1 }" :lg="{ span: 20 }">
+                  <a-row :key="i" type="flex" justify="space-around" align="middle">
+                    <a-col :xs="{ span: 24, offset: 1 }" :lg="{ span: 12 }">
                       <a-form-item :key="i">
                         <signatory-input
                           v-decorator="[`signatories[${i}]`,
                                 {
-                                  initialValue: { id: 'new', officeId: undefined, personnelId: undefined, list: [] },
+                                  initialValue: {
+                                    id: 'new',
+                                    officeId: undefined,
+                                    personnelId: undefined,
+                                    position: undefined,
+                                    list: [],
+                                    isCustom: false,
+                                  },
                                   rules: [{ validator: checkFields }]
                                 },
                           ]"
                           :index="i"
                           :count="details.length"
                           :office-list="mainOfficesList"
+                          :position-list="positionList"
+                          :form-name="formName"
+                          :form-active="formActive"
                           @add-signatory="addSignatory"
-                          @delete-signatory="deleteSignatory"/>
+                          @delete-signatory="deleteSignatory" />
                       </a-form-item>
+                      <a-divider type="horizontal" />
                     </a-col>
                   </a-row>
                 </template>
                 <a-form-item>
-                  <a-row type="flex" justify="center" style="padding-top: 10px">
+                  <a-row type="flex" justify="center" class="mt-5">
                     <a-col :xs="{ span: 4 }" :lg="{ span: 1 }">
                       <a-button @click="changeFormDisplay">
                         Cancel
@@ -52,12 +60,12 @@
                 </a-form-item>
               </a-form>
               <table-signatories :key="`${key}`" :year="year" :form-id="formId"
-                                 :list="filterBySignatory(position.id)"
+                                 :list="filterBySignatory(type.id)"
                                  v-else/>
             </div>
             <a-icon slot="extra"
-                    :type="filterBySignatory(position.id).length ? 'edit' : 'user-add'"
-                    @click="handleClick($event, key, position.id)" v-if="!displayInput"/>
+                    :type="filterBySignatory(type.id).length ? 'edit' : 'user-add'"
+                    @click="handleClick($event, key, type.id)" v-if="!displayInput"/>
           </a-collapse-panel>
         </a-collapse>
       </div>
@@ -80,9 +88,10 @@ export default {
   },
   computed: {
     ...mapState({
-      positionList: state => state.formSettings.positions,
+      signatoryTypes: state => state.formSettings.signatoryTypes,
       signatoryList: state => state.formSettings.signatories,
       mainOfficesList: state => state.external.mainOffices,
+      positionList: state => state.external.positionList,
       loading: state => state.external.loading,
     }),
     years() {
@@ -129,7 +138,8 @@ export default {
       }
       params = encodeURIComponent(JSON.stringify(params))
       this.$store.dispatch('external/FETCH_MAIN_OFFICES', { payload: params })
-      this.$store.dispatch('formSettings/FETCH_ALL_POSITIONS')
+      this.$store.dispatch('formSettings/FETCH_ALL_SIGNATORY_TYPES')
+      this.$store.dispatch('external/FETCH_ALL_POSITIONS')
     },
     fetchSignatories() {
       const data = {
@@ -138,20 +148,20 @@ export default {
       }
       this.$store.dispatch('formSettings/FETCH_YEAR_SIGNATORIES', { payload: data })
     },
-    filterBySignatory(position) {
+    filterBySignatory(type) {
       return this.signatoryList.filter((i) => {
-        return i.position_id === position
+        return i.type_id === type
       })
     },
     changeActivekey(key) {
       this.activeKey = key
     },
-    handleClick(event, index, positionId) {
+    handleClick(event, index, typeId) {
       event.stopPropagation()
-      const data = this.filterBySignatory(positionId)
+      const data = this.filterBySignatory(typeId)
       this.formActive = ''
       if (this.activeKey === index.toString()) {
-        this.formActive = positionId
+        this.formActive = typeId
         this.changeFormDisplay()
         if (!data.length) {
           this.addSignatory()
@@ -164,13 +174,17 @@ export default {
             const values = {
               officeId: undefined,
               personnelId: undefined,
+              position: undefined,
               list: [],
+              isCustom: false,
             }
             newValues.push({
               id: item.id,
-              officeId: item.officeId,
-              personnelId: item.personnelId,
+              officeId: item.officeId ? item.officeId : item.office_name,
+              personnelId: item.personnelId ? item.personnelId : item.personnel_name,
+              position: item.position,
               list: [],
+              isCustom: !item.officeId && !item.personnelId,
             })
             form.getFieldDecorator(`signatories[${count}]`, { initialValue: values })
           })
@@ -185,10 +199,10 @@ export default {
         const data = {
           officeId: undefined,
           personnelId: undefined,
+          position: undefined,
+          isCustom: false,
         }
         this.details.push(data)
-
-        console.log(this.form)
       } else {
         Modal.error({
           title: 'Up to 3 signatories are only allowed to be added',
@@ -199,22 +213,31 @@ export default {
     deleteSignatory(index) {
       const { form } = this
       const signatories = form.getFieldValue('signatories')
-      console.log(signatories)
       form.setFieldsValue({
         signatories: signatories.filter((i, k) => k !== index),
       })
       this.details.splice(index, 1)
     },
     checkFields(rule, value, callback) {
-      if (typeof value.officeId === 'undefined' || value.officeId === '') {
+      if ((typeof value.officeId === 'undefined' || value.officeId === '') && !value.isCustom) {
         callback(new Error('Please select an office'))
       } else if (typeof value.personnelId === 'undefined' || value.personnelId === '') {
-        callback(new Error('Please select a personnel'))
+        if (value.isCustom) {
+          callback(new Error('Please input the personnel\'s name'))
+        } else {
+          callback(new Error('Please select a personnel'))
+        }
+      } else if (typeof value.position === 'undefined' || value.position === '') {
+        if (value.isCustom) {
+          callback(new Error('Please input the personnel\'s position'))
+        } else {
+          callback(new Error('Please select the personnel\'s position'))
+        }
       } else {
         callback()
       }
     },
-    handleSubmit(e, positionId) {
+    handleSubmit(e, typeId) {
       e.preventDefault()
       const that = this
       this.form.validateFields((err, values) => {
@@ -230,12 +253,14 @@ export default {
                     id: item.id,
                     officeId: item.officeId,
                     personnelId: item.personnelId,
+                    position: item.position,
+                    isCustom: item.isCustom,
                   }
                   newValues.push(addNew)
                 })
               })
               const data = {
-                positionId: positionId,
+                typeId: typeId,
                 year: that.year,
                 formId: that.formId,
                 signatories: newValues,

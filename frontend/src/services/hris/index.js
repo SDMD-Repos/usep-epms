@@ -17,3 +17,12 @@ export async function getPersonnelByOffice(id) {
     })
     .catch(err => console.log(err))
 }
+
+export async function getAllPositions() {
+  return apiClient
+    .get('/hris/get-all-positions')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

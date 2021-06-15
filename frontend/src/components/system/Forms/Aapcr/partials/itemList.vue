@@ -1,10 +1,10 @@
 <template>
   <div class="row">
     <div class="col-xl-12 col-lg-12">
-      <div>
+      <div class="col-xs-5 col-sm-5 col-md-7 col-lg-4">
         <a-select v-model="mainCategory"
                   placeholder="Select"
-                  style="width: 30%"
+                  style="width: 100%"
                   :loading="loading"
                   @change="loadPIs"
                   label-in-value>
@@ -164,6 +164,10 @@ const getDefaultFormData = () => {
     cascadingLevel: '',
     implementing: [],
     supporting: [],
+    options: {
+      implementing: [],
+      supporting: [],
+    },
     otherRemarks: '',
   }
 }
@@ -197,7 +201,7 @@ export default {
       return this.dataSource.filter(i => i.program === this.mainCategory.key)
     },
     programBudget() {
-      return this.budgetList.filter(i => i.mainCategory.label === this.mainCategory.label)
+      return this.budgetList.filter(i => i.mainCategory.key === this.mainCategory.key)
     },
   },
   data() {
@@ -383,13 +387,19 @@ export default {
         cascadingLevel: editData.cascadingLevel,
         implementing: editData.implementing,
         supporting: editData.supporting,
+        options: {
+          implementing: [],
+          supporting: [],
+        },
         otherRemarks: editData.otherRemarks,
       }
       this.openModal('Update')
     },
     handleDelete(key, type) {
+      let deletedData = null
       if (type === 'pi') {
         const recordKey = this.dataSource.findIndex((record, i) => record.key === key)
+        deletedData = this.dataSource[recordKey]
         this.dataSource.splice(recordKey, 1)
       } else {
         const source = [...this.dataSource]
@@ -397,6 +407,7 @@ export default {
           if (typeof item.children !== 'undefined') {
             const recordKey = item.children.findIndex(i => i.key === key)
             if (recordKey !== -1) {
+              deletedData = item.children[recordKey]
               item.children.splice(recordKey, 1)
               if (!item.children.length) {
                 delete item.children
@@ -407,6 +418,12 @@ export default {
           }
         })
         this.$emit('update-data-source', source)
+      }
+      if (deletedData) {
+        const { id } = deletedData
+        if (id.toString().indexOf('new') === -1) {
+          this.$emit('add-deleted-id', id)
+        }
       }
     },
     handleAddSub(key) {

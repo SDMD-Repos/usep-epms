@@ -16,7 +16,9 @@ export default new Vuex.Store({
     external,
     aapcr,
   },
-  state: {},
+  state: {
+    dateFormat: 'YYYY-MM-DD hh:mm A',
+  },
   mutations: {},
   actions: {},
 })

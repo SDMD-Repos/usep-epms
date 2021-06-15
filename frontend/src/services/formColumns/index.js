@@ -115,7 +115,56 @@ export const getFormColumns = [
     title: 'Action',
     key: 'operation',
     fixed: 'right',
+    className: 'column-action',
     width: 100,
+    scopedSlots: { customRender: 'action' },
+  },
+]
+
+export const listTableColumns = [
+  {
+    title: 'Year',
+    key: 'year',
+    dataIndex: 'year',
+    className: 'column-year',
+    width: 60,
+  },
+  {
+    title: 'Document Name',
+    key: 'documentName',
+    dataIndex: 'document_name',
+    className: 'column-document-name',
+    width: 250,
+  },
+  {
+    title: 'Date Created',
+    key: 'dateCreated',
+    dataIndex: 'created_at',
+    className: 'column-created-at',
+    width: 150,
+    scopedSlots: { customRender: 'dateCreated' },
+  },
+  {
+    title: 'Date Published',
+    key: 'datePublished',
+    dataIndex: 'published_date',
+    className: 'column-published-date',
+    width: 150,
+    scopedSlots: { customRender: 'datePublished' },
+  },
+  {
+    title: 'Status',
+    key: 'status',
+    dataIndex: 'is_active',
+    className: 'column-status',
+    width: 70,
+    scopedSlots: { customRender: 'status' },
+  },
+  {
+    title: 'Action',
+    key: 'operation',
+    className: 'column-action',
+    width: 250,
     scopedSlots: { customRender: 'action' },
   },
 ]

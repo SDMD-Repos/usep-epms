@@ -54,18 +54,28 @@ const router = new Router({
         },
         // AAPCR Form
         {
-          path: '/aapcr/new',
+          path: '/aapcr/form/',
+          name: 'aapcr.form',
           meta: {
-            title: 'AAPCR Create New',
+            title: 'AAPCR Form',
           },
-          component: () => import('./views/forms/aapcr/new'),
+          component: () => import('./views/forms/aapcr'),
         },
         {
           path: '/aapcr/list',
+          name: 'aapcr.list',
           meta: {
             title: 'AAPCR List',
           },
-          component: () => import('./views/forms/aapcr/list'),
+          component: () => import('./views/forms/aapcr/list.vue'),
+        },
+        {
+          path: '/aapcr/update',
+          name: 'aapcr.update',
+          meta: {
+            title: 'AAPCR Update',
+          },
+          component: () => import('./views/forms/aapcr'),
         },
       ],
     },

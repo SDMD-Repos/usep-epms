@@ -19,7 +19,7 @@ class CreateAapcrDetailsTable extends Migration
             $table->smallInteger('is_header')->default(0)->nullable();
             $table->text('pi_name');
             $table->string('target')->nullable();
-            $table->float('allocated_budget')->nullable();
+            $table->float('allocated_budget', 11, 2)->nullable();
             $table->string('targets_basis')->nullable();
             $table->enum('cascading_level', ['vps', 'offices', 'colleges', 'individuals'])->nullable();
             $table->string('category_id', 25);

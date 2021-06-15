@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class PositionSeeder extends Seeder
+class SignatoryTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class PositionSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('positions')->insert([
+        DB::table('signatory_types')->insert([
             [
                 'id' => 'reviewed_by',
                 'name' => 'Reviewed by'
@@ -20,6 +20,10 @@ class PositionSeeder extends Seeder
             [
                 'id' => 'approved_by',
                 'name' => 'Approved by'
+            ],
+            [
+                'id' => 'prepared_by',
+                'name' => 'Prepared by'
             ]
         ]);
     }

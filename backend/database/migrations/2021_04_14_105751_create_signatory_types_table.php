@@ -13,7 +13,7 @@ class CreatePositionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('positions', function (Blueprint $table) {
+        Schema::create('signatory_types', function (Blueprint $table) {
             $table->string('id', 15);
             $table->string('name', 200);
             $table->timestamp('created_at')->useCurrent();

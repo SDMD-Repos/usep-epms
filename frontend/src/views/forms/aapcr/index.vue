@@ -4,7 +4,8 @@
   </div>
 </template>
 <script>
-import AapcrForm from '@/components/system/Forms/Aapcr'
+import AapcrForm from '@/components/system/Forms/Aapcr/'
+
 export default {
   components: {
     AapcrForm,

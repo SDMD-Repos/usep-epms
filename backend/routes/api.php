@@ -54,7 +54,7 @@ Route::group([
 
     Route::get('/get-all-spms-forms', 'SettingController@getAllForms');
 
-    Route::get('/get-all-positions', 'SettingController@getAllPositions');
+    Route::get('/get-all-signatory-types', 'SettingController@getAllSignatoryTypes');
 
     Route::get('/get-year-signatories/{year}/{formId}', 'SettingController@getYearSignatories');
     Route::post('/save-signatories', 'SettingController@saveSignatories');
@@ -75,6 +75,13 @@ Route::group([
         'prefix' => 'aapcr',
     ], function() {
         Route::post('/save', 'Form\AapcrController@save');
+        Route::get('/check-saved/{year}', 'Form\AapcrController@checkSaved');
+        Route::get('/list', 'Form\AapcrController@getAllAapcrs');
+        Route::post('/publish', 'Form\AapcrController@publish');
+        Route::post('/deactivate', 'Form\AapcrController@deactivate');
+        Route::get('/view/{id}', 'Form\AapcrController@view');
+        Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewPdf');
+        Route::post('/update/{id}', 'Form\AapcrController@update');
     });
 });
 
@@ -84,4 +91,5 @@ Route::group([
 ], function() {
     Route::get('/get-main-offices/{nodeStatus}', 'SettingController@getMainOffices');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
+    Route::get('/get-all-positions', 'SettingController@getAllPositions');
 });

@@ -18,10 +18,11 @@ class CreateSignatoriesTable extends Migration
             $table->year('year');
             $table->string('position_id', 15);
             $table->string('form_id', 15);
-            $table->string('personnel_id', 30);
+            $table->string('personnel_id', 30)->nullable();
             $table->string('personnel_name', 150);
-            $table->string('office_id', 30);
+            $table->string('office_id', 30)->nullable();
             $table->string('office_name', 150);
+            $table->string('position', 150)->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();

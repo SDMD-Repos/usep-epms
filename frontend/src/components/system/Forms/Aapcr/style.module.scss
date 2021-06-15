@@ -20,7 +20,16 @@ th.column-office-accountable,
 th.column-implementing,
 th.column-supporting,
 th.column-other-remarks,
-th.column-action{
+th.column-action,
+td.column-action,
+th.column-year,
+th.column-document-name,
+th.column-created-at,
+td.column-created-at,
+th.column-published-date,
+td.column-published-date,
+th.column-status,
+td.column-status {
   text-align: center !important;
 }
 
