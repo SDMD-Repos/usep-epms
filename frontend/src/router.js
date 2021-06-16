@@ -69,14 +69,6 @@ const router = new Router({
           },
           component: () => import('./views/forms/aapcr/list.vue'),
         },
-        {
-          path: '/aapcr/update',
-          name: 'aapcr.update',
-          meta: {
-            title: 'AAPCR Update',
-          },
-          component: () => import('./views/forms/aapcr'),
-        },
       ],
     },
 

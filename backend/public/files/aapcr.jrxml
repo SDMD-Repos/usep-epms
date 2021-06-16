@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="aapcr" language="groovy" pageWidth="938" pageHeight="612" orientation="Landscape" columnWidth="898" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="be2c73b6-eb3d-45b7-8c2a-78f34c496094">
-	<property name="ireport.zoom" value="2.8531167061100295"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="202"/>
+	<property name="ireport.zoom" value="1.6105100000000163"/>
+	<property name="ireport.x" value="13"/>
+	<property name="ireport.y" value="96"/>
 	<style name="ProgramHeader" mode="Opaque">
 		<conditionalStyle>
 			<conditionExpression><![CDATA[$F{category_id} == "core_functions"]]></conditionExpression>
@@ -44,6 +44,7 @@
 	<parameter name="public_path" class="java.lang.String"/>
 	<parameter name="notFinal" class="java.lang.String"/>
 	<parameter name="reviewedByPosition" class="java.lang.String"/>
+	<parameter name="totalBudget" class="java.lang.String"/>
 	<field name="pi_name" class="java.lang.String"/>
 	<field name="subCategory" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
@@ -61,16 +62,13 @@
 	<field name="subCategoryParent_1" class="java.lang.String"/>
 	<field name="subCategoryParent_2" class="java.lang.String"/>
 	<field name="subCategoryParent_3" class="java.lang.String"/>
-	<variable name="programTotal" class="java.math.BigDecimal" resetType="Group" resetGroup="GroupSubCategory" calculation="First">
+	<variable name="programTotal" class="java.math.BigDecimal" resetType="Group" resetGroup="ProgramGroup" calculation="First">
 		<variableExpression><![CDATA[$F{programBudget}]]></variableExpression>
 		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
 	</variable>
 	<variable name="subCategoryCount" class="java.lang.Integer" resetType="Group" resetGroup="GroupSubCategory" calculation="Sum">
 		<variableExpression><![CDATA[$F{subPICount} == "0" ? 1 : 0]]></variableExpression>
 		<initialValueExpression><![CDATA[1]]></initialValueExpression>
-	</variable>
-	<variable name="totalBudget" class="java.math.BigDecimal" calculation="Sum">
-		<variableExpression><![CDATA[$V{programTotal}]]></variableExpression>
 	</variable>
 	<group name="GroupFunction">
 		<groupExpression><![CDATA[$F{function}]]></groupExpression>
@@ -1175,7 +1173,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="6" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{totalBudget}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{totalBudget}]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

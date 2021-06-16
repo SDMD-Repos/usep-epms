@@ -115,23 +115,6 @@ class AppController extends Controller
             );
         }
 
-        $params = [
-            'usepLogo' => public_path()."/logos/USeP_Logo.png",
-            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? public_path()."/logos/notfinal.png" : "",
-            'year' => $aapcr->year,
-            'preparedBy' => strtoupper($preparedByName),
-            'preparedByPosition' => $preparedByPosition,
-            'preparedDate' => $preparedDate,
-            'reviewedBy' => $reviewedByName,
-            'reviewedByPosition' => $reviewedByPosition,
-            'reviewedDate' => $reviewedDate,
-            'approvedBy' => strtoupper($approvedByName),
-            'approvedDate' => $approvedDate,
-            'approvingPosition' => $approvedByPosition,
-            'programsDataSet' => $programsDataSet,
-            'public_path' => public_path()
-        ];
-
         $data[0] = array();
 
         $details = $aapcr->details()->where('parent_id', NULL)
@@ -143,6 +126,8 @@ class AppController extends Controller
         $aapcrBudgets = $aapcr->budgets;
 
         $tempProgramId = 0;
+
+        $totalBudget = 0;
 
         foreach($details as $key => $detail) {
             $budget = 0;
@@ -163,6 +148,7 @@ class AppController extends Controller
                 foreach ($aapcrBudgets as $aapcrBudget) {
                     if($aapcrBudget->program_id === $detail->program_id){
                         $budget = $aapcrBudget->budget;
+                        $totalBudget += $aapcrBudget->budget;
                         break;
                     }
                 }
@@ -238,6 +224,24 @@ class AppController extends Controller
                 }
             }
         }
+
+        $params = [
+            'usepLogo' => public_path()."/logos/USeP_Logo.png",
+            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? public_path()."/logos/notfinal.png" : "",
+            'totalBudget' => number_format($totalBudget, 2),
+            'year' => $aapcr->year,
+            'preparedBy' => strtoupper($preparedByName),
+            'preparedByPosition' => $preparedByPosition,
+            'preparedDate' => $preparedDate,
+            'reviewedBy' => $reviewedByName,
+            'reviewedByPosition' => $reviewedByPosition,
+            'reviewedDate' => $reviewedDate,
+            'approvedBy' => strtoupper($approvedByName),
+            'approvedDate' => $approvedDate,
+            'approvingPosition' => $approvedByPosition,
+            'programsDataSet' => $programsDataSet,
+            'public_path' => public_path()
+        ];
 
         $jasperReport = new Jasperreport();
         $jasperReport->showReport('aapcr', $params, $data, 'PDF', $documentName);

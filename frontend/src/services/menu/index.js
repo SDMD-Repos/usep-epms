@@ -58,9 +58,9 @@ export const getMenuData = [
     icon: 'fe fe-file-text',
     children: [
       {
-        title: 'Create New',
-        key: 'opcrVpNew',
-        url: '/opcrvp/new',
+        title: 'Form',
+        key: 'opcrVpForm',
+        url: '/opcrvp/form',
       },
       {
         title: 'List',
