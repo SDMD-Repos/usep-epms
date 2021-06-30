@@ -7,7 +7,53 @@ use Illuminate\Support\Facades\Http;
 trait OfficeTrait {
     use ConverterTrait;
 
-    public function getMainOffices($nodeStatus, $params=array())
+    public function getMainOfficesOnly($officesOnly=0)
+    {
+        try {
+            $values = array();
+
+            if(!$officesOnly) {
+                $data = new \stdClass();
+
+                $data->id = "allColleges";
+                $data->value = "allColleges";
+                $data->title = "All Colleges";
+
+                array_push($values, $data);
+            }
+
+            $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
+                'token' => env('DATA_HRIS_API_TOKEN')
+            ]);
+
+            $vpoffices = json_decode($response->body());
+
+            if(count($vpoffices)) {
+                foreach ($vpoffices as $vpoffice) {
+
+                    $data = new \stdClass();
+
+                    $data->id = $vpoffice->id;
+                    $data->value = $vpoffice->id;
+                    $data->title = $vpoffice->Department;
+
+                    array_push($values, $data);
+                }
+
+                if(empty($params)){
+                    return response()->json([
+                        'mainOffices' => $values
+                    ], 200);
+                }else{
+                    return $values;
+                }
+            }
+        }catch (\Exception $e) {
+            return response()->json($e->getMessage(), 400);
+        }
+    }
+
+    public function getMainOfficesWithChildren($nodeStatus, $params=array())
     {
         $status = json_decode($nodeStatus);
         $checkable = null;
@@ -25,7 +71,7 @@ trait OfficeTrait {
             $data = new \stdClass();
 
             $data->id = "allColleges";
-            $data->value = "All Colleges" . "_" . "allColleges";
+            $data->value = "allColleges";
             $data->title = "All Colleges";
             $data->cascadeTo = null;
             $data->children = $this->getChildOffices("allColleges",1);
@@ -49,7 +95,7 @@ trait OfficeTrait {
                     $data = new \stdClass();
 
                     $data->id = $vpoffice->id;
-                    $data->value = $vpoffice->Acronym . "_" . $vpoffice->id;
+                    $data->value = $vpoffice->id;
                     $data->title = $vpoffice->Acronym;
                     $data->cascadeTo = null;
                     $data->children = $this->getChildOffices($vpoffice->id,1);
@@ -72,9 +118,7 @@ trait OfficeTrait {
                 }
             }
         }catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 400);
+            return response()->json($e->getMessage(), 400);
         }
     }
 
@@ -102,7 +146,7 @@ trait OfficeTrait {
                     $data = new \stdClass();
 
                     $data->id = $o->id;
-                    $data->value = $o->Department . "_" . $o->id;
+                    $data->value = $o->id;
                     $data->title = $o->Department;
                     $data->acronym = $o->Acronym;
                     $data->pId = $vp_id;
@@ -141,7 +185,7 @@ trait OfficeTrait {
 
             if($withHeader) {
                 $obj->id = "all";
-                $obj->value = "All Personnel" . "_" . "all";
+                $obj->value = "all";
                 $obj->title = "All Personnel";
                 $obj->isPersonnel = 1;
                 $obj->children = [];
@@ -160,7 +204,7 @@ trait OfficeTrait {
                     $obj = new \stdClass();
 
                     $obj->id = $list->PmapsID;
-                    $obj->value = ucwords($fullName) . "_" . $list->PmapsID;
+                    $obj->value = $list->PmapsID;
                     $obj->title = ucwords($fullName);
                     $obj->isPersonnel = 1;
 

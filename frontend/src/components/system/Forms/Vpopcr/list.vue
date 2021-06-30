@@ -3,7 +3,7 @@
     <div class="mb-5">
       <a-breadcrumb>
         <a-breadcrumb-item>Home</a-breadcrumb-item>
-        <a-breadcrumb-item>AAPCR List</a-breadcrumb-item>
+        <a-breadcrumb-item>OPCR (VP) List</a-breadcrumb-item>
       </a-breadcrumb>
     </div>
     <div class="card">
@@ -14,11 +14,12 @@
         </div>
       </div>
       <div class="card-body">
-        <a-table :columns="listTableColumns"
+        <a-table :columns="columns"
                  :dataSource="list"
                  :loading="loading"
                  :scroll="{ x: 'calc(50px + 50%)' }">
           <!-- Custom data row render-->
+
           <span slot="dateCreated" slot-scope="text, record">
             {{ moment(record.created_at).format(dateFormat) }}
           </span>
@@ -55,7 +56,7 @@
               <a-divider type="vertical" />
               <a-tooltip>
                 <template slot="title"><span>Publish</span></template>
-                  <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record.id, record.year)"/>
+                  <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record)"/>
                 </a-tooltip>
             </template>
           </span>
@@ -66,40 +67,54 @@
 </template>
 
 <script>
-import { listTableColumns } from '@/services/formColumns'
 import { mapState } from 'vuex'
-import moment from 'moment'
 import { Modal } from 'ant-design-vue'
-import * as apiForm from '@/services/mainForms/aapcr'
+import ListMixin from '@/services/formMixins/list'
+import * as opcrvpForm from '@/services/mainForms/opcrvp'
 
 export default {
-  title: 'AAPCR List',
-  name: 'aapcr-list',
+  title: 'OPCR (VP) List',
+  name: 'vp-opcr-list',
   props: ['formId'],
+  mixins: [ListMixin],
   computed: {
     ...mapState({
-      list: state => state.aapcr.list,
-      loading: state => state.aapcr.loading,
+      list: state => state.opcrvp.list,
+      loading: state => state.opcrvp.loading,
       dateFormat: state => state.dateFormat,
     }),
   },
-  created() {
-    this.onLoad()
-  },
-  data() {
+  date() {
     return {
-      listTableColumns,
-      moment,
+      columns: [],
     }
   },
+  created() {
+    this.renderColumns()
+    this.onLoad()
+  },
   methods: {
+    renderColumns() {
+      let { columns } = this
+      const index = this.listTableColumns.findIndex(i => i.key === 'documentName')
+      columns = [...this.listTableColumns]
+      columns.splice(index, 0, {
+        title: 'Office Name',
+        key: 'officeName',
+        dataIndex: 'office_name',
+        className: 'column-document-name',
+        width: 250,
+      })
+      columns = [...columns.filter(i => i.key !== 'documentName')]
+      this.columns = columns
+    },
     onLoad() {
-      this.$store.dispatch('aapcr/FETCH_LIST')
+      this.$store.dispatch('opcrvp/FETCH_LIST')
     },
     handleUpdate(id) {
       this.$router.push({
         name: 'main.form',
-        params: { formId: this.formId, id: id },
+        params: { formId: this.form, id: id },
       })
     },
     viewPdf2(id, documentName) {
@@ -112,7 +127,7 @@ export default {
       this.$store.commit(form + '/SET_STATE', {
         loading: true,
       })
-      const fetchPdfData = apiForm.fetchPdfData
+      const fetchPdfData = opcrvpForm.fetchPdfData
       fetchPdfData(id, documentName).then(response => {
         if (response) {
           const blob = new Blob([response], { type: 'application/pdf' })
@@ -132,7 +147,7 @@ export default {
         })
       })
     },
-    handlePublish(id, year) {
+    handlePublish(data) {
       const self = this
       Modal.confirm({
         title: 'Are you sure you want to publish this?',
@@ -141,10 +156,11 @@ export default {
         cancelText: 'No',
         onOk() {
           const payload = {
-            id: id,
-            year: year,
+            id: data.id,
+            year: data.year,
+            officeId: data.office_id,
           }
-          self.$store.dispatch('aapcr/PUBLISH', { payload: payload })
+          self.$store.dispatch('opcrvp/PUBLISH', { payload: payload })
         },
       })
     },
@@ -159,7 +175,7 @@ export default {
           const payload = {
             id: id,
           }
-          self.$store.dispatch('aapcr/DEACTIVATE', { payload: payload })
+          self.$store.dispatch(self.form + '/DEACTIVATE', { payload: payload })
         },
       })
     },

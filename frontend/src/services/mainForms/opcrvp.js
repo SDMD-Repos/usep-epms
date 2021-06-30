@@ -1,35 +1,35 @@
 import apiClient from '@/services/axios'
 
-export async function getMainOfficesOnly(data) {
+export function getAapcrDetailsByOffice(vpId, year) {
   return apiClient
-    .get('/hris/get-main-offices-only/' + data)
+    .get('/forms/opcrvp/get-aapcr-details/' + vpId + '/' + year)
     .then(response => {
       return response.data
     })
     .catch(err => console.log(err))
 }
 
-export async function getMainOfficesWithChildren(data) {
+export function save(data) {
   return apiClient
-    .get('/hris/get-main-offices-children/' + data)
+    .post('/forms/opcrvp/save', data)
     .then(response => {
       return response.data
     })
     .catch(err => console.log(err))
 }
 
-export async function getPersonnelByOffice(id) {
+export function fetchVpOpcrs() {
   return apiClient
-    .get('/hris/get-personnel-by-office/' + id)
+    .get('/forms/opcrvp/list')
     .then(response => {
       return response.data
     })
     .catch(err => console.log(err))
 }
 
-export async function getAllPositions() {
+export function publish(data) {
   return apiClient
-    .get('/hris/get-all-positions')
+    .post('/forms/opcrvp/publish', data)
     .then(response => {
       return response.data
     })

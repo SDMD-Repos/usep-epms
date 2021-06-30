@@ -5,17 +5,26 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AapcrDetail extends Model
+class VpOpcrDetail extends Model
 {
     use SoftDeletes;
 
     /**
-     * Get the aapcr that owns the detail.
+     * Get the vp opcr that owns the detail.
      */
-
-    public function aapcr()
+    public function vpopcr()
     {
-        return $this->belongsTo('App\Aapcr');
+        return $this->belongsTo('App\VpOpcr');
+    }
+
+    public function mainDetails()
+    {
+        return $this->hasMany("App\VpOpcrDetail", 'parent_id');
+    }
+
+    public function subDetails()
+    {
+        return $this->mainDetails()->with('subDetails');
     }
 
     /**
@@ -47,7 +56,7 @@ class AapcrDetail extends Model
      */
     public function measures()
     {
-        return $this->belongsToMany('App\Measure', 'aapcr_detail_measures', 'detail_id', 'measure_id')
+        return $this->belongsToMany('App\Measure', 'vp_opcr_detail_measures', 'detail_id', 'measure_id')
             ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
     }
 
@@ -56,21 +65,11 @@ class AapcrDetail extends Model
      */
     public function offices()
     {
-        return $this->hasMany('App\AapcrDetailOffice', 'detail_id');
+        return $this->hasMany('App\VpOpcrDetailOffice', 'detail_id')->orderBy('office_type_id', 'asc');
     }
 
     /*public function getMeasureIds()
     {
         return $this->measures()->allRelatedIds();
     }*/
-
-    public function mainDetails()
-    {
-        return $this->hasMany("App\AapcrDetail", 'parent_id');
-    }
-
-    public function subDetails()
-    {
-        return $this->mainDetails()->with('subDetails');
-    }
 }

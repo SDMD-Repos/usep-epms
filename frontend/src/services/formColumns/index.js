@@ -20,12 +20,12 @@ export const getFormColumns = [
     dataIndex: 'isHeader',
     className: 'column-is-header',
     width: 100,
-    scopedSlots: { customRender: 'isHeaderPI' },
+    scopedSlots: { customRender: 'isHeader' },
   },
   {
     title: 'Success Indicators',
     className: 'column-success-indicator',
-    width: 450,
+    width: 400,
     children: [
       {
         title: 'Target (per Fiscal Year)',
@@ -47,7 +47,7 @@ export const getFormColumns = [
         key: 'measures',
         dataIndex: 'measures',
         className: 'column-measures',
-        width: 225,
+        width: 145,
         scopedSlots: { customRender: 'measures' },
       },
     ],

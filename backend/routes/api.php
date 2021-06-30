@@ -83,13 +83,25 @@ Route::group([
         Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewPdf');
         Route::post('/update/{id}', 'Form\AapcrController@update');
     });
+
+    # OPCR (VP) Controller routes
+
+    Route::group([
+        'prefix' => 'opcrvp'
+    ], function() {
+        Route::get('/get-aapcr-details/{vpId}/{year}', 'Form\VpopcrController@getAapcrDetails');
+        Route::post('/save', 'Form\VpopcrController@save');
+        Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
+        Route::post('/publish', 'Form\VpopcrController@publish');
+    });
 });
 
 Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
 ], function() {
-    Route::get('/get-main-offices/{nodeStatus}', 'SettingController@getMainOffices');
+    Route::get('/get-main-offices-children/{nodeStatus}', 'SettingController@getMainOfficesWithChildren');
+    Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
 });

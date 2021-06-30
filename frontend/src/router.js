@@ -52,22 +52,19 @@ const router = new Router({
           },
           component: () => import('./views/appsettings/signatory'),
         },
-        // AAPCR Form
+        // Main Form
         {
-          path: '/aapcr/form/',
-          name: 'aapcr.form',
-          meta: {
-            title: 'AAPCR Form',
-          },
-          component: () => import('./views/forms/aapcr'),
+          path: '/form/:formId',
+          name: 'main.form',
+          props: true,
+
+          component: () => import('./views/forms'),
         },
         {
-          path: '/aapcr/list',
-          name: 'aapcr.list',
-          meta: {
-            title: 'AAPCR List',
-          },
-          component: () => import('./views/forms/aapcr/list.vue'),
+          path: '/list/:formId',
+          name: 'form.list',
+          props: true,
+          component: () => import('./views/forms/list.vue'),
         },
       ],
     },

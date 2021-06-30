@@ -43,12 +43,12 @@ export const getMenuData = [
       {
         title: 'Form',
         key: 'aapcrForm',
-        url: '/aapcr/form',
+        url: '/form/aapcr',
       },
       {
         title: 'List',
         key: 'aapcrList',
-        url: '/aapcr/list',
+        url: '/list/aapcr',
       },
     ],
   },
@@ -60,12 +60,12 @@ export const getMenuData = [
       {
         title: 'Form',
         key: 'opcrVpForm',
-        url: '/opcrvp/form',
+        url: '/form/opcrvp',
       },
       {
         title: 'List',
         key: 'opcrVpList',
-        url: '/opcrvp/list',
+        url: '/list/opcrvp',
       },
     ],
   },

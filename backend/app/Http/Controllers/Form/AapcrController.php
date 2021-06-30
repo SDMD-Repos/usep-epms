@@ -50,7 +50,6 @@ class AapcrController extends Controller
         $getSaved = Aapcr::where([
             ['year', $year],
             ['is_active', 1],
-            ['deleted_at', NULL]
         ])->orderBy('created_at', 'DESC')->first();
 
         return response()->json([
@@ -195,12 +194,10 @@ class AapcrController extends Controller
                 $office_name = $office['label'];
             }
 
-            $officeId = explode("_", $office['value'])[1];
-
             $newOffice->detail_id = $detailId;
             $newOffice->office_type_id = $fieldName;
             $newOffice->cascade_to = $office['cascadeTo'];
-            $newOffice->office_id = $officeId;
+            $newOffice->office_id = $office['value'];
             $newOffice->office_name = $office_name;
             $newOffice->create_id = $this->login_user->pmaps_id;
             $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -308,12 +305,12 @@ class AapcrController extends Controller
 
             $implementing = count($offices) ? $offices['implementing'] : [];
 
-            $supporting = count($offices) && isset($offices['supporting']) ? $offices['supporting'] : [];
+            $supporting = $offices['supporting'] ?? [];
 
             $subs = [];
 
             if(count($detail->subDetails)) {
-                foreach($detail->subDetails as $subKey => $subPI){
+                foreach($detail->subDetails as $subPI){
 
                     $subPIOffices = $this->splitPIOffices($subPI->offices);
 
@@ -388,42 +385,6 @@ class AapcrController extends Controller
             'budgetList' => $programsSummary,
             'editMode' => true
         ], 200);
-    }
-
-    public function extractDetails($detail)
-    {
-        if($detail->sub_category_id) {
-            $subCategory = new \stdClass();
-
-            $subCategory->value = $detail->sub_category_id;
-            $subCategory->label = $detail->subCategory->name;
-        }
-
-        if($detail->cascading_level) {
-            $cascadingLevel = new \stdClass();
-
-            $cascadingLevel->key = $detail->cascading_level;
-            $cascadingLevel->label = ucwords($detail->cascading_level);
-        }
-
-        $measures = [];
-
-        if(count($detail->measures)) {
-            foreach($detail->measures as $measure) {
-                $record = new \stdClass();
-
-                $record->key = $measure->id;
-                $record->label = $measure->name;
-
-                array_push($measures, $record);
-            }
-        }
-
-        return [
-            'subCategory' => $subCategory ?? null,
-            'cascadingLevel' => $cascadingLevel ?? "",
-            'measures' => $measures
-        ];
     }
 
     public function update(UpdateAapcr $request, $id)
@@ -665,11 +626,10 @@ class AapcrController extends Controller
         $officeIds = array();
 
         foreach($offices as $office){
-            $officeId = explode("_", $office['value'])[1];
 
             $updatedOffice = AapcrDetailOffice::withTrashed()->where([
                 'detail_id' => $detailId,
-                'office_id' => $officeId,
+                'office_id' => $office['value'],
                 'office_type_id' => $type
             ])->first();
 

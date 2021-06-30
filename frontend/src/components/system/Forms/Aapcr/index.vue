@@ -4,7 +4,7 @@
       <div class="mb-5">
         <a-breadcrumb>
           <a-breadcrumb-item>Home</a-breadcrumb-item>
-          <a-breadcrumb-item><router-link to="/aapcr/list">List</router-link></a-breadcrumb-item>
+          <a-breadcrumb-item><router-link to="/list/aapcr">List</router-link></a-breadcrumb-item>
           <a-breadcrumb-item>AAPCR Form</a-breadcrumb-item>
         </a-breadcrumb>
       </div>
@@ -30,7 +30,7 @@
                     <item-list v-bind:key="`${key}`" :year="year"
                                :function-id="category.id"
                                :categories="categories"
-                               :pi-source="dataSource"
+                               :item-source="dataSource"
                                :budget-list="budgetList"
                                :targets-basis-list="targetsBasisList"
                                :drawer="drawer"
@@ -68,7 +68,7 @@
                     </template>
                     <template v-else>
                     <span>
-                    {{ item.mainCategory.label }} - <b>₱ {{ numbersWithCommas(item.categoryBudget) }}</b>
+                    {{ item.mainCategory.label }} - <b>₱ {{ item.categoryBudget | numbersWithCommas }}</b>
                   </span>
                       <template v-if="editingKey === ''" >
                         <a slot="actions" @click="editBudget(index)">edit</a>
@@ -98,12 +98,13 @@
 <script>
 import { mapState } from 'vuex'
 import ItemList from './partials/itemList'
-import { numbersWithCommas } from '@/services/filters'
+import '@/services/filters'
 import { Modal } from 'ant-design-vue'
 import * as apiForm from '@/services/mainForms/aapcr'
 
 export default {
   name: 'aapcr-form',
+  title: 'AAPCR Form',
   props: ['formId'],
   components: {
     ItemList,
@@ -151,9 +152,11 @@ export default {
     }
   },
   methods: {
-    numbersWithCommas,
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
+      this.$store.dispatch('formSettings/FETCH_SUB_CATEGORIES')
+      this.$store.dispatch('formSettings/FETCH_MEASURES')
+      this.$store.dispatch('formSettings/FETCH_CASCADING_LEVELS')
     },
     getFormDetails() {
       const { aapcrId } = this
@@ -307,19 +310,17 @@ export default {
       }
       if (!editMode) {
         details.isFinalized = isFinal
-        this.$store.dispatch('aapcr/SAVE_AAPCR', { payload: details })
+        this.$store.dispatch('aapcr/SAVE', { payload: details })
           .then(() => {
-            this.$router.push({ name: 'aapcr.list' })
+            this.$router.push({ name: 'form.list', params: { formId: this.formId } })
           })
       } else {
-        const finalStatus = isFinal || isFinalized
-
-        details.isFinalized = finalStatus
+        details.isFinalized = isFinal || isFinalized
         details.deletedIds = deletedIds
         details.aapcrId = aapcrId
-        this.$store.dispatch('aapcr/UPDATE_AAPCR', { payload: details })
+        this.$store.dispatch('aapcr/UPDATE', { payload: details })
           .then(() => {
-            this.$router.push({ name: 'aapcr.list' })
+            this.$router.push({ name: 'form.list', params: { formId: this.formId } })
           })
       }
     },

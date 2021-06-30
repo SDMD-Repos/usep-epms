@@ -110,7 +110,7 @@ trait ConverterTrait {
                 $officeId = (int)$datum->personnel_id !== 0 ? (int)$datum->personnel_id : $datum->personnel_id;
                 $officeName = $datum->personnel_name;
             }else{
-                $officeId = $datum->office_name. "_".$datum->office_id;
+                $officeId = $datum->office_id;
                 $officeName = $datum->office_name;
             }
 
@@ -129,26 +129,20 @@ trait ConverterTrait {
 //                'ipcrPeriod' => $ipcrPeriod
             );
 
-            if($splitCollege && $officeId === "allColleges") {
+            /*if($splitCollege && $officeId === "allColleges") {
                 $temp = explode("_", $officeId);
 
-                $offices[$datum->office_type_id][$counter]['id'] = $temp[1];
-                $offices[$datum->office_type_id][$counter]['parentId'] = $officeId;
+                $offices[$datum->office_type_id][$counter]['id'] = $officeId;
+                $offices[$datum->office_type_id][$counter]['pId'] = $officeId;
                 $offices[$datum->office_type_id][$counter]['acronym'] = $officeName;
-            }
-
-            $trimOfficeId = mb_strtolower(substr($datum->office_type_id, 0,3));
-
-            $viewIndex = $trimOfficeId."Text";
-
-            $offices[$viewIndex][$counter] = $datum->office_name; # used for view only PIs
+            }*/
 
             if($datum->vp_office_id){
-                $offices[$datum->office_type_id][$counter]['parentId'] = $datum->vp_office_id;
+                $offices[$datum->office_type_id][$counter]['pId'] = $datum->vp_office_id;
 
                 $offices[$datum->office_type_id][$counter]['acronym'] = $datum->office_name; # used for view only PIs
             }else{
-                $offices[$datum->office_type_id][$counter]['children'] = null;
+                $offices[$datum->office_type_id][$counter]['children'] = true;
             }
         }
 
@@ -166,6 +160,42 @@ trait ConverterTrait {
                 array_push($this->targetsBasisList, $targetsBasis);
             }
         }
+    }
+
+    public function extractDetails($detail)
+    {
+        if($detail->sub_category_id) {
+            $subCategory = new \stdClass();
+
+            $subCategory->value = $detail->sub_category_id;
+            $subCategory->label = $detail->subCategory->name;
+        }
+
+        if($detail->cascading_level) {
+            $cascadingLevel = new \stdClass();
+
+            $cascadingLevel->key = $detail->cascading_level;
+            $cascadingLevel->label = ucwords($detail->cascading_level);
+        }
+
+        $measures = [];
+
+        if(count($detail->measures)) {
+            foreach($detail->measures as $measure) {
+                $record = new \stdClass();
+
+                $record->key = $measure->id;
+                $record->label = $measure->name;
+
+                array_push($measures, $record);
+            }
+        }
+
+        return [
+            'subCategory' => $subCategory ?? null,
+            'cascadingLevel' => $cascadingLevel ?? "",
+            'measures' => $measures
+        ];
     }
 
 }

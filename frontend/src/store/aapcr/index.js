@@ -17,7 +17,7 @@ export default {
   namespaced: true,
   state: {
     loading: false,
-    aapcrList: [],
+    list: [],
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -27,7 +27,7 @@ export default {
     },
   },
   actions: {
-    FETCH_AAPCRS({ commit }) {
+    FETCH_LIST({ commit }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -36,7 +36,7 @@ export default {
         if (response) {
           const { aapcrList } = response
           commit('SET_STATE', {
-            aapcrList: aapcrList,
+            list: aapcrList,
           })
         }
         commit('SET_STATE', {
@@ -44,7 +44,7 @@ export default {
         })
       })
     },
-    SAVE_AAPCR({ commit, dispatch }, { payload }) {
+    SAVE({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -52,7 +52,7 @@ export default {
       const save = mapApiProviders.save
       save(payload).then(response => {
         if (response) {
-          dispatch('FETCH_AAPCRS')
+          dispatch('FETCH_LIST')
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'AAPCR was created successfully',
@@ -63,14 +63,14 @@ export default {
         })
       })
     },
-    PUBLISH_AAPCR({ commit, dispatch }, { payload }) {
+    PUBLISH({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
       const publish = mapApiProviders.publish
       publish(payload).then(response => {
         if (response) {
-          dispatch('FETCH_AAPCRS')
+          dispatch('FETCH_LIST')
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'AAPCR was published successfully',
@@ -81,14 +81,14 @@ export default {
         })
       })
     },
-    DEACTIVATE_AAPCR({ commit, dispatch }, { payload }) {
+    DEACTIVATE({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
       const deactivate = mapApiProviders.deactivate
       deactivate(payload).then(response => {
         if (response) {
-          dispatch('FETCH_AAPCRS')
+          dispatch('FETCH_LIST')
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'AAPCR was deactivated successfully',
@@ -99,7 +99,7 @@ export default {
         })
       })
     },
-    UPDATE_AAPCR({ commit, dispatch }, { payload }) {
+    UPDATE({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -107,7 +107,7 @@ export default {
       const update = mapApiProviders.update
       update(id, payload).then(response => {
         if (response) {
-          dispatch('FETCH_AAPCRS')
+          dispatch('FETCH_LIST')
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'AAPCR was updated successfully',

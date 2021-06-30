@@ -482,8 +482,7 @@ class SettingController extends Controller
 
     public function getYearSignatories($year, $formId)
     {
-        $signatories = Signatory::select("*", "id as key", DB::raw("CONCAT(office_name, '_', office_id) as officeId"),
-            DB::raw("CONCAT(personnel_name, '_', personnel_id) as personnelId"))->where([
+        $signatories = Signatory::select("*", "id as key")->where([
             ['form_id', $formId],
             ['year', $year]
         ])->get();
@@ -510,15 +509,19 @@ class SettingController extends Controller
 
             foreach($signatories as $signatory) {
 
-                if(strpos($signatory['officeId'], '_') !== false) {
-                    list($officeName, $officeId) = explode('_', $signatory['officeId']);
+                if(!$signatory['isCustom']) {
+                    $officeName = $signatory['officeId']['label'];
+                    $officeId = $signatory['officeId']['value'];
+//                    list($officeName, $officeId) = explode('_', $signatory['officeId']);
                 } else {
                     $officeId = null;
                     $officeName = $signatory['officeId'];
                 }
 
-                if(strpos($signatory['personnelId'], '_') !== false) {
-                    list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
+                if(!$signatory['isCustom']) {
+                    $personnelName = $signatory['personnelId']['label'];
+                    $personnelId = $signatory['personnelId']['value'];
+//                    list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
                 } else {
                     $personnelId = null;
                     $personnelName = $signatory['personnelId'];
@@ -578,9 +581,26 @@ class SettingController extends Controller
             foreach($signatories as $signatory) {
                 $check = Signatory::find($signatory['id']);
 
-                list($officeName, $officeId) = explode('_', $signatory['officeId']);
+//                list($officeName, $officeId) = explode('_', $signatory['officeId']);
 
-                list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
+
+//                list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
+
+                if(!$signatory['isCustom']) {
+                    $officeName = $signatory['officeId']['label'];
+                    $officeId = $signatory['officeId']['value'];
+                } else {
+                    $officeId = null;
+                    $officeName = $signatory['officeId'];
+                }
+
+                if(!$signatory['isCustom']) {
+                    $personnelName = $signatory['personnelId']['label'];
+                    $personnelId = $signatory['personnelId']['value'];
+                } else {
+                    $personnelId = null;
+                    $personnelName = $signatory['personnelId'];
+                }
 
                 if($check) {
                     $original = $check->getOriginal();
@@ -615,7 +635,7 @@ class SettingController extends Controller
                     $newSignatory = new Signatory();
 
                     $newSignatory->year = $year;
-                    $newSignatory->position_id = $typeId;
+                    $newSignatory->type_id = $typeId;
                     $newSignatory->form_id = $formId;
                     $newSignatory->personnel_id = $personnelId;
                     $newSignatory->personnel_name = $personnelName;

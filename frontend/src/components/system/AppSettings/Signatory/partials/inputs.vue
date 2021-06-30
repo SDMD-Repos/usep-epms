@@ -14,6 +14,7 @@
           show-search
           allow-clear
           tree-data-simple-mode
+          label-in-value
           @change="handleOfficeIdChange"
         />
         <a-tree-select
@@ -25,12 +26,14 @@
           show-search
           allow-clear
           tree-data-simple-mode
+          label-in-value
           @change="handlePersonnelIdChange"
         />
         <a-select v-model="position"
                   style="width: 100%"
                   show-search
                   placeholder="Select Personnel's Position"
+                  allow-clear
                   @change="handlePositionChange">
           <a-select-option v-for="position in positionList" :key="position" :value="position">
             {{ position }}
@@ -128,12 +131,12 @@ export default {
       }
     },
     getPersonnelList(officeId) {
-      const id = officeId.split('_')
+      const id = officeId.value
       this.$store.commit('external/SET_STATE', {
         loading: true,
       })
       const getPersonnelByOffice = hris.getPersonnelByOffice
-      getPersonnelByOffice(id[1]).then(response => {
+      getPersonnelByOffice(id).then(response => {
         if (response) {
           const { personnel } = response
           this.list = personnel

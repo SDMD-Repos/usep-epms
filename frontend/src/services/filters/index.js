@@ -1,4 +1,6 @@
-export const numbersWithCommas = data => {
+import Vue from 'vue'
+
+Vue.filter('numbersWithCommas', function (data) {
   let number = data || ''
 
   if (number !== '') {
@@ -8,9 +10,9 @@ export const numbersWithCommas = data => {
   }
 
   return number
-}
+})
 
-export const numbersWithCommasDecimal = data => {
+Vue.filter('numbersWithCommasDecimal', function(data) {
   let number = data || ''
 
   if (number !== '') {
@@ -20,4 +22,4 @@ export const numbersWithCommasDecimal = data => {
   }
 
   return number
-}
+})

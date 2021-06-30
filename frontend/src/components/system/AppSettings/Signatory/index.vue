@@ -33,7 +33,7 @@
                           ]"
                           :index="i"
                           :count="details.length"
-                          :office-list="mainOfficesList"
+                          :office-list="mainOfficesChildrenList"
                           :position-list="positionList"
                           :form-name="formName"
                           :form-active="formActive"
@@ -90,7 +90,7 @@ export default {
     ...mapState({
       signatoryTypes: state => state.formSettings.signatoryTypes,
       signatoryList: state => state.formSettings.signatories,
-      mainOfficesList: state => state.external.mainOffices,
+      mainOfficesChildrenList: state => state.external.mainOfficesChildren,
       positionList: state => state.external.positionList,
       loading: state => state.external.loading,
     }),
@@ -137,7 +137,7 @@ export default {
         },
       }
       params = encodeURIComponent(JSON.stringify(params))
-      this.$store.dispatch('external/FETCH_MAIN_OFFICES', { payload: params })
+      this.$store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       this.$store.dispatch('formSettings/FETCH_ALL_SIGNATORY_TYPES')
       this.$store.dispatch('external/FETCH_ALL_POSITIONS')
     },
@@ -178,13 +178,27 @@ export default {
               list: [],
               isCustom: false,
             }
+            let officeIdValue = item.office_id ? item.office_id : item.office_name
+            if (item.office_id) {
+              officeIdValue = {
+                value: parseInt(item.office_id),
+                label: item.office_name,
+              }
+            }
+            let personnelIdValue = item.personnel_id ? item.personnel_id : item.personnel_name
+            if (item.personnel_id) {
+              personnelIdValue = {
+                value: item.personnel_id,
+                label: item.personnel_name,
+              }
+            }
             newValues.push({
               id: item.id,
-              officeId: item.officeId ? item.officeId : item.office_name,
-              personnelId: item.personnelId ? item.personnelId : item.personnel_name,
+              officeId: officeIdValue,
+              personnelId: personnelIdValue,
               position: item.position,
               list: [],
-              isCustom: !item.officeId && !item.personnelId,
+              isCustom: !item.office_id && !item.personnel_id,
             })
             form.getFieldDecorator(`signatories[${count}]`, { initialValue: values })
           })
@@ -281,6 +295,7 @@ export default {
     changeFormDisplay() {
       this.details = []
       this.displayInput = !this.displayInput
+      this.edit = !this.edit
     },
   },
 }

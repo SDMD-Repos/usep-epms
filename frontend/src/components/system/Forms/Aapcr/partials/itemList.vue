@@ -44,7 +44,7 @@
               </a-col>
             </template>
             <a-col :xs="{ span: 12 }" :sm="{ span: 12 }" :lg="{ span: 4 }" v-else>
-              <label><b>₱ {{ numbersWithCommas(programBudget[0].categoryBudget) }}</b></label>
+              <label><b>₱ {{ programBudget[0].categoryBudget | numbersWithCommas }}</b></label>
             </a-col>
           </a-row>
         </template>
@@ -57,7 +57,7 @@
           {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
         </span>
 
-        <template slot="isHeaderPI" slot-scope="text, record" v-if="record.type === 'pi'">
+        <template slot="isHeader" slot-scope="text, record" v-if="record.type === 'pi'">
           <a-icon type="check-circle"
                   theme="filled"
                   :style="{ fontSize: '18px', color: '#2b5c17' }"
@@ -69,11 +69,11 @@
         </template>
 
         <template slot="budget" slot-scope="type, record">
-          {{ numbersWithCommasDecimal(record.budget) }}
+          {{ record.budget | numbersWithCommasDecimal }}
         </template>
 
         <template slot="measures" slot-scope="type, record">
-          <ul>
+          <ul class="form-ul-list">
             <li v-for="measure in record.measures" :key="measure.key">
               {{ measure.label }}
             </li>
@@ -85,7 +85,7 @@
         </span>
 
         <template slot="implementing" slot-scope="type, record">
-          <ul>
+          <ul class="form-ul-list">
             <li v-for="office in record.implementing" :key="office.key">
               {{ office.label }}
             </li>
@@ -93,7 +93,7 @@
         </template>
 
         <template slot="supporting" slot-scope="type, record">
-          <ul>
+          <ul class="form-ul-list">
             <li v-for="office in record.supporting" :key="office.key">
               {{ office.label }}
             </li>
@@ -117,11 +117,11 @@
           </a-popconfirm>
         </template>
       </a-table>
-        <drawer-pi-form
-          v-if="openDrawer === functionId"
+        <drawer-detail-form
+          v-if="opened === functionId"
           :form-object="form"
-          :pi-form-data="piFormData"
-          :function-id="functionId"
+          :drawer-config="drawerConfig"
+          :drawer-id="functionId"
           :categories="categories"
           :targets-basis-list="targetsBasisList"
           @add-table-item="addTableItem"
@@ -135,11 +135,10 @@
 <script>
 import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
-import DrawerPiForm from './form'
+import DrawerDetailForm from './form'
 import { getFormColumns } from '@/services/formColumns'
-import { numbersWithCommasDecimal, numbersWithCommas } from '@/services/filters'
 
-const getAddtlFormDataDefault = () => {
+const getDetailSettings = () => {
   return {
     open: false,
     okText: '',
@@ -150,7 +149,7 @@ const getAddtlFormDataDefault = () => {
   }
 }
 
-const addtlFromData = getAddtlFormDataDefault()
+const detailSettings = getDetailSettings()
 
 const getDefaultFormData = () => {
   return {
@@ -180,14 +179,14 @@ export default {
     year: Number,
     functionId: String,
     categories: Array,
-    piSource: Array,
+    itemSource: Array,
     budgetList: Array,
     targetsBasisList: Array,
     drawer: String,
     counter: Number,
   },
   components: {
-    DrawerPiForm,
+    DrawerDetailForm,
   },
   computed: {
     ...mapState({
@@ -205,30 +204,30 @@ export default {
     },
   },
   data() {
-    const piSource = this.piSource
+    const itemSource = this.itemSource
     const drawer = this.drawer
     const counter = this.counter
     return {
       getFormColumns,
       displayPiList: 0,
-      openDrawer: drawer,
+      opened: drawer,
       mainCategory: undefined,
       categoryBudget: null,
       count: counter,
-      dataSource: piSource,
-      piFormData: addtlFromData,
+      dataSource: itemSource,
+      drawerConfig: detailSettings,
       form: formData,
     }
   },
   watch: {
-    piSource(val) {
+    itemSource(val) {
       this.dataSource = val
     },
     mainCategory(val) {
       this.mainCategory = val
     },
     drawer(val) {
-      this.openDrawer = val
+      this.opened = val
     },
     counter(val) {
       this.count = val
@@ -238,8 +237,6 @@ export default {
     this.onLoad()
   },
   methods: {
-    numbersWithCommas,
-    numbersWithCommasDecimal,
     onLoad() {
       this.$store.dispatch('formSettings/FETCH_PROGRAMS')
     },
@@ -249,26 +246,26 @@ export default {
       }
     },
     openModal(action) {
-      const { piFormData } = this
+      const { drawerConfig } = this
       this.$emit('update-drawer-status', this.functionId)
-      piFormData.open = true
+      drawerConfig.open = true
       if (action === 'Add') {
-        piFormData.okText = action
-        piFormData.modalTitle = 'Add New'
-        piFormData.updateId = null
-        piFormData.type = 'pi'
+        drawerConfig.okText = action
+        drawerConfig.modalTitle = 'Add New'
+        drawerConfig.updateId = null
+        drawerConfig.type = 'pi'
       } else if (action === 'Update') {
-        piFormData.okText = action
-        piFormData.modalTitle = 'Update Details'
+        drawerConfig.okText = action
+        drawerConfig.modalTitle = 'Update Details'
       } else if (action === 'newsub') {
-        piFormData.okText = 'Add Sub PI'
-        piFormData.modalTitle = 'New Sub PI'
-        piFormData.updateId = null
-        piFormData.type = 'sub'
+        drawerConfig.okText = 'Add Sub PI'
+        drawerConfig.modalTitle = 'New Sub PI'
+        drawerConfig.updateId = null
+        drawerConfig.type = 'sub'
       }
     },
     addTableItem(data) {
-      const { count, piFormData } = this
+      const { count, drawerConfig } = this
       if (!data.isHeader) {
         if (data.targetsBasis !== '' && typeof data.targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(data.targetsBasis) === -1) {
           this.$emit('add-targets-basis-item', data.targetsBasis)
@@ -278,7 +275,7 @@ export default {
       const newData = {
         key: key,
         id: key,
-        type: piFormData.type,
+        type: drawerConfig.type,
         subCategory: data.subCategory,
         program: this.mainCategory.key,
         name: data.name,
@@ -292,7 +289,7 @@ export default {
         supporting: data.supporting,
         otherRemarks: data.otherRemarks,
       }
-      if (piFormData.type === 'pi') {
+      if (drawerConfig.type === 'pi') {
         this.dataSource.push(newData)
         if (data.isHeader) {
           const that = this
@@ -308,7 +305,7 @@ export default {
           })
         }
       } else {
-        const { parentDetails } = piFormData
+        const { parentDetails } = drawerConfig
         const source = [...this.dataSource]
         const target = source.filter(item => parentDetails.key === item.key)[0]
         if (typeof target.children === 'undefined') {
@@ -342,7 +339,7 @@ export default {
       Object.assign(this.form, getDefaultFormData())
     },
     changeModalState(newPI) {
-      Object.assign(this.piFormData, getAddtlFormDataDefault())
+      Object.assign(this.drawerConfig, getDetailSettings())
       this.resetForm()
       if (newPI) {
         this.openModal('Add')
@@ -355,9 +352,9 @@ export default {
       let editData = null
       if (type === 'pi') {
         editData = dataSource.filter(item => key === item.key)[0]
-        this.piFormData.updateId = dataSource.findIndex(record => record.key === key)
+        this.drawerConfig.updateId = dataSource.findIndex(record => record.key === key)
       } else {
-        this.piFormData.type = type
+        this.drawerConfig.type = type
         let shouldBreak = false
         dataSource.forEach(item => {
           if (typeof item.children !== 'undefined') {
@@ -368,8 +365,8 @@ export default {
             if (temp.length) {
               editData = temp[0]
               shouldBreak = true
-              this.piFormData.updateId = item.children.findIndex(i => i.key === key)
-              this.piFormData.parentDetails = { ...item }
+              this.drawerConfig.updateId = item.children.findIndex(i => i.key === key)
+              this.drawerConfig.parentDetails = { ...item }
               return
             }
             console.log(temp)
@@ -429,7 +426,7 @@ export default {
     handleAddSub(key) {
       const { form } = this
       const newData = this.dataSource.filter(item => key === item.key)[0]
-      this.piFormData.parentDetails = { ...newData }
+      this.drawerConfig.parentDetails = { ...newData }
       form.subCategory = newData.subCategory
       if (!newData.isHeader) {
         form.measures = newData.measures
@@ -457,5 +454,5 @@ export default {
 }
 </script>
 <style lang="scss">
-@import "@/components/system/Forms/Aapcr/style.module.scss";
+@import "@/components/system/Forms/style.module.scss";
 </style>

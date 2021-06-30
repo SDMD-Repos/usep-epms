@@ -4,7 +4,8 @@ import Vuex from 'vuex'
 import * as hris from '@/services/hris'
 
 const mapApiProviders = {
-  getMainOffices: hris.getMainOffices,
+  getMainOfficesWithChildren: hris.getMainOfficesWithChildren,
+  getMainOfficesOnly: hris.getMainOfficesOnly,
   getPersonnelList: hris.getPersonnelByOffice,
   getAllPositions: hris.getAllPositions,
 }
@@ -14,7 +15,9 @@ Vue.use(Vuex)
 export default {
   namespaced: true,
   state: {
+    vpOffices: [],
     mainOffices: [],
+    mainOfficesChildren: [],
     personnel: [],
     positionList: [],
     loading: false,
@@ -27,12 +30,47 @@ export default {
     },
   },
   actions: {
-    FETCH_MAIN_OFFICES({ commit }, { payload }) {
+    FETCH_VP_OFFICES({ commit }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
-      const getMainOffices = mapApiProviders.getMainOffices
-      getMainOffices(payload).then(response => {
+      const { officesOnly } = payload
+      const getMainOfficesOnly = mapApiProviders.getMainOfficesOnly
+      getMainOfficesOnly(officesOnly).then(response => {
+        if (response) {
+          const { mainOffices } = response
+          commit('SET_STATE', {
+            vpOffices: mainOffices,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_MAIN_OFFICES_CHILDREN({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const getMainOfficesWithChildren = mapApiProviders.getMainOfficesWithChildren
+      getMainOfficesWithChildren(payload).then(response => {
+        if (response) {
+          const { mainOffices } = response
+          commit('SET_STATE', {
+            mainOfficesChildren: mainOffices,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_MAIN_OFFICES_ONLY({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const getMainOfficesOnly = mapApiProviders.getMainOfficesOnly
+      getMainOfficesOnly(0).then(response => {
         if (response) {
           const { mainOffices } = response
           commit('SET_STATE', {

@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <div>
     <a-drawer :title="config.modalTitle"
               :width="800"
               :visible="config.open"
@@ -33,6 +33,20 @@
           <br>
         </div>
 
+        <a-form-model-item label="Program"
+                           prop="program"
+                           :label-col="formItemLayout.labelCol"
+                           :wrapper-col="formItemLayout.wrapperCol">
+          <a-select v-model="form.program"
+                    placeholder="Select"
+                    :disabled="config.type === 'sub' && config.parentDetails.program !== null"
+                    style="width: 100%" allow-clear>
+            <a-select-option v-for="p in filteredProgram" :value="p.id" :key="p.id">
+              {{ p.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-model-item>
+
         <a-form-model-item label="Sub Category"
                            prop="subCategory"
                            :label-col="formItemLayout.labelCol"
@@ -47,7 +61,7 @@
             allow-clear
             tree-default-expand-all
             label-in-value
-            :disabled="config.type === 'sub'"
+            :disabled="config.type === 'sub' && config.parentDetails.subCategory !== null"
             @change="changeNullValue($event, 'subCategory')"
           ></a-tree-select>
         </a-form-model-item>
@@ -118,21 +132,6 @@
               :filter-option="filterBasisOption"
               :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
             />
-          </a-form-model-item>
-
-          <a-form-model-item label="Casading Level"
-                             prop="cascadingLevel"
-                             :label-col="formItemLayout.labelCol"
-                             :wrapper-col="formItemLayout.wrapperCol">
-            <a-select v-model="form.cascadingLevel"
-                      placeholder="Select"
-                      style="width: 100%"
-                      label-in-value
-                      :disabled="config.type === 'sub' && !config.parentDetails.isHeader">
-              <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
-                {{ levelItem.name }}
-              </a-select-option>
-            </a-select>
           </a-form-model-item>
 
           <a-form-model-item label="Implementing Office"
@@ -253,11 +252,11 @@
             </div>
           </div>
 
-          <a-form-model-item label="Other Remarks"
-                             prop="otherRemarks"
+          <a-form-model-item label="Remarks"
+                             prop="remarks"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
-            <a-textarea v-model="form.otherRemarks" auto-size />
+            <a-textarea v-model="form.remarks" auto-size />
           </a-form-model-item>
         </template>
       </a-form-model>
@@ -297,33 +296,23 @@
         </a-button>
       </div>
     </a-drawer>
-  </span>
+  </div>
 </template>
-
 <script>
 import { mapState } from 'vuex'
-import { TreeSelect, Modal } from 'ant-design-vue'
-const SHOW_PARENT = TreeSelect.SHOW_PARENT
-
-const messageKey = 'updatable'
+import FormMixin from '@/services/formMixins/form'
 
 export default {
-  name: 'drawer-detail-form',
+  mixins: [FormMixin],
   props: {
-    formObject: Object,
-    drawerConfig: Object,
-    drawerId: String,
-    categories: Array,
-    targetsBasisList: Array,
   },
   computed: {
     ...mapState({
-      subCategoryList: state => state.formSettings.subCategories,
-      measuresList: state => state.formSettings.measures,
-      cascadingList: state => state.formSettings.cascadingLevels,
-      mainOfficesChildrenList: state => state.external.mainOfficesChildren,
-      loading: state => state.formSettings.loading,
+      programList: state => state.formSettings.programs,
     }),
+    filteredProgram() {
+      return this.programList.filter(i => i.category_id === this.drawerId)
+    },
     filteredSubCategory() {
       return this.subCategoryList.filter((i) => {
         return i.category_id === this.drawerId && i.parent_id === null
@@ -349,38 +338,29 @@ export default {
       }
     }
     const subCategoryValidator = (rule, value, callback) => {
-      if ((this.drawerId !== 'support_functions') && value === null) {
+      const { drawerId, config } = this
+      const hasParent = (typeof config.parentDetails === 'undefined') || (typeof config.parentDetails !== 'undefined' && config.parentDetails.subCategory !== null)
+      if (drawerId !== 'support_functions' && value === null && hasParent) {
         callback(new Error('Please select at least one'))
       } else {
-        this.$refs[this.drawerId].validateField(rule.field)
+        this.$refs[drawerId].validateField(rule.field)
         callback()
       }
     }
-    const drawerConfig = this.drawerConfig
-    const formObject = this.formObject
+    const programValidator = (rule, value, callback) => {
+      const { drawerId, config } = this
+      const hasParent = (typeof config.parentDetails === 'undefined') || (typeof config.parentDetails !== 'undefined' && config.parentDetails.subCategory !== null)
+      if (value === null && hasParent) {
+        callback(new Error('Please select at least one'))
+      } else {
+        this.$refs[drawerId].validateField(rule.field)
+        callback()
+      }
+    }
     return {
-      formItemLayout: {
-        labelCol: { span: 6 },
-        wrapperCol: { span: 14 },
-      },
-      SHOW_PARENT,
-      isSubmmiting: false,
-      config: drawerConfig,
       tooltipHeaderText: 'Check to disable editing of Target to Other Remarks',
-      normalizer: {
-        title: 'name',
-        value: 'id',
-      },
-      form: formObject,
-      cachedOffice: {
-        implementing: [],
-        supporting: [],
-      },
-      storedOffices: {
-        implementing: [],
-        supporting: [],
-      },
       rules: {
+        program: [{ validator: programValidator, trigger: 'blur' }],
         subCategory: [
           { validator: subCategoryValidator, trigger: 'blur' },
           { type: 'object' },
@@ -389,7 +369,6 @@ export default {
         target: [{ validator: validateNonHeader, trigger: 'blur' }],
         measures: [{ validator: validateNonHeader, trigger: 'blur' }],
         targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
-        cascadingLevel: [{ validator: validateNonHeader, trigger: 'blur' }],
         implementing: [
           { validator: validateNonHeader, trigger: 'blur' },
           { type: 'array' },
@@ -398,12 +377,6 @@ export default {
     }
   },
   watch: {
-    drawerConfig(val) {
-      this.config = val
-    },
-    formObject(val) {
-      this.form = val
-    },
   },
   created() {
     this.onLoad()
@@ -419,24 +392,6 @@ export default {
       params = encodeURIComponent(JSON.stringify(params))
       this.$store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params }) // needs to load first
     },
-    onOfficeChange() {
-      const args = [...arguments] /* 0 - value, 1 - label, 2 - extra, 3 - field */
-      const extra = args[2]
-      const field = args[3]
-      this.storedOffices[field] = []
-      const { allCheckedNodes } = extra
-      if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
-        allCheckedNodes.forEach(item => {
-          const { dataRef } = (typeof item.node !== 'undefined') ? item.node.data.props : item.data.props
-          this.storedOffices[field].push(dataRef)
-        })
-      }
-    },
-    filterBasisOption(input, option) {
-      return (
-        option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
-      )
-    },
     toggleIsHeader(checked) {
       if (checked) {
         const { form, storedOffices } = this
@@ -449,134 +404,10 @@ export default {
         form.supporting = []
         form.options.implementing = []
         form.options.supporting = []
-        form.otherRemarks = ''
+        form.remarks = ''
         storedOffices.implementing = []
         storedOffices.supporting = []
       }
-    },
-    changeNullValue(value, label) {
-      if (typeof value === 'undefined' || value === 0) {
-        this.form[label] = null
-      }
-    },
-    validateFields() {
-      this.isSubmmiting = !this.isSubmmiting
-      const { form } = this
-      const tempImplementing = this.mappedOfficeList(form.implementing, 'implementing')
-      const tempSupporting = this.mappedOfficeList(form.supporting, 'supporting')
-      form.implementing = tempImplementing
-      form.supporting = tempSupporting
-      const self = this
-      setTimeout(() => {
-        this.$refs[this.drawerId].validate(valid => {
-          if (valid) {
-            if (form.options.supporting.length) {
-              Modal.confirm({
-                title: 'The Supporting Office was not saved',
-                content: 'Data will be lost if you proceed. Do you still want to continue?',
-                okText: 'Yes',
-                cancelText: 'No',
-                onOk() {
-                  self.saveForm()
-                },
-                onCancel() {
-                  self.isSubmmiting = !self.isSubmmiting
-                },
-              })
-            } else {
-              self.saveForm()
-            }
-          } else {
-            console.log('errror')
-            self.isSubmmiting = !self.isSubmmiting
-            return false
-          }
-        })
-      }, 500)
-    },
-    saveForm() {
-      const { config, form } = this
-      let msgContent = ''
-      const self = this
-      for (var office in this.storedOffices) {
-        self.storedOffices[office] = []
-      }
-      if (config.updateId === null) {
-        this.$emit('add-table-item', form)
-        msgContent = 'Added!'
-      } else {
-        this.$emit('update-table-item', { formData: form, updateId: config.updateId })
-        msgContent = 'Updated!'
-      }
-
-      this.$emit('reset-form')
-      if (config.type !== 'pi') {
-        const { parentDetails } = config
-        this.$emit('add-sub-pi', parentDetails.key)
-      }
-      this.$message.success({ content: msgContent, messageKey, duration: 2 })
-        .then(() => {
-          self.isSubmmiting = !self.isSubmmiting
-        })
-    },
-    resetFormData(newPI) {
-      this.$emit('close-modal', newPI)
-    },
-    saveOfficeList(field) {
-      const { form, cachedOffice, storedOffices } = this
-      const list = storedOffices[field]
-      form[field] = this.mappedOfficeList(list, field)
-      form.options[field] = []
-      storedOffices[field] = []
-      if (cachedOffice[field].length) {
-        cachedOffice[field] = []
-      }
-    },
-    updateOfficeList(field) {
-      const { form, cachedOffice, storedOffices } = this
-      form.options[field] = form[field]
-      cachedOffice[field] = form[field]
-      storedOffices[field] = form[field]
-      form[field] = []
-    },
-    deleteOfficeItem(field, index) {
-      const { form } = this
-      Modal.confirm({
-        title: 'Are you sure you want to delete this?',
-        content: '',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          form[field].splice(index, 1)
-        },
-        onCancel() {},
-      })
-    },
-    mappedOfficeList(list, field) {
-      const cascadeTo = field === 'implementing' ? 'core_functions' : 'support_functions'
-      const { cachedOffice } = this
-      return list.map(item => {
-        const container = {}
-        let tempCascadeTo = ''
-        container.value = item.value
-        container.label = typeof item.title !== 'undefined' ? item.title : item.label
-        if (typeof item.children !== 'undefined') {
-          container.children = true
-        } else {
-          container.acronym = item.acronym
-          container.pId = item.pId
-        }
-        const hasCached = cachedOffice[field].filter(i => i.value === item.value)
-        if (hasCached.length) {
-          tempCascadeTo = hasCached[0].cascadeTo
-        } else if (typeof (item.cascadeTo) !== 'undefined' && item.cascadeTo) {
-          tempCascadeTo = item.cascadeTo
-        } else {
-          tempCascadeTo = cascadeTo
-        }
-        container.cascadeTo = tempCascadeTo
-        return container
-      })
     },
   },
 }

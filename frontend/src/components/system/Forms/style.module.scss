@@ -1,7 +1,7 @@
 @import '@/mixins.scss';
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/* AAPCR */
+/* FORM */
 
 th.column-category,
 th.column-sub-category,
@@ -29,10 +29,16 @@ td.column-created-at,
 th.column-published-date,
 td.column-published-date,
 th.column-status,
-td.column-status {
+td.column-status,
+th.column-count,
+td.column-count {
   text-align: center !important;
 }
 
 .ant-table td { white-space: pre-wrap; }
 
 .withNewLine { white-space: pre-wrap; }
+
+ul.form-ul-list {
+  list-style-type: circle;
+}

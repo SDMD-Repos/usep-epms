@@ -16,6 +16,8 @@ import { i18n } from './localization'
 import './antd'
 import './registerServiceWorker'
 
+import '@/services/filters' // import global filters
+
 Vue.use(BootstrapVue)
 Vue.use(VueLayers)
 
