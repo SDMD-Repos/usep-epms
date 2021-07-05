@@ -43,6 +43,19 @@ class VpopcrController extends Controller
 
     }
 
+    public function checkSaved($officeId, $year)
+    {
+        $hasSaved = VpOpcr::where([
+            ['office_id', (int)$officeId],
+            ['year', $year],
+            ['is_active', 1]
+        ])->first();
+
+        return response()->json([
+            'hasSaved' => $hasSaved !== null
+        ], 200);
+    }
+
     public function getAapcrDetails($vpId, $year)
     {
         $query = Aapcr::where([
@@ -248,10 +261,10 @@ class VpopcrController extends Controller
                 foreach($dataSource as $source) {
                     $isNew = strpos($source['id'], 'new') !== false;
 
-                    $getParentId = null;
-
                     if(!$isNew){
                         $aapcrDetailId = $source['id'];
+
+                        $getParentId = null;
                     }else{
                         $aapcrDetailId = null;
                     }
@@ -277,8 +290,6 @@ class VpopcrController extends Controller
                         $newDetail = $isNew || $storeHeader;
 
                         $getParentId = $this->saveVpOpcrDetails($vpopcr->id, $source, $newDetail);
-                    } else {
-                        $getParentId = $source['id'];
                     }
 
                     if(isset($source['children']) && count($source['children'])) {
@@ -414,5 +425,215 @@ class VpopcrController extends Controller
         }else{
             return response()->json('Cannot publish two or more OPCRs for '.$hasPublished->office_name.' in a year', 400);
         }
+    }
+
+    public function deactivate(Request $request)
+    {
+        $id = $request->id;
+
+        $now = Carbon::now();
+
+        $vpopcr = VpOpcr::find($id);
+
+        $vpopcr->is_active = 0;
+        $vpopcr->end_effectivity = $now;
+        $vpopcr->updated_at = $now;
+        $vpopcr->modify_id = $this->login_user->pmaps_id;
+        $vpopcr->history = $vpopcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+
+        $vpopcr->save();
+
+        return response()->json("Successfully deactivated", 200);
+    }
+
+    public function view($id)
+    {
+        $vpOpcr = VpOpcr::with([
+            'detailParents',
+            'detailParents.aapcrDetail',
+            'detailParents.measures',
+            'detailParents.offices',
+            'detailParents.subDetails'
+        ])->where('id', $id)->first();
+
+        $officeId = $vpOpcr->office_id;
+
+        $dataSource = [];
+
+        $this->targetsBasisList = []; // Reset $this->targetsBasisList from ConverterTrait
+
+        $parentIds = []; // To store parent PIs' id for tracking purposes
+
+        foreach($vpOpcr->detailParents as $detail) {
+            $stored = 0;
+
+            $isParent = 0;
+
+            $parentDetails = null;
+
+            $detail->isCascaded = $detail->from_aapcr;
+
+            $detail->wasSaved = 1;
+
+            $extracted = $this->extractDetails($detail);
+
+            $subCategory = $extracted['subCategory'];
+
+            $data = $this->getVpOpcrDetails($detail, []);
+
+            if($detail->aapcr_detail_id) {
+                $aapcrDetail = $detail->aapcrDetail;
+
+                if($aapcrDetail->parent_id && $detail->from_aapcr) {
+
+                    if(!$detail->aapcrDetail->parent->is_header) {
+                        $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
+                            $query->where(function($q) use ($officeId) {
+                                $q->where('vp_office_id', '=', $officeId)
+                                    ->orWhere('office_id', '=', $officeId);
+                            });
+                        })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
+
+                        if($parentDetail) {
+                            $isParent = 1;
+
+                            $parentDetails = $parentDetail;
+                        }else{
+                            $stored = 1;
+                        }
+                    }else {
+                        $isParent = 1;
+
+                        $parentDetails = $detail->aapcrDetail->parent;
+                    }
+                } else {
+                    if(!$detail->from_aapcr) {
+                        $isParent = 1;
+
+                        $parentDetails = $aapcrDetail;
+                    }else{
+                        $stored = 1;
+                    }
+                }
+            } else {
+                $stored = 1;
+            }
+
+            if($isParent) {
+                $isExists = 0;
+
+                foreach($parentIds as $id) {
+                    if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
+                        $isExists = 1;
+                    }
+                }
+
+                if(!$isExists) {
+                    $parentDetails->isCascaded = 1;
+
+                    $parentDetails->wasSaved = 0;
+
+                    if($parentDetails->category_id !== $detail->category_id){
+                        $parentDetails->sub_category = null;
+                    }else{
+                        $parentDetails->sub_category = $subCategory;
+                    }
+
+                    $dataSource[] = $this->getVpOpcrDetails($parentDetails, $data);
+
+                    array_push($parentIds, array(
+                        'id' => $parentDetails->id,
+                        'index' => $detail->category_id
+                    ));
+
+                } else{
+                    foreach($dataSource as $key => $source) {
+                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
+                            $dataSource[$key]['children'][] = $data;
+                        }
+                    }
+                }
+            } elseif($stored) {
+                if(count($detail->subDetails)) {
+                    $subs = [];
+
+                    foreach($detail->subDetails as $subDetail) {
+
+                        $subDetail->isCascaded = $subDetail->from_aapcr;
+
+                        $subDetail->wasSaved = 1;
+
+                        $subs[] = $this->getVpOpcrDetails($subDetail, []);
+                    }
+
+                    $data['children'] = $subs;
+                }
+
+                $dataSource[] = $data;
+
+                array_push($parentIds, array(
+                    'id' => $detail->id,
+                    'index' => $detail->category_id
+                ));
+            }
+        }
+
+        $vpOffice = new \stdClass();
+
+        $vpOffice->key = $vpOpcr->office_id;
+        $vpOffice->label = $vpOpcr->office_name;
+
+        return response()->json([
+            'dataSource' => $dataSource,
+            'year' => $vpOpcr->year,
+            'vpOffice' => $vpOffice,
+            'isFinalized' => $vpOpcr->finalized_date !== NULL,
+            'targetsBasisList' => $this->targetsBasisList,
+            'editMode' => true,
+        ], 200);
+    }
+
+    public function getVpOpcrDetails($data, $children)
+    {
+        $offices = $this->splitPIOffices($data->offices, 1);
+
+        $this->getTargetsBasisList($data->targets_basis);
+
+        $extracted = $this->extractDetails($data);
+
+        if($data->from_aapcr) {
+            $id = $data->aapcr_detail_id;
+        }/*elseif(!$isCopy) {
+            $id = $data->id;
+        }*/else{
+//            $id = "new";
+            $id = $data->id;
+        }
+
+        $details = array(
+            'key' => $id,
+            'id' => $id,
+            'category' => $data->category_id,
+            'subCategory' => $extracted['subCategory'],
+            'program' => $data->program_id,
+            'name' => $data->pi_name,
+            'isHeader' => false,
+            'target' => $data->target,
+            'measures' => $extracted['measures'],
+            'budget' => $data->allocated_budget,
+            'targetsBasis' => $data->targets_basis,
+            'implementing' => $offices['implementing'] ?? [],
+            'supporting' => $offices['supporting'] ?? [],
+            'remarks' => $data->remarks,
+            'deleted' => 0,
+            'isCascaded' => $data->isCascaded,
+            'wasSaved' => $data->wasSaved
+        );
+
+        if(count($children)){
+            $details['children'][] = $children;
+        }
+
+        return $details;
     }
 }

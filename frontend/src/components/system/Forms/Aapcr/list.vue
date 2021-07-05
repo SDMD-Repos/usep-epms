@@ -66,16 +66,18 @@
 </template>
 
 <script>
-import { listTableColumns } from '@/services/formColumns'
+// import { listTableColumns } from '@/services/formColumns'
 import { mapState } from 'vuex'
-import moment from 'moment'
+// import moment from 'moment'
 import { Modal } from 'ant-design-vue'
 import * as apiForm from '@/services/mainForms/aapcr'
+import ListMixin from '@/services/formMixins/list'
 
 export default {
   title: 'AAPCR List',
   name: 'aapcr-list',
-  props: ['formId'],
+  // props: ['formId'],
+  mixins: [ListMixin],
   computed: {
     ...mapState({
       list: state => state.aapcr.list,
@@ -88,8 +90,8 @@ export default {
   },
   data() {
     return {
-      listTableColumns,
-      moment,
+      // listTableColumns,
+      // moment,
     }
   },
   methods: {
@@ -145,21 +147,6 @@ export default {
             year: year,
           }
           self.$store.dispatch('aapcr/PUBLISH', { payload: payload })
-        },
-      })
-    },
-    deactivate(id) {
-      const self = this
-      Modal.confirm({
-        title: 'Are you sure you want to deactivate this?',
-        content: 'You won\'t be able to revert this!',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          const payload = {
-            id: id,
-          }
-          self.$store.dispatch('aapcr/DEACTIVATE', { payload: payload })
         },
       })
     },

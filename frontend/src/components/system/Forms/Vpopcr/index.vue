@@ -26,7 +26,11 @@
                   </label>
                 </div>
                 <div class="col-12 col-md-4 col-lg-3">
-                  <a-select v-model="year" placeholder="Select year" style="width: 100%">
+                  <a-select v-model="year"
+                            placeholder="Select year"
+                            style="width: 100%"
+                            :disabled="editMode"
+                            @change="checkDetails()">
                     <template v-for="(y, i) in years">
                       <a-select-option :value="y" :key="i">
                         {{ y }}
@@ -47,6 +51,7 @@
                             placeholder="Select VP Office"
                             style="width: 100%"
                             @change="checkDetails()"
+                            :disabled="editMode"
                             allow-clear
                             label-in-value>
                     <template v-for="(office, i) in vpOfficesList">
@@ -68,6 +73,7 @@
                                :categories="categories"
                                :targets-basis-list="targetsBasisList"
                                :counter="counter"
+                               :enable-form="enableForm"
                                @update-counter="updateSourceCount"
                                @update-drawer-status="updateDrawerStatus"
                                @add-targets-basis-item="addTargetsBasisItem"
@@ -105,6 +111,7 @@ export default {
   data() {
     return {
       year: new Date().getFullYear(),
+      vpOpcrId: null,
       aapcrId: null,
       vpOffice: undefined,
       activeKey: '0',
@@ -131,7 +138,12 @@ export default {
     },
   },
   created() {
-    this.onLoad()
+    this.vpOpcrId = this.$route.params.id
+    if (this.vpOpcrId) {
+      this.getVpOpcrDetails()
+    } else {
+      this.onLoad()
+    }
   },
   methods: {
     onLoad() {
@@ -149,24 +161,51 @@ export default {
       this.targetsBasisList = []
     },
     checkDetails() {
-      if (this.counter) {
-        const that = this
-        Modal.confirm({
-          title: 'Changes were not yet saved',
-          content: 'Do you still want to continue?',
-          okText: 'Yes',
-          cancelText: 'No',
-          onOk() {
-            that.loadDetails()
-          },
-          onCancel() {},
+      const { year, vpOffice } = this
+      if (typeof vpOffice !== 'undefined') {
+        const self = this
+        this.enableForm = false
+        this.resetDetails()
+        this.$store.commit('opcrvp/SET_STATE', {
+          loading: true,
+        })
+        const checkSaved = apiForm.checkSaved
+        checkSaved(vpOffice.key, year).then(response => {
+          if (response) {
+            const { hasSaved } = response
+            this.enableForm = false
+            if (hasSaved) {
+              Modal.error({
+                title: 'The selected office has an existing OPCR for the year ' + self.year,
+                content: 'Please check the list or select a different year/office to create a new OPCR',
+              })
+            } else {
+              if (this.counter) {
+                Modal.confirm({
+                  title: 'Changes were not yet saved',
+                  content: 'Do you still want to continue?',
+                  okText: 'Yes',
+                  cancelText: 'No',
+                  onOk() {
+                    self.enableForm = true
+                    self.loadDetails()
+                  },
+                  onCancel() {},
+                })
+              } else {
+                if (typeof this.vpOffice !== 'undefined') {
+                  self.enableForm = true
+                  this.loadDetails()
+                }
+              }
+            }
+          }
+          this.$store.commit('opcrvp/SET_STATE', {
+            loading: false,
+          })
         })
       } else {
-        if (typeof this.vpOffice !== 'undefined') {
-          this.loadDetails()
-        } else {
-          this.resetDetails()
-        }
+        this.resetDetails()
       }
     },
     loadDetails() {
@@ -178,10 +217,40 @@ export default {
       const getAapcrDetailsByOffice = apiForm.getAapcrDetailsByOffice
       getAapcrDetailsByOffice(vpOffice.key, year).then(response => {
         if (response) {
+          if (response.aapcrId) {
+            this.enableForm = true
+            this.aapcrId = response.aapcrId
+            this.dataSource = response.dataSource
+            this.targetsBasisList = response.targetsBasisList
+          } else {
+            Modal.warning({
+              title: 'There is no AAPCR created for the year ' + this.year,
+              content: '',
+            })
+          }
+        }
+        this.$store.commit('opcrvp/SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    getVpOpcrDetails() {
+      const { vpOpcrId } = this
+      this.$store.commit('opcrvp/SET_STATE', {
+        loading: true,
+      })
+      const fetchFormDetails = apiForm.fetchFormDetails
+      fetchFormDetails(vpOpcrId).then(response => {
+        if (response) {
           this.enableForm = true
-          this.aapcrId = response.aapcrId
+          this.onLoad()
+
+          this.year = response.year
+          this.vpOffice = response.vpOffice
           this.dataSource = response.dataSource
           this.targetsBasisList = response.targetsBasisList
+          this.isFinalized = response.isFinalized
+          this.editMode = response.editMode
         }
         this.$store.commit('opcrvp/SET_STATE', {
           loading: false,

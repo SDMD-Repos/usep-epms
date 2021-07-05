@@ -70,12 +70,11 @@
 import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import ListMixin from '@/services/formMixins/list'
-import * as opcrvpForm from '@/services/mainForms/opcrvp'
+// import * as opcrvpForm from '@/services/mainForms/opcrvp'
 
 export default {
   title: 'OPCR (VP) List',
   name: 'vp-opcr-list',
-  props: ['formId'],
   mixins: [ListMixin],
   computed: {
     ...mapState({
@@ -114,37 +113,7 @@ export default {
     handleUpdate(id) {
       this.$router.push({
         name: 'main.form',
-        params: { formId: this.form, id: id },
-      })
-    },
-    viewPdf2(id, documentName) {
-      const baseUrl = process.env.VUE_APP_BACKEND_URL
-      window.open(baseUrl + '/api/forms/aapcr/viewPdf/' + id + '/' + documentName + '.pdf', '_blank')
-    },
-    viewPdf(id, documentName) {
-      // const baseUrl = process.env.VUE_APP_BACKEND_URL
-      const { form } = this
-      this.$store.commit(form + '/SET_STATE', {
-        loading: true,
-      })
-      const fetchPdfData = opcrvpForm.fetchPdfData
-      fetchPdfData(id, documentName).then(response => {
-        if (response) {
-          const blob = new Blob([response], { type: 'application/pdf' })
-          const _url = window.URL.createObjectURL(blob)
-          // _url.setAttribute('download', _url)?
-          // const link = document.createElement('a')
-          // link.href = window.URL.createObjectURL(blob)
-          // link.download = documentName + '.pdf'
-          // link.setAttribute('target', '_blank')
-          // link.click()
-          // console.log(response)
-          // console.log(_url)
-          window.open(_url, '_blank').focus()
-        }
-        this.$store.commit(form + '/SET_STATE', {
-          loading: false,
-        })
+        params: { formId: this.formId, id: id },
       })
     },
     handlePublish(data) {
@@ -161,21 +130,6 @@ export default {
             officeId: data.office_id,
           }
           self.$store.dispatch('opcrvp/PUBLISH', { payload: payload })
-        },
-      })
-    },
-    deactivate(id) {
-      const self = this
-      Modal.confirm({
-        title: 'Are you sure you want to deactivate this?',
-        content: 'You won\'t be able to revert this!',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          const payload = {
-            id: id,
-          }
-          self.$store.dispatch(self.form + '/DEACTIVATE', { payload: payload })
         },
       })
     },

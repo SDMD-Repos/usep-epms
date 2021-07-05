@@ -68,6 +68,11 @@ class VpOpcrDetail extends Model
         return $this->hasMany('App\VpOpcrDetailOffice', 'detail_id')->orderBy('office_type_id', 'asc');
     }
 
+    public function aapcrDetail()
+    {
+        return $this->belongsTo('App\AapcrDetail', 'aapcr_detail_id');
+    }
+
     /*public function getMeasureIds()
     {
         return $this->measures()->allRelatedIds();

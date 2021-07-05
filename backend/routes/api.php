@@ -89,10 +89,13 @@ Route::group([
     Route::group([
         'prefix' => 'opcrvp'
     ], function() {
+        Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
         Route::get('/get-aapcr-details/{vpId}/{year}', 'Form\VpopcrController@getAapcrDetails');
         Route::post('/save', 'Form\VpopcrController@save');
         Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
         Route::post('/publish', 'Form\VpopcrController@publish');
+        Route::post('/deactivate', 'Form\VpopcrController@deactivate');
+        Route::get('/view/{id}', 'Form\VpopcrController@view');
     });
 });
 

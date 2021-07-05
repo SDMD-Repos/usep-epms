@@ -73,4 +73,9 @@ class AapcrDetail extends Model
     {
         return $this->mainDetails()->with('subDetails');
     }
+
+    public function parent()
+    {
+        return $this->belongsTo('App\AapcrDetail', 'parent_id');
+    }
 }

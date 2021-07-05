@@ -10,7 +10,7 @@
         :loading="loading"
       >
 
-        <template slot="title" v-if="typeof vpOffice !== 'undefined'">
+        <template slot="title" v-if="enableForm">
           <a-button type="primary" @click="openModal('Add')">New</a-button>
         </template>
 
@@ -125,6 +125,7 @@ export default {
   name: 'list-item',
   props: {
     vpOffice: Object,
+    enableForm: Boolean,
   },
   computed: {
     ...mapState({
@@ -139,9 +140,11 @@ export default {
     },
   },
   data() {
+    const enableForm = this.enableForm
     return {
       columns: [],
       form: formData,
+      isEnable: enableForm,
     }
   },
   created() {
