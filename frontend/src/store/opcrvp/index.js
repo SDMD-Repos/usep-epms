@@ -8,6 +8,7 @@ const mapApiProviders = {
   getList: opcrvpForm.fetchVpOpcrs,
   publish: opcrvpForm.publish,
   deactivate: opcrvpForm.deactivate,
+  update: opcrvpForm.update,
 }
 
 Vue.use(Vuex)
@@ -91,6 +92,25 @@ export default {
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'VP\'s OPCR was deactivated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const id = payload.vpOpcrId
+      const update = mapApiProviders.update
+      update(id, payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'VP\'s OPCR was updated successfully',
           })
         }
         commit('SET_STATE', {

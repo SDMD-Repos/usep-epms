@@ -6,6 +6,7 @@ use App\Aapcr;
 use App\AapcrDetail;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
+use App\Http\Requests\UpdateVpOpcr;
 use App\Http\Traits\ConverterTrait;
 use App\VpOpcr;
 use App\VpOpcrDetail;
@@ -512,6 +513,7 @@ class VpopcrController extends Controller
 
                         $parentDetails = $aapcrDetail;
                     }else{
+
                         $stored = 1;
                     }
                 }
@@ -534,10 +536,16 @@ class VpopcrController extends Controller
                     $parentDetails->wasSaved = 0;
 
                     if($parentDetails->category_id !== $detail->category_id){
+                        $parentDetails->category_id = $detail->category_id;
+
                         $parentDetails->sub_category = null;
                     }else{
                         $parentDetails->sub_category = $subCategory;
                     }
+
+                    $data['type'] = 'sub';
+
+                    $parentDetails['type'] = 'pi';
 
                     $dataSource[] = $this->getVpOpcrDetails($parentDetails, $data);
 
@@ -549,6 +557,8 @@ class VpopcrController extends Controller
                 } else{
                     foreach($dataSource as $key => $source) {
                         if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
+                            $data['type'] = 'sub';
+
                             $dataSource[$key]['children'][] = $data;
                         }
                     }
@@ -563,11 +573,15 @@ class VpopcrController extends Controller
 
                         $subDetail->wasSaved = 1;
 
+                        $subDetail->type = 'sub';
+
                         $subs[] = $this->getVpOpcrDetails($subDetail, []);
                     }
 
                     $data['children'] = $subs;
                 }
+
+                $data['type'] = 'pi';
 
                 $dataSource[] = $data;
 
@@ -589,6 +603,7 @@ class VpopcrController extends Controller
             'vpOffice' => $vpOffice,
             'isFinalized' => $vpOpcr->finalized_date !== NULL,
             'targetsBasisList' => $this->targetsBasisList,
+            'aapcrId' => $vpOpcr->aapcr_id,
             'editMode' => true,
         ], 200);
     }
@@ -601,23 +616,16 @@ class VpopcrController extends Controller
 
         $extracted = $this->extractDetails($data);
 
-        if($data->from_aapcr) {
-            $id = $data->aapcr_detail_id;
-        }/*elseif(!$isCopy) {
-            $id = $data->id;
-        }*/else{
-//            $id = "new";
-            $id = $data->id;
-        }
-
         $details = array(
-            'key' => $id,
-            'id' => $id,
+            'key' => $data->id,
+            'id' => $data->id,
+            'aapcr_detail_id' => $data->aapcr_detail_id,
+            'type' => $data->type,
             'category' => $data->category_id,
             'subCategory' => $extracted['subCategory'],
             'program' => $data->program_id,
             'name' => $data->pi_name,
-            'isHeader' => false,
+            'isHeader' => (bool)$data->is_header,
             'target' => $data->target,
             'measures' => $extracted['measures'],
             'budget' => $data->allocated_budget,
@@ -635,5 +643,240 @@ class VpopcrController extends Controller
         }
 
         return $details;
+    }
+
+    public function update(UpdateVpOpcr $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+
+            $dataSource = $validated['dataSource'];
+            $isFinalized = $validated['isFinalized'];
+            $deletedIds = $validated['deletedIds'];
+
+            $vpOpcr = VpOpcr::find($id);
+
+            $history = "";
+
+            if($isFinalized){
+                if($vpOpcr->finalized_date !== NULL){
+                    $finalized_date = $vpOpcr->finalized_date;
+                }else{
+                    $finalized_date = Carbon::now();
+                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullName."\n";
+                }
+            }
+
+            $vpOpcr->finalized_date = ($isFinalized ? $finalized_date : null);
+            $vpOpcr->modify_id = $this->login_user->pmaps_id;
+
+            $vpOpcr->history = $vpOpcr->history.$history;
+
+            if($vpOpcr->save()) {
+                foreach($deletedIds as $deletedId) {
+                    $deletedVpOpcr = VpOpcrDetail::find($deletedId);
+
+                    $deletedVpOpcr->modify_id = $this->login_user->pmaps_id;
+                    $deletedVpOpcr->history = $deletedVpOpcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+
+                    if($deletedVpOpcr->save()){
+                        if(!$deletedVpOpcr->delete()){
+                            DB::rollBack();
+                        }
+                    }else{
+                        DB::rollBack();
+                    }
+                }
+
+                foreach($dataSource as $source) {
+                    $getParentId = null;
+
+                    $isNew = strpos($source['id'], 'new') !== false;
+
+                    if((isset($source['isCascaded']) && !$source['isCascaded']) || $isNew){
+                        $process = 0;
+
+                        if(!$isNew) {
+                            $detail = VpOpcrDetail::find($source['id']);
+
+                            if($detail) {
+                                $this->updateDetails($id, $source, $detail);
+                            } else {
+                                $process = 1;
+                            }
+                        } else{
+                            $process = 1;
+                        }
+
+                        if($process) {
+                            $source['aapcr_detail_id'] = null;
+
+                            $source['from_aapcr'] = 0;
+
+                            $source['parent_id'] = null;
+
+                            $newDetail = 1;
+
+                            $getParentId = $this->saveVpOpcrDetails($id, $source, $newDetail);
+                        }
+                    } else {
+                        if((!isset($source['wasSaved']) || (isset($source['wasSaved']) && !$source['wasSaved'])) && !isset($source['children'])){
+                            $hasTrashed = VpOpcrDetail::onlyTrashed()->where([
+                                ['aapcr_detail_id', $source['id']],
+                                ['from_aapcr', 1],
+                                ['vp_opcr_id', $id]
+                            ])->first();
+
+                            if($hasTrashed !== null) {
+                                $hasTrashed->restore();
+
+                                $hasTrashed->modify_id = $this->login_user->pmaps_id;
+                                $hasTrashed->history = $hasTrashed->history."Updated " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                                if(!$hasTrashed->save()){
+                                    DB::rollBack();
+                                }
+                            }else{
+                                $source['aapcr_detail_id'] = $isNew ? null : $source['id'];
+
+                                $source['from_aapcr'] = !$isNew;
+
+                                $source['parent_id'] = null;
+
+                                $newDetail = $isNew;
+
+                                $getParentId = $this->saveVpOpcrDetails($id, $source, $newDetail);
+                            }
+                        }
+                    }
+
+                    if(isset($source['children']) && count($source['children'])) {
+                        foreach($source['children'] as $child) {
+                            $isChildNew = strpos($child['id'], 'new') !== false;
+
+                            if((isset($child['isCascaded']) && !$child['isCascaded']) || $isChildNew) {
+                                $process = 0;
+
+                                if(!$isChildNew) {
+                                    $sub = VpOpcrDetail::find($child['id']);
+
+                                    if($sub) {
+                                        $this->updateDetails($id, $child, $sub);
+                                    } else {
+                                        $process = 1;
+                                    }
+                                } else {
+                                    $process = 1;
+                                }
+
+                                if($process) {
+                                    $fromAapcr = 0;
+
+                                    if(!$isChildNew) {
+                                        $aapcrDetailId = $child['id'];
+                                    }else{
+                                        if(!$isNew && (isset($source['wasSaved']) && $source['wasSaved'])){
+                                            $aapcrDetailId = $source['aapcr_detail_id'];
+                                        }elseif(!$isNew && $source['isCascaded']){
+                                            $aapcrDetailId = $source['id'];
+                                        }else{
+                                            $aapcrDetailId = null;
+                                        }
+                                    }
+
+                                    if(!$isNew && (!$source['isCascaded'] || $source['isHeader'])){
+                                        $getParentId = $source['id'];
+                                    }
+
+                                    $child['aapcr_detail_id'] = $aapcrDetailId;
+
+                                    $child['from_aapcr'] = $fromAapcr;
+
+                                    $child['parent_id'] = $getParentId;
+
+                                    $this->saveVpOpcrDetails($id, $child);
+
+                                    if(!$isNew && !$source['isHeader'] && (isset($source['wasSaved']) && $source['wasSaved']) && (isset($source['isCascaded']) && $source['isCascaded'])){
+                                        $aapcr = VpOpcrDetail::find($source['id']);
+
+                                        $aapcr->modify_id = $this->login_user->pmaps_id;
+                                        $aapcr->history = $aapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+
+                                        if($aapcr->save()){
+                                            if(!$aapcr->delete()){
+                                                DB::rollBack();
+                                            }
+                                        }else{
+                                            DB::rollBack();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                DB::rollBack();
+            }
+//            dd('doneeee');
+            DB::commit();
+
+            return response()->json("VP's OPCR was updated successfully", 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function updateDetails($id, $data, $updated)
+    {
+        $original = $updated->getOriginal();
+
+        $updated->is_header = $data['isHeader'];
+        $updated->pi_name = $data['name'];
+        $updated->target = $data['target'];
+        $updated->targets_basis = $data['targetsBasis'];
+        $updated->allocated_budget = $data['budget'];
+        $updated->remarks = $data['remarks'];
+        $updated->modify_id = $this->login_user->pmaps_id;
+
+        $history = '';
+
+        if($updated->isDirty('is_header')){
+            $history .= "Updated is_header column from '".$original['is_header']."' to '".$data['isHeader']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        if($updated->isDirty('pi_name')){
+            $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        if($updated->isDirty('target')){
+            $history .= "Updated Target from ".$original['target']." to ".$data['target']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        if($updated->isDirty('allocated_budget')){
+            $history .= "Updated Allocated Budget from ".$original['allocated_budget']." to ".$data['budget']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        if($updated->isDirty('targets_basis')){
+            $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        if($updated->isDirty('remarks')){
+            $history .= "Updated Remarks from '".$original['remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+        }
+
+        $updated->history = $updated->history.$history;
+
+        if(!$updated->save()){
+            DB::rollBack();
+        }
     }
 }

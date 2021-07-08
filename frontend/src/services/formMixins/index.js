@@ -21,5 +21,8 @@ export default {
     addTargetsBasisItem(data) {
       this.targetsBasisList.push(data)
     },
+    addDeletedId(data) {
+      this.deletedIds.push(data)
+    },
   },
 }

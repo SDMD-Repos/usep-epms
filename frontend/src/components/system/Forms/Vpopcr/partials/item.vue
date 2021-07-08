@@ -210,7 +210,6 @@ export default {
         measures: data.measures,
         budget: data.budget,
         targetsBasis: data.targetsBasis,
-        cascadingLevel: data.cascadingLevel,
         implementing: data.implementing,
         supporting: data.supporting,
         remarks: data.remarks,
@@ -265,12 +264,11 @@ export default {
               this.drawerConfig.parentDetails = { ...item }
               return
             }
-            console.log(temp)
+            console.log('for return purposes only')
           }
         })
       }
       this.form = {
-        // category: this.functionId,
         subCategory: editData.subCategory,
         program: editData.program,
         name: editData.name,
@@ -279,7 +277,6 @@ export default {
         measures: editData.measures,
         budget: editData.budget,
         targetsBasis: editData.targetsBasis,
-        cascadingLevel: editData.cascadingLevel,
         implementing: editData.implementing,
         supporting: editData.supporting,
         options: {
@@ -301,7 +298,6 @@ export default {
       if (!newData.isHeader) {
         form.measures = newData.measures
         form.targetsBasis = newData.targetsBasis
-        form.cascadingLevel = newData.cascadingLevel
         form.implementing = newData.implementing
         form.supporting = newData.supporting
       }

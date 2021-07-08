@@ -96,6 +96,7 @@ Route::group([
         Route::post('/publish', 'Form\VpopcrController@publish');
         Route::post('/deactivate', 'Form\VpopcrController@deactivate');
         Route::get('/view/{id}', 'Form\VpopcrController@view');
+        Route::post('/update/{id}', 'Form\VpopcrController@update');
     });
 });
 

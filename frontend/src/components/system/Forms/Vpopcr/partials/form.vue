@@ -39,7 +39,7 @@
                            :wrapper-col="formItemLayout.wrapperCol">
           <a-select v-model="form.program"
                     placeholder="Select"
-                    :disabled="config.type === 'sub' && config.parentDetails.program !== null"
+                    :disabled="config.type === 'sub'"
                     style="width: 100%" allow-clear>
             <a-select-option v-for="p in filteredProgram" :value="p.id" :key="p.id">
               {{ p.name }}
@@ -61,7 +61,7 @@
             allow-clear
             tree-default-expand-all
             label-in-value
-            :disabled="config.type === 'sub' && config.parentDetails.subCategory !== null"
+            :disabled="config.type === 'sub'"
             @change="changeNullValue($event, 'subCategory')"
           ></a-tree-select>
         </a-form-model-item>
@@ -386,7 +386,7 @@ export default {
       let params = {
         checkable: {
           allColleges: true,
-          mains: true,
+          mains: false,
         },
       }
       params = encodeURIComponent(JSON.stringify(params))
@@ -399,7 +399,6 @@ export default {
         form.measures = []
         form.budget = null
         form.targetsBasis = ''
-        form.cascadingLevel = ''
         form.implementing = []
         form.supporting = []
         form.options.implementing = []

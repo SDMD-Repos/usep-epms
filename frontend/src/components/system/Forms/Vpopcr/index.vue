@@ -76,6 +76,7 @@
                                :enable-form="enableForm"
                                @update-counter="updateSourceCount"
                                @update-drawer-status="updateDrawerStatus"
+                               @add-deleted-id="addDeletedId"
                                @add-targets-basis-item="addTargetsBasisItem"
                                @update-data-source="updateDataSource"/>
                   </div>
@@ -236,23 +237,24 @@ export default {
     },
     getVpOpcrDetails() {
       const { vpOpcrId } = this
-      this.$store.commit('opcrvp/SET_STATE', {
+      this.$store.commit('formSettings/SET_STATE', {
         loading: true,
       })
       const fetchFormDetails = apiForm.fetchFormDetails
       fetchFormDetails(vpOpcrId).then(response => {
-        if (response) {
+        if (response.aapcrId) {
           this.enableForm = true
           this.onLoad()
 
           this.year = response.year
           this.vpOffice = response.vpOffice
           this.dataSource = response.dataSource
+          this.aapcrId = response.aapcrId
           this.targetsBasisList = response.targetsBasisList
           this.isFinalized = response.isFinalized
           this.editMode = response.editMode
         }
-        this.$store.commit('opcrvp/SET_STATE', {
+        this.$store.commit('formSettings/SET_STATE', {
           loading: false,
         })
       })
@@ -289,28 +291,30 @@ export default {
     handleSave(isFinal) {
       const { dataSource, year } = this
       const { editMode, deletedIds, isFinalized } = this
-      const { vpOffice, aapcrId } = this
-      const details = {
-        dataSource: dataSource,
-        fiscalYear: year,
-        isFinalized: isFinal,
-        vpOffice: vpOffice,
-        aapcrId: aapcrId,
-      }
+      const { vpOffice, vpOpcrId, aapcrId } = this
       if (!editMode) {
-        details.isFinalized = isFinal
+        const details = {
+          dataSource: dataSource,
+          fiscalYear: year,
+          vpOffice: vpOffice,
+          isFinalized: isFinal,
+          aapcrId: aapcrId,
+        }
         this.$store.dispatch('opcrvp/SAVE', { payload: details })
           .then(() => {
             this.$router.push({ name: 'form.list', params: { formId: this.formId } })
           })
       } else {
-        details.isFinalized = isFinal || isFinalized
-        details.deletedIds = deletedIds
-        details.aapcrId = aapcrId
-        // this.$store.dispatch('opcrvp/UPDATE', { payload: details })
-        //   .then(() => {
-        //     this.$router.push({ name: 'form.list', params: { formId: this.formId } })
-        //   })
+        const details = {
+          dataSource: dataSource,
+          isFinalized: isFinal || isFinalized,
+          deletedIds: deletedIds,
+          vpOpcrId: vpOpcrId,
+        }
+        this.$store.dispatch('opcrvp/UPDATE', { payload: details })
+          .then(() => {
+            this.$router.push({ name: 'form.list', params: { formId: this.formId } })
+          })
       }
     },
   },

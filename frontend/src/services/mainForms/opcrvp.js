@@ -62,3 +62,12 @@ export function fetchFormDetails(id) {
     })
     .catch(err => console.log(err))
 }
+
+export function update(id, data) {
+  return apiClient
+    .post('/forms/opcrvp/update/' + id, data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

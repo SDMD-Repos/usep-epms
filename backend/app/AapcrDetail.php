@@ -2,8 +2,10 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class AapcrDetail extends Model
 {
@@ -77,5 +79,24 @@ class AapcrDetail extends Model
     public function parent()
     {
         return $this->belongsTo('App\AapcrDetail', 'parent_id');
+    }
+
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($details) {
+            foreach($details->subDetails as $sub) {
+                $fullName = Auth::user()->firstName . " " . Auth::user()->lastName;
+
+                $sub->modify_id = Auth::user()->pmaps_id;
+                $sub->updated_at = Carbon::now();
+                $sub->history = $sub->history . "Deleted " . Carbon::now() . " by " . $fullName . "\n";
+
+                $sub->save();
+
+                $sub->delete();
+            }
+
+        });
     }
 }

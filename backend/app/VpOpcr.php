@@ -38,6 +38,6 @@ class VpOpcr extends Model
 
     public function detailParents()
     {
-        return $this->details()->whereNull('parent_id');
+        return $this->details()->whereNull('parent_id')->orderByRaw('-`aapcr_detail_id` DESC');
     }
 }

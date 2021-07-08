@@ -449,12 +449,11 @@ class AapcrController extends Controller
                 }
 
                 foreach($dataSource as $source){
-//                    var_dump($source['id']);
                     $this->updateDetails($source, $id);
                 }
 
                 $this->updateProgramBudgets($id, $programBudgets);
-//dd('success');
+
                 DB::commit();
 
                 return response()->json('AAPCR was updated successfully', 200);
