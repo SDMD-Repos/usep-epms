@@ -353,13 +353,13 @@ export default {
       })
     },
     FETCH_YEAR_SIGNATORIES({ commit }, { payload }) {
-      const { year, formId } = payload
+      const { year, formId, officeId } = payload
       commit('SET_STATE', {
         loading: true,
       })
 
       const getYearSignatories = mapApiProviders.getYearSignatories
-      getYearSignatories(year, formId).then(response => {
+      getYearSignatories(year, formId, officeId).then(response => {
         if (response) {
           const { signatories } = response
           commit('SET_STATE', {

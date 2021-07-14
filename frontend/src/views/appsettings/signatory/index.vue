@@ -11,11 +11,11 @@
             </a-tabs>
           </div>
           <div class="card-body">
-            <aapcr-signatory-form v-if="activeKey === 1" :formName="`aapcr`" key="1" />
-            <aapcr-signatory-form v-if="activeKey === 2" :formName="`vpopcr`" key="2" />
-            <aapcr-signatory-form v-if="activeKey === 3" :formName="`opcr`" key="3" />
-            <aapcr-signatory-form v-if="activeKey === 4" :formName="`cpcr`" key="4" />
-            <aapcr-signatory-form v-if="activeKey === 5" :formName="`ipcr`" key="5" />
+            <signatory-form v-if="activeKey === 1" :formName="`aapcr`" key="1" />
+            <signatory-form v-if="activeKey === 2" :formName="`vpopcr`" key="2" />
+            <signatory-form v-if="activeKey === 3" :formName="`opcr`" key="3" />
+            <signatory-form v-if="activeKey === 4" :formName="`cpcr`" key="4" />
+            <signatory-form v-if="activeKey === 5" :formName="`ipcr`" key="5" />
           </div>
         </div>
       </div>
@@ -24,11 +24,11 @@
 </template>
 <script>
 import { mapState } from 'vuex'
-import AapcrSignatoryForm from '@/components/system/AppSettings/Signatory'
+import SignatoryForm from '@/components/system/AppSettings/Signatory/Main'
 
 export default {
   components: {
-    AapcrSignatoryForm,
+    SignatoryForm,
   },
   computed: {
     ...mapState({

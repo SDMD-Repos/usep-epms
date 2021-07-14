@@ -28,7 +28,8 @@ class StoreSignatory extends FormRequest
             'year' => 'required',
             'typeId' => 'required',
             'formId' => 'required',
-            'position' => ''
+            'position' => '',
+            'officeId' => 'required_if:formId,vpopcr'
         ];
     }
 }

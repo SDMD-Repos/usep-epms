@@ -71,3 +71,12 @@ export function update(id, data) {
     })
     .catch(err => console.log(err))
 }
+
+export function renderPdf(id) {
+  return apiClient
+    .get('/forms/opcrvp/viewPdf/' + id, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

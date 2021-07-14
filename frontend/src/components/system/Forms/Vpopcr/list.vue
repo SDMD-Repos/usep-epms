@@ -50,7 +50,7 @@
             </template>
             <a-tooltip>
               <template slot="title"><span>View PDF</span></template>
-              <a-icon type="file-pdf" :style="{fontSize: '18px'}" @click="viewPdf(record.id, record.document_name)"/>
+              <a-icon type="file-pdf" :style="{fontSize: '18px'}" @click="viewPdf(record.id, record.office_name)"/>
             </a-tooltip>
             <template v-if="record.finalized_date && !record.published_date && record.is_active">
               <a-divider type="vertical" />
@@ -70,7 +70,7 @@
 import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import ListMixin from '@/services/formMixins/list'
-// import * as opcrvpForm from '@/services/mainForms/opcrvp'
+import * as opcrvpForm from '@/services/mainForms/opcrvp'
 
 export default {
   title: 'OPCR (VP) List',
@@ -114,6 +114,25 @@ export default {
       this.$router.push({
         name: 'main.form',
         params: { formId: this.formId, id: id },
+      })
+    },
+    viewPdf(id, officeName) {
+      const self = this
+      this.$store.commit('opcrvp/SET_STATE', {
+        loading: true,
+      })
+      const renderPdf = opcrvpForm.renderPdf
+      renderPdf(id).then(response => {
+        if (response) {
+          self.visible = true
+          const blob = new Blob([response], { type: 'application/pdf' })
+          self.name = window.URL.createObjectURL(blob)
+          self.fileName = officeName + ' - OPCR'
+          window.open(self.getFilePath, '_blank')
+        }
+        this.$store.commit('opcrvp/SET_STATE', {
+          loading: false,
+        })
       })
     },
     handlePublish(data) {

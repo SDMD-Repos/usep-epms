@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Aapcr;
+use App\AapcrDetail;
 use App\AapcrDetailOffice;
 use App\Http\Classes\Jasperreport;
 use App\Http\Traits\ConverterTrait;
 use App\Program;
 use App\Signatory;
-use Illuminate\Http\Request;
+use App\VpOpcr;
+use App\VpOpcrDetailOffice;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class AppController extends Controller
 {
@@ -39,66 +39,14 @@ class AppController extends Controller
 
     }
 
-    public function viewPdf($id, $documentName)
+    // AAPCR
+    public function viewAapcrPdf($id, $documentName)
     {
         $aapcr = Aapcr::find($id);
 
-        $signatories = Signatory::where([
-            ['year', $aapcr->year],
-            ['form_id', 'aapcr']
-        ])->get();
+        $officeModel = new AapcrDetailOffice();
 
-        $signatoryList = [];
-
-        foreach($signatories as $signatory) {
-            $dataSignatories = [
-                'name' => strtoupper($signatory['personnel_name']),
-                'position' => $signatory['position'],
-                'office_name' => $signatory['office_name'],
-            ];
-
-            if(!array_key_exists($signatory->type_id, $signatoryList)) {
-                $signatoryList[$signatory->type_id] = [];
-            }
-
-            array_push($signatoryList[$signatory->type_id], $dataSignatories);
-        }
-
-        $preparedDate = ($aapcr->finalized_date ? date("d F Y", strtotime($aapcr->finalized_date)) : '');
-
-        if(isset($signatoryList['prepared_by'])) {
-            $preparedBy = $signatoryList['prepared_by'][0];
-
-            $preparedByName = $preparedBy['name'];
-            $preparedByPosition = $preparedBy['position'] . ", " . $preparedBy['office_name'];
-        } else {
-            $preparedByName = "";
-            $preparedByPosition = "";
-        }
-
-        $reviewedDate = ($aapcr->reviewed_date ? date("d F Y", strtotime($aapcr->reviewed_date)) : '');
-
-        if(isset($signatoryList['reviewed_by'])) {
-            $reviewedBy = $signatoryList['reviewed_by'][0];
-
-            $reviewedByName = $reviewedBy['name'];
-            $reviewedByPosition = $reviewedBy['position'] . ", " . $reviewedBy['office_name'];
-        } else {
-            $reviewedByName = "";
-            $reviewedByPosition = "";
-        }
-
-        $approvedDate = ($aapcr->approved_date ? date("d F Y", strtotime($aapcr->approved_date)) : '');
-
-        if (isset($signatoryList['approved_by'])) {
-            $approvedBy = $signatoryList['approved_by'][0];
-
-            $approvedByName = $approvedBy['name'];
-            $approvedByPosition = $approvedBy['position'];
-        } else {
-            $approvedByName = "";
-            $approvedByPosition = "";
-        }
+        $signatory = $this->getSignatories($aapcr, "aapcr");
 
         $programs = Program::all();
 
@@ -119,7 +67,8 @@ class AppController extends Controller
 
         $details = $aapcr->details()->where('parent_id', NULL)
             ->orderBy('category_id', 'ASC')
-            ->orderBy('program_id', 'ASC')->orderBy('sub_category_id', 'ASC')->get();
+            ->orderBy('program_id', 'ASC')
+            ->orderBy('sub_category_id', 'ASC')->get();
 
         $PICount = 0;
 
@@ -129,7 +78,7 @@ class AppController extends Controller
 
         $totalBudget = 0;
 
-        foreach($details as $key => $detail) {
+        foreach($details as $detail) {
             $budget = 0;
 
             $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
@@ -140,7 +89,7 @@ class AppController extends Controller
 
             $measures = $this->fetchMeasuresPdf($detail->measures);
 
-            $getOffices = $this->getOfficesPdf($detail->id);
+            $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
 
             if(!$tempProgramId || $tempProgramId !== $detail->program_id){
                 $tempProgramId = $detail->program_id;
@@ -194,7 +143,7 @@ class AppController extends Controller
 
                     $subMeasures = $this->fetchMeasuresPdf($subPi->measures);
 
-                    $getSubOffices = $this->getOfficesPdf($subPi->id);
+                    $getSubOffices = $this->getOfficesPdf($officeModel, $subPi->id);
 
                     $data[$PICount] = array(
                         'category_id' => $detail->category_id,
@@ -225,22 +174,24 @@ class AppController extends Controller
             }
         }
 
+        $publicPath = public_path();
+
         $params = [
-            'usepLogo' => public_path()."/logos/USeP_Logo.png",
-            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? public_path()."/logos/notfinal.png" : "",
+            'usepLogo' => $publicPath."/logos/USeP_Logo.png",
+            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : "",
             'totalBudget' => number_format($totalBudget, 2),
             'year' => $aapcr->year,
-            'preparedBy' => strtoupper($preparedByName),
-            'preparedByPosition' => $preparedByPosition,
-            'preparedDate' => $preparedDate,
-            'reviewedBy' => $reviewedByName,
-            'reviewedByPosition' => $reviewedByPosition,
-            'reviewedDate' => $reviewedDate,
-            'approvedBy' => strtoupper($approvedByName),
-            'approvedDate' => $approvedDate,
-            'approvingPosition' => $approvedByPosition,
+            'preparedBy' => strtoupper($signatory['preparedBy']),
+            'preparedByPosition' => $signatory['preparedByPosition'],
+            'preparedDate' => $signatory['preparedDate'],
+            'reviewedBy' => $signatory['reviewedBy'],
+            'reviewedByPosition' => $signatory['reviewedByPosition'],
+            'reviewedDate' => $signatory['reviewedDate'],
+            'approvedBy' => strtoupper($signatory['approvedBy']),
+            'approvedDate' => $signatory['approvedDate'],
+            'approvingPosition' => $signatory['approvedByPosition'],
             'programsDataSet' => $programsDataSet,
-            'public_path' => public_path()
+            'public_path' => $publicPath
         ];
 
         $jasperReport = new Jasperreport();
@@ -249,6 +200,422 @@ class AppController extends Controller
         $pdf = public_path('forms/'.$documentName.".pdf");
 
         return response()->download($pdf);
+    }
+
+    // VP's OPCR
+
+    public function viewVpOpcrPdf($id)
+    {
+        $vpopcr = VpOpcr::find($id);
+
+        $signatory = $this->getSignatories($vpopcr, 'vpopcr');
+
+        $documentName = str_replace(" ","_", $vpopcr->office_name);
+
+        $details = $vpopcr->details()->where('parent_id', NULL)
+            ->orderBy('category_id', 'ASC')
+            ->orderByRaw('-program_id DESC')
+            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderBy('created_at', 'ASC')->get();
+
+        $dataSource = [];
+
+        $parentIds = []; // To store parent PIs' id for tracking purposes
+
+        foreach($details as $detail) {
+            $stored = 0;
+
+            $isParent = 0;
+
+            $parentDetails = null;
+
+            $data = $this->getVpOpcrPdfDetails($detail, []);
+
+            if($detail->aapcr_detail_id) {
+                $aapcrDetail = $detail->aapcrDetail;
+
+                if($aapcrDetail->parent_id && $detail->from_aapcr) {
+                    if(!$detail->aapcrDetail->parent->is_header) {
+                        $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
+                            $query->where(function($q) use ($officeId) {
+                                $q->where('vp_office_id', '=', $officeId)
+                                    ->orWhere('office_id', '=', $officeId);
+                            });
+                        })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
+
+                        if($parentDetail) {
+                            $isParent = 1;
+
+                            $parentDetails = $parentDetail;
+                        }else{
+                            $stored = 1;
+                        }
+                    }else {
+                        $isParent = 1;
+
+                        $parentDetails = $detail->aapcrDetail->parent;
+                    }
+                } else {
+                    if(!$detail->from_aapcr) {
+                        $isParent = 1;
+
+                        $parentDetails = $aapcrDetail;
+                    }else{
+
+                        $stored = 1;
+                    }
+                }
+            } else {
+                $stored = 1;
+            }
+
+            if($isParent) {
+                $isExists = 0;
+
+                foreach($parentIds as $id) {
+                    if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
+                        $isExists = 1;
+                    }
+                }
+
+                if(!$isExists) {
+
+                    $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
+
+                    array_push($parentIds, array(
+                        'id' => $parentDetails->id,
+                        'index' => $detail->category_id
+                    ));
+                } else {
+                    foreach($dataSource as $key => $source) {
+                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
+                            $data['type'] = 'sub';
+
+                            $dataSource[$key]['children'][] = $data;
+                        }
+                    }
+                }
+            } elseif($stored) {
+                if(count($detail->subDetails)) {
+                    $subs = [];
+
+                    foreach($detail->subDetails as $subDetail) {
+
+                        $subs[] = $this->getVpOpcrPdfDetails($subDetail, []);
+                    }
+
+//                    $data['children'] = $subs;
+                    $dataSource[] = $subs;
+                }
+
+                $dataSource[] = $data;
+
+                array_push($parentIds, array(
+                    'id' => $detail->id,
+                    'index' => $detail->category_id
+                ));
+            }
+        }
+    }
+
+    public function getVpOpcrPdfDetails($detail, $children)
+    {
+        $officeModel = new VpOpcrDetailOffice();
+
+        $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
+
+        $program = NULL;
+
+        if($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL) {
+            $program = strtoupper($detail->program->name);
+        }else if($detail->category_id === 'support_functions'){
+            $program = $detail->program->name;
+        }
+
+        $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
+
+        $measures = $this->fetchMeasuresPdf($detail->measures);
+
+        $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+
+        $data = array(
+            'category_id' => $detail->category_id,
+            'function' => $function,
+            'program' => $program,
+            'subCategory' => $subCategory,
+            'pi_name' => $detail->pi_name,
+            'target' => $detail->target,
+            'measures' => implode(", ", $measures),
+            'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
+            'targetsBasis' => $detail->targets_basis,
+            'implementing' => implode(", ", $getOffices['implementing']),
+            'supporting' => implode(", ", $getOffices['supporting']),
+            'subPICount' => 0
+        );
+
+        if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
+            $this->parentSubCategories = [];
+
+            $this->getParentSubCategories($detail->subCategory->parent_id);
+
+            $reversedSubCategories = array_reverse($this->parentSubCategories);
+
+            foreach($reversedSubCategories as $dataKey => $subParent) {
+                $subCategoryKey = "subCategoryParent_".($dataKey+1);
+
+                $data[$subCategoryKey] = $subParent;
+            }
+        }
+
+        return $data;
+    }
+
+    public function viewVpOpcrPdf1($id)
+    {
+        $vpopcr = VpOpcr::find($id);
+
+        $officeModel = new VpOpcrDetailOffice();
+
+        $signatory = $this->getSignatories($vpopcr, 'vpopcr');
+
+        $documentName = str_replace(" ","_", $vpopcr->office_name);
+
+        $details = $vpopcr->details()->where('parent_id', NULL)
+            ->orderBy('category_id', 'ASC')
+            ->orderByRaw('-program_id DESC')
+            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderBy('created_at', 'ASC')->get();
+
+        $count = 0;
+
+        $programsDataSet = array();
+
+        $dataSetCount = 0;
+
+        foreach($details as $detail) {
+
+            $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
+
+            $program = NULL;
+
+            if($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL) {
+                $program = strtoupper($detail->program->name);
+            }else if($detail->category_id === 'support_functions'){
+                $program = $detail->program->name;
+            }
+
+            $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
+
+            $measures = $this->fetchMeasuresPdf($detail->measures);
+
+            $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+
+            $data[$count] = array(
+                'category_id' => $detail->category_id,
+                'function' => $function,
+                'program' => $program,
+                'subCategory' => $subCategory,
+                'pi_name' => $detail->pi_name,
+                'target' => $detail->target,
+                'measures' => implode(", ", $measures),
+                'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
+                'targetsBasis' => $detail->targets_basis,
+                'implementing' => implode(", ", $getOffices['implementing']),
+                'supporting' => implode(", ", $getOffices['supporting']),
+                'subPICount' => 0
+            );
+
+            if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
+                $this->parentSubCategories = [];
+
+                $this->getParentSubCategories($detail->subCategory->parent_id);
+
+                $reversedSubCategories = array_reverse($this->parentSubCategories);
+
+                foreach($reversedSubCategories as $dataKey => $subParent) {
+                    $subCategoryKey = "subCategoryParent_".($dataKey+1);
+
+                    $data[$count][$subCategoryKey] = $subParent;
+                }
+            }
+
+            $count++;
+
+            $subs = $vpopcr->details()->where('parent_id', $detail->id)->get();
+
+            if(count($subs)) {
+                foreach($subs as $key => $sub) {
+                    $subMeasures = $this->fetchMeasuresPdf($sub->measures);
+
+                    $getSubOffices = $this->getOfficesPdf($officeModel, $sub->id);
+
+                    $data[$count] = array(
+                        'category_id' => $detail->category_id,
+                        'function' => $function,
+                        'program' => $program,
+                        'subCategory' => $subCategory,
+                        'pi_name' => $sub->pi_name,
+                        'target' => $sub->target,
+                        'measures' => implode(", ", $subMeasures),
+                        'allocatedBudget' => $sub->allocated_budget ? number_format($sub->allocated_budget) : '',
+                        'targetsBasis' => $sub->targets_basis,
+                        'implementing' => implode(', ', $getSubOffices['implementing']),
+                        'supporting' => implode(', ', $getSubOffices['supporting']),
+                        'subPICount' => $key + 1
+                    );
+
+                    if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
+                        foreach($reversedSubCategories as $k => $subParent) {
+                            $subCategoryKey = "subCategoryParent_" . ($k + 1);
+
+                            $data[$count][$subCategoryKey] = $subParent;
+                        }
+                    }
+
+                    $count++;
+                }
+            }
+
+            if($detail->category_id === 'support_functions' || ($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL)){
+
+                $ifSaved = $this->array_any(function($x, $compare){
+                    return $x['programName'] === ucwords($compare['progName']);
+                }, $programsDataSet, ['progName' => strtolower($program)]);
+
+                if(!$ifSaved) {
+
+                    $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
+
+                    $programsDataSet[$dataSetCount] = array(
+                        'categoryName' => $categoryName,
+                        'categoryPercentage' => $detail->category->percentage,
+                        'programName' => ucwords($detail->program->name),
+                        'programPercentage' => $detail->program->percentage
+                    );
+
+                    $dataSetCount++;
+                }
+            }
+        }
+
+        $publicPath = public_path();
+
+        $params = array(
+            'usepLogo' => $publicPath."/logos/USeP_Logo.png",
+            'public_path' => $publicPath,
+            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'year' => $vpopcr->year,
+            'vpOfficeName' => $vpopcr->office_name,
+            'preparedBy' => strtoupper($signatory['preparedBy']),
+            'preparedByPosition' => $signatory['preparedByPosition'],
+            'preparedDate' => $signatory['preparedDate'],
+            'reviewedBy' => $signatory['reviewedBy'],
+            'reviewedByPosition' => $signatory['reviewedByPosition'],
+            'reviewedDate' => $signatory['reviewedDate'],
+            'approvedBy' => strtoupper($signatory['approvedBy']),
+            'approvedDate' => $signatory['approvedDate'],
+            'approvingPosition' => $signatory['approvedByPosition'],
+            'assessedBy' => 'NAME:',
+            'assessedByPosition' => 'PMT-PMG Member/Secretariat',
+            'programsDataSet' => $programsDataSet
+        );
+
+        $jasperReport = new Jasperreport();
+        $jasperReport->showReport('vpopcr', $params, $data, 'PDF', $documentName);
+
+        $pdf = public_path('forms/'.$documentName.".pdf");
+
+        return response()->download($pdf);
+    }
+
+    public function getSignatories($model, $form)
+    {
+        if($form === 'vpopcr') {
+            $signatories = Signatory::where([
+                ['year', $model->year],
+                ['form_id', $form],
+                ['office_form_id', $model->office_id]
+            ])->get();
+        } else {
+            $signatories = Signatory::where([
+                ['year', $model->year],
+                ['form_id', $form]
+            ])->get();
+        }
+
+        $signatoryList = [];
+
+        foreach($signatories as $signatory) {
+            $dataSignatories = [
+                'name' => strtoupper($signatory['personnel_name']),
+                'position' => $signatory['position'],
+                'office_name' => $signatory['office_name'],
+            ];
+
+            if(!array_key_exists($signatory->type_id, $signatoryList)) {
+                $signatoryList[$signatory->type_id] = [];
+            }
+
+            array_push($signatoryList[$signatory->type_id], $dataSignatories);
+        }
+
+        $preparedDate = ($model->finalized_date ? date("d F Y", strtotime($model->finalized_date)) : '');
+
+        if(isset($signatoryList['prepared_by'])) {
+            $preparedBy = $signatoryList['prepared_by'][0];
+
+            $preparedByName = $preparedBy['name'];
+
+            if($form === 'vpopcr') {
+                $preparedByPosition = str_replace('Office of the ', '', $preparedBy['office_name']);
+            } else {
+                $preparedByPosition = $preparedBy['position'] . ", " . $preparedBy['office_name'];
+            }
+        } else {
+            $preparedByName = "";
+            $preparedByPosition = "";
+        }
+
+        $reviewedDate = ($model->reviewed_date ? date("d F Y", strtotime($model->reviewed_date)) : '');
+
+        if(isset($signatoryList['reviewed_by'])) {
+            $reviewedBy = $signatoryList['reviewed_by'][0];
+
+            $reviewedByName = $reviewedBy['name'];
+
+            if($form === 'vpopcr') {
+                $reviewedByPosition = $reviewedBy['office_name'] . " " . $reviewedBy['position'];
+            } else {
+                $reviewedByPosition = $reviewedBy['position'] . ", " . $reviewedBy['office_name'];
+            }
+        } else {
+            $reviewedByName = "";
+            $reviewedByPosition = "";
+        }
+
+        $approvedDate = ($model->approved_date ? date("d F Y", strtotime($model->approved_date)) : '');
+
+        if (isset($signatoryList['approved_by'])) {
+            $approvedBy = $signatoryList['approved_by'][0];
+
+            $approvedByName = $approvedBy['name'];
+            $approvedByPosition = $approvedBy['position'];
+        } else {
+            $approvedByName = "";
+            $approvedByPosition = "";
+        }
+
+        return [
+            'preparedDate' => $preparedDate,
+            'preparedBy' => $preparedByName,
+            'preparedByPosition' => $preparedByPosition,
+            'reviewedDate' => $reviewedDate,
+            'reviewedBy' => $reviewedByName,
+            'reviewedByPosition' => $reviewedByPosition,
+            'approvedDate' => $approvedDate,
+            'approvedBy' => $approvedByName,
+            'approvedByPosition' => $approvedByPosition,
+        ];
     }
 
     public function fetchMeasuresPdf($details)
@@ -262,9 +629,9 @@ class AppController extends Controller
         return $measures;
     }
 
-    public function getOfficesPdf($detailId)
+    public function getOfficesPdf($model, $detailId)
     {
-        $getOffices = AapcrDetailOffice::select('office_name', 'office_type_id')
+        $getOffices = $model::select('office_name', 'office_type_id')
             ->where('detail_id', $detailId)
             ->orderBy('office_type_id', 'asc')
             ->get();

@@ -62,13 +62,20 @@
         </a-table>
       </div>
     </div>
+<!--    <a-modal v-model="visible"-->
+<!--             width="100%"-->
+<!--             :dialog-style="{ top: '20px' }"-->
+<!--             :body-style="{ 'height': '900px' }"-->
+<!--             :footer="null"-->
+<!--             :title="fileName"-->
+<!--             @cancel="handleClose">-->
+<!--      <iframe height="100%" width=100% :src="`${getFilePath}`" ></iframe>-->
+<!--    </a-modal>-->
   </div>
 </template>
 
 <script>
-// import { listTableColumns } from '@/services/formColumns'
 import { mapState } from 'vuex'
-// import moment from 'moment'
 import { Modal } from 'ant-design-vue'
 import * as apiForm from '@/services/mainForms/aapcr'
 import ListMixin from '@/services/formMixins/list'
@@ -76,7 +83,6 @@ import ListMixin from '@/services/formMixins/list'
 export default {
   title: 'AAPCR List',
   name: 'aapcr-list',
-  // props: ['formId'],
   mixins: [ListMixin],
   computed: {
     ...mapState({
@@ -90,8 +96,6 @@ export default {
   },
   data() {
     return {
-      // listTableColumns,
-      // moment,
     }
   },
   methods: {
@@ -104,32 +108,21 @@ export default {
         params: { formId: this.formId, id: id },
       })
     },
-    viewPdf2(id, documentName) {
-      const baseUrl = process.env.VUE_APP_BACKEND_URL
-      window.open(baseUrl + '/api/forms/aapcr/viewPdf/' + id + '/' + documentName + '.pdf', '_blank')
-    },
     viewPdf(id, documentName) {
-      // const baseUrl = process.env.VUE_APP_BACKEND_URL
-      const { form } = this
-      this.$store.commit(form + '/SET_STATE', {
+      const self = this
+      this.$store.commit('aapcr/SET_STATE', {
         loading: true,
       })
       const fetchPdfData = apiForm.fetchPdfData
       fetchPdfData(id, documentName).then(response => {
         if (response) {
+          self.visible = true
           const blob = new Blob([response], { type: 'application/pdf' })
-          const _url = window.URL.createObjectURL(blob)
-          // _url.setAttribute('download', _url)?
-          // const link = document.createElement('a')
-          // link.href = window.URL.createObjectURL(blob)
-          // link.download = documentName + '.pdf'
-          // link.setAttribute('target', '_blank')
-          // link.click()
-          // console.log(response)
-          // console.log(_url)
-          window.open(_url, '_blank').focus()
+          self.name = window.URL.createObjectURL(blob)
+          self.fileName = documentName
+          window.open(self.getFilePath, '_blank')
         }
-        this.$store.commit(form + '/SET_STATE', {
+        this.$store.commit('aapcr/SET_STATE', {
           loading: false,
         })
       })
@@ -150,6 +143,8 @@ export default {
         },
       })
     },
+  },
+  components: {
   },
 }
 </script>

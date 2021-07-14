@@ -81,7 +81,10 @@ trait OfficeTrait {
             } elseif($selectable) {
                 $data->selectable = $selectable->allColleges;
             }
+
             array_push($values, $data);
+
+            $isAcronym = isset($status->isAcronym) && $status->isAcronym;
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
                 'token' => env('DATA_HRIS_API_TOKEN')
@@ -96,7 +99,7 @@ trait OfficeTrait {
 
                     $data->id = $vpoffice->id;
                     $data->value = $vpoffice->id;
-                    $data->title = $vpoffice->Acronym;
+                    $data->title = $isAcronym ? $vpoffice->Acronym : $vpoffice->Department;
                     $data->cascadeTo = null;
                     $data->children = $this->getChildOffices($vpoffice->id,1);
 

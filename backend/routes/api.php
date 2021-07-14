@@ -56,7 +56,7 @@ Route::group([
 
     Route::get('/get-all-signatory-types', 'SettingController@getAllSignatoryTypes');
 
-    Route::get('/get-year-signatories/{year}/{formId}', 'SettingController@getYearSignatories');
+    Route::get('/get-year-signatories/{year}/{formId}/{officeId}', 'SettingController@getYearSignatories');
     Route::post('/save-signatories', 'SettingController@saveSignatories');
     Route::post('/update-signatories', 'SettingController@updateSignatories');
     Route::post('/delete-signatory/{id}', 'SettingController@deleteSignatory');
@@ -80,7 +80,7 @@ Route::group([
         Route::post('/publish', 'Form\AapcrController@publish');
         Route::post('/deactivate', 'Form\AapcrController@deactivate');
         Route::get('/view/{id}', 'Form\AapcrController@view');
-        Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewPdf');
+        Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewAapcrPdf');
         Route::post('/update/{id}', 'Form\AapcrController@update');
     });
 
@@ -96,6 +96,7 @@ Route::group([
         Route::post('/publish', 'Form\VpopcrController@publish');
         Route::post('/deactivate', 'Form\VpopcrController@deactivate');
         Route::get('/view/{id}', 'Form\VpopcrController@view');
+        Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
         Route::post('/update/{id}', 'Form\VpopcrController@update');
     });
 });

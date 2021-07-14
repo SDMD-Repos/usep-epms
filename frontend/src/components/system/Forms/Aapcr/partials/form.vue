@@ -415,6 +415,7 @@ export default {
           allColleges: true,
           mains: true,
         },
+        isAcronym: true,
       }
       params = encodeURIComponent(JSON.stringify(params))
       this.$store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params }) // needs to load first

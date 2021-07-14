@@ -480,12 +480,20 @@ class SettingController extends Controller
         ], 200);
     }
 
-    public function getYearSignatories($year, $formId)
+    public function getYearSignatories($year, $formId, $officeId)
     {
-        $signatories = Signatory::select("*", "id as key")->where([
-            ['form_id', $formId],
-            ['year', $year]
-        ])->get();
+        if($officeId === 'undefined') {
+            $signatories = Signatory::select("*", "id as key")->where([
+                ['form_id', $formId],
+                ['year', $year]
+            ])->get();
+        } else {
+            $signatories = Signatory::select("*", "id as key")->where([
+                ['form_id', $formId],
+                ['year', $year],
+                ['office_form_id', $officeId]
+            ])->get();
+        }
 
         return response()->json([
             'signatories' => $signatories
@@ -507,12 +515,13 @@ class SettingController extends Controller
 
             $signatories = $validated['signatories'];
 
+            $officeFormId = $validated['officeId'] ?? null;
+
             foreach($signatories as $signatory) {
 
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
                     $officeId = $signatory['officeId']['value'];
-//                    list($officeName, $officeId) = explode('_', $signatory['officeId']);
                 } else {
                     $officeId = null;
                     $officeName = $signatory['officeId'];
@@ -521,7 +530,6 @@ class SettingController extends Controller
                 if(!$signatory['isCustom']) {
                     $personnelName = $signatory['personnelId']['label'];
                     $personnelId = $signatory['personnelId']['value'];
-//                    list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
                 } else {
                     $personnelId = null;
                     $personnelName = $signatory['personnelId'];
@@ -537,6 +545,7 @@ class SettingController extends Controller
                 $newSignatory->office_id = $officeId;
                 $newSignatory->office_name = $officeName;
                 $newSignatory->position = $signatory['position'];
+                $newSignatory->office_form_id = $officeFormId;
                 $newSignatory->create_id = $this->login_user->pmaps_id;
                 $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 

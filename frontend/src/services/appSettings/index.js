@@ -135,9 +135,9 @@ export async function getAllSignatoryTypes() {
     .catch(err => console.log(err))
 }
 
-export async function getYearSignatories(year, formId) {
+export async function getYearSignatories(year, formId, officeId) {
   return apiClient
-    .get('/settings/get-year-signatories/' + year + '/' + formId)
+    .get('/settings/get-year-signatories/' + year + '/' + formId + '/' + officeId)
     .then(response => {
       return response.data
     })
