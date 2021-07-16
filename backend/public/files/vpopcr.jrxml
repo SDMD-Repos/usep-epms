@@ -2,24 +2,24 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="vpopcr" language="groovy" pageWidth="938" pageHeight="612" orientation="Landscape" columnWidth="898" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="be2c73b6-eb3d-45b7-8c2a-78f34c496094">
 	<property name="ireport.zoom" value="1.4641000000000017"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="432"/>
+	<property name="ireport.y" value="384"/>
 	<style name="ProgramHeader" mode="Opaque">
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_id} == "core_functions" && $F{subCategory} != null]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{categoryId} == "core_functions" && $F{subCategory} != null]]></conditionExpression>
 			<style mode="Opaque" forecolor="#000000" backcolor="#F7CAAC" fill="Solid" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="5" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_id} == "support_functions"]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{categoryId} == "support_functions"]]></conditionExpression>
 			<style mode="Transparent" forecolor="#000000" backcolor="#FFFFFF" fill="Solid" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="5" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_id} == "core_functions" && ($F{subCategory} == null || $F{subCategory} == "")]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{categoryId} == "core_functions" && ($F{subCategory} == null || $F{subCategory} == "")]]></conditionExpression>
 			<style mode="Opaque" forecolor="#000000" backcolor="#D8D8D8" fill="Solid" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="5" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
 		</conditionalStyle>
 	</style>
 	<style name="subCategoryHeader" mode="Opaque">
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_id} == "support_functions"]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{categoryId} == "support_functions"]]></conditionExpression>
 			<style mode="Opaque" forecolor="#000000" fill="Solid" hAlign="Left" vAlign="Middle" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica" isPdfEmbedded="false"/>
 		</conditionalStyle>
 		<conditionalStyle>
@@ -27,7 +27,7 @@
 			<style mode="Transparent" forecolor="#000000" backcolor="#D8D8D8" fill="Solid" hAlign="Center" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="DejaVu Sans"/>
 		</conditionalStyle>
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{subCategory} != "Outcome Indicators" && $F{subCategory} != "Output Indicators" && $F{category_id} != "support_functions"]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{subCategory} != "Outcome Indicators" && $F{subCategory} != "Output Indicators" && $F{categoryId} != "support_functions"]]></conditionExpression>
 			<style mode="Opaque" forecolor="#000000" backcolor="#FBE4D5" fill="Solid" hAlign="Center" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="DejaVu Sans" isPdfEmbedded="true"/>
 		</conditionalStyle>
 	</style>
@@ -51,11 +51,11 @@
 	<parameter name="assessedByPosition" class="java.lang.String"/>
 	<parameter name="notFinalImage" class="java.lang.String"/>
 	<parameter name="public_path" class="java.lang.String"/>
-	<field name="pi_name" class="java.lang.String"/>
+	<field name="piName" class="java.lang.String"/>
 	<field name="subCategory" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
 	<field name="function" class="java.lang.String"/>
-	<field name="category_id" class="java.lang.String"/>
+	<field name="categoryId" class="java.lang.String"/>
 	<field name="allocatedBudget" class="java.lang.String"/>
 	<field name="subPICount" class="java.lang.String"/>
 	<field name="target" class="java.lang.String"/>
@@ -68,12 +68,14 @@
 	<field name="subCategoryParent_1" class="java.lang.String"/>
 	<field name="subCategoryParent_2" class="java.lang.String"/>
 	<field name="subCategoryParent_3" class="java.lang.String"/>
+	<field name="id" class="java.lang.String"/>
+	<field name="children" class="java.util.ArrayList"/>
 	<variable name="programTotal" class="java.math.BigDecimal" resetType="Group" resetGroup="GroupSubCategory" calculation="First">
 		<variableExpression><![CDATA[$F{programBudget}]]></variableExpression>
 		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
 	</variable>
 	<variable name="subCategoryCount" class="java.lang.Integer" resetType="Group" resetGroup="GroupSubCategory" calculation="Sum">
-		<variableExpression><![CDATA[$F{subPICount} == "0" ? 1 : 0]]></variableExpression>
+		<variableExpression><![CDATA[1]]></variableExpression>
 		<initialValueExpression><![CDATA[1]]></initialValueExpression>
 	</variable>
 	<variable name="totalBudget" class="java.math.BigDecimal" calculation="Sum">
@@ -722,7 +724,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{subPICount} != "0" ? ("     "+$V{subCategoryCount}+"."+$F{subPICount}+" "+$F{pi_name}) : ($V{subCategoryCount}+". "+$F{pi_name})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{subCategoryCount}+". "+$F{piName}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="534f3092-277b-4df0-8611-a6713f391c76" stretchType="RelativeToTallestObject" x="227" y="0" width="94" height="13" isPrintWhenDetailOverflows="true"/>
@@ -836,6 +838,17 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{allocatedBudget}]]></textFieldExpression>
 			</textField>
+		</band>
+		<band height="13">
+			<printWhenExpression><![CDATA[!$F{children}.isEmpty()]]></printWhenExpression>
+			<subreport>
+				<reportElement uuid="0be9d8f6-e68b-4deb-9249-c03421b9bfc8" x="0" y="0" width="898" height="13"/>
+				<subreportParameter name="parentCount">
+					<subreportParameterExpression><![CDATA[$V{subCategoryCount}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{children})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{public_path} + "\\files\\vpopcr_sub_details.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</detail>
 	<summary>

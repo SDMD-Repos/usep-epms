@@ -62,15 +62,6 @@
         </a-table>
       </div>
     </div>
-<!--    <a-modal v-model="visible"-->
-<!--             width="100%"-->
-<!--             :dialog-style="{ top: '20px' }"-->
-<!--             :body-style="{ 'height': '900px' }"-->
-<!--             :footer="null"-->
-<!--             :title="fileName"-->
-<!--             @cancel="handleClose">-->
-<!--      <iframe height="100%" width=100% :src="`${getFilePath}`" ></iframe>-->
-<!--    </a-modal>-->
   </div>
 </template>
 

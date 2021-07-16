@@ -19,6 +19,8 @@ class AppController extends Controller
 
     private $login_user;
 
+    private $programDataSet= [];
+
     /**
      * Create a new controller instance.
      *
@@ -208,6 +210,8 @@ class AppController extends Controller
     {
         $vpopcr = VpOpcr::find($id);
 
+//        $officeId = $vpopcr->office_id;
+
         $signatory = $this->getSignatories($vpopcr, 'vpopcr');
 
         $documentName = str_replace(" ","_", $vpopcr->office_name);
@@ -216,6 +220,7 @@ class AppController extends Controller
             ->orderBy('category_id', 'ASC')
             ->orderByRaw('-program_id DESC')
             ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderByRaw('-`aapcr_detail_id` DESC')
             ->orderBy('created_at', 'ASC')->get();
 
         $dataSource = [];
@@ -236,7 +241,7 @@ class AppController extends Controller
 
                 if($aapcrDetail->parent_id && $detail->from_aapcr) {
                     if(!$detail->aapcrDetail->parent->is_header) {
-                        $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
+                        /*$parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
                             $query->where(function($q) use ($officeId) {
                                 $q->where('vp_office_id', '=', $officeId)
                                     ->orWhere('office_id', '=', $officeId);
@@ -249,21 +254,23 @@ class AppController extends Controller
                             $parentDetails = $parentDetail;
                         }else{
                             $stored = 1;
-                        }
+                        }*/
+                        $stored = 1;
                     }else {
                         $isParent = 1;
 
                         $parentDetails = $detail->aapcrDetail->parent;
                     }
                 } else {
-                    if(!$detail->from_aapcr) {
+                    /*if(!$detail->from_aapcr) {
                         $isParent = 1;
 
                         $parentDetails = $aapcrDetail;
                     }else{
 
                         $stored = 1;
-                    }
+                    }*/
+                    $stored = 1;
                 }
             } else {
                 $stored = 1;
@@ -288,8 +295,7 @@ class AppController extends Controller
                     ));
                 } else {
                     foreach($dataSource as $key => $source) {
-                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
-                            $data['type'] = 'sub';
+                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['categoryId']) {
 
                             $dataSource[$key]['children'][] = $data;
                         }
@@ -304,8 +310,7 @@ class AppController extends Controller
                         $subs[] = $this->getVpOpcrPdfDetails($subDetail, []);
                     }
 
-//                    $data['children'] = $subs;
-                    $dataSource[] = $subs;
+                    $data['children'] = $subs;
                 }
 
                 $dataSource[] = $data;
@@ -316,6 +321,35 @@ class AppController extends Controller
                 ));
             }
         }
+
+        $publicPath = public_path();
+
+        $params = array(
+            'usepLogo' => $publicPath."/logos/USeP_Logo.png",
+            'public_path' => $publicPath,
+            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'year' => $vpopcr->year,
+            'vpOfficeName' => $vpopcr->office_name,
+            'preparedBy' => strtoupper($signatory['preparedBy']),
+            'preparedByPosition' => $signatory['preparedByPosition'],
+            'preparedDate' => $signatory['preparedDate'],
+            'reviewedBy' => $signatory['reviewedBy'],
+            'reviewedByPosition' => $signatory['reviewedByPosition'],
+            'reviewedDate' => $signatory['reviewedDate'],
+            'approvedBy' => strtoupper($signatory['approvedBy']),
+            'approvedDate' => $signatory['approvedDate'],
+            'approvingPosition' => $signatory['approvedByPosition'],
+            'assessedBy' => 'NAME:',
+            'assessedByPosition' => 'PMT-PMG Member/Secretariat',
+            'programsDataSet' => $this->programDataSet
+        );
+
+        $jasperReport = new Jasperreport();
+        $jasperReport->showReport('vpopcr', $params, $dataSource, 'PDF', $documentName);
+
+        $pdf = public_path('forms/'.$documentName.".pdf");
+
+        return response()->download($pdf);
     }
 
     public function getVpOpcrPdfDetails($detail, $children)
@@ -339,18 +373,18 @@ class AppController extends Controller
         $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
 
         $data = array(
-            'category_id' => $detail->category_id,
+            'id' => $detail->id,
+            'categoryId' => $detail->category_id,
             'function' => $function,
             'program' => $program,
             'subCategory' => $subCategory,
-            'pi_name' => $detail->pi_name,
+            'piName' => $detail->pi_name,
             'target' => $detail->target,
             'measures' => implode(", ", $measures),
             'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
             'targetsBasis' => $detail->targets_basis,
             'implementing' => implode(", ", $getOffices['implementing']),
             'supporting' => implode(", ", $getOffices['supporting']),
-            'subPICount' => 0
         );
 
         if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
@@ -364,6 +398,29 @@ class AppController extends Controller
                 $subCategoryKey = "subCategoryParent_".($dataKey+1);
 
                 $data[$subCategoryKey] = $subParent;
+            }
+        }
+
+        if(count($children)){
+            $data['children'][] = $children;
+        }
+
+        if($detail->category_id === 'support_functions' || ($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL)){
+
+            $ifSaved = $this->array_any(function($x, $compare){
+                return $x['programName'] === ucwords($compare['progName']);
+            }, $this->programDataSet, ['progName' => strtolower($program)]);
+
+            if(!$ifSaved) {
+
+                $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
+
+                $this->programDataSet[] = array(
+                    'categoryName' => $categoryName,
+                    'categoryPercentage' => $detail->category->percentage,
+                    'programName' => ucwords($detail->program->name),
+                    'programPercentage' => $detail->program->percentage
+                );
             }
         }
 

@@ -66,10 +66,22 @@ class Jasperreport
         #------------- DATA -------------------------------------------------------------------------------------
         #------------- DATA -------------------------------------------------------------------------------------
         $jCollection = new Java("java.util.ArrayList");
+
         foreach ($data as $i => $row) {
             $jMap = new Java('java.util.HashMap');
-            foreach ($row as $field => $value) {
-                $jMap->put($field, $value);
+            foreach ( $row as $field => $value ) {
+                if(gettype($value) === 'array') {
+                    $jMap->put($field, new Java("java.util.ArrayList"));
+                    foreach($value as $val) {
+                        $subMap = new Java("java.util.HashMap");
+                        foreach($val as $f => $v ) {
+                            $subMap->put($f, $v);
+                        }
+                        $jMap->get($field)->add($subMap);
+                    }
+                } else {
+                    $jMap->put($field, $value);
+                }
 
             }
             $jCollection->add($jMap);
