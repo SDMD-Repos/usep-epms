@@ -368,9 +368,15 @@ class AppController extends Controller
 
         $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
 
-        $measures = $this->fetchMeasuresPdf($detail->measures);
+        $measures = '' ;
 
-        $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+        $getOffices = [];
+
+        if(!$detail->is_header) {
+            $measures = $this->fetchMeasuresPdf($detail->measures);
+
+            $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+        }
 
         $data = array(
             'id' => $detail->id,
@@ -380,11 +386,11 @@ class AppController extends Controller
             'subCategory' => $subCategory,
             'piName' => $detail->pi_name,
             'target' => $detail->target,
-            'measures' => implode(", ", $measures),
+            'measures' => $measures ? implode(", ", $measures) : '',
             'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
             'targetsBasis' => $detail->targets_basis,
-            'implementing' => implode(", ", $getOffices['implementing']),
-            'supporting' => implode(", ", $getOffices['supporting']),
+            'implementing' => isset($getOffices['implementing']) ? implode(", ", $getOffices['implementing']) : '',
+            'supporting' => isset($getOffices['supporting']) ? implode(", ", $getOffices['supporting']) : '',
         );
 
         if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
@@ -425,164 +431,6 @@ class AppController extends Controller
         }
 
         return $data;
-    }
-
-    public function viewVpOpcrPdf1($id)
-    {
-        $vpopcr = VpOpcr::find($id);
-
-        $officeModel = new VpOpcrDetailOffice();
-
-        $signatory = $this->getSignatories($vpopcr, 'vpopcr');
-
-        $documentName = str_replace(" ","_", $vpopcr->office_name);
-
-        $details = $vpopcr->details()->where('parent_id', NULL)
-            ->orderBy('category_id', 'ASC')
-            ->orderByRaw('-program_id DESC')
-            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
-            ->orderBy('created_at', 'ASC')->get();
-
-        $count = 0;
-
-        $programsDataSet = array();
-
-        $dataSetCount = 0;
-
-        foreach($details as $detail) {
-
-            $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
-
-            $program = NULL;
-
-            if($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL) {
-                $program = strtoupper($detail->program->name);
-            }else if($detail->category_id === 'support_functions'){
-                $program = $detail->program->name;
-            }
-
-            $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
-
-            $measures = $this->fetchMeasuresPdf($detail->measures);
-
-            $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
-
-            $data[$count] = array(
-                'category_id' => $detail->category_id,
-                'function' => $function,
-                'program' => $program,
-                'subCategory' => $subCategory,
-                'pi_name' => $detail->pi_name,
-                'target' => $detail->target,
-                'measures' => implode(", ", $measures),
-                'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
-                'targetsBasis' => $detail->targets_basis,
-                'implementing' => implode(", ", $getOffices['implementing']),
-                'supporting' => implode(", ", $getOffices['supporting']),
-                'subPICount' => 0
-            );
-
-            if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
-                $this->parentSubCategories = [];
-
-                $this->getParentSubCategories($detail->subCategory->parent_id);
-
-                $reversedSubCategories = array_reverse($this->parentSubCategories);
-
-                foreach($reversedSubCategories as $dataKey => $subParent) {
-                    $subCategoryKey = "subCategoryParent_".($dataKey+1);
-
-                    $data[$count][$subCategoryKey] = $subParent;
-                }
-            }
-
-            $count++;
-
-            $subs = $vpopcr->details()->where('parent_id', $detail->id)->get();
-
-            if(count($subs)) {
-                foreach($subs as $key => $sub) {
-                    $subMeasures = $this->fetchMeasuresPdf($sub->measures);
-
-                    $getSubOffices = $this->getOfficesPdf($officeModel, $sub->id);
-
-                    $data[$count] = array(
-                        'category_id' => $detail->category_id,
-                        'function' => $function,
-                        'program' => $program,
-                        'subCategory' => $subCategory,
-                        'pi_name' => $sub->pi_name,
-                        'target' => $sub->target,
-                        'measures' => implode(", ", $subMeasures),
-                        'allocatedBudget' => $sub->allocated_budget ? number_format($sub->allocated_budget) : '',
-                        'targetsBasis' => $sub->targets_basis,
-                        'implementing' => implode(', ', $getSubOffices['implementing']),
-                        'supporting' => implode(', ', $getSubOffices['supporting']),
-                        'subPICount' => $key + 1
-                    );
-
-                    if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
-                        foreach($reversedSubCategories as $k => $subParent) {
-                            $subCategoryKey = "subCategoryParent_" . ($k + 1);
-
-                            $data[$count][$subCategoryKey] = $subParent;
-                        }
-                    }
-
-                    $count++;
-                }
-            }
-
-            if($detail->category_id === 'support_functions' || ($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL)){
-
-                $ifSaved = $this->array_any(function($x, $compare){
-                    return $x['programName'] === ucwords($compare['progName']);
-                }, $programsDataSet, ['progName' => strtolower($program)]);
-
-                if(!$ifSaved) {
-
-                    $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
-
-                    $programsDataSet[$dataSetCount] = array(
-                        'categoryName' => $categoryName,
-                        'categoryPercentage' => $detail->category->percentage,
-                        'programName' => ucwords($detail->program->name),
-                        'programPercentage' => $detail->program->percentage
-                    );
-
-                    $dataSetCount++;
-                }
-            }
-        }
-
-        $publicPath = public_path();
-
-        $params = array(
-            'usepLogo' => $publicPath."/logos/USeP_Logo.png",
-            'public_path' => $publicPath,
-            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
-            'year' => $vpopcr->year,
-            'vpOfficeName' => $vpopcr->office_name,
-            'preparedBy' => strtoupper($signatory['preparedBy']),
-            'preparedByPosition' => $signatory['preparedByPosition'],
-            'preparedDate' => $signatory['preparedDate'],
-            'reviewedBy' => $signatory['reviewedBy'],
-            'reviewedByPosition' => $signatory['reviewedByPosition'],
-            'reviewedDate' => $signatory['reviewedDate'],
-            'approvedBy' => strtoupper($signatory['approvedBy']),
-            'approvedDate' => $signatory['approvedDate'],
-            'approvingPosition' => $signatory['approvedByPosition'],
-            'assessedBy' => 'NAME:',
-            'assessedByPosition' => 'PMT-PMG Member/Secretariat',
-            'programsDataSet' => $programsDataSet
-        );
-
-        $jasperReport = new Jasperreport();
-        $jasperReport->showReport('vpopcr', $params, $data, 'PDF', $documentName);
-
-        $pdf = public_path('forms/'.$documentName.".pdf");
-
-        return response()->download($pdf);
     }
 
     public function getSignatories($model, $form)

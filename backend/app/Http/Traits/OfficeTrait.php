@@ -253,4 +253,76 @@ trait OfficeTrait {
             'positionList' => $positionList
         ], 200);
     }
+    public function getUserOffices($form)
+    {
+        try{
+            $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+                "pmaps_id" => $this->login_user->pmaps_id,
+                "token" => env("DATA_HRIS_API_TOKEN")
+            ]);
+
+            $data = json_decode($response->body());
+
+            $personnelOffices = array();
+
+            if(count($data)){
+                foreach($data as $datum) {
+                    $isCollege = filter_var($datum->isCollege, FILTER_VALIDATE_BOOLEAN);
+
+                    $add = ($form === 'cpcr' && !$isCollege) || ($form === 'opcr' && $isCollege) ? false : true;
+
+                    if($add) {
+                        $ifExists = $this->array_any(function($x, $compare){
+                            return $x->id === $compare['id'];
+                        }, $personnelOffices, ['id' => $datum->DepartmentID]);
+
+                        if(!$ifExists){
+                            $newOffice = new \stdClass();
+
+                            $newOffice->key = $datum->DepartmentID;
+                            $newOffice->value = $datum->DepartmentID;
+                            $newOffice->title = $datum->DepartmentName;
+                            $newOffice->acronym = $datum->Acronym;
+
+                            array_push($personnelOffices, $newOffice);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'personnelOffices' => $personnelOffices
+            ], 200);
+        }catch(\Exception $e){
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
+        }
+
+    }
+
+    public function getOfficeParentId($officeId, $form)
+    {
+        $vpOfficeId = 'colleges';
+
+        if($form === 'opcr'){
+            $params = array(
+                "token" => env("DATA_HRIS_API_TOKEN"),
+                "department_id" => $officeId
+            );
+
+            $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/structure/subdepartment', $params);
+
+            $objs = json_decode($response->body());
+
+            if(count($objs)) {
+                foreach ($objs as $obj) {
+                    $vpOfficeId = $obj->HeadDepartmentID;
+                }
+            }
+        }
+
+        return $vpOfficeId;
+    }
+
 }

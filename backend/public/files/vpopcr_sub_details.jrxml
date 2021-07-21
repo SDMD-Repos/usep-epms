@@ -28,7 +28,7 @@
 				<textFieldExpression><![CDATA[$P{parentCount} + "." + $V{REPORT_COUNT} + " " + $F{piName}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="063619d8-d9f0-42fc-a32e-eaa7331badd1" stretchType="RelativeToTallestObject" x="470" y="0" width="120" height="13" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="063619d8-d9f0-42fc-a32e-eaa7331badd1" stretchType="RelativeToTallestObject" x="454" y="0" width="100" height="13" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -42,7 +42,7 @@
 				<textFieldExpression><![CDATA[$F{targetsBasis}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement uuid="ff1901a2-bd43-4b7e-955f-790e2584ffcc" stretchType="RelativeToTallestObject" x="405" y="0" width="65" height="13" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="ff1901a2-bd43-4b7e-955f-790e2584ffcc" stretchType="RelativeToTallestObject" x="405" y="0" width="49" height="13" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -56,7 +56,7 @@
 				<textFieldExpression><![CDATA[$F{allocatedBudget}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="f8686477-6a50-4c86-b2b4-0fb7d668b914" stretchType="RelativeToTallestObject" x="590" y="0" width="97" height="13" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="f8686477-6a50-4c86-b2b4-0fb7d668b914" stretchType="RelativeToTallestObject" x="554" y="0" width="97" height="13" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -84,7 +84,7 @@
 				<textFieldExpression><![CDATA[$F{target}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="67580173-7782-4567-b084-7f81483a64cd" stretchType="RelativeToTallestObject" x="687" y="0" width="97" height="13" isPrintWhenDetailOverflows="true"/>
+				<reportElement uuid="67580173-7782-4567-b084-7f81483a64cd" stretchType="RelativeToTallestObject" x="651" y="0" width="97" height="13" isPrintWhenDetailOverflows="true"/>
 				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -112,7 +112,7 @@
 				<textFieldExpression><![CDATA[$F{measures}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement uuid="98a68718-b351-4984-bcc9-adacf85168c6" stretchType="RelativeToTallestObject" x="841" y="0" width="57" height="13"/>
+				<reportElement uuid="98a68718-b351-4984-bcc9-adacf85168c6" stretchType="RelativeToTallestObject" x="848" y="0" width="50" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>
@@ -126,7 +126,21 @@
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="a1744168-c2d9-422a-a8b7-3298d370f6fe" stretchType="RelativeToTallestObject" x="784" y="0" width="57" height="13"/>
+				<reportElement uuid="a1744168-c2d9-422a-a8b7-3298d370f6fe" stretchType="RelativeToTallestObject" x="748" y="0" width="50" height="13"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a1744168-c2d9-422a-a8b7-3298d370f6fe" stretchType="RelativeToTallestObject" x="798" y="0" width="50" height="13"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.5"/>

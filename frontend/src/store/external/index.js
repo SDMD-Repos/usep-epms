@@ -8,6 +8,7 @@ const mapApiProviders = {
   getMainOfficesOnly: hris.getMainOfficesOnly,
   getPersonnelList: hris.getPersonnelByOffice,
   getAllPositions: hris.getAllPositions,
+  getPersonnelOffices: hris.getPersonnelOffices,
 }
 
 Vue.use(Vuex)
@@ -20,6 +21,7 @@ export default {
     mainOfficesChildren: [],
     personnel: [],
     positionList: [],
+    personnelOffices: [],
     loading: false,
   },
   mutations: {
@@ -94,6 +96,25 @@ export default {
           const { personnel } = response
           commit('SET_STATE', {
             personnel: personnel,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_OFFICES_BY_PERSONNEL({ commit }, { payload }) {
+      const { formId } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getPersonnelOffices = mapApiProviders.getPersonnelOffices
+      getPersonnelOffices(formId).then(response => {
+        if (response) {
+          const { personnelOffices } = response
+          commit('SET_STATE', {
+            personnelOffices: personnelOffices,
           })
         }
         commit('SET_STATE', {

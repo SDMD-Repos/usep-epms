@@ -6,6 +6,7 @@ import formSettings from './formSettings'
 import external from './external'
 import aapcr from './aapcr'
 import opcrvp from './opcrvp'
+import ocpcr from './ocpcr'
 
 Vue.use(Vuex)
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
     external,
     aapcr,
     opcrvp,
+    ocpcr,
   },
   state: {
     dateFormat: 'YYYY-MM-DD hh:mm A',

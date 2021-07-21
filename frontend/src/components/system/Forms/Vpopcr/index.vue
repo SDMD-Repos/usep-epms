@@ -111,14 +111,10 @@ export default {
   mixins: [IndexMixin],
   data() {
     return {
-      year: new Date().getFullYear(),
       vpOpcrId: null,
       aapcrId: null,
       vpOffice: undefined,
-      activeKey: '0',
       drawer: '',
-      dataSource: [],
-      targetsBasisList: [],
       counter: 0,
     }
   },
@@ -128,15 +124,6 @@ export default {
       loading: state => state.formSettings.loading,
       vpOfficesList: state => state.external.vpOffices,
     }),
-    years() {
-      const now = new Date().getFullYear()
-      const min = 10
-      const lists = []
-      for (let i = now; i >= (now - min); i--) {
-        lists.push(i)
-      }
-      return lists
-    },
   },
   created() {
     this.vpOpcrId = this.$route.params.id

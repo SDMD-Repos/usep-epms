@@ -99,6 +99,22 @@ Route::group([
         Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
         Route::post('/update/{id}', 'Form\VpopcrController@update');
     });
+
+    # OPCR & CPCR Form Controller routes
+
+    Route::group([
+        'prefix' => 'ocpcr'
+    ], function() {
+        Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
+        Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
+        Route::post('/save', 'Form\VpopcrController@save');
+        Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
+        Route::post('/publish', 'Form\VpopcrController@publish');
+        Route::post('/deactivate', 'Form\VpopcrController@deactivate');
+        Route::get('/view/{id}', 'Form\VpopcrController@view');
+        Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
+        Route::post('/update/{id}', 'Form\VpopcrController@update');
+    });
 });
 
 Route::group([
@@ -109,4 +125,5 @@ Route::group([
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
+    Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
 });

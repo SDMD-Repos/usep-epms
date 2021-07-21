@@ -70,7 +70,7 @@
                   </a-row>
                 </a-form-item>
               </a-form>
-              <table-signatories :key="`${key}`" :year="year" :form-id="formId"
+              <table-signatories :key="`${key}`" :year="year" :form-id="formId" :office-id="office"
                                  :list="filterBySignatory(type.id)" :loading="!loading && loadingList"
                                  v-else/>
             </div>

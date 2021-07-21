@@ -25,7 +25,7 @@ const columns = [
 ]
 
 export default {
-  props: ['list', 'year', 'formId', 'loading'],
+  props: ['list', 'year', 'formId', 'officeId', 'loading'],
   data() {
     return {
       columns,
@@ -36,6 +36,7 @@ export default {
       const data = {
         year: this.year,
         formId: this.formId,
+        officeId: this.officeId,
         id: key,
       }
       this.$store.dispatch('formSettings/DELETE_POSITION_SIGNATORY', { payload: data })
