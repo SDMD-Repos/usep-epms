@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('lastName', 50);
             $table->string('email', 100);
             $table->text('avatar');
-            $table->text('remember_token');
+            $table->text('remember_token')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

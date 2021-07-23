@@ -3,7 +3,7 @@ import store from 'store'
 import { notification } from 'ant-design-vue'
 
 const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: process.env.VUE_APP_BACKEND_URL + '/api',
   // timeout: 1000,
   // headers: { 'X-Custom-Header': 'foobar' }
 })

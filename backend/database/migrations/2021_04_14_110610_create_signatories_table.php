@@ -16,7 +16,7 @@ class CreateSignatoriesTable extends Migration
         Schema::create('signatories', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->year('year');
-            $table->string('position_id', 15);
+            $table->string('type_id', 15);
             $table->string('form_id', 15);
             $table->string('personnel_id', 30)->nullable();
             $table->string('personnel_name', 150);
@@ -31,7 +31,7 @@ class CreateSignatoriesTable extends Migration
             $table->softDeletes();
             $table->text('history');
 
-            $table->foreign('position_id')->references('id')->on('positions')->onUpdate('cascade');
+            $table->foreign('type_id')->references('id')->on('signatory_types')->onUpdate('cascade');
             $table->foreign('form_id')->references('id')->on('forms')->onUpdate('cascade');
         });
     }
