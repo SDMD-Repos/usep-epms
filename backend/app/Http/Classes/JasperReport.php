@@ -12,7 +12,7 @@ class Jasperreport
     {
         if (!extension_loaded('java')) {
             $sapi_type = php_sapi_name();
-            $port = (isset($_SERVER['SERVER_PORT']) && (($_SERVER['SERVER_PORT']) > 1024)) ? $_SERVER['SERVER_PORT'] : '8080';
+            $port = (isset($_SERVER['SERVER_PORT']) && (($_SERVER['SERVER_PORT']) > 1024)) ? $_SERVER['SERVER_PORT'] : '8090';
             if ($sapi_type == "cgi" || $sapi_type == "cgi-fcgi" || $sapi_type == "cli") {
                 require_once(config('tomcat.tomcat_java'));
                 return true;

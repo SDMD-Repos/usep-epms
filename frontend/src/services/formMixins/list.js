@@ -9,18 +9,22 @@ export default {
       visible: false,
       name: '',
       fileName: '',
-      path: 'lib/pdfjs-2.8.335-dist/web/viewer.html',
       listTableColumns,
       moment,
+      config: {
+        toolbar: {
+          toolbarViewerRight: {
+            presentationMode: false,
+            viewBookmark: false,
+            openFile: false,
+            secondaryToolbarToggle: false,
+          },
+        },
+        secondaryToolbar: false,
+      },
     }
   },
   computed: {
-    getFilePath() {
-      if (this.name !== '') {
-        return this.path + '?file=' + this.name + '&name=' + this.fileName + '.pdf'
-      }
-      return this.path
-    },
   },
   methods: {
     deactivate(id) {

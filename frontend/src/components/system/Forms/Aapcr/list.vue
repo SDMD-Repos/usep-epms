@@ -62,6 +62,16 @@
         </a-table>
       </div>
     </div>
+    <a-modal v-model="visible"
+             width="100%"
+             :dialog-style="{ top: '0px' }"
+             :body-style="{ 'height': '100vh', 'padding': '0px 0px 10px 0px',}"
+             :footer="null"
+             wrap-class-name="pdfModal"
+             :title="fileName"
+             @cancel="handleClose">
+      <vue-pdf-app :pdf="name" theme="light" :file-name="fileName" :config="config"></vue-pdf-app>
+    </a-modal>
   </div>
 </template>
 
@@ -70,6 +80,8 @@ import { mapState } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import * as apiForm from '@/services/mainForms/aapcr'
 import ListMixin from '@/services/formMixins/list'
+import VuePdfApp from 'vue-pdf-app'
+import 'vue-pdf-app/dist/icons/main.css'
 
 export default {
   title: 'AAPCR List',
@@ -111,7 +123,6 @@ export default {
           const blob = new Blob([response], { type: 'application/pdf' })
           self.name = window.URL.createObjectURL(blob)
           self.fileName = documentName
-          window.open(self.getFilePath, '_blank')
         }
         this.$store.commit('aapcr/SET_STATE', {
           loading: false,
@@ -136,6 +147,7 @@ export default {
     },
   },
   components: {
+    VuePdfApp,
   },
 }
 </script>

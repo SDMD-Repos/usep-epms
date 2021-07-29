@@ -42,3 +42,25 @@ td.column-count {
 ul.form-ul-list {
   list-style-type: circle;
 }
+
+.pdf-app.dark {
+  --pdf-app-background-color: rgba(42, 42, 46);
+  --pdf-toolbar-color: rgba(56, 56, 61);
+  --pdf-button-hover-font-color: rgba(207, 175, 176);
+}
+
+.pdf-app.light {
+  --pdf-toolbar-color: #7d6c6c;
+  --pdf-button-hover-font-color: #cfcaca;
+  --pdf-input-color: #4a2c2c;
+}
+
+.pdfModal .ant-modal-content .ant-modal-header{
+  padding: 5px 24px;
+}
+
+.pdfModal .ant-modal-content .ant-modal-close-x{
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+}
