@@ -151,6 +151,16 @@ export default {
   },
 }
 </script>
+<style scoped>
+  .pdf-app.light {
+    --pdf-toolbar-color: #782f32;
+    --pdf-button-hover-font-color: #b79798;
+    --pdf-input-color: #865f61;
+    --pdf-button-toggled-color: #97595c;
+    --pdf-thumbnail-selection-ring-color: #5f4244;
+    --pdf-thumbnail-selection-ring-selected-color: #725859;
+  }
+</style>
 <style lang="scss">
 @import "@/components/system/Forms/style.module.scss";
 </style>
