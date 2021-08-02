@@ -39,7 +39,7 @@ class UserController extends Controller
                         'middleName' => $obj->MiddleName,
                         'lastName' => $obj->LastName,
                         'email' => $obj->Email,
-                        'avatar' => $obj->Avatar
+//                        'avatar' => $obj->Avatar
                     ]
                 );
 
@@ -47,13 +47,12 @@ class UserController extends Controller
 
                 $loggedInUser = Auth::user();
 
-                $success['accessToken'] =  $loggedInUser->createToken('MyApp')->accessToken;
-                $token = $loggedInUser->createToken('MyApp')->accessToken;
+                $success['accessToken'] =  $loggedInUser->createToken('e-PMS Password Grant')->accessToken;
 
                 $user->remember_token = $success['accessToken'];
                 $user->save();
 
-                return response()->json(["accessToken" => $token], $this->successStatus);
+                return response()->json(["accessToken" => $success['accessToken']], $this->successStatus);
             }else{
                 return response()->json("Invalid login credentials", 400);
             }
