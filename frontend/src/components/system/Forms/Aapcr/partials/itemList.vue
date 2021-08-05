@@ -318,8 +318,8 @@ export default {
     },
     updateTableItem(details) {
       const newData = [...this.dataSource]
-      const { piFormData } = this
-      if (piFormData.type === 'pi') {
+      const { drawerConfig } = this
+      if (drawerConfig.type === 'pi') {
         if (!details.formData.isHeader) {
           const { targetsBasis } = details.formData
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(targetsBasis) === -1) {
@@ -328,7 +328,7 @@ export default {
         }
         Object.assign(newData[details.updateId], details.formData)
       } else {
-        const { parentDetails } = this.piFormData
+        const { parentDetails } = this.drawerConfig
         const parentIndex = newData.findIndex(i => i.key === parentDetails.key)
         const { children } = newData[parentIndex]
         Object.assign(children[details.updateId], details.formData)

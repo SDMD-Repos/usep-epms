@@ -86,6 +86,9 @@ export default {
       this.parentSubs = this.subCategoryList.filter((i) => {
         return i.category_id === value
       })
+      this.parentSubs.forEach(item => {
+        item.selectable = true
+      })
     },
     handleSubmit(e) {
       const that = this

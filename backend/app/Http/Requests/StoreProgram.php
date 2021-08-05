@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProgram extends FormRequest
 {
@@ -24,7 +25,13 @@ class StoreProgram extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|max:100',
+            'name' => [
+                'required',
+                'max:100',
+                Rule::unique('programs')->whereNull('deleted_at')->where(function ($query) {
+                    return $query->where('name', $this->name)->where('category_id', $this->category_id);
+                })
+            ],
             'category_id' => 'required',
             'percentage' => 'numeric|min:0|max:100'
         ];
@@ -40,6 +47,7 @@ class StoreProgram extends FormRequest
         return [
             'name.required' => 'This field is required',
             'name.max' => 'This field may not be greater than :max characters',
+            'name.unique' => 'The Program name has already been taken.',
             'category_id.required' => 'This field is required',
         ];
     }

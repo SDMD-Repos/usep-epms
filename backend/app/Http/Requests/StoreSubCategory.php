@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSubCategory extends FormRequest
 {
@@ -24,7 +25,13 @@ class StoreSubCategory extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|max:100',
+            'name' => [
+                'required',
+                'max:100',
+                Rule::unique('sub_categories')->whereNull('deleted_at')->where(function ($query) {
+                    return $query->where('name', $this->name)->where('category_id', $this->category_id);
+                })
+            ],
             'category_id' => 'required',
             'parentId' => ''
         ];
@@ -39,6 +46,7 @@ class StoreSubCategory extends FormRequest
         return [
             'name.required' => 'This field is required',
             'name.max' => 'This field may not be greater than :max characters',
+            'name.unique' => 'The Sub Category name has already been taken.',
             'category_id.required' => 'This field is required',
         ];
     }

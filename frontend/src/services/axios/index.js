@@ -23,7 +23,12 @@ apiClient.interceptors.response.use(undefined, error => {
   let { data } = response
 
   if (data && response.status !== 401) {
-    if (typeof data.message !== 'undefined') {
+    // Errors from backend form validation
+    if (typeof data.errors !== 'undefined') {
+      Object.keys(data.errors).forEach(key => {
+        data = data.errors[key]
+      })
+    } else if (typeof data.message !== 'undefined') {
       data = data.message
     }
     notification.warning({
