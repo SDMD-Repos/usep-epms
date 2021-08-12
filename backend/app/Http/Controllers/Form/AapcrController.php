@@ -6,6 +6,7 @@ use App\Aapcr;
 use App\AapcrDetail;
 use App\AapcrDetailMeasure;
 use App\AapcrDetailOffice;
+use App\AapcrFile;
 use App\AapcrProgramBudget;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
@@ -256,23 +257,31 @@ class AapcrController extends Controller
     public function unpublish(Request $request)
     {
         try {
-            $request->validate([
+            /*$request->validate([
                 'files' => 'required|mimes:pdf|max:5120',
                 'id' => 'required|integer'
-            ]);
+            ]);*/
 
             $files = $request->file('files');
 
             foreach($files as $file) {
-                if (File::exists(public_path('forms/published/' . $file->getClientOriginalName()))) {
+                if (File::exists(public_path('forms/uploads/' . $file->getClientOriginalName()))) {
                     dd('File is Exists');
                 }else{
-                    $fileName = $file->getClientOriginalName() . '_' . time();
-                    $filePath = $file->storeAs('uploads', $fileName, 'public');
+                    $fileName = $file->getClientOriginalName();
+                    $fileExtension = $file->getClientOriginalExtension();
 
-                    $fileModel->name = $fileName;
-                    $fileModel->file_path = '/storage/' . $filePath;
-                    $fileModel->save();
+                    if (($pos = strpos($fileName, "." . $fileExtension)) !== FALSE) {
+                        $whatIWant = substr($fileName, $pos+1);
+                    }
+                    $filePath = $file->storeAs('forms/uploads', $fileName, 'public');
+
+
+                    $newFile = new AapcrFile();
+
+                    $newFile->name = $fileName;
+                    $newFile->file_path = '/storage/' . $filePath;
+                    $newFile->save();
                 }
             }
         } catch(\Exception $e){
@@ -281,7 +290,7 @@ class AapcrController extends Controller
             } else {
                 $status = 400;
             }
-
+            dd($e->getMessage());
             return response()->json($e->getMessage(), $status);
         }
 
