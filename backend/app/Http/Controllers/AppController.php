@@ -210,7 +210,7 @@ class AppController extends Controller
     {
         $vpopcr = VpOpcr::find($id);
 
-//        $officeId = $vpopcr->office_id;
+        $officeId = $vpopcr->office_id;
 
         $signatory = $this->getSignatories($vpopcr, 'vpopcr');
 
@@ -241,7 +241,7 @@ class AppController extends Controller
 
                 if($aapcrDetail->parent_id && $detail->from_aapcr) {
                     if(!$detail->aapcrDetail->parent->is_header) {
-                        /*$parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
+                        $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
                             $query->where(function($q) use ($officeId) {
                                 $q->where('vp_office_id', '=', $officeId)
                                     ->orWhere('office_id', '=', $officeId);
@@ -251,26 +251,31 @@ class AppController extends Controller
                         if($parentDetail) {
                             $isParent = 1;
 
+                            $parentDetail->isParent = 1;
+
                             $parentDetails = $parentDetail;
                         }else{
                             $stored = 1;
-                        }*/
-                        $stored = 1;
+                        }
                     }else {
                         $isParent = 1;
+
+                        $detail->aapcrDetail->parent->isParent = 1;
 
                         $parentDetails = $detail->aapcrDetail->parent;
                     }
                 } else {
-                    /*if(!$detail->from_aapcr) {
+//                    if($detail->id === 63)
+                    if(!$detail->from_aapcr) {
                         $isParent = 1;
+
+                        $aapcrDetail->isParent = 1;
 
                         $parentDetails = $aapcrDetail;
                     }else{
 
                         $stored = 1;
-                    }*/
-                    $stored = 1;
+                    }
                 }
             } else {
                 $stored = 1;
@@ -286,6 +291,13 @@ class AppController extends Controller
                 }
 
                 if(!$isExists) {
+                    if($parentDetails->category_id !== $detail->category_id){
+                        $parentDetails->category_id = $detail->category_id;
+
+                        $parentDetails->sub_category = null;
+                    }else{
+                        $parentDetails->sub_category = $detail->sub_category_id;
+                    }
 
                     $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
 
@@ -374,6 +386,10 @@ class AppController extends Controller
 
         if(!$detail->is_header) {
             $measures = $this->fetchMeasuresPdf($detail->measures);
+
+            if(isset($detail->isParent) && $detail->isParent) {
+                $officeModel = new AapcrDetailOffice();
+            }
 
             $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
         }

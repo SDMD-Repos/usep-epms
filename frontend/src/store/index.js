@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import user from './user'
 import settings from './settings'
-import formSettings from './formSettings'
+import formManager from './formManager'
 import external from './external'
 import aapcr from './aapcr'
 import opcrvp from './opcrvp'
@@ -14,7 +14,7 @@ export default new Vuex.Store({
   modules: {
     user,
     settings,
-    formSettings,
+    formManager,
     external,
     aapcr,
     opcrvp,

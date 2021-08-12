@@ -308,7 +308,7 @@ export default {
   },
   computed: {
     ...mapState({
-      programList: state => state.formSettings.programs,
+      programList: state => state.formManager.programs,
     }),
     filteredProgram() {
       return this.programList.filter(i => i.category_id === this.drawerId)

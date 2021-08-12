@@ -120,8 +120,8 @@ export default {
   },
   computed: {
     ...mapState({
-      categories: state => state.formSettings.functions,
-      loading: state => state.formSettings.loading,
+      categories: state => state.formManager.functions,
+      loading: state => state.formManager.loading,
       vpOfficesList: state => state.external.vpOffices,
     }),
   },
@@ -136,11 +136,11 @@ export default {
   methods: {
     onLoad() {
       this.$store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
-      this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
-      this.$store.dispatch('formSettings/FETCH_PROGRAMS')
-      this.$store.dispatch('formSettings/FETCH_SUB_CATEGORIES')
-      this.$store.dispatch('formSettings/FETCH_MEASURES')
-      this.$store.dispatch('formSettings/FETCH_CASCADING_LEVELS')
+      this.$store.dispatch('formManager/FETCH_FUNCTIONS')
+      this.$store.dispatch('formManager/FETCH_PROGRAMS')
+      this.$store.dispatch('formManager/FETCH_SUB_CATEGORIES')
+      this.$store.dispatch('formManager/FETCH_MEASURES')
+      this.$store.dispatch('formManager/FETCH_CASCADING_LEVELS')
     },
     resetDetails() {
       this.enableForm = false
@@ -224,7 +224,7 @@ export default {
     },
     getVpOpcrDetails() {
       const { vpOpcrId } = this
-      this.$store.commit('formSettings/SET_STATE', {
+      this.$store.commit('formManager/SET_STATE', {
         loading: true,
       })
       const fetchFormDetails = apiForm.fetchFormDetails
@@ -241,7 +241,7 @@ export default {
           this.isFinalized = response.isFinalized
           this.editMode = response.editMode
         }
-        this.$store.commit('formSettings/SET_STATE', {
+        this.$store.commit('formManager/SET_STATE', {
           loading: false,
         })
       })

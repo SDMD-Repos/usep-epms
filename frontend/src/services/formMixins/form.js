@@ -12,9 +12,9 @@ export default {
   },
   computed: {
     ...mapState({
-      subCategoryList: state => state.formSettings.subCategories,
-      measuresList: state => state.formSettings.measures,
-      cascadingList: state => state.formSettings.cascadingLevels,
+      subCategoryList: state => state.formManager.subCategories,
+      measuresList: state => state.formManager.measures,
+      cascadingList: state => state.formManager.cascadingLevels,
       mainOfficesChildrenList: state => state.external.mainOfficesChildren,
     }),
   },

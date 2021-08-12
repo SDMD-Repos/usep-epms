@@ -190,8 +190,8 @@ export default {
   },
   computed: {
     ...mapState({
-      programList: state => state.formSettings.programs,
-      loading: state => state.formSettings.loading,
+      programList: state => state.formManager.programs,
+      loading: state => state.formManager.loading,
     }),
     filteredProgram() {
       return this.programList.filter(i => i.category_id === this.functionId)
@@ -238,7 +238,7 @@ export default {
   },
   methods: {
     onLoad() {
-      this.$store.dispatch('formSettings/FETCH_PROGRAMS')
+      this.$store.dispatch('formManager/FETCH_PROGRAMS')
     },
     loadPIs(e) {
       if (e !== '' && typeof e !== 'undefined') {

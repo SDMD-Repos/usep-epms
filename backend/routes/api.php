@@ -83,6 +83,7 @@ Route::group([
         Route::get('/check-saved/{year}', 'Form\AapcrController@checkSaved');
         Route::get('/list', 'Form\AapcrController@getAllAapcrs');
         Route::post('/publish', 'Form\AapcrController@publish');
+        Route::post('/unpublish', 'Form\AapcrController@unpublish');
         Route::post('/deactivate', 'Form\AapcrController@deactivate');
         Route::get('/view/{id}', 'Form\AapcrController@view');
         Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewAapcrPdf');

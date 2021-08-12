@@ -116,7 +116,7 @@ export default {
   computed: {
     ...mapState({
       personnelOffices: state => state.external.personnelOffices,
-      categories: state => state.formSettings.functions,
+      categories: state => state.formManager.functions,
     }),
   },
   created() {
@@ -125,7 +125,7 @@ export default {
   methods: {
     onLoad() {
       this.$store.dispatch('external/FETCH_OFFICES_BY_PERSONNEL', { payload: { formId: this.formId } })
-      this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
+      this.$store.dispatch('formManager/FETCH_FUNCTIONS')
     },
     checkDetails() {
       this.loadDetails()

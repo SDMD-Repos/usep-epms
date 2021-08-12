@@ -55,13 +55,22 @@
               <a-divider type="vertical" />
               <a-tooltip>
                 <template slot="title"><span>Publish</span></template>
-                  <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record.id, record.year)"/>
-                </a-tooltip>
+                <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record.id, record.year)"/>
+              </a-tooltip>
+            </template>
+            <template v-if="record.published_date">
+              <a-divider type="vertical" />
+              <a-tooltip>
+                <template slot="title"><span>Unpublish</span></template>
+                <a-icon type="close-square" theme="filled" :style="{fontSize: '18px'}" @click="openUploadModal(record.id)"/>
+              </a-tooltip>
             </template>
           </span>
         </a-table>
       </div>
     </div>
+
+    <!-- View PDF Modal-->
     <a-modal v-model="visible"
              width="100%"
              :dialog-style="{ top: '0px' }"
@@ -72,6 +81,32 @@
              @cancel="handleClose">
       <vue-pdf-app :pdf="name" theme="light" :file-name="fileName" :config="config"></vue-pdf-app>
     </a-modal>
+
+    <!-- Upload Published File Modal -->
+    <upload-publish-modal :is-file-upload="isFileUpload"
+                          :list="fileList"
+                          :uploading="loading"
+                          @upload="uploadFile"
+                          @add-to-list="addUploadItem"
+                          @cancel-upload="cancelUpload"
+                          @remove-file="removeFile"/>
+<!--    <a-modal v-model="isFileUpload" title="File Upload" :closable="false">
+      <a-upload-dragger
+        name="file"
+        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        @change="handleChange"
+      >
+        <p class="ant-upload-drag-icon">
+          <a-icon type="cloud-upload" />
+        </p>
+        <p class="ant-upload-text">
+          Click or drag a PDF file to upload
+        </p>
+        <p class="ant-upload-hint">
+          Max file size: 2 MB
+        </p>
+      </a-upload-dragger>
+    </a-modal>-->
   </div>
 </template>
 
@@ -82,6 +117,7 @@ import * as apiForm from '@/services/mainForms/aapcr'
 import ListMixin from '@/services/formMixins/list'
 import VuePdfApp from 'vue-pdf-app'
 import 'vue-pdf-app/dist/icons/main.css'
+import uploadPublishModal from '../Extras/uploadPublishModal'
 
 export default {
   title: 'AAPCR List',
@@ -145,21 +181,35 @@ export default {
         },
       })
     },
+    uploadFile() {
+      const { fileList } = this
+      const formData = new FormData()
+      fileList.forEach(file => {
+        formData.append('files[]', file)
+      })
+      formData.append('id', this.cachedId)
+      console.log(formData)
+      // const payload = {
+      //   id: this.cachedId,
+      // }
+      this.$store.dispatch('aapcr/UNPUBLISH', { payload: formData })
+    },
   },
   components: {
     VuePdfApp,
+    uploadPublishModal,
   },
 }
 </script>
 <style scoped>
-  .pdf-app.light {
-    --pdf-toolbar-color: #782f32;
-    --pdf-button-hover-font-color: #b79798;
-    --pdf-input-color: #865f61;
-    --pdf-button-toggled-color: #97595c;
-    --pdf-thumbnail-selection-ring-color: #5f4244;
-    --pdf-thumbnail-selection-ring-selected-color: #725859;
-  }
+.pdf-app.light {
+  --pdf-toolbar-color: #782f32;
+  --pdf-button-hover-font-color: #b79798;
+  --pdf-input-color: #865f61;
+  --pdf-button-toggled-color: #97595c;
+  --pdf-thumbnail-selection-ring-color: #5f4244;
+  --pdf-thumbnail-selection-ring-selected-color: #725859;
+}
 </style>
 <style lang="scss">
 @import "@/components/system/Forms/style.module.scss";

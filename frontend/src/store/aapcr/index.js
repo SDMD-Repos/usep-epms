@@ -7,6 +7,7 @@ const mapApiProviders = {
   save: aapcrForm.save,
   getAapcrList: aapcrForm.fetchAapcrs,
   publish: aapcrForm.publish,
+  unpublish: aapcrForm.unpublish,
   deactivate: aapcrForm.deactivate,
   update: aapcrForm.update,
 }
@@ -74,6 +75,24 @@ export default {
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'AAPCR was published successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UNPUBLISH({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const unpublish = mapApiProviders.unpublish
+      unpublish(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'AAPCR was unpublished successfully',
           })
         }
         commit('SET_STATE', {

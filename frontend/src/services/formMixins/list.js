@@ -22,6 +22,10 @@ export default {
         },
         secondaryToolbar: false,
       },
+      isFileUpload: false,
+      fileList: [],
+      uploading: false,
+      cachedId: null,
     }
   },
   computed: {
@@ -44,6 +48,33 @@ export default {
     },
     handleClose() {
       this.visible = !this.visible
+    },
+    // For unpublish and upload functions
+    openUploadModal(id) {
+      const self = this
+      Modal.confirm({
+        title: 'Are you sure you want to unpublish this?',
+        content: 'You won\'t be able to revert this!',
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk() {
+          self.cachedId = id
+          self.isFileUpload = true
+        },
+      })
+    },
+    addUploadItem(file) {
+      this.fileList = [...this.fileList, file]
+    },
+    removeFile(file) {
+      const index = this.fileList.indexOf(file)
+      const newFileList = this.fileList.slice()
+      newFileList.splice(index, 1)
+      this.fileList = newFileList
+    },
+    cancelUpload() {
+      this.isFileUpload = false
+      this.fileList = []
     },
   },
 }

@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 
 class AapcrController extends Controller
@@ -250,6 +251,40 @@ class AapcrController extends Controller
         }else{
             return response()->json('Cannot publish two or more AAPCRs in a year', 400);
         }
+    }
+
+    public function unpublish(Request $request)
+    {
+        try {
+            $request->validate([
+                'files' => 'required|mimes:pdf|max:5120',
+                'id' => 'required|integer'
+            ]);
+
+            $files = $request->file('files');
+
+            foreach($files as $file) {
+                if (File::exists(public_path('forms/published/' . $file->getClientOriginalName()))) {
+                    dd('File is Exists');
+                }else{
+                    $fileName = $file->getClientOriginalName() . '_' . time();
+                    $filePath = $file->storeAs('uploads', $fileName, 'public');
+
+                    $fileModel->name = $fileName;
+                    $fileModel->file_path = '/storage/' . $filePath;
+                    $fileModel->save();
+                }
+            }
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+
     }
 
     public function deactivate(Request $request)

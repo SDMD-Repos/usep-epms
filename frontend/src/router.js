@@ -30,27 +30,34 @@ const router = new Router({
           },
           component: () => import('./views/dashboard/about'),
         },
-        // Settings
+        // Manager
         {
-          path: '/settings/form',
+          path: '/manager/form',
           meta: {
-            title: 'Settings Form',
+            title: 'Form Manager',
           },
-          component: () => import('./views/appsettings/form'),
+          component: () => import('./views/manager/form'),
         },
         {
-          path: '/settings/measures',
+          path: '/manager/form',
           meta: {
-            title: 'Settings Measures',
+            title: 'Form Manager',
           },
-          component: () => import('./views/appsettings/measures'),
+          component: () => import('./views/manager/form'),
         },
         {
-          path: '/settings/signatories',
+          path: '/manager/measures',
           meta: {
-            title: 'Settings Signatories',
+            title: 'Measures Manager',
           },
-          component: () => import('./views/appsettings/signatory'),
+          component: () => import('./views/manager/measures'),
+        },
+        {
+          path: '/manager/signatories',
+          meta: {
+            title: 'Signatories Manager',
+          },
+          component: () => import('./views/manager/signatory'),
         },
         // Main Form
         {

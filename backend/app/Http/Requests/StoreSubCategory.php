@@ -46,7 +46,7 @@ class StoreSubCategory extends FormRequest
         return [
             'name.required' => 'This field is required',
             'name.max' => 'This field may not be greater than :max characters',
-            'name.unique' => 'The Sub Category name has already been taken.',
+            'name.unique' => 'The Sub Category name has already been used.',
             'category_id.required' => 'This field is required',
         ];
     }

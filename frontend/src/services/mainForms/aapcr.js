@@ -36,6 +36,20 @@ export function publish(data) {
     .catch(err => console.log(err))
 }
 
+export function unpublish(data) {
+  return apiClient
+    .post('/forms/aapcr/unpublish', data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export function deactivate(data) {
   return apiClient
     .post('/forms/aapcr/deactivate', data)

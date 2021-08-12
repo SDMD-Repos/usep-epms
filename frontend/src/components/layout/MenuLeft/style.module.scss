@@ -396,6 +396,7 @@
             right: rem(20);
           }
           &__user {
+            &__avatar,
             &__name,
             &__role {
               display: none;
@@ -1057,6 +1058,44 @@
               }
             }
           }
+        }
+      }
+    }
+  }
+}
+
+// dark theme
+[data-kit-theme='dark'] {
+  .air__menuLeft {
+    // user
+    &__user {
+      &__name {
+        color: $gray-3;
+      }
+      &__role {
+        color: $gray-6;
+      }
+    }
+
+    &__category {
+      color: $gray-3;
+    }
+
+    // toggle button
+    &__toggleButton {
+      span {
+        &:before,
+        &:after {
+          background: $gray-3;
+        }
+      }
+    }
+
+    &__submenu {
+      > .air__menuLeft__link {
+        &:before,
+        &:after {
+          background: $gray-3;
         }
       }
     }

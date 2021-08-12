@@ -10,24 +10,29 @@ export const getMenuData = [
     url: '/dashboard/about',
   },
   {
-    title: 'Settings',
-    key: 'settings',
+    title: 'Manager',
+    key: 'manager',
     icon: 'fe fe-settings',
     children: [
       {
         title: 'Form',
-        key: 'settingsForm',
-        url: '/settings/form',
+        key: 'managerForm',
+        url: '/manager/form',
+      },
+      {
+        title: 'Groups',
+        key: 'managerGroups',
+        url: '/manager/groups',
       },
       {
         title: 'Measures',
-        key: 'settingsMeasures',
-        url: '/settings/measures',
+        key: 'managerMeasures',
+        url: '/manager/measures',
       },
       {
         title: 'Signatories',
-        key: 'settingsSignatories',
-        url: '/settings/signatories',
+        key: 'managerSignatories',
+        url: '/manager/signatories',
       },
     ],
   },

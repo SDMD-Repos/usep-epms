@@ -23,6 +23,8 @@
 // DARK THEME STYLES
 [data-kit-theme='dark'] {
   .ant-input {
+    background: $dark-gray-1;
+
     &-number {
       &-handler {
         &-wrap {

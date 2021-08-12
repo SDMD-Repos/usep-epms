@@ -130,7 +130,7 @@ export default {
   },
   computed: {
     ...mapState({
-      categories: state => state.formSettings.functions,
+      categories: state => state.formManager.functions,
       loading: state => state.aapcr.loading,
     }),
     years() {
@@ -153,10 +153,10 @@ export default {
   },
   methods: {
     onLoad() {
-      this.$store.dispatch('formSettings/FETCH_FUNCTIONS')
-      this.$store.dispatch('formSettings/FETCH_SUB_CATEGORIES')
-      this.$store.dispatch('formSettings/FETCH_MEASURES')
-      this.$store.dispatch('formSettings/FETCH_CASCADING_LEVELS')
+      this.$store.dispatch('formManager/FETCH_FUNCTIONS')
+      this.$store.dispatch('formManager/FETCH_SUB_CATEGORIES')
+      this.$store.dispatch('formManager/FETCH_MEASURES')
+      this.$store.dispatch('formManager/FETCH_CASCADING_LEVELS')
     },
     getFormDetails() {
       const { aapcrId } = this

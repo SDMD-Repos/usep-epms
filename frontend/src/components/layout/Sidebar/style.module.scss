@@ -274,6 +274,10 @@
 
     &__toggleButton {
       background: $dark-gray-4;
+
+      i {
+        color: $gray-2;
+      }
     }
   }
 }
