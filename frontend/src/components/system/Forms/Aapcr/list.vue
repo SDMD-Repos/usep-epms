@@ -58,11 +58,18 @@
                 <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record.id, record.year)"/>
               </a-tooltip>
             </template>
-            <template v-if="record.published_date">
+            <template v-if="record.published_date && record.is_active">
               <a-divider type="vertical" />
               <a-tooltip>
                 <template slot="title"><span>Unpublish</span></template>
-                <a-icon type="close-square" theme="filled" :style="{fontSize: '18px'}" @click="openUploadModal(record.id)"/>
+                <a-icon type="close-square" theme="filled" :style="{fontSize: '18px'}" @click="onUnpublish(record.id)"/>
+              </a-tooltip>
+            </template>
+            <template v-if="record.files.length">
+              <a-divider type="vertical" />
+              <a-tooltip>
+                <template slot="title"><span>View Archived</span></template>
+                <a-icon type="unordered-list" :style="{fontSize: '18px'}" @click="viewUploadedList(record)"/>
               </a-tooltip>
             </template>
           </span>
@@ -82,31 +89,23 @@
       <vue-pdf-app :pdf="name" theme="light" :file-name="fileName" :config="config"></vue-pdf-app>
     </a-modal>
 
-    <!-- Upload Published File Modal -->
+    <!-- View Uploaded Files Modal -->
+    <uploaded-list-modal :upload-modal-state="isUploadedViewed"
+                         :date-format="dateFormat"
+                         :form-details="viewedForm"
+                         @close-list-modal="onCloseList"
+                         @view-file="openFile" @delete-file="deleteFile"/>
+
+    <!-- Upload File Modal -->
     <upload-publish-modal :is-file-upload="isFileUpload"
                           :list="fileList"
                           :uploading="loading"
+                          :upload-ok-text="okTextUploadModal"
+                          :modal-note="noteInModal"
                           @upload="uploadFile"
                           @add-to-list="addUploadItem"
                           @cancel-upload="cancelUpload"
                           @remove-file="removeFile"/>
-<!--    <a-modal v-model="isFileUpload" title="File Upload" :closable="false">
-      <a-upload-dragger
-        name="file"
-        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-        @change="handleChange"
-      >
-        <p class="ant-upload-drag-icon">
-          <a-icon type="cloud-upload" />
-        </p>
-        <p class="ant-upload-text">
-          Click or drag a PDF file to upload
-        </p>
-        <p class="ant-upload-hint">
-          Max file size: 2 MB
-        </p>
-      </a-upload-dragger>
-    </a-modal>-->
   </div>
 </template>
 
@@ -118,6 +117,7 @@ import ListMixin from '@/services/formMixins/list'
 import VuePdfApp from 'vue-pdf-app'
 import 'vue-pdf-app/dist/icons/main.css'
 import uploadPublishModal from '../Extras/uploadPublishModal'
+import uploadedListModal from '../Extras/uploadedListModal'
 
 export default {
   title: 'AAPCR List',
@@ -188,16 +188,64 @@ export default {
         formData.append('files[]', file)
       })
       formData.append('id', this.cachedId)
-      console.log(formData)
-      // const payload = {
-      //   id: this.cachedId,
-      // }
-      this.$store.dispatch('aapcr/UNPUBLISH', { payload: formData })
+      const self = this
+      if (!this.isConfirmDeleteFile) {
+        this.$store.dispatch('aapcr/UNPUBLISH', { payload: formData }).then(() => {
+          self.cancelUpload()
+        })
+      } else {
+        this.$store.commit('aapcr/SET_STATE', {
+          loading: true,
+        })
+        self.cancelUpload()
+        self.onCloseList()
+        const updateFile = apiForm.updateFile
+        updateFile(formData).then(response => {
+          if (response) {
+            self.$store.dispatch('aapcr/FETCH_LIST').then(() => {
+              const { aapcr } = response
+              self.viewUploadedList(aapcr) // open List of Uploaded Files Modal
+            })
+            self.$notification.success({
+              message: 'Success',
+              description: 'File was deleted successfully',
+            })
+          }
+          this.$store.commit('aapcr/SET_STATE', {
+            loading: false,
+          })
+        })
+      }
+    },
+    openFile(data) {
+      const self = this
+      this.$message.loading('Loading...')
+      const { id } = data
+      const name = data.file_name
+      const viewUploaded = apiForm.viewUploadedFile
+      viewUploaded(id).then(response => {
+        if (response) {
+          self.visible = true
+          const blob = new Blob([response], { type: 'application/pdf' })
+          self.name = window.URL.createObjectURL(blob)
+          self.fileName = name
+        }
+        self.$message.destroy()
+      })
+    },
+    deleteFile(data) {
+      this.cachedId = data.id
+      this.isFileUpload = true
+      this.okTextUploadModal = 'Confirm Deletion'
+      this.noteInModal = 'Deleting this requires you to upload the new published PDF copy of the deleted form'
+      this.isConfirmDeleteFile = true
+      this.isUploadedViewed = false
     },
   },
   components: {
     VuePdfApp,
     uploadPublishModal,
+    uploadedListModal,
   },
 }
 </script>

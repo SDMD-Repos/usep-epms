@@ -16,7 +16,8 @@ class CreateAapcrFilesTable extends Migration
         Schema::create('aapcr_files', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->integer('aapcr_id');
-            $table->string('file_name', 100);
+            $table->string('file_path', 150);
+            $table->string('file_name', 150);
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();

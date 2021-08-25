@@ -11,6 +11,7 @@ use App\AapcrProgramBudget;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateAapcr;
+use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
 use App\Program;
 use App\SubCategory;
@@ -18,7 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 
 class AapcrController extends Controller
@@ -61,7 +62,7 @@ class AapcrController extends Controller
 
     public function getAllAapcrs()
     {
-        $aapcrList = Aapcr::select("*", "id as key")->orderBy('created_at', 'ASC')->get();
+        $aapcrList = Aapcr::select("*", "id as key")->with('files')->orderBy('created_at', 'ASC')->get();
 
         return response()->json([
             'aapcrList' => $aapcrList
@@ -254,43 +255,39 @@ class AapcrController extends Controller
         }
     }
 
-    public function unpublish(Request $request)
+    public function unpublish(UploadPdfFile $request)
     {
         try {
-            /*$request->validate([
-                'files' => 'required|mimes:pdf|max:5120',
-                'id' => 'required|integer'
-            ]);*/
+            DB::beginTransaction();
 
-            $files = $request->file('files');
+            $validated = $request->validated();
 
-            foreach($files as $file) {
-                if (File::exists(public_path('forms/uploads/' . $file->getClientOriginalName()))) {
-                    dd('File is Exists');
-                }else{
-                    $fileName = $file->getClientOriginalName();
-                    $fileExtension = $file->getClientOriginalExtension();
+            $files = $validated['files'];
+            $id = $validated['id'];
 
-                    if (($pos = strpos($fileName, "." . $fileExtension)) !== FALSE) {
-                        $whatIWant = substr($fileName, $pos+1);
-                    }
-                    $filePath = $file->storeAs('forms/uploads', $fileName, 'public');
+            $aapcr = Aapcr::find($id);
 
+            $aapcr->published_date = NULL;
+            $aapcr->updated_at = Carbon::now();
+            $aapcr->modify_id = $this->login_user->pmaps_id;
+            $aapcr->history = $aapcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-                    $newFile = new AapcrFile();
-
-                    $newFile->name = $fileName;
-                    $newFile->file_path = '/storage/' . $filePath;
-                    $newFile->save();
-                }
+            if($aapcr->save()) {
+                $this->uploadFiles($id, $files);
+            }else {
+                DB::rollBack();
             }
+
+            DB::commit();
+
+            return response()->json('AAPCR was unpublished successfully', 200);
         } catch(\Exception $e){
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
                 $status = 400;
             }
-            dd($e->getMessage());
+
             return response()->json($e->getMessage(), $status);
         }
 
@@ -690,7 +687,7 @@ class AapcrController extends Controller
                 $newOffice->detail_id = $detailId;
                 $newOffice->office_type_id = $type;
                 $newOffice->cascade_to = $office['cascadeTo'];
-                $newOffice->office_id = $officeId;
+                $newOffice->office_id = $office['value'];
                 $newOffice->office_name = $office_name;
                 $newOffice->create_id = $this->login_user->pmaps_id;
                 $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -816,6 +813,88 @@ class AapcrController extends Controller
                     DB::rollBack();
                 }
             }
+        }
+    }
+
+    public function uploadFiles($id, $files)
+    {
+        foreach($files as $file) {
+            $fileName = $file->getClientOriginalName();
+            $fileExtension = $file->getClientOriginalExtension();
+
+            $name = str_replace("." . $fileExtension, "", $fileName);
+
+            $modFileName = $name . "__" . time() . "." . $fileExtension;
+
+            $filePath = $file->storeAs('uploads', $modFileName, 'public');
+
+            $newFile = new AapcrFile();
+
+            $newFile->aapcr_id = $id;
+            $newFile->file_path = $filePath;
+            $newFile->file_name = $fileName;
+            $newFile->create_id = $this->login_user->pmaps_id;
+            $newFile->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            $newFile->save();
+        }
+    }
+
+    public function viewUploadedFile($id)
+    {
+        $file = AapcrFile::find($id);
+
+        $contents = public_path('storage/' . $file->file_path);
+        $headers = array('Content-Type: application/pdf',);
+
+        return response()->download($contents, '', $headers);
+    }
+
+    public function updateFile(UploadPdfFile $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+
+            $files = $validated['files'];
+            $id = $validated['id'];
+
+            $now = Carbon::now();
+
+            $aapcrFile = AapcrFile::find($id);
+
+            $aapcrId = $aapcrFile->aapcr_id;
+
+            $aapcrFile->updated_at = $now;
+            $aapcrFile->modify_id = $this->login_user->pmaps_id;
+            $aapcrFile->history = $aapcrFile->history . "Deleted " . $now . " by " . $this->login_user->fullName . "\n";
+
+            if($aapcrFile->save()) {
+                if(!$aapcrFile->delete()){
+                    DB::rollBack();
+                }
+            } else {
+                DB::rollBack();
+            }
+
+            $this->uploadFiles($aapcrId, $files);
+
+            $aapcr = Aapcr::where('id', $aapcrId)->with('files')->first();
+
+            DB::commit();
+
+            return response()->json([
+                'aapcr' => $aapcr
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 }

@@ -2,12 +2,12 @@
   <div>
     <a-modal v-model="visible"
              title="File Upload"
-             ok-text="Unpublish"
+             :ok-text="uploadOkText"
              :closable="false"
              :confirm-loading="isUploading"
-             @ok="onUnpublish"
+             @ok="onClickOk"
              @cancel="onClose">
-      <p>Unpublishing this requires you to upload the published PDF copy of the form</p>
+      <p>{{ modalNote }}</p>
       <a-upload-dragger
         name="file"
         :file-list="fileList"
@@ -35,6 +35,8 @@ export default {
     isFileUpload: Boolean,
     list: Array,
     uploading: Boolean,
+    uploadOkText: String,
+    modalNote: String,
   },
   watch: {
     isFileUpload(val) {
@@ -63,7 +65,7 @@ export default {
       if (!isPdf) {
         this.$message.error('You can only upload a PDF file!')
       }
-      console.log(file.size)
+      console.log('file size: ' + file.size)
       const isLt5M = file.size / 1024 / 1024 < 5
       if (!isLt5M) {
         this.$message.error('File size must not exceed to 5MB')
@@ -85,9 +87,9 @@ export default {
     onClose() {
       this.$emit('cancel-upload')
     },
-    onUnpublish() {
+    onClickOk() {
       if (this.fileList.length < 1) {
-        this.$message.error('Please upload a published copy of the form')
+        this.$message.error('No file was selected')
       } else {
         this.$emit('upload')
       }

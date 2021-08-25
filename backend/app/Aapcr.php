@@ -49,4 +49,13 @@ class Aapcr extends Model
     {
         return $this->hasMany('App\AapcrProgramBudget');
     }
+
+    /**
+     * Get the files for the aapcr.
+     */
+
+    public function files()
+    {
+        return $this->hasMany('App\AapcrFile');
+    }
 }

@@ -22,10 +22,16 @@ export default {
         },
         secondaryToolbar: false,
       },
+      // upload modal
       isFileUpload: false,
       fileList: [],
-      uploading: false,
       cachedId: null,
+      okTextUploadModal: '',
+      noteInModal: '',
+      isConfirmDeleteFile: false,
+      // uploaded list modal
+      isUploadedViewed: false,
+      viewedForm: {},
     }
   },
   computed: {
@@ -49,8 +55,9 @@ export default {
     handleClose() {
       this.visible = !this.visible
     },
+
     // For unpublish and upload functions
-    openUploadModal(id) {
+    onUnpublish(id) {
       const self = this
       Modal.confirm({
         title: 'Are you sure you want to unpublish this?',
@@ -58,8 +65,11 @@ export default {
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
+          self.okTextUploadModal = 'Unpublish'
           self.cachedId = id
           self.isFileUpload = true
+          self.noteInModal = 'Unpublishing this requires you to upload the published PDF copy of the form'
+          self.isConfirmDeleteFile = false
         },
       })
     },
@@ -75,6 +85,25 @@ export default {
     cancelUpload() {
       this.isFileUpload = false
       this.fileList = []
+      this.cachedId = null
+      if (this.isConfirmDeleteFile) {
+        this.isUploadedViewed = true
+      }
+    },
+
+    // For viewing of uploaded files in a modal
+    viewUploadedList(data) {
+      const files = [...data.files]
+      this.isUploadedViewed = true
+      files.forEach(item => {
+        item.created_at_disp = moment(item.created_at).format(this.dateFormat)
+      })
+      data.files = files
+      this.viewedForm = data
+    },
+    onCloseList() {
+      this.isUploadedViewed = false
+      this.viewedForm = {}
     },
   },
 }
