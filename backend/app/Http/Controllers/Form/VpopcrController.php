@@ -7,10 +7,13 @@ use App\AapcrDetail;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UpdateVpOpcr;
+use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
+use App\Http\Traits\FileTrait;
 use App\VpOpcr;
 use App\VpOpcrDetail;
 use App\VpOpcrDetailOffice;
+use App\VpOpcrFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 class VpopcrController extends Controller
 {
-    use ConverterTrait;
+    use ConverterTrait, FileTrait;
 
     private $login_user;
 
@@ -223,7 +226,7 @@ class VpopcrController extends Controller
 
     public function getAllVpOpcrs()
     {
-        $list = VpOpcr::select("*", "id as key")->orderBy('created_at', 'ASC')->get();
+        $list = VpOpcr::select("*", "id as key")->with('files')->orderBy('created_at', 'ASC')->get();
 
         return response()->json([
             'list' => $list
@@ -425,6 +428,45 @@ class VpopcrController extends Controller
             return response()->json('OPCR was published successfully', 200);
         }else{
             return response()->json('Cannot publish two or more OPCRs for '.$hasPublished->office_name.' in a year', 400);
+        }
+    }
+
+    public function unpublish(UploadPdfFile $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+
+            $files = $validated['files'];
+            $id = $validated['id'];
+
+            $vpopcr = VpOpcr::find($id);
+
+            $vpopcr->published_date = NULL;
+            $vpopcr->updated_at = Carbon::now();
+            $vpopcr->modify_id = $this->login_user->pmaps_id;
+            $vpopcr->history = $vpopcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if($vpopcr->save()) {
+                $model = new VpOpcrFile();
+
+                $this->uploadFiles($model, $id, $files);
+            }else {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json('VP\'s OPCR was unpublished successfully', 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 
@@ -877,6 +919,50 @@ class VpopcrController extends Controller
 
         if(!$updated->save()){
             DB::rollBack();
+        }
+    }
+
+    public function viewUploadedFile($id)
+    {
+        $model = new VpOpcrFile();
+
+        $file = $this->viewFile($model, $id);
+
+        return response()->download($file['contents'], '', $file['headers']);
+    }
+
+    public function updateFile(UploadPdfFile $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+
+            $fileModel = new VpOpcrFile();
+
+            $formModel = new VpOpcr();
+
+            $params = [
+                'fileModel' => $fileModel,
+                'formModel' => $formModel,
+                'validated' => $validated
+            ];
+
+            $data = $this->processUpdateFile($params);
+
+            DB::commit();
+
+            return response()->json([
+                'data' => $data
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 }

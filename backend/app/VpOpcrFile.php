@@ -5,16 +5,16 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AapcrFile extends Model
+class VpOpcrFile extends Model
 {
     use SoftDeletes;
 
     /**
-     * Get the aapcr that owns the file.
+     * Get the vp opcr that owns the file.
      */
 
-    public function aapcr()
+    public function vpopcr()
     {
-        return $this->belongsTo('App\Aapcr', 'form_id');
+        return $this->belongsTo('App\VpOpcr', 'form_id');
     }
 }

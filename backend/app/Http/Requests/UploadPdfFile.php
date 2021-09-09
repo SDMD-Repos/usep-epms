@@ -41,7 +41,7 @@ class UploadPdfFile extends FormRequest
             'files.*.required' => 'Please upload a file',
             'files.*.mimes' => 'Only pdf files are allowed',
             'files.*.max' => 'Sorry! Maximum allowed size for a file is 5MB',
-            'id.required' => 'AAPCR ID is required',
+            'id.required' => 'ID is required',
             'id.integer' => 'ID should be an integer'
         ];
     }

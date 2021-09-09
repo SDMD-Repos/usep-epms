@@ -105,5 +105,13 @@ export default {
       this.isUploadedViewed = false
       this.viewedForm = {}
     },
+    deleteFile(data) {
+      this.cachedId = data.id
+      this.isFileUpload = true
+      this.okTextUploadModal = 'Confirm Deletion'
+      this.noteInModal = 'Deleting this requires you to upload the new published PDF copy of the form to be deleted'
+      this.isConfirmDeleteFile = true
+      this.isUploadedViewed = false
+    },
   },
 }

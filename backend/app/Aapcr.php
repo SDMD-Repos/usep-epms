@@ -56,6 +56,6 @@ class Aapcr extends Model
 
     public function files()
     {
-        return $this->hasMany('App\AapcrFile');
+        return $this->hasMany('App\AapcrFile', 'form_id');
     }
 }

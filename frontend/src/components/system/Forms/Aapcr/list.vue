@@ -203,8 +203,8 @@ export default {
         updateFile(formData).then(response => {
           if (response) {
             self.$store.dispatch('aapcr/FETCH_LIST').then(() => {
-              const { aapcr } = response
-              self.viewUploadedList(aapcr) // open List of Uploaded Files Modal
+              const { data } = response
+              self.viewUploadedList(data) // open List of Uploaded Files Modal
             })
             self.$notification.success({
               message: 'Success',
@@ -232,14 +232,6 @@ export default {
         }
         self.$message.destroy()
       })
-    },
-    deleteFile(data) {
-      this.cachedId = data.id
-      this.isFileUpload = true
-      this.okTextUploadModal = 'Confirm Deletion'
-      this.noteInModal = 'Deleting this requires you to upload the new published PDF copy of the deleted form'
-      this.isConfirmDeleteFile = true
-      this.isUploadedViewed = false
     },
   },
   components: {

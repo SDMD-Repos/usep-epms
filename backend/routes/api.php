@@ -107,10 +107,13 @@ Route::group([
         Route::post('/save', 'Form\VpopcrController@save');
         Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
         Route::post('/publish', 'Form\VpopcrController@publish');
+        Route::post('/unpublish', 'Form\VpopcrController@unpublish');
         Route::post('/deactivate', 'Form\VpopcrController@deactivate');
         Route::get('/view/{id}', 'Form\VpopcrController@view');
         Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
         Route::post('/update/{id}', 'Form\VpopcrController@update');
+        Route::get('/viewUploadedFile/{id}', 'Form\VpopcrController@viewUploadedFile');
+        Route::post('/update-file', 'Form\VpopcrController@updateFile');
     });
 
     # OPCR & CPCR Form Controller routes

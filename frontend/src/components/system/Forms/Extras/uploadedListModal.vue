@@ -13,22 +13,22 @@
 
         <!-- Custom column render-->
         <span slot="fileName" slot-scope="text, record">
-        <a @click="viewFile(record)">{{ text }}</a>
-      </span>
+          <a @click="viewFile(record)">{{ text }}</a>
+        </span>
 
         <span slot="action" slot-scope="text, record">
-        <a-popconfirm
-          title="Are you sure you want to delete this file?"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="onDelete(record)"
-        >
-          <a-tooltip>
-            <template slot="title"><span>Delete</span></template>
-            <a-icon type="delete" :style="{fontSize: '18px'}" />
-          </a-tooltip>
-        </a-popconfirm>
-      </span>
+          <a-popconfirm
+            title="Are you sure you want to delete this file?"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="onDelete(record)"
+          >
+            <a-tooltip>
+              <template slot="title"><span>Delete</span></template>
+              <a-icon type="delete" :style="{fontSize: '18px'}" />
+            </a-tooltip>
+          </a-popconfirm>
+        </span>
       </a-table>
     </a-modal>
   </div>
@@ -39,6 +39,7 @@ const uploadedColumns = [
   {
     title: 'File Name',
     dataIndex: 'file_name',
+    width: 350,
     scopedSlots: { customRender: 'fileName' },
   },
   {
@@ -66,7 +67,7 @@ export default {
     },
     formDetails(val) {
       this.list = val.files || []
-      this.documentName = val.document_name || null
+      this.documentName = val.document_name || val.office_name || null
     },
   },
   data() {

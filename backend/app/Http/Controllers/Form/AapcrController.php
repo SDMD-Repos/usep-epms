@@ -13,18 +13,18 @@ use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateAapcr;
 use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
+use App\Http\Traits\FileTrait;
 use App\Program;
 use App\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 
 class AapcrController extends Controller
 {
-    use ConverterTrait;
+    use ConverterTrait, FileTrait;
 
     private $login_user;
 
@@ -273,7 +273,9 @@ class AapcrController extends Controller
             $aapcr->history = $aapcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             if($aapcr->save()) {
-                $this->uploadFiles($id, $files);
+                $model = new AapcrFile();
+
+                $this->uploadFiles($model, $id, $files);
             }else {
                 DB::rollBack();
             }
@@ -290,7 +292,6 @@ class AapcrController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
-
     }
 
     public function deactivate(Request $request)
@@ -816,38 +817,13 @@ class AapcrController extends Controller
         }
     }
 
-    public function uploadFiles($id, $files)
-    {
-        foreach($files as $file) {
-            $fileName = $file->getClientOriginalName();
-            $fileExtension = $file->getClientOriginalExtension();
-
-            $name = str_replace("." . $fileExtension, "", $fileName);
-
-            $modFileName = $name . "__" . time() . "." . $fileExtension;
-
-            $filePath = $file->storeAs('uploads', $modFileName, 'public');
-
-            $newFile = new AapcrFile();
-
-            $newFile->aapcr_id = $id;
-            $newFile->file_path = $filePath;
-            $newFile->file_name = $fileName;
-            $newFile->create_id = $this->login_user->pmaps_id;
-            $newFile->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            $newFile->save();
-        }
-    }
-
     public function viewUploadedFile($id)
     {
-        $file = AapcrFile::find($id);
+        $model = new AapcrFile();
 
-        $contents = public_path('storage/' . $file->file_path);
-        $headers = array('Content-Type: application/pdf',);
+        $file = $this->viewFile($model, $id);
 
-        return response()->download($contents, '', $headers);
+        return response()->download($file['contents'], '', $file['headers']);
     }
 
     public function updateFile(UploadPdfFile $request)
@@ -857,35 +833,22 @@ class AapcrController extends Controller
 
             $validated = $request->validated();
 
-            $files = $validated['files'];
-            $id = $validated['id'];
+            $fileModel = new AapcrFile();
 
-            $now = Carbon::now();
+            $formModel = new Aapcr();
 
-            $aapcrFile = AapcrFile::find($id);
+            $params = [
+                'fileModel' => $fileModel,
+                'formModel' => $formModel,
+                'validated' => $validated
+            ];
 
-            $aapcrId = $aapcrFile->aapcr_id;
-
-            $aapcrFile->updated_at = $now;
-            $aapcrFile->modify_id = $this->login_user->pmaps_id;
-            $aapcrFile->history = $aapcrFile->history . "Deleted " . $now . " by " . $this->login_user->fullName . "\n";
-
-            if($aapcrFile->save()) {
-                if(!$aapcrFile->delete()){
-                    DB::rollBack();
-                }
-            } else {
-                DB::rollBack();
-            }
-
-            $this->uploadFiles($aapcrId, $files);
-
-            $aapcr = Aapcr::where('id', $aapcrId)->with('files')->first();
+            $data = $this->processUpdateFile($params);
 
             DB::commit();
 
             return response()->json([
-                'aapcr' => $aapcr
+                'data' => $data
             ], 200);
         } catch(\Exception $e){
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {

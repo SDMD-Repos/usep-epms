@@ -40,4 +40,13 @@ class VpOpcr extends Model
     {
         return $this->details()->whereNull('parent_id')->orderByRaw('-`aapcr_detail_id` DESC');
     }
+
+    /**
+     * Get the files for the vp opcr.
+     */
+
+    public function files()
+    {
+        return $this->hasMany('App\VpOpcrFile', 'form_id');
+    }
 }

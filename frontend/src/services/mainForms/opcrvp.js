@@ -45,6 +45,20 @@ export function publish(data) {
     .catch(err => console.log(err))
 }
 
+export function unpublish(data) {
+  return apiClient
+    .post('/forms/opcrvp/unpublish', data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export function deactivate(data) {
   return apiClient
     .post('/forms/opcrvp/deactivate', data)
@@ -75,6 +89,24 @@ export function update(id, data) {
 export function renderPdf(id) {
   return apiClient
     .get('/forms/opcrvp/viewPdf/' + id, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export function viewUploadedFile(id) {
+  return apiClient
+    .get('/forms/opcrvp/viewUploadedFile/' + id, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export function updateFile(data) {
+  return apiClient
+    .post('/forms/opcrvp/update-file', data)
     .then(response => {
       return response.data
     })

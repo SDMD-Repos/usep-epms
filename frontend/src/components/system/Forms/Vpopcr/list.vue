@@ -59,10 +59,26 @@
                   <a-icon type="file-done" :style="{fontSize: '18px'}" @click="handlePublish(record)"/>
                 </a-tooltip>
             </template>
+            <template v-if="record.published_date && record.is_active">
+              <a-divider type="vertical" />
+              <a-tooltip>
+                <template slot="title"><span>Unpublish</span></template>
+                <a-icon type="close-square" theme="filled" :style="{fontSize: '18px'}" @click="onUnpublish(record.id)"/>
+              </a-tooltip>
+            </template>
+            <template v-if="record.files.length">
+              <a-divider type="vertical" />
+              <a-tooltip>
+                <template slot="title"><span>View Archived</span></template>
+                <a-icon type="unordered-list" :style="{fontSize: '18px'}" @click="viewUploadedList(record)"/>
+              </a-tooltip>
+            </template>
           </span>
         </a-table>
       </div>
     </div>
+
+    <!-- View PDF Modal-->
     <a-modal v-model="visible"
              width="100%"
              :dialog-style="{ top: '0px' }"
@@ -73,6 +89,24 @@
              @cancel="handleClose">
       <vue-pdf-app :pdf="name" theme="light" :file-name="fileName" :config="config"></vue-pdf-app>
     </a-modal>
+
+    <!-- Upload File Modal -->
+    <upload-publish-modal :is-file-upload="isFileUpload"
+                          :list="fileList"
+                          :uploading="loading"
+                          :upload-ok-text="okTextUploadModal"
+                          :modal-note="noteInModal"
+                          @upload="uploadFile"
+                          @add-to-list="addUploadItem"
+                          @cancel-upload="cancelUpload"
+                          @remove-file="removeFile"/>
+
+    <!-- View Uploaded Files Modal -->
+    <uploaded-list-modal :upload-modal-state="isUploadedViewed"
+                         :date-format="dateFormat"
+                         :form-details="viewedForm"
+                         @close-list-modal="onCloseList"
+                         @view-file="openFile" @delete-file="deleteFile"/>
   </div>
 </template>
 
@@ -83,6 +117,8 @@ import ListMixin from '@/services/formMixins/list'
 import * as opcrvpForm from '@/services/mainForms/opcrvp'
 import VuePdfApp from 'vue-pdf-app'
 import 'vue-pdf-app/dist/icons/main.css'
+import uploadPublishModal from '../Extras/uploadPublishModal'
+import uploadedListModal from '../Extras/uploadedListModal'
 
 export default {
   title: 'OPCR (VP) List',
@@ -163,9 +199,63 @@ export default {
         },
       })
     },
+    uploadFile() {
+      const { fileList } = this
+      const formData = new FormData()
+      fileList.forEach(file => {
+        formData.append('files[]', file)
+      })
+      formData.append('id', this.cachedId)
+      const self = this
+      if (!this.isConfirmDeleteFile) {
+        this.$store.dispatch('opcrvp/UNPUBLISH', { payload: formData }).then(() => {
+          self.cancelUpload()
+        })
+      } else {
+        this.$store.commit('opcrvp/SET_STATE', {
+          loading: true,
+        })
+        self.cancelUpload()
+        self.onCloseList()
+        const updateFile = opcrvpForm.updateFile
+        updateFile(formData).then(response => {
+          if (response) {
+            self.$store.dispatch('opcrvp/FETCH_LIST').then(() => {
+              const { data } = response
+              self.viewUploadedList(data) // open List of Uploaded Files Modal
+            })
+            self.$notification.success({
+              message: 'Success',
+              description: 'File was deleted successfully',
+            })
+          }
+          this.$store.commit('opcrvp/SET_STATE', {
+            loading: false,
+          })
+        })
+      }
+    },
+    openFile(data) {
+      const self = this
+      this.$message.loading('Loading...')
+      const { id } = data
+      const name = data.file_name
+      const viewUploaded = opcrvpForm.viewUploadedFile
+      viewUploaded(id).then(response => {
+        if (response) {
+          self.visible = true
+          const blob = new Blob([response], { type: 'application/pdf' })
+          self.name = window.URL.createObjectURL(blob)
+          self.fileName = name
+        }
+        self.$message.destroy()
+      })
+    },
   },
   components: {
     VuePdfApp,
+    uploadPublishModal,
+    uploadedListModal,
   },
 }
 </script>
