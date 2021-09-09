@@ -153,7 +153,7 @@ export default {
       this.$store.dispatch('formManager/FETCH_MEASURES')
     },
     onDelete(key) {
-      this.$store.dispatch('formManager/DELETE_MEASURE', { payload: key })
+      this.$store.dispatch('formManager/DELETE_GROUP', { payload: key })
     },
     openModal(event, record) {
       this.resetFormData()

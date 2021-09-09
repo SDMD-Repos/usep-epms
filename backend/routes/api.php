@@ -66,6 +66,11 @@ Route::group([
     Route::post('/update-signatories', 'SettingController@updateSignatories');
     Route::post('/delete-signatory/{id}', 'SettingController@deleteSignatory');
 
+    Route::get('/get-all-groups', 'SettingController@getAllGroups');
+    Route::post('/create-group', 'SettingController@saveGroup');
+    Route::post('/update-group/{id}', 'SettingController@updateGroup');
+    Route::post('/delete-group/{id}', 'SettingController@deleteGroup');
+
     Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
 });
 

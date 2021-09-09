@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.topbar">
     <div class="mr-md-4 mr-auto">
-      <epms-logo />
+      <epms-logo :root="root"/>
     </div>
     <div class="mr-auto d-none d-md-block">
     </div>
@@ -12,7 +12,7 @@
     <div class="mr-4 d-none d-sm-block">
     </div>
     <div class="d-none d-md-block">
-      <usep-logo />
+      <usep-logo :root="root" />
     </div>
   </div>
 </template>
@@ -25,6 +25,11 @@ export default {
   components: {
     EpmsLogo,
     UsepLogo,
+  },
+  data() {
+    return {
+      root: 'resources/images/',
+    }
   },
 }
 </script>

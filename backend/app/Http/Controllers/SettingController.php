@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\CascadingLevel;
 use App\Category;
 use App\Form;
+use App\Group;
+use App\GroupMember;
 use App\Http\Requests\StoreCategory;
+use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
 use App\Http\Requests\StoreProgram;
 use App\Http\Requests\StoreSignatory;
 use App\Http\Requests\StoreSubCategory;
+use App\Http\Requests\UpdateGroup;
 use App\Http\Traits\OfficeTrait;
 use App\Measure;
 use App\MeasureItem;
@@ -545,7 +549,7 @@ class SettingController extends Controller
                 $newSignatory->office_id = $officeId;
                 $newSignatory->office_name = $officeName;
                 $newSignatory->position = $signatory['position'];
-                $newSignatory->office_form_id = $officeFormId;
+                $newSignatory->office_form_id = $officeFormId; // selected office for the signatories added
                 $newSignatory->create_id = $this->login_user->pmaps_id;
                 $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -702,6 +706,224 @@ class SettingController extends Controller
             return response()->json([
                 'success' => 'Signatory deleted successfully'
             ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function getAllGroups()
+    {
+        $groups = Group::select('*', 'id as key')->with('members')->get();
+
+        return response()->json([
+            'groups' => $groups
+        ], 200);
+    }
+
+    public function saveGroup(StoreGroup $request)
+    {
+        try{
+
+            $validated = $request->validated();
+
+            $name = $validated['name'];
+            $effectivy = $validated['effectivity'];
+            $members = $validated['members'];
+
+            DB::beginTransaction();
+
+            $group = new Group;
+
+            $group->name = $name;
+            $group->effective_until = $effectivy;
+
+            if($validated['hasChair']){
+                $chairId = $validated['chairId'];
+                $chairOffice = $validated['chairOffice'];
+
+                $group->oic_id = $chairId['key'];
+                $group->oic_name = trim($chairId['label']);
+                $group->oic_dept_id = trim($chairOffice['value']);
+                $group->oic_dept_name = trim($chairOffice['label']);
+            }
+
+            $group->create_id = $this->login_user->pmaps_id;
+            $group->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if($group->save()){
+                foreach($members as $member) {
+                    $this->saveGroupMember($group->id, $member);
+                }
+            }else{
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json('Group created successfully', 200);
+        }catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function saveGroupMember($group_id, $member)
+    {
+        try{
+            $newGroup = Group::find($group_id);
+
+            $detail = $member['id'];
+            $office = $member['officeId'];
+
+            $newMember = new GroupMember;
+
+            $newMember->member_id = $detail['value'];
+            $newMember->member_name = trim($detail['label']);
+            $newMember->office_id = $office['value'];
+            $newMember->office_name = $office['label'];
+            $newMember->create_id = $this->login_user->pmaps_id;
+            $newMember->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if(!$newGroup->members()->save($newMember)) {
+                DB::rollBack();
+            }
+        }catch (\Exception $e) {
+            dd($e);
+        }
+    }
+
+    public function updateGroup(UpdateGroup $request, $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            $name = $validated['name'];
+            $effectivity = $validated['effectivity'];
+
+            DB::beginTransaction();
+
+            $group = Group::find($id);
+
+            $original = $group->getOriginal();
+
+            $group->name = $name;
+            $group->effective_until = $effectivity;
+
+            if($validated['hasChair']) {
+                $chairId = $validated['chairId'];
+                $chairOffice = $validated['chairOffice'];
+
+                $group->oic_id = $chairId['key'];
+                $group->oic_name = trim($chairId['label']);
+                $group->oic_dept_id = trim($chairOffice['value']);
+                $group->oic_dept_name = trim($chairOffice['label']);
+            } else {
+                $group->oic_id = NULL;
+                $group->oic_name = NULL;
+                $group->oic_dept_id = NULL;
+                $group->oic_dept_name = NULL;
+            }
+
+            $group->modify_id = $this->login_user->pmaps_id;
+            $group->updated_at = Carbon::now();
+
+            $history = '';
+
+            if($group->isDirty('name')){
+                $history .= "Updated Name from '".$original['name']."' to '".$name."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            if($group->isDirty('effective_until')){
+                $history .= "Updated Effective Until from '".$original['effective_until']."' to '".$effectivity."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            if($group->isDirty('oic_id')){
+                $history .= "Updated Officer-in-Charge from '".$original['oic_name']."' to '".$group->oic_name."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            $group->history = $group->history . $history;
+
+            if ($group->save()) {
+                $members = $validated['members'];
+
+                foreach ($members as $member) {
+                    if (isset($member['status']) && $member['status'] === 'new') {
+                        $this->saveGroupMember($id, $member);
+                    }
+                }
+            } else {
+                DB::rollBack();
+            }
+
+            $deleted = $validated['deleted'];
+
+            if (!empty($deleted)) {
+                foreach ($deleted as $deleteId) {
+                    $deleteMember = GroupMember::find($deleteId);
+
+                    $deleteMember->modify_id = $this->login_user->pmaps_id;
+                    $deleteMember->updated_at = Carbon::now();
+                    $deleteMember->history = $deleteMember->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                    if (!$deleteMember->save()) {
+                        DB::rollBack();
+                    } else {
+                        if (!$deleteMember->delete()) {
+                            DB::rollBack();
+                        }
+                    }
+                }
+            }
+
+            DB:: commit();
+
+            return response()->json('Group updated successfully', 200);
+
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function deleteGroup($id)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            $group = Group::find($id);
+
+            $group->modify_id = $this->login_user->pmaps_id;
+            $group->updated_at = Carbon::now();
+            $group->history = $group->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if (!$group->save()) {
+                DB::rollBack();
+            } else {
+                if (!$group->delete()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json('Group deleted successfully', 200);
         } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode()) {
                 $status = $e->getCode();

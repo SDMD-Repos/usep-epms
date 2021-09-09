@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img src="resources/images/SDMD.png" alt="SDMD Branding" height="40px">
+    <img :src="theme === 'default' ? root + 'SDMD.png' : root + 'SDMD-dark-2.png'" alt="SDMD Branding" height="40px">
   </div>
 </template>
 
@@ -8,21 +8,23 @@
 import { mapState } from 'vuex'
 
 export default {
+  props: {
+    root: String,
+  },
   computed: {
     ...mapState(['user']),
     loading() {
       return this.$store.state.user.loading
     },
+    theme() {
+      return this.$store.state.settings.theme
+    },
   },
   data: function () {
     return {
-      count: 7,
     }
   },
   methods: {
-    addCount() {
-      this.count++
-    },
     logout() {
       this.$store.dispatch('user/LOGOUT')
     },

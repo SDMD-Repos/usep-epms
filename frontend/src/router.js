@@ -39,11 +39,11 @@ const router = new Router({
           component: () => import('./views/manager/form'),
         },
         {
-          path: '/manager/form',
+          path: '/manager/groups',
           meta: {
-            title: 'Form Manager',
+            title: 'Groups Manager',
           },
-          component: () => import('./views/manager/form'),
+          component: () => import('./views/manager/groups'),
         },
         {
           path: '/manager/measures',

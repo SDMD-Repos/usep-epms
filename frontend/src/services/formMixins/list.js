@@ -10,7 +10,6 @@ export default {
       name: '',
       fileName: '',
       listTableColumns,
-      moment,
       config: {
         toolbar: {
           toolbarViewerRight: {
@@ -37,6 +36,7 @@ export default {
   computed: {
   },
   methods: {
+    moment,
     deactivate(id) {
       const self = this
       Modal.confirm({

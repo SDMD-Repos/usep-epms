@@ -10,7 +10,7 @@
       air__layout__borderless: settings.isBorderless,
     }"
     >
-      <air-sidebar />
+      <sidebar />
       <!-- <air-support-chat /> -->
       <air-menu-left v-if="settings.menuLayoutType === 'left'" />
       <air-menu-top v-if="settings.menuLayoutType === 'top'" />
@@ -52,12 +52,12 @@ import AirMenuTop from '@/components/layout/MenuTop'
 import AirFooter from '@/components/layout/Footer'
 import AirFooterDark from '@/components/layout/FooterDark'
 // import AirSupportChat from '@/@airui/layout/SupportChat'
-import AirSidebar from '@/components/layout/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 
 export default {
   name: 'MainLayout',
   computed: mapState(['settings']),
-  components: { AirTopbar, AirSubbar, AirMenuLeft, AirMenuTop, AirFooter, AirSidebar, AirTopbarDark, AirFooterDark },
+  components: { AirTopbar, AirSubbar, AirMenuLeft, AirMenuTop, AirFooter, Sidebar, AirTopbarDark, AirFooterDark },
   mounted() {
     this.detectViewPort(true)
     window.addEventListener('resize', this.detectViewPortListener)

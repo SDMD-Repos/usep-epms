@@ -11,9 +11,9 @@
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
           :tree-data="officeList"
           placeholder="Select office"
+          tree-node-filter-prop="title"
           show-search
           allow-clear
-          tree-data-simple-mode
           label-in-value
           @change="handleOfficeIdChange"
         />
@@ -23,9 +23,9 @@
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
           :tree-data="list"
           placeholder="Select Personnel"
+          tree-node-filter-prop="title"
           show-search
           allow-clear
-          tree-data-simple-mode
           label-in-value
           @change="handlePersonnelIdChange"
         />

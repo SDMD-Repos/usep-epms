@@ -1,7 +1,7 @@
 <template>
   <a-layout>
     <a-layout-content>
-      <air-sidebar />
+      <sidebar />
       <div
         :class="{
           [$style.container]: true,
@@ -42,11 +42,11 @@
 
 <script>
 import { mapState } from 'vuex'
-import AirSidebar from '@/components/layout/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 
 export default {
   name: 'AuthLayout',
-  components: { AirSidebar },
+  components: { Sidebar },
   computed: mapState(['settings']),
 }
 </script>

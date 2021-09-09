@@ -23,6 +23,10 @@ const mapApiProviders = {
   saveSignatories: manager.saveSignatories,
   updateSignatories: manager.updateSignatory,
   deleteSignatory: manager.deleteSignatory,
+  fetchGroups: manager.fetchAllGroups,
+  createGroup: manager.createGroup,
+  updateGroup: manager.updateGroup,
+  deleteGroup: manager.deleteGroup,
   getCascadingLevels: manager.getCascadingLevels,
 }
 
@@ -39,6 +43,7 @@ export default {
     signatoryTypes: [],
     signatories: [],
     cascadingLevels: [],
+    groups: [],
     loading: false,
   },
   mutations: {
@@ -422,6 +427,83 @@ export default {
           Vue.prototype.$notification.success({
             message: 'Success',
             description: 'Personnel deleted successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_GROUPS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const fetchGroups = mapApiProviders.fetchGroups
+      fetchGroups().then(response => {
+        if (response) {
+          const { groups } = response
+          commit('SET_STATE', {
+            groups: groups,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CREATE_GROUP({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const createGroup = mapApiProviders.createGroup
+      createGroup(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_GROUPS')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Group created successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE_GROUP({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const id = payload.id
+
+      const updateGroup = mapApiProviders.updateGroup
+      updateGroup(payload, id).then(response => {
+        if (response) {
+          dispatch('FETCH_GROUPS')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Group updated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DELETE_GROUP({ commit, dispatch }, { payload }) {
+      const id = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const deleteGroup = mapApiProviders.deleteGroup
+      deleteGroup(id).then(response => {
+        if (response) {
+          dispatch('FETCH_GROUPS')
+          Vue.prototype.$notification.success({
+            message: 'Success',
+            description: 'Group deleted successfully',
           })
         }
         commit('SET_STATE', {

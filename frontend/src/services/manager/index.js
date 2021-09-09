@@ -171,6 +171,42 @@ export async function deleteSignatory(id) {
     .catch(err => console.log(err))
 }
 
+export async function fetchAllGroups() {
+  return apiClient
+    .get('/settings/get-all-groups')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function createGroup(data) {
+  return apiClient
+    .post('/settings/create-group', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function updateGroup(data, id) {
+  return apiClient
+    .post('/settings/update-group/' + id, data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function deleteGroup(id) {
+  return apiClient
+    .post('/settings/delete-group/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function getCascadingLevels() {
   return apiClient
     .get('/settings/get-all-cascading-levels')

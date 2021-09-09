@@ -1,19 +1,19 @@
 <template>
   <div>
-    <a-tooltip placement="left">
-      <template slot="title">
-        <span>Switch Dark / Light Theme</span>
-      </template>
-      <a
-        href="javascript: void(0);"
-        @click="setTheme(settings.theme === 'default' ? 'dark' : 'default')"
-        style="bottom: calc(50% + 60px)"
-        :class="$style.air__sidebar__toggleButton"
-      >
-        <i v-if="settings.theme === 'default'" class="fe fe-moon" />
-        <i v-if="settings.theme !== 'default'" class="fe fe-sun" />
-      </a>
-    </a-tooltip>
+<!--    <a-tooltip placement="left">-->
+<!--      <template slot="title">-->
+<!--        <span>Switch Dark / Light Theme</span>-->
+<!--      </template>-->
+<!--      <a-->
+<!--        href="javascript: void(0);"-->
+<!--        @click="setTheme(settings.theme === 'default' ? 'dark' : 'default')"-->
+<!--        style="bottom: calc(50% + 60px)"-->
+<!--        :class="$style.air__sidebar__toggleButton"-->
+<!--      >-->
+<!--        <i v-if="settings.theme === 'default'" class="fe fe-moon" />-->
+<!--        <i v-if="settings.theme !== 'default'" class="fe fe-sun" />-->
+<!--      </a>-->
+<!--    </a-tooltip>-->
   </div>
 </template>
 
