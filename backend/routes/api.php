@@ -142,4 +142,5 @@ Route::group([
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
+    Route::get('/get-offices-accountable/{nodeStatus}', 'SettingController@getOfficesAccountable');
 });

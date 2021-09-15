@@ -9,6 +9,7 @@ const mapApiProviders = {
   getPersonnelList: hris.getPersonnelByOffice,
   getAllPositions: hris.getAllPositions,
   getPersonnelOffices: hris.getPersonnelOffices,
+  getOfficesAccountable: hris.getOfficesAccountable,
 }
 
 Vue.use(Vuex)
@@ -22,6 +23,7 @@ export default {
     personnel: [],
     positionList: [],
     personnelOffices: [],
+    officesAccountable: [],
     loading: false,
   },
   mutations: {
@@ -133,6 +135,24 @@ export default {
           const { positionList } = response
           commit('SET_STATE', {
             positionList: positionList,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_OFFICES_ACCOUNTABLE({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getOfficesAccountable = mapApiProviders.getOfficesAccountable
+      getOfficesAccountable(payload).then(response => {
+        if (response) {
+          const { officesAccountable } = response
+          commit('SET_STATE', {
+            officesAccountable: officesAccountable,
           })
         }
         commit('SET_STATE', {

@@ -16,7 +16,7 @@ class CreateGroupsTable extends Migration
         Schema::create('groups', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->string('name', 50);
-            $table->date('effective_until');
+            $table->year('effective_until');
             $table->string('oic_id', 15)->nullable();
             $table->string('oic_name', 100)->nullable();
             $table->integer('oic_dept_id')->nullable();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Traits;
 
+use App\Group;
 use Illuminate\Support\Facades\Http;
 
 trait OfficeTrait {
@@ -123,6 +124,51 @@ trait OfficeTrait {
         }catch (\Exception $e) {
             return response()->json($e->getMessage(), 400);
         }
+    }
+
+    public function getOfficesAccountable($nodeStatus)
+    {
+//        $items = new \stdClass();
+//
+//        $items->allColleges = true;
+//        $items->mains = true;
+//
+//        $config = new \stdClass();
+//
+//        $config->checkable = $items;
+
+        $offices = $this->getMainOfficesWithChildren($nodeStatus, ['fromForm' => true]);
+
+        $groups = Group::all();
+
+        $children = [];
+
+        foreach($groups as $group) {
+            $data = new \stdClass();
+
+            $data->id = $group->id;
+            $data->value = $group->id;
+            $data->title = $group->name;
+            $data->pId = 'allGroups';
+            $data->cascadeTo = null;
+
+            array_push($children, $data);
+        }
+
+        $data = new \stdClass();
+
+        $data->id = "allGroups";
+        $data->value = "allGroups";
+        $data->title = "All Groups";
+        $data->isGroup = true;
+        $data->cascadeTo = null;
+        $data->children = $children;
+
+        array_push($offices, $data);
+
+        return response()->json([
+            'officesAccountable' => $offices
+        ], 200);
     }
 
     public function getChildOffices($vp_id, $update=0)

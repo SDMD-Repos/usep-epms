@@ -26,7 +26,7 @@ class UpdateGroup extends FormRequest
     {
         return [
             'name' => ['required', Rule::unique('groups')->ignore($this->id)->whereNull('deleted_at')],
-            'effectivity' => 'required|date|after:created_at',
+            'effectivity' => 'required|digits:4',
             'members' => 'required|array',
             'hasChair' => 'boolean',
             'chairId' => 'exclude_if:hasChair,false|required',

@@ -73,7 +73,7 @@ export default {
         hasChair: false,
         chairOffice: undefined,
         chairId: undefined,
-        effectivity: null,
+        effectivity: new Date().getFullYear(),
         members: [],
         deleted: [],
       },
@@ -168,7 +168,7 @@ export default {
         hasChair: false,
         chairOffice: undefined,
         chairId: undefined,
-        effectivity: null,
+        effectivity: new Date().getFullYear(),
         members: [],
         deleted: [],
       }

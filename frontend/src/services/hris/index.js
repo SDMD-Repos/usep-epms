@@ -44,3 +44,12 @@ export async function getAllPositions() {
     })
     .catch(err => console.log(err))
 }
+
+export async function getOfficesAccountable(data) {
+  return apiClient
+    .get('/hris/get-offices-accountable/' + data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

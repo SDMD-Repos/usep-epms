@@ -64,3 +64,12 @@ ul.form-ul-list {
 .viewUploadedModal .ant-modal-title {
   text-align: center;
 }
+
+.required-asterisk {
+  display: inline-block;
+  margin-right: 4px;
+  color: #f00;
+  font-size: 15px;
+  font-family: SimSun, sans-serif;
+  line-height: 1;
+}

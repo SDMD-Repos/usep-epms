@@ -26,7 +26,7 @@ class StoreGroup extends FormRequest
     {
         return [
             'name' => ['required', Rule::unique('groups')->whereNull('deleted_at')],
-            'effectivity' => 'required|date|after:'.date("Y-m-d"),
+            'effectivity' => 'required|digits:4',
             'members' => 'required|array',
             'hasChair' => 'boolean',
             'chairId' => 'exclude_if:hasChair,false|required',

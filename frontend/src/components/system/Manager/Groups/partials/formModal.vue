@@ -44,10 +44,13 @@
         </template>
 
         <a-form-model-item label="Effective until" ref="effectivity" prop="effectivity">
-          <a-date-picker v-model='form.effectivity'
-                         :disabled-date="disabledDate"
-                         value-format="YYYY-MM-DD"
-                         :disabled="actionType === 'view'"/>
+          <a-select v-model="form.effectivity" placeholder="Select year" style="width: 200px" :disabled="actionType === 'view'">
+            <template v-for="(y, i) in years">
+              <a-select-option :value="y" :key="i">
+                {{ y }}
+              </a-select-option>
+            </template>
+          </a-select>
         </a-form-model-item>
 
         <a-form-model-item ref="members" prop="members">
@@ -111,6 +114,17 @@ export default {
     formObject: Object,
     dateFormatter: Function,
   },
+  computed: {
+    years() {
+      const now = new Date().getFullYear()
+      const max = 10
+      const lists = []
+      for (let i = now; i <= (now + max); i++) {
+        lists.push(i)
+      }
+      return lists
+    },
+  },
   data() {
     const open = this.open
     const formObject = this.formObject
@@ -144,6 +158,7 @@ export default {
       },
       loadOicList: false,
       loadMemberList: false,
+      isEffectivityOpen: false,
     }
   },
   watch: {
@@ -155,9 +170,6 @@ export default {
     },
   },
   methods: {
-    disabledDate(current) {
-      return current && current < this.dateFormatter().subtract(1, 'days').endOf('day')
-    },
     filterOption(input, option) {
       return (
         option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
