@@ -25,8 +25,7 @@ class CreateCategoriesTable extends Migration
             $table->softDeletes();
             $table->text('history');
 
-            $table->primary('id');
-            $table->primary('percentage');
+            $table->primary(['id', 'percentage']);
         });
     }
 
