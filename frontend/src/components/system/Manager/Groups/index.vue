@@ -40,6 +40,7 @@
                     :ok-text="okText"
                     :action-type="action"
                     :office-list="offices"
+                    :supervising-list="vpOfficesList"
                     :date-formatter="moment"
                     @change-action="changeAction"
                     @close-modal="resetModalData"
@@ -74,6 +75,7 @@ export default {
         chairOffice: undefined,
         chairId: undefined,
         effectivity: new Date().getFullYear(),
+        supervising: undefined,
         members: [],
         deleted: [],
       },
@@ -87,6 +89,7 @@ export default {
   computed: {
     ...mapState({
       offices: state => state.external.mainOfficesChildren,
+      vpOfficesList: state => state.external.vpOffices,
       groups: state => state.formManager.groups,
       loading: state => state.formManager.loading,
       dateFormat: state => state.dateFormat,
@@ -108,6 +111,7 @@ export default {
       }
       params = encodeURIComponent(JSON.stringify(params))
       this.$store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
+      this.$store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
     },
     openModal(event, record) {
       this.resetModalData()
@@ -129,6 +133,12 @@ export default {
           this.$refs.groupModal.getPersonnelList(this.form.chairOffice, 'oic')
         }
         this.form.effectivity = record.effective_until
+        if (record.supervising_id) {
+          this.form.supervising = {
+            key: record.supervising_id,
+            label: record.supervising_name,
+          }
+        }
         record.members.forEach(item => {
           const data = {
             id: {
@@ -169,6 +179,7 @@ export default {
         chairOffice: undefined,
         chairId: undefined,
         effectivity: new Date().getFullYear(),
+        supervising: undefined,
         members: [],
         deleted: [],
       }

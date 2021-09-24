@@ -17,4 +17,9 @@ class AapcrDetailOffice extends Model
     {
         return $this->belongsTo('App\AapcrDetail', 'detail_id');
     }
+
+    public function group()
+    {
+        return $this->belongsTo('App\Group', 'group_id');
+    }
 }

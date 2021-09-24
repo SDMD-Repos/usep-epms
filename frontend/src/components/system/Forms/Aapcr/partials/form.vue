@@ -104,12 +104,9 @@
             </a-select>
           </a-form-model-item>
 
-          <a-form-model-item prop="budget"
+          <a-form-model-item label="Allocated Budget" prop="budget"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
-            <span slot="label">
-              <p class="required-asterisk">*</p> Allocated Budget
-            </span>
             <a-input-number v-model="form.budget"
                             style="width: 50%"
                             :step="0.01"
@@ -190,7 +187,7 @@
           <div v-if="form.implementing.length">
             <div v-for="(office, index) in form.implementing" v-bind:key="index">
               <a-row type="flex" align="middle">
-                <a-col :span="3" :offset="4">
+                <a-col :span="5" :offset="3">
                   <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
                 </a-col>
                 <a-col :span="8">
@@ -250,7 +247,7 @@
           <div v-if="form.supporting.length" >
             <div v-for="(office, index) in form.supporting" v-bind:key="index">
               <a-row type="flex" align="middle">
-                <a-col :span="3" :offset="4">
+                <a-col :span="5" :offset="3">
                   <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
                 </a-col>
                 <a-col :span="8">
@@ -328,6 +325,7 @@ const messageKey = 'updatable'
 export default {
   name: 'drawer-detail-form',
   props: {
+    currentYear: Number,
     formObject: Object,
     drawerConfig: Object,
     drawerId: String,
@@ -434,13 +432,13 @@ export default {
           mains: true,
         },
         isAcronym: true,
+        currentYear: this.currentYear,
       }
       params = encodeURIComponent(JSON.stringify(params))
       this.$store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params }) // needs to load first
     },
     onOfficeChange() {
       const args = [...arguments] /* 0 - value, 1 - label, 2 - extra, 3 - field */
-      console.log(args)
       const extra = args[2]
       const field = args[3]
       this.storedOffices[field] = []
@@ -583,7 +581,9 @@ export default {
         if (typeof item.children !== 'undefined') {
           container.children = true
         } else {
-          container.acronym = item.acronym
+          if (typeof item.isGroup === 'undefined') {
+            container.acronym = item.acronym
+          }
           container.pId = item.pId
         }
         const hasCached = cachedOffice[field].filter(i => i.value === item.value)
@@ -595,6 +595,9 @@ export default {
           tempCascadeTo = cascadeTo
         }
         container.cascadeTo = tempCascadeTo
+        if (typeof item.isGroup !== 'undefined') {
+          container.isGroup = item.isGroup
+        }
         return container
       })
     },

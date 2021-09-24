@@ -189,19 +189,26 @@ class AapcrController extends Controller
 
             $newOffice = new AapcrDetailOffice();
 
-            if(!array_key_exists('children', $office)){
-                $newOffice->vp_office_id = $office['pId'];
-
-                $office_name = $office['acronym'];
-            }else{
-                $office_name = $office['label'];
-            }
-
             $newOffice->detail_id = $detailId;
             $newOffice->office_type_id = $fieldName;
             $newOffice->cascade_to = $office['cascadeTo'];
-            $newOffice->office_id = $office['value'];
-            $newOffice->office_name = $office_name;
+
+            if(isset($office['isGroup']) && $office['isGroup']) {
+                $newOffice->is_group = true;
+                $newOffice->group_id = $office['value'];
+            } else {
+                if(!array_key_exists('children', $office)){
+                    $newOffice->vp_office_id = $office['pId'];
+
+                    $office_name = $office['acronym'];
+                }else{
+                    $office_name = $office['label'];
+                }
+
+                $newOffice->office_id = $office['value'];
+                $newOffice->office_name = $office_name;
+            }
+
             $newOffice->create_id = $this->login_user->pmaps_id;
             $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -528,15 +535,16 @@ class AapcrController extends Controller
 
                 $original = $detail->getOriginal();
 
+                $isHeader = $data['isHeader'] ? 1 : 0;
+
                 $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
 
                 $cascadingLevel = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
-
                 $detail->category_id = $category_id->category->id;
                 $detail->sub_category_id = $subCategory;
                 $detail->program_id = $data['program'];
                 $detail->pi_name = $data['name'];
-                $detail->is_header = $data['isHeader'];
+                $detail->is_header = $isHeader;
                 $detail->target = $data['target'];
                 $detail->allocated_budget = $data['budget'];
                 $detail->targets_basis = $data['targetsBasis'];
@@ -551,7 +559,7 @@ class AapcrController extends Controller
                 }
 
                 if($detail->isDirty('is_header')){
-                    $history .= "Updated is_header from '".$original['is_header']."' to '".$data['isHeader']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullName."\n";
                 }
 
                 if($detail->isDirty('target')){
@@ -567,7 +575,7 @@ class AapcrController extends Controller
                 }
 
                 if($detail->isDirty('cascading_level')){
-                    $history .= "Updated Cascading Level from '".$original['level_of_cascading']."' to '".$cascadingLevel."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Cascading Level from '".$original['cascading_level']."' to '".$cascadingLevel."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
                 }
 
                 if($detail->isDirty('category_id')){
@@ -597,6 +605,15 @@ class AapcrController extends Controller
                 $this->updateOffices($data['id'], $data['implementing'], 'implementing');
 
                 $this->updateOffices($data['id'], $data['supporting'], 'supporting');
+
+                if(isset($data['children']) && count($data['children'])) {
+
+                    foreach ($data['children'] as $child) {
+                        $child['detailId'] = $detail->id;
+
+                        $this->updateDetails($child, $aapcrId);
+                    }
+                }
 
             } else {
                 DB::rollBack();
@@ -670,26 +687,38 @@ class AapcrController extends Controller
 
             $updatedOffice = AapcrDetailOffice::withTrashed()->where([
                 'detail_id' => $detailId,
-                'office_id' => $office['value'],
                 'office_type_id' => $type
-            ])->first();
+            ])->where(function ($query) use ($office) {
+                if (isset($office['isGroup']) && $office['isGroup']) {
+                    $query->where('group_id', $office['value']);
+                } else {
+                    $query->where('office_id', $office['value']);
+                }
+            })->first();
 
             if(!isset($updatedOffice->id)){
                 $newOffice = new AapcrDetailOffice();
 
-                if(!array_key_exists('children', $office)){
-                    $newOffice->vp_office_id = $office['pId'];
-
-                    $office_name = $office['acronym'];
-                }else{
-                    $office_name = $office['label'];
-                }
-
                 $newOffice->detail_id = $detailId;
                 $newOffice->office_type_id = $type;
                 $newOffice->cascade_to = $office['cascadeTo'];
-                $newOffice->office_id = $office['value'];
-                $newOffice->office_name = $office_name;
+
+                if(isset($office['isGroup']) && $office['isGroup']) {
+                    $newOffice->is_group = true;
+                    $newOffice->group_id = $office['value'];
+                } else {
+                    if(!array_key_exists('children', $office)){
+                        $newOffice->vp_office_id = $office['pId'];
+
+                        $office_name = $office['acronym'];
+                    }else{
+                        $office_name = $office['label'];
+                    }
+
+                    $newOffice->office_id = $office['value'];
+                    $newOffice->office_name = $office_name;
+                }
+
                 $newOffice->create_id = $this->login_user->pmaps_id;
                 $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 

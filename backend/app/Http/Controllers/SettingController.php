@@ -734,6 +734,7 @@ class SettingController extends Controller
 
             $name = $validated['name'];
             $effectivy = $validated['effectivity'];
+            $supervising = $validated['supervising'];
             $members = $validated['members'];
 
             DB::beginTransaction();
@@ -742,6 +743,8 @@ class SettingController extends Controller
 
             $group->name = $name;
             $group->effective_until = $effectivy;
+            $group->supervising_id = $supervising['key'];
+            $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']){
                 $chairId = $validated['chairId'];
@@ -810,6 +813,7 @@ class SettingController extends Controller
 
             $name = $validated['name'];
             $effectivity = $validated['effectivity'];
+            $supervising = $validated['supervising'];
 
             DB::beginTransaction();
 
@@ -819,6 +823,8 @@ class SettingController extends Controller
 
             $group->name = $name;
             $group->effective_until = $effectivity;
+            $group->supervising_id = $supervising['key'];
+            $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']) {
                 $chairId = $validated['chairId'];
@@ -846,6 +852,10 @@ class SettingController extends Controller
 
             if($group->isDirty('effective_until')){
                 $history .= "Updated Effective Until from '".$original['effective_until']."' to '".$effectivity."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            if($group->isDirty('supervising_id')){
+                $history .= "Updated Supervising office from '".$original['supervising_name']."' to '".$supervising['label']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
             }
 
             if($group->isDirty('oic_id')){

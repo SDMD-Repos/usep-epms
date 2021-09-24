@@ -27,6 +27,7 @@ class StoreGroup extends FormRequest
         return [
             'name' => ['required', Rule::unique('groups')->whereNull('deleted_at')],
             'effectivity' => 'required|digits:4',
+            'supervising' => 'required',
             'members' => 'required|array',
             'hasChair' => 'boolean',
             'chairId' => 'exclude_if:hasChair,false|required',

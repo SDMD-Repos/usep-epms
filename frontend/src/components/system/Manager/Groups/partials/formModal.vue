@@ -53,6 +53,15 @@
           </a-select>
         </a-form-model-item>
 
+        <a-form-model-item label="Supervising Office" ref="supervising" prop="supervising">
+          <a-select v-model="form.supervising"
+                    placeholder="Select Supervising Office"
+                    :disabled="actionType === 'view'"
+                    :options="supervisingList"
+                    label-in-value>
+          </a-select>
+        </a-form-model-item>
+
         <a-form-model-item ref="members" prop="members">
           <span slot="label">
             <p class="required-indicator">*</p> Members
@@ -111,6 +120,7 @@ export default {
     okText: String,
     actionType: String,
     officeList: Array,
+    supervisingList: Array,
     formObject: Object,
     dateFormatter: Function,
   },
@@ -148,6 +158,7 @@ export default {
           { min: 3, message: 'Length should be at least 3 characters', trigger: 'change' },
         ],
         effectivity: [{ required: true, message: 'Please pick a date', trigger: 'change' }],
+        supervising: [{ required: true, message: 'Please choose one', trigger: 'change' }],
         chairId: [{ validator: checkIfEmpty, trigger: 'change' }],
       },
       oicList: [],

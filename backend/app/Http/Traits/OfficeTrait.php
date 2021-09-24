@@ -128,18 +128,11 @@ trait OfficeTrait {
 
     public function getOfficesAccountable($nodeStatus)
     {
-//        $items = new \stdClass();
-//
-//        $items->allColleges = true;
-//        $items->mains = true;
-//
-//        $config = new \stdClass();
-//
-//        $config->checkable = $items;
-
         $offices = $this->getMainOfficesWithChildren($nodeStatus, ['fromForm' => true]);
 
-        $groups = Group::all();
+        $decoded = json_decode($nodeStatus);
+
+        $groups = Group::where('effective_until', '>=', $decoded->currentYear)->get();
 
         $children = [];
 
@@ -151,18 +144,21 @@ trait OfficeTrait {
             $data->title = $group->name;
             $data->pId = 'allGroups';
             $data->cascadeTo = null;
+            $data->isGroup = true;
 
             array_push($children, $data);
         }
 
         $data = new \stdClass();
 
-        $data->id = "allGroups";
-        $data->value = "allGroups";
-        $data->title = "All Groups";
+        $data->id = "groups";
+        $data->value = "groups";
+        $data->title = "Groups";
         $data->isGroup = true;
         $data->cascadeTo = null;
         $data->children = $children;
+        $data->checkable = false;
+        $data->selectable = false;
 
         array_push($offices, $data);
 

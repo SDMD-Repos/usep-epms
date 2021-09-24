@@ -121,6 +121,10 @@
       <path value="$PROJECT_DIR$/backend/vendor/symfony/http-kernel" />
       <path value="$PROJECT_DIR$/backend/vendor/phpspec/prophecy" />
       <path value="$PROJECT_DIR$/backend/vendor/fakerphp/faker" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/dbal" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/cache" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/deprecations" />
+      <path value="$PROJECT_DIR$/backend/vendor/doctrine/event-manager" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.2" />

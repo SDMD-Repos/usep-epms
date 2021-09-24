@@ -125,6 +125,10 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-kernel" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpspec/prophecy" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fakerphp/faker" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/dbal" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/deprecations" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/event-manager" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

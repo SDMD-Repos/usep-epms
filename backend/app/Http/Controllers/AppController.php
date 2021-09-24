@@ -552,7 +552,7 @@ class AppController extends Controller
 
     public function getOfficesPdf($model, $detailId)
     {
-        $getOffices = $model::select('office_name', 'office_type_id')
+        $getOffices = $model::select('office_name', 'office_type_id', 'is_group', 'group_id')
             ->where('detail_id', $detailId)
             ->orderBy('office_type_id', 'asc')
             ->get();
@@ -563,10 +563,16 @@ class AppController extends Controller
         ];
 
         foreach($getOffices as $getOffice) {
+            $officeName = $getOffice['office_name'];
+
+            if ($getOffice['is_group']) {
+                $officeName = $getOffice->group->name;
+            }
+
             if($getOffice['office_type_id'] === 'implementing') {
-                array_push($allOffices['implementing'], $getOffice['office_name']);
+                array_push($allOffices['implementing'], $officeName);
             }else{
-                array_push($allOffices['supporting'], $getOffice['office_name']);
+                array_push($allOffices['supporting'], $officeName);
             }
         }
 

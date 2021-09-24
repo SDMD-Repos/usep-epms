@@ -114,6 +114,11 @@ trait ConverterTrait {
                 $officeName = $datum->office_name;
             }
 
+            if ($datum->is_group) {
+                $officeId = $datum->group->id;
+                $officeName = $datum->group->name;
+            }
+
             /*$ipcrPeriod = IpcrPeriod::select('id')->pluck('id');
 
             if(isset($datum->periods)){
@@ -129,6 +134,10 @@ trait ConverterTrait {
 //                'ipcrPeriod' => $ipcrPeriod
             );
 
+            if ($datum->is_group) {
+                $offices[$datum->office_type_id][$counter]['isGroup'] = true;
+            }
+
             /*if($splitCollege && $officeId === "allColleges") {
                 $temp = explode("_", $officeId);
 
@@ -142,7 +151,9 @@ trait ConverterTrait {
 
                 $offices[$datum->office_type_id][$counter]['acronym'] = $datum->office_name; # used for view only PIs
             }else{
-                $offices[$datum->office_type_id][$counter]['children'] = true;
+                if (!$datum->is_group) {
+                    $offices[$datum->office_type_id][$counter]['children'] = true;
+                }
             }
         }
 

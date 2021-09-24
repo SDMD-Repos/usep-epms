@@ -69,7 +69,13 @@ class VpopcrController extends Controller
             $que->whereHas('offices', function ($query) use ($vpId) {
                 $query->where(function($q) use ($vpId) {
                     $q->where('vp_office_id', '=', $vpId)
-                        ->orWhere('office_id', '=', $vpId);
+                        ->orWhere('office_id', '=', $vpId)
+                        ->orWhere(function($groupWhere) use ($vpId) {
+                            $groupWhere->where('is_group', 1)
+                                ->whereHas('group', function($joinQuery) use ($vpId) {
+                                    $joinQuery->where('supervising_id', '=', $vpId);
+                                });
+                        });
                 });
             });
         }, 'detailsOrdered.offices', 'detailsOrdered.measures'])->first();
@@ -98,7 +104,9 @@ class VpopcrController extends Controller
                 # Check whether PI will be cascaded in core or support functions
                 # Set default sub category id and name based on the new category id
                 $hasCore = $this->array_any(function ($x, $arr) {
-                    return $x->cascade_to === 'core_functions' && ($x->vp_office_id === $arr['vpId'] || $x->office_id === $arr['vpId']);
+                    return $x->cascade_to === 'core_functions' &&
+                        ($x->vp_office_id === $arr['vpId'] || $x->office_id === $arr['vpId'] ||
+                            ($x->is_group && $x->group->supervising_id === (int)$arr['vpId']));
                 }, $data->offices, ['vpId' => $vpId]);
 
                 if($hasCore){
