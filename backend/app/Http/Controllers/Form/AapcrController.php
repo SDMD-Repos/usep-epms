@@ -14,8 +14,10 @@ use App\Http\Requests\UpdateAapcr;
 use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FileTrait;
+use App\Http\Traits\FormTrait;
 use App\Program;
 use App\SubCategory;
+use App\VpOpcrDetailOffice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,16 +26,16 @@ use Illuminate\Support\Facades\DB;
 
 class AapcrController extends Controller
 {
-    use ConverterTrait, FileTrait;
+    use ConverterTrait, FileTrait, FormTrait;
 
-    private $login_user;
+//    private $login_user;
 
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function __construct()
+    /*public function __construct()
     {
 
         $this->middleware(function ($request, $next) {
@@ -46,7 +48,7 @@ class AapcrController extends Controller
             return $next($request);
         });
 
-    }
+    }*/
 
     public function checkSaved($year)
     {
@@ -158,9 +160,21 @@ class AapcrController extends Controller
 
             $this->saveMeasures($detail, $values['measures']);
 
-            $this->saveOffices($values['implementing'], $detail->id, 'implementing');
+            $officeModel = new AapcrDetailOffice();
 
-            $this->saveOffices($values['supporting'], $detail->id, 'supporting');
+            $this->saveOffices([
+                'model' => $officeModel,
+                'detailId' => $detail->id,
+                'offices' => $values['implementing'],
+                'fieldName' => 'implementing'
+            ]);
+
+            $this->saveOffices([
+                'model' => $officeModel,
+                'detailId' => $detail->id,
+                'offices' => $values['supporting'],
+                'fieldName' => 'supporting'
+            ]);
 
             if(isset($values['children']) && count($values['children'])) {
 
@@ -169,51 +183,6 @@ class AapcrController extends Controller
 
                     $this->saveAapcrDetails($aapcrId, $child);
                 }
-            }
-        }
-    }
-
-    public function saveMeasures($detail, $measures)
-    {
-        foreach ($measures as $measure) {
-            $detail->measures()->attach($measure['key'], [
-                'create_id' => $this->login_user->pmaps_id,
-                'history' => "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n"
-            ]);
-        }
-    }
-
-    public function saveOffices($offices, $detailId, $fieldName)
-    {
-        foreach($offices as $office){
-
-            $newOffice = new AapcrDetailOffice();
-
-            $newOffice->detail_id = $detailId;
-            $newOffice->office_type_id = $fieldName;
-            $newOffice->cascade_to = $office['cascadeTo'];
-
-            if(isset($office['isGroup']) && $office['isGroup']) {
-                $newOffice->is_group = true;
-                $newOffice->group_id = $office['value'];
-            } else {
-                if(!array_key_exists('children', $office)){
-                    $newOffice->vp_office_id = $office['pId'];
-
-                    $office_name = $office['acronym'];
-                }else{
-                    $office_name = $office['label'];
-                }
-
-                $newOffice->office_id = $office['value'];
-                $newOffice->office_name = $office_name;
-            }
-
-            $newOffice->create_id = $this->login_user->pmaps_id;
-            $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if(!$newOffice->save()){
-                DB::rollBack();
             }
         }
     }
@@ -540,6 +509,7 @@ class AapcrController extends Controller
                 $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
 
                 $cascadingLevel = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
+
                 $detail->category_id = $category_id->category->id;
                 $detail->sub_category_id = $subCategory;
                 $detail->program_id = $data['program'];
@@ -600,11 +570,23 @@ class AapcrController extends Controller
                     DB::rollBack();
                 }
 
-                $this->updateMeasures($data['id'], $data['measures']);
+                $this->updateMeasures(new AapcrDetailMeasure(), $data['id'], $data['measures']);
 
-                $this->updateOffices($data['id'], $data['implementing'], 'implementing');
+                $officeModel = new AapcrDetailOffice();
 
-                $this->updateOffices($data['id'], $data['supporting'], 'supporting');
+                $this->updateOffices([
+                    'model' => $officeModel,
+                    'detailId' => $data['id'],
+                    'offices' => $data['implementing'],
+                    'type' => 'implementing',
+                ]);
+
+                $this->updateOffices([
+                    'model' => $officeModel,
+                    'detailId' => $data['id'],
+                    'offices' => $data['supporting'],
+                    'type' => 'supporting',
+                ]);
 
                 if(isset($data['children']) && count($data['children'])) {
 
@@ -620,160 +602,6 @@ class AapcrController extends Controller
             }
         } else {
             $this->saveAapcrDetails($aapcrId, $data);
-        }
-    }
-
-    public function updateMeasures($detailId, $measures)
-    {
-        $measureIds = array();
-
-        foreach($measures as $measure){
-            $updatedMeasure = AapcrDetailMeasure::withTrashed()->where([
-                'detail_id' => $detailId,
-                'measure_id' => $measure['key']
-            ])->first();
-
-            if(!isset($updatedMeasure->id)){
-                $newMeasure = new AapcrDetailMeasure;
-
-                $newMeasure->detail_id = $detailId;
-                $newMeasure->measure_id = $measure['key'];
-                $newMeasure->create_id = $this->login_user->pmaps_id;
-                $newMeasure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                if(!$newMeasure->save()){
-                    DB::rollBack();
-                }else{
-                    array_push($measureIds, $newMeasure->id);
-                }
-            }else{
-                if($updatedMeasure->trashed()){
-                    $updatedMeasure->restore();
-
-                    $updatedMeasure->modify_id = $this->login_user->pmaps_id;
-                    $updatedMeasure->history = $updatedMeasure->history."Selected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                    if(!$updatedMeasure->save()){
-                        DB::rollBack();
-                    }
-                }
-
-                array_push($measureIds, $updatedMeasure->id);
-            }
-        }
-
-        $deleteAapcrMeasure = AapcrDetailMeasure::where('detail_id', $detailId)->whereNotIn('id', $measureIds)->get();
-
-        foreach($deleteAapcrMeasure as $deletedMeasure) {
-            $deletedMeasure->updated_at = Carbon::now();
-            $deletedMeasure->modify_id = $this->login_user->pmaps_id;
-            $deletedMeasure->history = $deletedMeasure->history."Unselected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if(!$deletedMeasure->save()){
-                DB::rollBack();
-            }else{
-                if(!$deletedMeasure->delete()){
-                    DB::rollBack();
-                }
-            }
-        }
-    }
-
-    public function updateOffices($detailId, $offices, $type)
-    {
-        $officeIds = array();
-
-        foreach($offices as $office){
-
-            $updatedOffice = AapcrDetailOffice::withTrashed()->where([
-                'detail_id' => $detailId,
-                'office_type_id' => $type
-            ])->where(function ($query) use ($office) {
-                if (isset($office['isGroup']) && $office['isGroup']) {
-                    $query->where('group_id', $office['value']);
-                } else {
-                    $query->where('office_id', $office['value']);
-                }
-            })->first();
-
-            if(!isset($updatedOffice->id)){
-                $newOffice = new AapcrDetailOffice();
-
-                $newOffice->detail_id = $detailId;
-                $newOffice->office_type_id = $type;
-                $newOffice->cascade_to = $office['cascadeTo'];
-
-                if(isset($office['isGroup']) && $office['isGroup']) {
-                    $newOffice->is_group = true;
-                    $newOffice->group_id = $office['value'];
-                } else {
-                    if(!array_key_exists('children', $office)){
-                        $newOffice->vp_office_id = $office['pId'];
-
-                        $office_name = $office['acronym'];
-                    }else{
-                        $office_name = $office['label'];
-                    }
-
-                    $newOffice->office_id = $office['value'];
-                    $newOffice->office_name = $office_name;
-                }
-
-                $newOffice->create_id = $this->login_user->pmaps_id;
-                $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                if(!$newOffice->save()){
-                    DB::rollBack();
-                }else{
-                    array_push($officeIds, $newOffice->id);
-                }
-            }else{
-                $history = '';
-
-                if($updatedOffice->trashed()){
-                    $updatedOffice->restore();
-
-                    $history = "Selected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                }else{
-                    $oldCascadeTo = $updatedOffice->cascade_to;
-
-                    $updatedOffice->cascade_to = $office['cascadeTo'];
-
-                    if($updatedOffice->isDirty('cascade_to')) {
-
-                        $history = "Updated cascade_to from '".$oldCascadeTo."' to '".$office['cascadeTo']. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
-                    }
-                }
-
-                $updatedOffice->modify_id = $this->login_user->pmaps_id;
-                $updatedOffice->history = $updatedOffice->history.$history;
-
-                if(!$updatedOffice->save()){
-                    DB::rollBack();
-                }
-
-                array_push($officeIds, $updatedOffice->id);
-            }
-        }
-
-        $deleteAapcrOffice = AapcrDetailOffice::where([
-            'detail_id' => $detailId,
-            'office_type_id' => $type
-        ])->whereNotIn('id', $officeIds)->get();
-
-        foreach($deleteAapcrOffice as $deletedOffice) {
-            $deletedOffice->updated_at = Carbon::now();
-            $deletedOffice->modify_id = $this->login_user->pmaps_id;
-            $deletedOffice->history = $deletedOffice->history."Unselected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if(!$deletedOffice->save()){
-                DB::rollBack();
-            }else{
-                if(!$deletedOffice->delete()){
-                    DB::rollBack();
-                }
-            }
         }
     }
 

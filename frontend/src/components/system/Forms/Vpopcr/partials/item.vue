@@ -78,6 +78,7 @@
       </a-table>
 
       <drawer-detail-form v-if="opened === functionId"
+                          :current-year="year"
                           :drawer-id="opened"
                           :form-object="form"
                           :drawer-config="drawerConfig"
@@ -268,22 +269,23 @@ export default {
           }
         })
       }
+      const parsedData = JSON.parse(JSON.stringify(editData))
       this.form = {
-        subCategory: editData.subCategory,
-        program: editData.program,
-        name: editData.name,
-        isHeader: editData.isHeader,
-        target: editData.target,
-        measures: editData.measures,
-        budget: editData.budget,
-        targetsBasis: editData.targetsBasis,
-        implementing: editData.implementing,
-        supporting: editData.supporting,
+        subCategory: parsedData.subCategory,
+        program: parsedData.program,
+        name: parsedData.name,
+        isHeader: parsedData.isHeader,
+        target: parsedData.target,
+        measures: parsedData.measures,
+        budget: parsedData.budget,
+        targetsBasis: parsedData.targetsBasis,
+        implementing: parsedData.implementing,
+        supporting: parsedData.supporting,
         options: {
           implementing: [],
           supporting: [],
         },
-        remarks: editData.remarks,
+        remarks: parsedData.remarks,
       }
       this.openModal('Update')
     },
@@ -292,14 +294,15 @@ export default {
       const newData = this.dataSource.filter(item => {
         return key === item.key && functionId === item.category
       })[0]
+      const parsedData = JSON.parse(JSON.stringify(newData))
       this.drawerConfig.parentDetails = { ...newData }
-      form.subCategory = newData.subCategory
-      form.program = newData.program
-      if (!newData.isHeader) {
-        form.measures = newData.measures
-        form.targetsBasis = newData.targetsBasis
-        form.implementing = newData.implementing
-        form.supporting = newData.supporting
+      form.subCategory = parsedData.subCategory
+      form.program = parsedData.program
+      if (!parsedData.isHeader) {
+        form.measures = parsedData.measures
+        form.targetsBasis = parsedData.targetsBasis
+        form.implementing = parsedData.implementing
+        form.supporting = parsedData.supporting
       }
       this.form = form
       this.openModal('newsub')

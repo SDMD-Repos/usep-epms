@@ -324,10 +324,20 @@ export default {
         if (!details.formData.isHeader) {
           const { targetsBasis } = details.formData
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && this.targetsBasisList.indexOf(targetsBasis) === -1) {
-            this.$emit('add-targets-basis-list', targetsBasis)
+            this.$emit('add-targets-basis-item', targetsBasis)
+            console.log('here')
           }
         }
         Object.assign(newData[details.updateId], details.formData)
+        const { children } = newData[details.updateId]
+        if (children.length) {
+          children.forEach(i => {
+            i.subCategory = details.formData.subCategory
+            i.measures = details.formData.measures
+            i.targetsBasis = details.formData.targetsBasis
+            i.cascadingLevel = details.formData.cascadingLevel
+          })
+        }
       } else {
         const { parentDetails } = this.drawerConfig
         const parentIndex = newData.findIndex(i => i.key === parentDetails.key)

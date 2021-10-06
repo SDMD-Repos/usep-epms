@@ -33,10 +33,12 @@
           <br>
         </div>
 
-        <a-form-model-item label="Program"
-                           prop="program"
+        <a-form-model-item prop="program"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
+          <span slot="label">
+              <p class="required-asterisk">*</p> Program
+            </span>
           <a-select v-model="form.program"
                     placeholder="Select"
                     :disabled="config.type === 'sub'"
@@ -47,10 +49,12 @@
           </a-select>
         </a-form-model-item>
 
-        <a-form-model-item label="Sub Category"
-                           prop="subCategory"
+        <a-form-model-item prop="subCategory"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
+          <span slot="label">
+              <p class="required-asterisk" v-if="drawerId !== 'support_functions'">*</p> Sub Category
+            </span>
           <a-tree-select
             v-model="form.subCategory"
             style="width: 100%"
@@ -66,10 +70,12 @@
           ></a-tree-select>
         </a-form-model-item>
 
-        <a-form-model-item label="Performance Indicator"
-                           prop="name"
+        <a-form-model-item prop="name"
                            :label-col="formItemLayout.labelCol"
                            :wrapper-col="formItemLayout.wrapperCol">
+          <span slot="label">
+            <p class="required-asterisk">*</p> Performance Indicator
+          </span>
           <a-textarea v-model="form.name" auto-size/>
         </a-form-model-item>
 
@@ -86,17 +92,21 @@
         </a-form-model-item>
 
         <template v-if="!form.isHeader">
-          <a-form-model-item label="Target"
-                             prop="target"
+          <a-form-model-item prop="target"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
+            <span slot="label">
+              <p class="required-asterisk">*</p> Target
+            </span>
             <a-input v-model="form.target" />
           </a-form-model-item>
 
-          <a-form-model-item label="Measures"
-                             prop="measures"
+          <a-form-model-item prop="measures"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
+            <span slot="label">
+              <p class="required-asterisk">*</p> Measures
+            </span>
             <a-select v-model="form.measures"
                       mode="multiple"
                       placeholder="Select"
@@ -122,10 +132,12 @@
                             :min="0"/>
           </a-form-model-item>
 
-          <a-form-model-item label="Targets Basis"
-                             prop="targetsBasis"
+          <a-form-model-item prop="targetsBasis"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
+            <span slot="label">
+              <p class="required-asterisk">*</p> Targets Basis
+            </span>
             <a-auto-complete
               v-model="form.targetsBasis"
               :data-source="targetsBasisList"
@@ -134,17 +146,19 @@
             />
           </a-form-model-item>
 
-          <a-form-model-item label="Implementing Office"
-                             prop="implementing"
+          <a-form-model-item prop="implementing"
                              :label-col="formItemLayout.labelCol"
                              :wrapper-col="formItemLayout.wrapperCol">
+            <span slot="label">
+              <p class="required-asterisk">*</p> Implementing Office
+            </span>
             <div class="row">
               <div class="col-sm-9 col-lg-10">
                 <a-tree-select
                   v-model="form.options.implementing"
                   style="width: 100%"
                   :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                  :tree-data="mainOfficesChildrenList"
+                  :tree-data="officesList"
                   placeholder="Select an office/s"
                   tree-node-filter-prop="title"
                   :show-checked-strategy="SHOW_PARENT"
@@ -204,7 +218,7 @@
                   v-model="form.options.supporting"
                   style="width: 100%"
                   :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                  :tree-data="mainOfficesChildrenList"
+                  :tree-data="officesList"
                   placeholder="Select an office/s"
                   tree-node-filter-prop="title"
                   :show-checked-strategy="SHOW_PARENT"
@@ -378,8 +392,6 @@ export default {
       },
     }
   },
-  watch: {
-  },
   created() {
     this.onLoad()
   },
@@ -391,9 +403,10 @@ export default {
           mains: false,
         },
         isAcronym: true,
+        currentYear: this.currentYear,
       }
       params = encodeURIComponent(JSON.stringify(params))
-      this.$store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params }) // needs to load first
+      this.$store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params }) // needs to load first
     },
     toggleIsHeader(checked) {
       if (checked) {

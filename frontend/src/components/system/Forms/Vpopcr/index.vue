@@ -66,7 +66,7 @@
                 <template v-for="(category, key) in categories">
                   <div :key="`${key}`">
                     <a-divider type="horizontal"><b>{{ category.name }}</b></a-divider>
-                    <list-item :item-source="dataSource"
+                    <list-item :year="year" :item-source="dataSource"
                                :function-id="category.key"
                                :drawer="drawer"
                                :vp-office="vpOffice"
@@ -212,7 +212,7 @@ export default {
             this.targetsBasisList = response.targetsBasisList
           } else {
             Modal.warning({
-              title: 'There is no AAPCR created for the year ' + this.year,
+              title: 'There is no published AAPCR for the year ' + this.year,
               content: '',
             })
           }

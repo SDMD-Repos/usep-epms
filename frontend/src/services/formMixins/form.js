@@ -9,13 +9,15 @@ export default {
     formObject: Object,
     targetsBasisList: Array,
     categories: Array,
+    currentYear: Number,
   },
   computed: {
     ...mapState({
       subCategoryList: state => state.formManager.subCategories,
       measuresList: state => state.formManager.measures,
       cascadingList: state => state.formManager.cascadingLevels,
-      mainOfficesChildrenList: state => state.external.mainOfficesChildren,
+      officesList: state => state.external.officesAccountable,
+      // mainOfficesChildrenList: state => state.external.mainOfficesChildren,
     }),
   },
   data() {
@@ -181,7 +183,9 @@ export default {
         if (typeof item.children !== 'undefined') {
           container.children = true
         } else {
-          container.acronym = item.acronym
+          if (typeof item.isGroup === 'undefined') {
+            container.acronym = item.acronym
+          }
           container.pId = item.pId
         }
         const hasCached = cachedOffice[field].filter(i => i.value === item.value)
@@ -193,6 +197,9 @@ export default {
           tempCascadeTo = cascadeTo
         }
         container.cascadeTo = tempCascadeTo
+        if (typeof item.isGroup !== 'undefined') {
+          container.isGroup = item.isGroup
+        }
         return container
       })
     },

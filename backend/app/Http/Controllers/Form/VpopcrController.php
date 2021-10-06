@@ -10,8 +10,10 @@ use App\Http\Requests\UpdateVpOpcr;
 use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FileTrait;
+use App\Http\Traits\FormTrait;
 use App\VpOpcr;
 use App\VpOpcrDetail;
+use App\VpOpcrDetailMeasure;
 use App\VpOpcrDetailOffice;
 use App\VpOpcrFile;
 use Carbon\Carbon;
@@ -21,18 +23,18 @@ use Illuminate\Support\Facades\DB;
 
 class VpopcrController extends Controller
 {
-    use ConverterTrait, FileTrait;
+    use ConverterTrait, FileTrait, FormTrait;
 
-    private $login_user;
+//    private $login_user;
 
     private $STO = 5;
 
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function __construct()
+    /*public function __construct()
     {
 
         $this->middleware(function ($request, $next) {
@@ -45,7 +47,7 @@ class VpopcrController extends Controller
             return $next($request);
         });
 
-    }
+    }*/
 
     public function checkSaved($officeId, $year)
     {
@@ -365,49 +367,25 @@ class VpopcrController extends Controller
         if($detail->save()){
             $this->saveMeasures($detail, $data['measures']);
 
-            $this->saveOffices($detail->id, $data['implementing'], 'implementing');
+            $officeModel = new VpOpcrDetailOffice();
 
-            $this->saveOffices($detail->id, $data['supporting'], 'supporting');
+            $this->saveOffices([
+                'model' => $officeModel,
+                'detailId' => $detail->id,
+                'offices' => $data['implementing'],
+                'fieldName' => 'implementing',
+            ]);
+
+            $this->saveOffices([
+                'model' => $officeModel,
+                'detailId' => $detail->id,
+                'offices' => $data['supporting'],
+                'fieldName' => 'supporting',
+            ]);
         }
 
         if($isNew){
             return $detail->id;
-        }
-    }
-
-    public function saveMeasures($detail, $measures)
-    {
-        foreach ($measures as $measure) {
-            $detail->measures()->attach($measure['key'], [
-                'create_id' => $this->login_user->pmaps_id,
-                'history' => "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n"
-            ]);
-        }
-    }
-
-    public function saveOffices($detailId, $offices, $fieldName)
-    {
-        foreach($offices as $office){
-
-            $newOffice = new VpOpcrDetailOffice();
-
-            if(!array_key_exists('children', $office)){
-                $newOffice->vp_office_id = $office['pId'];
-
-                $office_name = $office['acronym'];
-            }else{
-                $office_name = $office['label'];
-            }
-
-            $newOffice->detail_id = $detailId;
-            $newOffice->office_type_id = $fieldName;
-            $newOffice->cascade_to = $office['cascadeTo'];
-            $newOffice->office_id = $office['value'];
-            $newOffice->office_name = $office_name;
-            $newOffice->create_id = $this->login_user->pmaps_id;
-            $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            $newOffice->save();
         }
     }
 
@@ -752,7 +730,7 @@ class VpopcrController extends Controller
                             $detail = VpOpcrDetail::find($source['id']);
 
                             if($detail) {
-                                $this->updateDetails($id, $source, $detail);
+                                $this->updateDetails($source, $detail);
                             } else {
                                 $process = 1;
                             }
@@ -813,7 +791,7 @@ class VpopcrController extends Controller
                                     $sub = VpOpcrDetail::find($child['id']);
 
                                     if($sub) {
-                                        $this->updateDetails($id, $child, $sub);
+                                        $this->updateDetails($child, $sub);
                                     } else {
                                         $process = 1;
                                     }
@@ -885,11 +863,20 @@ class VpopcrController extends Controller
         }
     }
 
-    public function updateDetails($id, $data, $updated)
+    public function updateDetails($data, $updated)
     {
         $original = $updated->getOriginal();
 
-        $updated->is_header = $data['isHeader'];
+        $isHeader = $data['isHeader'] ? 1 : 0;
+
+        if (!$data['isCascaded']) {
+            $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+
+            $updated->sub_category_id = $subCategory;
+            $updated->program_id = $data['program'];
+        }
+
+        $updated->is_header = $isHeader;
         $updated->pi_name = $data['name'];
         $updated->target = $data['target'];
         $updated->targets_basis = $data['targetsBasis'];
@@ -900,7 +887,7 @@ class VpopcrController extends Controller
         $history = '';
 
         if($updated->isDirty('is_header')){
-            $history .= "Updated is_header column from '".$original['is_header']."' to '".$data['isHeader']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated is_header column from '".$original['is_header']."' to '".$isHeader."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
         }
 
         if($updated->isDirty('pi_name')){
@@ -928,6 +915,24 @@ class VpopcrController extends Controller
         if(!$updated->save()){
             DB::rollBack();
         }
+
+        $this->updateMeasures(new VpOpcrDetailMeasure(), $data['id'], $data['measures']);
+
+        $officeModel = new VpOpcrDetailOffice();
+
+        $this->updateOffices([
+            'model' => $officeModel,
+            'detailId' => $data['id'],
+            'offices' => $data['implementing'],
+            'type' => 'implementing',
+        ]);
+
+        $this->updateOffices([
+            'model' => $officeModel,
+            'detailId' => $data['id'],
+            'offices' => $data['supporting'],
+            'type' => 'supporting',
+        ]);
     }
 
     public function viewUploadedFile($id)
