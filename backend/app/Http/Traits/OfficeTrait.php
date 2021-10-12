@@ -251,6 +251,7 @@ trait OfficeTrait {
                     $obj->id = $list->PmapsID;
                     $obj->value = $list->PmapsID;
                     $obj->title = ucwords($fullName);
+                    $obj->position = $list->Position;
                     $obj->isPersonnel = 1;
 
                     if($withHeader) {

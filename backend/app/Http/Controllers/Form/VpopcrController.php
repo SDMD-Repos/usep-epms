@@ -825,22 +825,22 @@ class VpopcrController extends Controller
                                     $child['parent_id'] = $getParentId;
 
                                     $this->saveVpOpcrDetails($id, $child);
-
-                                    if(!$isNew && !$source['isHeader'] && (isset($source['wasSaved']) && $source['wasSaved']) && (isset($source['isCascaded']) && $source['isCascaded'])){
-                                        $aapcr = VpOpcrDetail::find($source['id']);
-
-                                        $aapcr->modify_id = $this->login_user->pmaps_id;
-                                        $aapcr->history = $aapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
-
-                                        if($aapcr->save()){
-                                            if(!$aapcr->delete()){
-                                                DB::rollBack();
-                                            }
-                                        }else{
-                                            DB::rollBack();
-                                        }
-                                    }
                                 }
+                            }
+                        }
+
+                        if(!$isNew && !$source['isHeader'] && (isset($source['wasSaved']) && $source['wasSaved']) && (isset($source['isCascaded']) && $source['isCascaded'])){
+                            $aapcr = VpOpcrDetail::find($source['id']);
+
+                            $aapcr->modify_id = $this->login_user->pmaps_id;
+                            $aapcr->history = $aapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+
+                            if($aapcr->save()){
+                                if(!$aapcr->delete()){
+                                    DB::rollBack();
+                                }
+                            }else{
+                                DB::rollBack();
                             }
                         }
                     }

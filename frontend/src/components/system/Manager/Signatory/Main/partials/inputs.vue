@@ -149,6 +149,19 @@ export default {
     },
     handlePersonnelIdChange() {
       const personnelId = this.personnelId
+      const officeId = this.officeId
+      const extra = [...arguments][2] // extra
+      if (typeof extra.triggerNode !== 'undefined') {
+        const { position } = extra.triggerNode.dataRef
+        const officePosition = position.filter(i => {
+          return i.DepartmentID === officeId.value
+        })[0]
+        if (typeof officePosition !== 'undefined') {
+          this.position = officePosition.PositionName
+          console.log(officePosition, officePosition.PositionName)
+          this.handlePositionChange()
+        }
+      }
       this.triggerChange({ personnelId })
     },
     handlePositionChange() {

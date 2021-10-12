@@ -96,8 +96,7 @@
                       placeholder="Select"
                       style="width: 100%"
                       label-in-value
-                      allow-clear
-                      :disabled="config.type === 'sub' && !config.parentDetails.isHeader">
+                      allow-clear >
               <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
                 {{ measure.name }}
               </a-select-option>

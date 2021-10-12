@@ -253,7 +253,14 @@ class AppController extends Controller
 
                             $parentDetail->isParent = 1;
 
+                            $parentDetail->category_id = $detail->category_id;
+
+                            $parentDetail->sub_category_id = $detail->sub_category_id;
+
+                            $parentDetail->program_id = $detail->program_id;
+
                             $parentDetails = $parentDetail;
+
                         }else{
                             $stored = 1;
                         }
@@ -265,7 +272,6 @@ class AppController extends Controller
                         $parentDetails = $detail->aapcrDetail->parent;
                     }
                 } else {
-//                    if($detail->id === 63)
                     if(!$detail->from_aapcr) {
                         $isParent = 1;
 

@@ -333,7 +333,6 @@ export default {
         if (children.length) {
           children.forEach(i => {
             i.subCategory = details.formData.subCategory
-            i.measures = details.formData.measures
             i.targetsBasis = details.formData.targetsBasis
             i.cascadingLevel = details.formData.cascadingLevel
           })

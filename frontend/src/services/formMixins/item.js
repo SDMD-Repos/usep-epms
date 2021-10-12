@@ -80,7 +80,6 @@ export default {
           children.forEach(i => {
             i.program = details.formData.program
             i.subCategory = details.formData.subCategory
-            i.measures = details.formData.measures
             i.targetsBasis = details.formData.targetsBasis
             i.cascadingLevel = details.formData.cascadingLevel
           })
