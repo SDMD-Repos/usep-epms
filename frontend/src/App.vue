@@ -1,44 +1,48 @@
 <template>
-  <div id="app">
-    <localization></localization>
-  </div>
+  <styleLoader />
+  <localization />
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { computed, onMounted, watch } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
+import qs from 'qs'
 import Localization from '@/localization'
+import StyleLoader from '@/styleLoader'
 
 export default {
-  name: 'app',
-  components: { Localization },
-  computed: {
-    ...mapState(['settings']),
-    ...mapState('user', ['authorized']),
-    nextRoute() {
-      return this.$route.query.redirect || '/'
-    },
-    currentRoute() {
-      return this.$route.path
-    },
-  },
-  mounted() {
-    this.$store.dispatch('user/LOAD_CURRENT_ACCOUNT')
-    this.$store.commit('SET_PRIMARY_COLOR', { color: this.settings.primaryColor })
-    this.$store.commit('SET_THEME', { theme: this.settings.theme })
-  },
-  watch: {
-    '$store.state.settings.theme'(theme) {
-      this.$store.commit('SET_THEME', { theme })
-    },
-    authorized(authorized) {
-      if (authorized && this.currentRoute === '/auth/login') {
-        this.$router.replace(this.nextRoute)
+  name: 'App',
+  components: { Localization, StyleLoader },
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const store = useStore()
+    const acronym = computed(() => store.getters.settings.acronym)
+    const routeTitle = computed(() => route.meta.title)
+    const currentRoute = computed(() => route)
+    const authorized = computed(() => store.getters['user/user'].authorized)
+
+    // watch page title change
+    watch(
+      [acronym, routeTitle],
+      ([acronym, routeTitle]) => (document.title = `${acronym} | ${routeTitle}` || `${acronym}`),
+    )
+
+    // initial auth check
+    onMounted(() => {
+      store.dispatch('user/LOAD_CURRENT_ACCOUNT')
+    })
+
+    // redirect if authorized and current page is login
+    watch(authorized, authorized => {
+      if (authorized) {
+        const query = qs.parse(currentRoute.value.fullPath.split('?')[1], {
+          ignoreQueryPrefix: true,
+        })
+        router.push(query.redirect || '/')
       }
-    },
-    '$route'(to, from) {
-      const query = Object.assign({}, to.query)
-      this.$store.commit('SETUP_URL_SETTINGS', query)
-    },
+    })
   },
 }
 </script>

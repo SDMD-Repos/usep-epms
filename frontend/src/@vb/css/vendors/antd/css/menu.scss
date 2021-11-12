@@ -1,0 +1,33 @@
+// Import mixins
+@import '@/mixins.scss';
+.ant-menu {
+  &-item {
+    &-selected {
+      a {
+        color: $gray-2 !important;
+
+        i {
+          color: $gray-2 !important;
+        }
+      }
+    }
+    &-disabled {
+      color: $gray-4 !important;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// DARK THEME STYLES
+[data-vb-theme='dark'] {
+  .ant-menu {
+    &-item {
+      &-group-title {
+        color: $dark-gray-2;
+      }
+      &-disabled {
+        color: $dark-gray-3 !important;
+      }
+    }
+  }
+}

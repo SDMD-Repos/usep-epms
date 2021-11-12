@@ -2,8 +2,8 @@ import localeAntd from 'ant-design-vue/lib/locale-provider/ru_RU'
 
 const messages = {
   topBar: {
-    issuesHistory: 'История заданий',
-    projectManagement: 'Управление проектом',
+    issuesHistory: 'Задания',
+    projectManagement: 'Проекты',
     typeToSearch: 'Поиск...',
     findPages: 'Поиск страниц...',
     actions: 'Действия',

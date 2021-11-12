@@ -1,41 +1,48 @@
 <template>
-  <div :class="{air__layout__grayBackground: settings.isGrayBackground}">
+  <div
+    :class="{
+      vb__layout__grayBackground: settings.isGrayBackground,
+    }"
+  >
     <a-layout
       :class="{
-      air__layout__contentMaxWidth: settings.isContentMaxWidth,
-      air__layout__appMaxWidth: settings.isAppMaxWidth,
-      air__layout__grayBackground: settings.isGrayBackground,
-      air__layout__squaredBorders: settings.isSquaredBorders,
-      air__layout__cardsShadow: settings.isCardShadow,
-      air__layout__borderless: settings.isBorderless,
-    }"
+        vb__layout: true,
+        vb__layout__contentMaxWidth: settings.isContentMaxWidth,
+        vb__layout__appMaxWidth: settings.isAppMaxWidth,
+        vb__layout__squaredBorders: settings.isSquaredBorders,
+        vb__layout__cardsShadow: settings.isCardShadow,
+        vb__layout__borderless: settings.isBorderless,
+      }"
     >
-      <sidebar />
-      <!-- <air-support-chat /> -->
-      <air-menu-left v-if="settings.menuLayoutType === 'left'" />
-      <air-menu-top v-if="settings.menuLayoutType === 'top'" />
+      <vb-variants />
+      <!-- <vb-sidebar />
+      <vb-support-chat /> -->
+      <vb-menu-classic v-if="settings.layoutMenu === 'classic'" />
+      <vb-menu-flyout v-if="settings.layoutMenu === 'flyout'" />
+      <vb-menu-simply v-if="settings.layoutMenu === 'simply'" />
       <a-layout>
         <a-layout-header
-          class="air__layout__header"
+          v-if="settings.layoutTopbar === 'v1'"
           :class="{
-          air__layout__fixedHeader: settings.isTopbarFixed,
-          air__layout__headerGray: settings.isGrayTopbar,
-        }"
+            vb__layout__header: true,
+            vb__layout__fixedHeader: settings.isTopbarFixed,
+            vb__layout__headerGray: settings.isGrayTopbar,
+            vb__layout__separatedHeader: settings.isTopbarSeparated,
+          }"
         >
-          <air-topbar v-if="settings.menuLayoutType !== 'top-dark'" />
-          <air-topbar-dark v-if="settings.menuLayoutType === 'top-dark'" />
-          <air-subbar />
+          <vb-topbar />
         </a-layout-header>
-        <a-layout-content>
-          <div class="air__utils__content">
+        <vb-breadcrumbs v-if="settings.layoutBreadcrumbs === 'v1'" />
+        <vb-breadcrumbs2 v-if="settings.layoutBreadcrumbs === 'v2'" />
+        <a-layout-content class="vb__layout__content">
+          <router-view v-slot="{ Component }">
             <transition :name="settings.routerAnimation" mode="out-in">
-              <router-view />
+              <component :is="Component" />
             </transition>
-          </div>
+          </router-view>
         </a-layout-content>
-        <a-layout-footer>
-          <air-footer v-if="!settings.isFooterDark" />
-          <air-footer-dark v-if="settings.isFooterDark" />
+        <a-layout-footer v-if="settings.layoutFooter === 'v1'">
+          <vb-footer />
         </a-layout-footer>
       </a-layout>
     </a-layout>
@@ -43,39 +50,62 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import AirTopbar from '@/components/layout/TopBar'
-import AirTopbarDark from '@/components/layout/TopBarDark'
-import AirSubbar from '@/components/layout/SubBar'
-import AirMenuLeft from '@/components/layout/MenuLeft'
-import AirMenuTop from '@/components/layout/MenuTop'
-import AirFooter from '@/components/layout/Footer'
-import AirFooterDark from '@/components/layout/FooterDark'
-// import AirSupportChat from '@/@airui/layout/SupportChat'
-import Sidebar from '@/components/layout/Sidebar'
+import { computed, onMounted, ref } from 'vue'
+import { useStore } from 'vuex'
+import VbTopbar from '@/@vb/components/Topbar'
+// import VbSidebar from '@/@vb/components/Sidebar'
+// import VbSupportChat from '@/@vb/components/SupportChat'
+import VbVariants from '@/@vb/components/Variants'
+import VbMenuClassic from '@/@vb/components/MenuClassic'
+import VbMenuFlyout from '@/@vb/components/MenuFlyout'
+import VbMenuSimply from '@/@vb/components/MenuSimply'
+import VbBreadcrumbs from '@/@vb/components/Breadcrumbs'
+import VbBreadcrumbs2 from '@/@vb/components/Breadcrumbs2'
+import VbFooter from '@/@vb/components/Footer'
 
 export default {
   name: 'MainLayout',
-  computed: mapState(['settings']),
-  components: { AirTopbar, AirSubbar, AirMenuLeft, AirMenuTop, AirFooter, Sidebar, AirTopbarDark, AirFooterDark },
-  mounted() {
-    this.detectViewPort(true)
-    window.addEventListener('resize', this.detectViewPortListener)
+  components: {
+    VbMenuClassic,
+    VbMenuFlyout,
+    VbMenuSimply,
+    VbTopbar,
+    // VbSidebar,
+    // VbSupportChat,
+    VbVariants,
+    VbBreadcrumbs,
+    VbBreadcrumbs2,
+    VbFooter,
   },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.detectViewPortListener)
-  },
-  methods: {
-    detectViewPortListener: function () {
-      this.detectViewPort(false)
-    },
-    setViewPort: function (isMobileView = false, isTabletView = false) {
-      this.$store.commit('CHANGE_SETTING', { setting: 'isMobileView', value: isMobileView })
-      this.$store.commit('CHANGE_SETTING', { setting: 'isTabletView', value: isTabletView })
-    },
-    detectViewPort: function (firstLoad = false) {
-      const isMobile = this.settings.isMobileView
-      const isTablet = this.settings.isTabletView
+  setup() {
+    const store = useStore()
+    const settings = computed(() => store.getters.settings)
+    const touchStartPrev = ref(0)
+    const touchStartLocked = ref(false)
+
+    const toggleMobileMenu = () => {
+      const value = !settings.value.isMobileMenuOpen
+      store.commit('CHANGE_SETTING', { setting: 'isMobileMenuOpen', value })
+    }
+
+    const setViewPort = (isMobileView = false, isTabletView = false) => {
+      store.commit('CHANGE_SETTING', {
+        setting: 'isMobileView',
+        value: isMobileView,
+      })
+      store.commit('CHANGE_SETTING', {
+        setting: 'isTabletView',
+        value: isTabletView,
+      })
+    }
+
+    // resize viewport events (commit toggleMenu, etc...)
+    const detectViewPortListener = () => {
+      detectViewPort(false)
+    }
+    const detectViewPort = (firstLoad = false) => {
+      const isMobile = settings.value.isMobileView
+      const isTablet = settings.value.isTabletView
       const width = window.innerWidth
       const state = {
         next: {
@@ -86,23 +116,71 @@ export default {
         prev: {
           mobile: isMobile,
           tablet: isTablet,
-          desktop: !(isMobile) && !(isTablet),
+          desktop: !isMobile && !isTablet,
         },
       }
       // desktop
-      if (state.next.desktop && ((state.next.desktop !== state.prev.desktop) || firstLoad)) {
-        this.setViewPort(false, false)
+      if (state.next.desktop && (state.next.desktop !== state.prev.desktop || firstLoad)) {
+        setViewPort(false, false)
       }
       // tablet & collapse menu
-      if (state.next.tablet && !state.next.mobile && ((state.next.tablet !== state.prev.tablet) || firstLoad)) {
-        this.setViewPort(false, true)
-        this.$store.commit('CHANGE_SETTING', { setting: 'isMenuCollapsed', value: true })
+      if (
+        state.next.tablet &&
+        !state.next.mobile &&
+        (state.next.tablet !== state.prev.tablet || firstLoad)
+      ) {
+        setViewPort(false, true)
+        store.commit('CHANGE_SETTING', {
+          setting: 'isMenuCollapsed',
+          value: true,
+        })
       }
       // mobile
-      if (state.next.mobile && ((state.next.mobile !== state.prev.mobile) || firstLoad)) {
-        this.setViewPort(true, false)
+      if (state.next.mobile && (state.next.mobile !== state.prev.mobile || firstLoad)) {
+        setViewPort(true, false)
       }
-    },
+    }
+
+    // mobile slide bindings
+    const bindMobileSlide = () => {
+      // mobile menu touch slide opener
+      const unify = e => {
+        return e.changedTouches ? e.changedTouches[0] : e
+      }
+      document.addEventListener(
+        'touchstart',
+        e => {
+          const x = unify(e).clientX
+          touchStartPrev.value = x
+          touchStartLocked.value = x > 70
+        },
+        { passive: false },
+      )
+      document.addEventListener(
+        'touchmove',
+        e => {
+          const x = unify(e).clientX
+          const prev = touchStartPrev.value
+          if (x - prev > 50 && !touchStartLocked.value) {
+            toggleMobileMenu()
+            touchStartLocked.value = true
+          }
+        },
+        { passive: false },
+      )
+    }
+
+    onMounted(() => bindMobileSlide())
+    onMounted(() => detectViewPort(true))
+    onMounted(() => window.addEventListener('resize', detectViewPortListener))
+
+    return {
+      settings,
+    }
   },
 }
 </script>
+
+<style lang="scss" module>
+@import './style.module.scss';
+</style>

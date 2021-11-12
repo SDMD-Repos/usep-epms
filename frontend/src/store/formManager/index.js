@@ -1,7 +1,5 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-
 import * as manager from '@/services/manager'
+import { notification } from 'ant-design-vue'
 
 const mapApiProviders = {
   getFunctions: manager.getFunctions,
@@ -29,8 +27,6 @@ const mapApiProviders = {
   deleteGroup: manager.deleteGroup,
   getCascadingLevels: manager.getCascadingLevels,
 }
-
-Vue.use(Vuex)
 
 export default {
   namespaced: true,
@@ -81,7 +77,7 @@ export default {
       createFunction(payload).then(response => {
         if (response) {
           dispatch('FETCH_FUNCTIONS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Function created successfully',
           })
@@ -101,7 +97,7 @@ export default {
       deleteFunction(id).then(response => {
         if (response) {
           dispatch('FETCH_FUNCTIONS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Function deleted successfully',
           })
@@ -143,7 +139,7 @@ export default {
       createProgram(data).then(response => {
         if (response) {
           dispatch('FETCH_PROGRAMS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Program created successfully',
           })
@@ -163,7 +159,7 @@ export default {
       deleteProgram(id).then(response => {
         if (response) {
           dispatch('FETCH_PROGRAMS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Program deleted successfully',
           })
@@ -205,7 +201,7 @@ export default {
       createSubCategory(data).then(response => {
         if (response) {
           dispatch('FETCH_SUB_CATEGORIES')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Sub category created successfully',
           })
@@ -225,7 +221,7 @@ export default {
       deleteSubCategory(id).then(response => {
         if (response) {
           dispatch('FETCH_SUB_CATEGORIES')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Sub category deleted successfully',
           })
@@ -532,5 +528,7 @@ export default {
   },
   getters: {
     functions: state => state.functions,
+    subCategories: state => state.subCategories,
+    manager: state => state,
   },
 }

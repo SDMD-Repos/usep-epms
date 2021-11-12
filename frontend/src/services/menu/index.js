@@ -1,4 +1,5 @@
 export const getMenuData = [
+  // VB:REPLACE-START:MENU-CONFIG
   {
     category: true,
     title: 'Dashboards',
@@ -7,7 +8,7 @@ export const getMenuData = [
     title: 'Dashboard',
     key: 'dashboard',
     icon: 'fe fe-home',
-    url: '/dashboard/about',
+    url: '/dashboard',
   },
   {
     title: 'Manager',
@@ -80,14 +81,32 @@ export const getMenuData = [
     icon: 'fe fe-file',
     children: [
       {
+        title: 'Template',
+        key: 'opcrTemplate',
+        children: [
+          {
+            title: 'Form 1',
+            key: 'opcrForm_1',
+            url: '/form/opcr',
+            level: 3,
+          },
+          {
+            title: 'List 1',
+            key: 'opcrList_1',
+            url: '/list/opcr',
+            level: 3,
+          },
+        ],
+      },
+      {
         title: 'Form',
         key: 'opcrForm',
-        url: '/form/opcr',
+        url: '/form/opcrsss',
       },
       {
         title: 'List',
         key: 'opcrList',
-        url: '/list/opcr',
+        url: '/list/opcrsss',
       },
     ],
   },
@@ -125,4 +144,6 @@ export const getMenuData = [
       },
     ],
   },
+
+  // VB:REPLACE-END:MENU-CONFIG
 ]

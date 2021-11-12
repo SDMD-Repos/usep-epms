@@ -2,8 +2,8 @@ import localeAntd from 'ant-design-vue/lib/locale-provider/fr_FR'
 
 const messages = {
   topBar: {
-    issuesHistory: 'Histoire des problèmes',
-    projectManagement: 'Gestion de projet',
+    issuesHistory: 'Problèmes',
+    projectManagement: 'Projets',
     typeToSearch: 'Chercher...',
     findPages: 'Trouver des pages...',
     actions: 'Actes',

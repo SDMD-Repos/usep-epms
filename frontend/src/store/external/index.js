@@ -1,6 +1,3 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-
 import * as hris from '@/services/hris'
 
 const mapApiProviders = {
@@ -11,8 +8,6 @@ const mapApiProviders = {
   getPersonnelOffices: hris.getPersonnelOffices,
   getOfficesAccountable: hris.getOfficesAccountable,
 }
-
-Vue.use(Vuex)
 
 export default {
   namespaced: true,
@@ -163,5 +158,6 @@ export default {
   },
   getters: {
     officeList: state => state.mainOffices,
+    external: state => state,
   },
 }

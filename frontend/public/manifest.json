@@ -1,6 +1,6 @@
 {
-  "name": "vue",
-  "short_name": "vue",
+  "short_name": "VB",
+  "name": "Visual Builder Vue",
   "icons": [
     {
       "src": "favicon.png",

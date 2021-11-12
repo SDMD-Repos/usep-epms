@@ -20,9 +20,96 @@
   }
 }
 
-.containerInner {
-  max-width: 36rem;
+.topbar {
+  height: rem(64);
+  border-bottom: 1px solid $border;
+  background: $white;
+  margin-bottom: rem(40);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: rem(28);
   width: 100%;
+
+  &.topbarGray {
+    background: $gray-1;
+  }
+}
+
+.logoContainer {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 rem(28) 0 0;
+
+  .logo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: rem(24);
+    white-space: nowrap;
+    width: 100%;
+
+    svg {
+      margin-right: rem(6);
+      height: rem(30);
+      width: rem(30);
+      path:nth-child(1) {
+        stroke: $primary;
+        fill: $primary;
+        stroke-width: 1px;
+        animation: logoAnimate 6s ease-in-out infinite;
+      }
+      path:nth-child(2) {
+        stroke: $primary;
+        fill: $primary;
+        stroke-width: 1px;
+        animation: logoAnimate 6s ease-in-out infinite;
+        animation-delay: 2s;
+      }
+      path:nth-child(3) {
+        stroke: $primary;
+        fill: $primary;
+        stroke-width: 1px;
+        animation: logoAnimate 6s ease-in-out infinite;
+        animation-delay: 4s;
+      }
+
+      @keyframes logoAnimate {
+        0% {
+          stroke: $primary;
+          fill: $primary;
+        }
+        50% {
+          stroke: #1ad697;
+          fill: #1ad697;
+        }
+        100% {
+          stroke: $primary;
+          fill: $primary;
+        }
+      }
+    }
+  }
+  .name {
+    font-size: rem(20);
+    font-weight: 700;
+    color: $black;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 90%;
+    display: block;
+  }
+  .descr {
+    margin-left: rem(13);
+    padding-left: rem(13);
+    height: rem(38);
+    line-height: rem(38);
+    border-left: 1px solid $gray-2;
+    font-size: rem(14);
+  }
 }
 
 .footerNav {
@@ -31,59 +118,24 @@
   }
 }
 
-.logo {
-  display: block;
-  padding: rem(15) rem(20);
-  line-height: 1;
-  height: rem(64);
-  white-space: nowrap;
-
-  .letter {
-    float: left;
-    display: flex;
-    width: 35px;
-    height: 35px;
-    border-radius: 10px;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.35714rem;
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: $black;
-    border: 4px solid $black;
-    padding-bottom: rem(2);
-  }
-  .name {
-    font-weight: 900;
-    color: $black;
-    font-size: 21px;
-    margin-left: rem(40);
-  }
-  .descr {
-    color: $gray-6;
-    margin-left: rem(40);
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-}
-
 // dark theme
-[data-kit-theme='dark'] {
+[data-vb-theme='dark'] {
   .container {
     background: transparent !important;
   }
 
-  .logo {
-    .letter {
-      color: $dark-gray-1;
-      border-color: $dark-gray-1;
-    }
+  .topbar {
+    background: $dark-gray-5 !important;
+    border-bottom: 1px solid $dark-gray-4 !important;
+  }
+
+  .logoContainer {
     .name {
-      color: $dark-gray-1;
+      color: $white;
     }
     .descr {
-      color: $gray-3;
+      color: $dark-gray-2;
+      border-left: 1px solid $dark-gray-4;
     }
   }
 }

@@ -1,8 +1,4 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
 import store from 'store'
-
-Vue.use(Vuex)
 
 const STORED_SETTINGS = storedSettings => {
   const settings = {}
@@ -16,42 +12,63 @@ const STORED_SETTINGS = storedSettings => {
 export default {
   state: {
     ...STORED_SETTINGS({
-      authProvider: 'jwt', // firebase, jwt
+      // VB:REPLACE-START:SETTINGS
+      authProvider: 'jwt',
       logo: 'USeP',
       logoName: 'University of Southeastern Philippines',
       description: 'Electronic Performance Management System',
       acronym: 'e-PMS',
+      officeName: 'Systems Data and Management Division',
+      version: 'fluent',
+      theme: 'default',
       locale: 'en-US',
       isSidebarOpen: false,
       isSupportChatOpen: false,
       isMobileView: false,
       isMobileMenuOpen: false,
       isMenuCollapsed: false,
-      menuLayoutType: 'left', // left, top, nomenu
-      menuType: 'default', // default, flyout, compact
-      routerAnimation: 'slide-fadein-up', // none, slide-fadein-up, slide-fadein-right, fadein, zoom-fadein
-      menuColor: 'gray', // dark, blue, gray, white
-      flyoutMenuColor: 'blue', // dark, blue, gray, white
-      authPagesColor: 'gray', // white, gray, image
-      theme: 'default', // default, dark
+      isPreselectedOpen: false,
+      preselectedVariant: 'default',
+      menuLayoutType: 'left',
+      routerAnimation: 'slide-fadein-up',
+      menuColor: 'gray',
+      authPagesColor: 'gray',
+      isAuthTopbar: true,
       primaryColor: '#6C1B1F',
+      leftMenuWidth: 256,
       isMenuUnfixed: false,
       isMenuShadow: false,
       isTopbarFixed: false,
+      isTopbarSeparated: false,
       isGrayTopbar: false,
-      isContentMaxWidth: true,
+      isContentMaxWidth: false,
       isAppMaxWidth: false,
       isGrayBackground: true,
       isCardShadow: true,
       isSquaredBorders: false,
       isBorderless: false,
-      isFooterDark: false,
+      layoutMenu: 'classic',
+      layoutTopbar: 'v1',
+      layoutBreadcrumbs: 'v1',
+      layoutFooter: 'v1',
+      flyoutMenuType: 'flyout',
+      flyoutMenuColor: 'blue',
+
+      // VB:REPLACE-END:SETTINGS
     }),
   },
   mutations: {
     CHANGE_SETTING(state, payload) {
-      window.localStorage.setItem(`app.settings.${payload.setting}`, payload.value)
+      store.set(`app.settings.${payload.setting}`, payload.value)
       state[payload.setting] = payload.value
+    },
+    CHANGE_SETTING_BULK(state, payload) {
+      const settings = {}
+      Object.keys(payload).forEach(key => {
+        store.set(`app.settings.${key}`, payload[key])
+        settings[key] = payload[key]
+        state[key] = payload[key]
+      })
     },
     SETUP_URL_SETTINGS(state, payload) {
       let queryParams = payload
@@ -60,7 +77,14 @@ export default {
         const str = payload.redirect
         const subs = str.substring(str.indexOf('?') + 1)
         if (str.indexOf('?') >= 0) {
-          queryParams = JSON.parse('{"' + decodeURI(subs).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
+          queryParams = JSON.parse(
+            '{"' +
+              decodeURI(subs)
+                .replace(/"/g, '\\"')
+                .replace(/&/g, '","')
+                .replace(/=/g, '":"') +
+              '"}',
+          )
         }
       }
       delete queryParams.redirect
@@ -79,7 +103,9 @@ export default {
               value = queryParams[key]
               break
           }
-          if (key in state) { state[key] = value }
+          if (key in state) {
+            state[key] = value
+          }
         })
       }
     },
@@ -92,7 +118,7 @@ export default {
         }
         const body = document.querySelector('body')
         const styleEl = document.createElement('style')
-        const css = document.createTextNode(`:root { --kit-color-primary: ${color};}`)
+        const css = document.createTextNode(`:root { --vb-color-primary: ${color};}`)
         styleEl.setAttribute('id', 'primaryColor')
         styleEl.appendChild(css)
         body.appendChild(styleEl)
@@ -104,13 +130,13 @@ export default {
     SET_THEME(state, payload) {
       const { theme } = payload
       const nextTheme = theme === 'dark' ? 'dark' : 'default'
-      document.querySelector('html').setAttribute('data-kit-theme', nextTheme)
+      document.querySelector('html').setAttribute('data-vb-theme', nextTheme)
       state.theme = nextTheme
       store.set('app.settings.theme', nextTheme)
     },
   },
   actions: {},
   getters: {
-    state: state => state,
+    settings: state => state,
   },
 }

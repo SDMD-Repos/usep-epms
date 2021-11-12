@@ -1,13 +1,13 @@
 <template>
   <div>
-    <epms-login />
+    <vb-login />
   </div>
 </template>
 <script>
-import EpmsLogin from '@/components/system/Auth/Login'
+import VbLogin from '@/@vb/components/Auth/Login'
 export default {
   components: {
-    EpmsLogin,
+    VbLogin,
   },
 }
 </script>

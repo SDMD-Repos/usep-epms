@@ -1,13 +1,13 @@
 <template>
-  <div>
-    <groups-component />
-  </div>
+  <a-card>
+    <groups />
+  </a-card>
 </template>
 <script>
-import GroupsComponent from '@/components/system/Manager/Groups'
+import Groups from '@/components/Manager/Groups'
 export default {
   components: {
-    GroupsComponent,
+    Groups,
   },
 }
 </script>

@@ -1,35 +1,34 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import NProgress from 'nprogress'
 import AuthLayout from '@/layouts/Auth'
 import MainLayout from '@/layouts/Main'
 import store from '@/store'
 
-Vue.use(Router)
-
-const router = new Router({
+const router = createRouter({
   base: process.env.BASE_URL,
-  // mode: 'history',
   scrollBehavior() {
     return { x: 0, y: 0 }
   },
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
-      redirect: 'dashboard/about',
+      name: 'home',
+      // VB:REPLACE-NEXT-LINE:ROUTER-REDIRECT
+      redirect: '/dashboard',
       component: MainLayout,
       meta: {
         authRequired: true,
         hidden: true,
       },
       children: [
-        // Dashboards
+        // VB:REPLACE-START:ROUTER-CONFIG
         {
-          path: '/dashboard/about',
-          meta: {
-            title: 'Dashboard About',
-          },
-          component: () => import('./views/dashboard/about'),
+          path: '/dashboard',
+          meta: { title: 'Dashboard' },
+          component: () => import('./views/dashboard'),
         },
+
         // Manager
         {
           path: '/manager/form',
@@ -45,34 +44,8 @@ const router = new Router({
           },
           component: () => import('./views/manager/groups'),
         },
-        {
-          path: '/manager/measures',
-          meta: {
-            title: 'Measures Manager',
-          },
-          component: () => import('./views/manager/measures'),
-        },
-        {
-          path: '/manager/signatories',
-          meta: {
-            title: 'Signatories Manager',
-          },
-          component: () => import('./views/manager/signatory'),
-        },
-        // Main Form
-        {
-          path: '/form/:formId',
-          name: 'main.form',
-          props: true,
 
-          component: () => import('./views/forms'),
-        },
-        {
-          path: '/list/:formId',
-          name: 'form.list',
-          props: true,
-          component: () => import('./views/forms/list.vue'),
-        },
+        // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },
 
@@ -84,6 +57,7 @@ const router = new Router({
       children: [
         {
           path: '/auth/404',
+          name: 'route404',
           meta: {
             title: 'Error 404',
           },
@@ -98,6 +72,7 @@ const router = new Router({
         },
         {
           path: '/auth/login',
+          name: 'login',
           meta: {
             title: 'Sign In',
           },
@@ -108,12 +83,18 @@ const router = new Router({
 
     // Redirect to 404
     {
-      path: '*', redirect: 'auth/404', hidden: true,
+      path: '/:pathMatch(.*)*',
+      redirect: { name: 'route404' },
     },
   ],
 })
 
 router.beforeEach((to, from, next) => {
+  NProgress.start()
+  setTimeout(() => {
+    NProgress.done()
+  }, 300)
+
   if (to.matched.some(record => record.meta.authRequired)) {
     if (!store.state.user.authorized) {
       next({

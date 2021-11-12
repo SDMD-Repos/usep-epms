@@ -1,6 +1,5 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-// import router from '@/router'
+import router from '@/router'
+import { notification } from 'ant-design-vue'
 
 import * as firebase from '@/services/firebase'
 import * as jwt from '@/services/jwt'
@@ -14,12 +13,11 @@ const mapAuthProviders = {
   },
   jwt: {
     login: jwt.login,
+    register: jwt.register,
     currentAccount: jwt.currentAccount,
     logout: jwt.logout,
   },
 }
-
-Vue.use(Vuex)
 
 export default {
   namespaced: true,
@@ -30,8 +28,9 @@ export default {
     pmapsId: '',
     role: '',
     avatar: '',
-    authorized: process.env.VUE_APP_AUTHENTICATED || false, // false is default value
+    authorized: process.env.VUE_APP_AUTHENTICATED || false,
     loading: false,
+    accountFetchIsTouched: false,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -51,9 +50,9 @@ export default {
       login(pmapsId, password).then(success => {
         if (success) {
           dispatch('LOAD_CURRENT_ACCOUNT')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Logged In',
-            description: 'You have successfully logged in to USeP e-PMS!',
+            description: 'You have successfully logged in!',
           })
         }
         if (!success) {
@@ -92,14 +91,15 @@ export default {
       logout().then(() => {
         commit('SET_STATE', {
           id: '',
-          name: '',
-          role: '',
-          email: '',
+          lastName: '',
+          firstName: '',
+          pmapsId: '',
           avatar: '',
+          role: '',
           authorized: false,
           loading: false,
         })
-        location.href = '/'
+        router.push('/auth/login')
       })
     },
   },

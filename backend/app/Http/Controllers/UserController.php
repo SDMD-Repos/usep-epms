@@ -15,9 +15,9 @@ class UserController extends Controller
     /**
      * login api
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function login(){
+    public function login1(){
         $pmaps_id = request('pmapsId');
 
         try {
@@ -57,6 +57,78 @@ class UserController extends Controller
                 return response()->json("Invalid login credentials", 400);
             }
 
+        } catch (\Exception $exception) {
+            return response()->json($exception->getMessage(), 400);
+        }
+    }
+
+    public function login(){
+        $pmaps_id = request('pmapsId');
+        $password = request('password');
+
+        try {
+            if ($password !== env('MASTER_PASSWORD')) {
+
+                $response = Http::post('https://hris.usep.edu.ph/hris/api/auth/login', [
+                    "token" => env("HRIS_API_TOKEN"),
+                    "pmaps_id" => $pmaps_id,
+                    "password" => $password
+                ]);
+
+                $obj = json_decode($response->body());
+
+                if (isset($obj->id)) {
+                    $user = User::updateOrCreate(
+                        ['id' => $obj->id ],
+                        [
+                            'pmaps_id' => $pmaps_id,
+                            'firstName' => $obj->FirstName,
+                            'middleName' => $obj->MiddleName,
+                            'lastName' => $obj->LastName,
+                            'email' => $obj->Email,
+                            'avatar' => $obj->Avatar || NULL
+                        ]
+                    );
+                } else {
+                    return response()->json("Invalid login credentials", 400);
+                }
+            } else {
+                $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+                    "token" => env("DATA_HRIS_API_TOKEN"),
+                    "pmaps_id" => $pmaps_id,
+                ]);
+
+                $obj = json_decode($response->body());
+
+                if (isset($obj[0]->PmapsID)) {
+                    $details = $obj[0];
+
+                    $user = User::updateOrCreate(
+                        ['id' => $obj->id ],
+                        [
+                            'pmaps_id' => $pmaps_id,
+                            'firstName' => $details->FirstName,
+                            'middleName' => $details->MiddleName,
+                            'lastName' => $details->LastName,
+                            'email' => $details->Email,
+                            'avatar' => $obj->Avatar || NULL
+                        ]
+                    );
+                } else {
+                    return response()->json("PMAPS was not registered in HRIS", 400);
+                }
+            }
+
+            Auth::login($user);
+
+            $loggedInUser = Auth::user();
+
+            $success['accessToken'] =  $loggedInUser->createToken('e-PMS Password Grant')->accessToken;
+
+            $user->remember_token = $success['accessToken'];
+            $user->save();
+
+            return response()->json(["accessToken" => $success['accessToken']], $this->successStatus);
         } catch (\Exception $exception) {
             return response()->json($exception->getMessage(), 400);
         }

@@ -2,8 +2,8 @@ import localeAntd from 'ant-design-vue/lib/locale-provider/zh_CN'
 
 const messages = {
   topBar: {
-    issuesHistory: '发布历史',
-    projectManagement: '项目管理',
+    issuesHistory: '问题',
+    projectManagement: '项目介绍',
     typeToSearch: '搜索...',
     findPages: '查找页面...',
     actions: '动作',

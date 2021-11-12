@@ -1,9 +1,9 @@
-name = "airui-vue"
+name = "visual-builder-vue"
 type = "webpack"
 account_id = "792461088a4c863230f3faee467094b1"
 # workers_dev = true
-route = "vue.airui.cloud/*"
-zone_id = "e32c3c89723adb66f1b86027a9a8d9db"
+route = "vue.visualbuilder.cloud/*"
+zone_id = "3098985d50eb34908b966db14245a73e"
 
 [site]
 bucket = "../dist"

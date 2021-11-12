@@ -1,28 +1,22 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex'
 import user from './user'
 import settings from './settings'
 import formManager from './formManager'
 import external from './external'
-import aapcr from './aapcr'
-import opcrvp from './opcrvp'
-import ocpcr from './ocpcr'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
+export default createStore({
   modules: {
     user,
     settings,
     formManager,
     external,
-    aapcr,
-    opcrvp,
-    ocpcr,
   },
   state: {
-    dateFormat: 'YYYY-MM-DD hh:mm A',
+    imagesPath: '/resources/images/',
   },
   mutations: {},
   actions: {},
+  getters: {
+    mainStore: state => state,
+  },
 })

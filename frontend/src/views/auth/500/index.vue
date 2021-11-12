@@ -1,13 +1,13 @@
 <template>
   <div>
-    <component-error-500 />
+    <vb-error-500 />
   </div>
 </template>
 <script>
-import ComponentError500 from '@/components/system/Errors/500'
+import VbError500 from '@/@vb/components/Errors/500'
 export default {
   components: {
-    ComponentError500,
+    VbError500,
   },
 }
 </script>
