@@ -32,7 +32,6 @@
               placeholder="Select office"
               tree-node-filter-prop="title"
               show-search
-              allow-clear
               label-in-value
               @change="getPersonnelList($event, 'oic')"
             />
@@ -44,22 +43,10 @@
                 placeholder="Select Personnel"
                 tree-node-filter-prop="title"
                 show-search
-                allow-clear
                 label-in-value
                 @change="validate('chairId', { trigger: 'blur' }).catch(() => {})"
               />
             </div>
-
-<!--            <office-personnel-fields-->
-<!--              v-model:value="form.chairId"-->
-<!--              :chair-office="form.chairOffice"-->
-<!--              :departments="officeList"-->
-<!--              :personnel="oicList"-->
-<!--              :members="form.members"-->
-<!--              :action="actionType"-->
-<!--              @get-personnel-list="getPersonnelList($event, 'oic')"-->
-<!--              @update-chair-id="updateFormDetail"-->
-<!--            />-->
           </a-form-item>
         </template>
 
@@ -141,13 +128,13 @@ import { defineComponent, computed, toRef, ref, reactive } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
 import { Form, message } from 'ant-design-vue'
 import * as hris from '@/services/hris'
-// import officePersonnelFields from './officePersonnelFields'
+
 const useForm = Form.useForm
+
 export default defineComponent({
   name: 'FormModal',
   components: {
     UserAddOutlined,
-    // officePersonnelFields,
   },
   props: {
     visible: Boolean,
@@ -208,8 +195,8 @@ export default defineComponent({
     const isVisible = toRef(props, 'visible')
     const form = toRef(props, 'formState')
     let checkIfEmpty = async (rule, value) => {
-      console.log(value)
-      if (value === '' || typeof value === 'undefined' || value.length === 0) {
+      console.log(form.value.hasChair)
+      if (form.value.hasChair && (value === '' || typeof value === 'undefined' || value.length === 0)) {
         return Promise.reject('This field is required')
       } else {
         return Promise.resolve()
@@ -247,7 +234,30 @@ export default defineComponent({
 
     // METHODS
     const okAction = () => {
-      emit('change-action', 'update')
+      if (props.actionType === 'view') {
+        emit('change-action', 'update')
+      } else {
+        validateFields()
+      }
+    }
+
+    const validateFields = () => {
+      validate()
+        .then(() => {
+          if (form.value.members.length < 1) {
+            message.error('The member\'s list should not be empty')
+          } else {
+            // member = {
+            //   officeId: undefined,
+            //   id: undefined,
+            // }
+            // emit('submit-form')
+          }
+          // console.log(toRaw(groupRef));
+        })
+        .catch(err => {
+          console.log('error', err);
+        });
     }
 
     const onClose = () => {
