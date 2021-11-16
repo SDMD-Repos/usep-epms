@@ -63,12 +63,12 @@
         <a-form-item label="Supervising Office" v-bind="validateInfos.supervising">
           <a-select v-model:value="form.supervising"
                     placeholder="Select Supervising Office"
+                    option-label-prop="title"
+                    :options="supervisingList"
                     label-in-value>
-            <a-select-option v-for="list in supervisingList"
-                             :value="list.value"
-                             :key="list.value">
-              {{ list.title }}
-            </a-select-option>
+            <template #option="{ title }">
+              {{ title }}
+            </template>
           </a-select>
         </a-form-item>
 
@@ -91,7 +91,7 @@
           <a-input-group compact class="mt-2">
             <a-tree-select
               v-model:value="member.id"
-              style="width: 90%"
+              style="width: 88%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="memberList"
               placeholder="Select Personnel"
@@ -124,12 +124,10 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, computed, toRef, ref, reactive } from 'vue'
+import { defineComponent, computed, toRef, watch, ref, reactive } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
 import { Form, message } from 'ant-design-vue'
 import * as hris from '@/services/hris'
-
-const useForm = Form.useForm
 
 export default defineComponent({
   name: 'FormModal',
@@ -166,6 +164,10 @@ export default defineComponent({
         }
       },
     },
+    formRules: {
+      type: Object,
+      default: () => { return {} },
+    },
     officeList: {
       type: Array,
       default: () => { return [] },
@@ -174,8 +176,16 @@ export default defineComponent({
       type: Array,
       default: () => { return [] },
     },
+    validate: {
+      type: Function,
+      default: () => {},
+    },
+    validateInfos: {
+      type: Object,
+      default: () => { return {} },
+    },
   },
-  emits: ['change-action', 'close-modal'],
+  emits: ['change-action', 'close-modal', 'submit-form'],
   setup(props, { emit }) {
     // COMPUTED
     const years = computed(() => {
@@ -190,20 +200,23 @@ export default defineComponent({
 
     // DATA
     const groupRef = ref()
+
+    let isVisible = ref()
+    const form = toRef(props, 'formState')
+
     let memberList = ref([])
     let oicList = ref([])
-    const isVisible = toRef(props, 'visible')
-    const form = toRef(props, 'formState')
-    let checkIfEmpty = async (rule, value) => {
-      console.log(form.value.hasChair)
-      if (form.value.hasChair && (value === '' || typeof value === 'undefined' || value.length === 0)) {
-        return Promise.reject('This field is required')
-      } else {
-        return Promise.resolve()
-      }
-    }
+    let formLoading = ref(false)
 
-    const rules = reactive({
+    // let checkIfEmpty = async (rule, value) => {
+    //   if (form.value.hasChair && (value === '' || typeof value === 'undefined' || value.length === 0)) {
+    //     return Promise.reject('This field is required')
+    //   } else {
+    //     return Promise.resolve()
+    //   }
+    // }
+
+    /*const rules = reactive({
       name: [
         { required: true, message: 'This field is required', trigger: 'change' },
         { whitespace: true, message: 'Please input a valid Group name', trigger: 'change' },
@@ -218,20 +231,26 @@ export default defineComponent({
       chairId: [
         { validator: checkIfEmpty, trigger: 'change' },
       ],
-    })
+    })*/
 
-    const { validate, validateInfos } = useForm(form, rules);
+    /*const formProperties = toRef(props, 'formProp')
+    const { validate, validateInfos } = formProperties.value
+    console.log(formProperties)*/
 
     const labelCol = { span: 6 }
     const wrapperCol = { span: 16 }
 
-    const member = reactive({
+    const memberIntial = () => ({
       officeId: undefined,
       id: undefined,
     })
 
-    let formLoading = ref(false)
+    const member = reactive(memberIntial())
 
+    // EVENTS
+    watch(props.visible, (visible, prevVisble) => {
+      isVisible.value = visible
+    })
     // METHODS
     const okAction = () => {
       if (props.actionType === 'view') {
@@ -242,18 +261,14 @@ export default defineComponent({
     }
 
     const validateFields = () => {
-      validate()
+      props.validate()
         .then(() => {
           if (form.value.members.length < 1) {
             message.error('The member\'s list should not be empty')
           } else {
-            // member = {
-            //   officeId: undefined,
-            //   id: undefined,
-            // }
-            // emit('submit-form')
+            Object.assign(member, memberIntial())
+            emit('submit-form')
           }
-          // console.log(toRaw(groupRef));
         })
         .catch(err => {
           console.log('error', err);
@@ -265,31 +280,40 @@ export default defineComponent({
     }
 
     const getPersonnelList = (data, field) => {
-      const id = data.value
-      formLoading.value = true
-      const getPersonnelByOffice = hris.getPersonnelByOffice
-      getPersonnelByOffice(id).then(response => {
-        if (response) {
-          const { personnel } = response
-          formLoading.value = false
-          if (field === 'oic') {
-            oicList.value = personnel
-          } else {
-            memberList.value = personnel
+      if (field === 'oic') {
+        form.value.chairOffice = data
+        oicList.value = []
+        form.value.chairId = undefined
+      } else {
+        memberList.value = []
+        member.id = undefined
+      }
+      if (typeof data !== 'undefined') {
+        const id = data.value
+        formLoading.value = true
+        const getPersonnelByOffice = hris.getPersonnelByOffice
+        getPersonnelByOffice(id).then(response => {
+          if (response) {
+            const { personnel } = response
+            formLoading.value = false
+            if (field === 'oic') {
+              oicList.value = personnel
+            } else {
+              memberList.value = personnel
+            }
           }
-        }
-      })
+        })
+      }
     }
 
     const addMember = () => {
       let isChair = false
       const details = { ...member }
-      console.log(details)
       const ifExists = form.value.members.some(function(field) {
         return field.id.value === details.id.value
       })
       if (form.value.chairId !== null && typeof form.value.chairId !== 'undefined') {
-        isChair = form.value.chairId.key === details.id.value
+        isChair = form.value.chairId.value === details.id.value
       }
       if (!ifExists && !isChair) {
         details.status = 'new'
@@ -314,10 +338,6 @@ export default defineComponent({
       form.value[data.field] = data.values
     }
 
-    const hithere = () => {
-      console.log('sss')
-    }
-
     return {
       years,
 
@@ -326,14 +346,14 @@ export default defineComponent({
       groupRef,
       isVisible,
       form,
-      rules,
+      // rules,
       labelCol,
       wrapperCol,
       member,
       formLoading,
 
-      validate,
-      validateInfos,
+      // validate,
+      // validateInfos,
 
       okAction,
       onClose,
@@ -341,7 +361,6 @@ export default defineComponent({
       addMember,
       deleteMember,
       updateFormDetail,
-      hithere,
     }
   },
 })

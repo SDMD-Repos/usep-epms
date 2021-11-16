@@ -457,7 +457,7 @@ export default {
       createGroup(payload).then(response => {
         if (response) {
           dispatch('FETCH_GROUPS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Group created successfully',
           })
@@ -477,7 +477,7 @@ export default {
       updateGroup(payload, id).then(response => {
         if (response) {
           dispatch('FETCH_GROUPS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Group updated successfully',
           })
@@ -497,7 +497,7 @@ export default {
       deleteGroup(id).then(response => {
         if (response) {
           dispatch('FETCH_GROUPS')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Group deleted successfully',
           })

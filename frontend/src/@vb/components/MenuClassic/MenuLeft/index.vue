@@ -101,7 +101,7 @@ export default {
     const settings = computed(() => store.getters.settings)
     const isMenuCollapsed = computed(() => store.getters.settings.isMenuCollapsed)
     const user = computed(() => store.getters['user/user'])
-    const pathname = computed(() => route.pathname)
+    const pathname = computed(() => route.path)
     const mainStore = computed(() => store.getters.mainStore)
 
     const onCollapse = (collapsed, type) => {
@@ -138,7 +138,7 @@ export default {
         }, [])
       const selectedItem = find(flattenItems(menuData.value.concat(), 'children'), [
         'url',
-        pathname,
+        pathname.value,
       ])
       selectedKeys.value = selectedItem ? [selectedItem.key] : []
     }

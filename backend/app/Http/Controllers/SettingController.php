@@ -743,14 +743,14 @@ class SettingController extends Controller
 
             $group->name = $name;
             $group->effective_until = $effectivy;
-            $group->supervising_id = $supervising['key'];
+            $group->supervising_id = $supervising['value'];
             $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']){
                 $chairId = $validated['chairId'];
                 $chairOffice = $validated['chairOffice'];
 
-                $group->oic_id = $chairId['key'];
+                $group->oic_id = $chairId['value'];
                 $group->oic_name = trim($chairId['label']);
                 $group->oic_dept_id = trim($chairOffice['value']);
                 $group->oic_dept_name = trim($chairOffice['label']);
@@ -823,14 +823,14 @@ class SettingController extends Controller
 
             $group->name = $name;
             $group->effective_until = $effectivity;
-            $group->supervising_id = $supervising['key'];
+            $group->supervising_id = $supervising['value'];
             $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']) {
                 $chairId = $validated['chairId'];
                 $chairOffice = $validated['chairOffice'];
 
-                $group->oic_id = $chairId['key'];
+                $group->oic_id = $chairId['value'];
                 $group->oic_name = trim($chairId['label']);
                 $group->oic_dept_id = trim($chairOffice['value']);
                 $group->oic_dept_name = trim($chairOffice['label']);

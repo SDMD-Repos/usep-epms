@@ -12,6 +12,7 @@ export default createStore({
     external,
   },
   state: {
+    dateFormat: 'YYYY-MM-DD hh:mm A',
     imagesPath: '/resources/images/',
   },
   mutations: {},

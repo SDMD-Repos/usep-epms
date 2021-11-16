@@ -34,7 +34,7 @@ trait OfficeTrait {
 
                     $data = new \stdClass();
 
-                    $data->id = $vpoffice->id;
+//                    $data->id = $vpoffice->id;
                     $data->value = $vpoffice->id;
                     $data->title = $vpoffice->Department;
 
