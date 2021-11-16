@@ -68,7 +68,7 @@ export default defineComponent({
 
     // COMPUTED
     const mainStore = computed(() => store.getters.mainStore)
-    const loading = computed(() => store.getters['formManager/manager'].loading)
+    const loading = computed(() => store.getters['external/external'].loading)
     const groups = computed(() => store.getters['formManager/manager'].groups)
     const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
@@ -136,27 +136,26 @@ export default defineComponent({
     // METHODS
     const openModal = (event, record) => {
       resetModalData()
-      const details = toRefs(formState)
       isOpenModal.value = true
       groupId.value = record !== null ? record.id : record
       if (groupId.value) {
-        details.id = record.id
-        details.name = record.name
+        formState.id = record.id
+        formState.name = record.name
         if (record.oic_id) {
-          details.hasChair = true
-          details.chairId = {
-            value: record.oic_id,
-            label: record.oic_name,
-          }
-          details.chairOffice = {
+          formState.hasChair = true
+          formState.chairOffice = {
             value: record.oic_dept_id,
             label: record.oic_dept_name,
           }
-          groupModal.value.getPersonnelList(details.chairOffice, 'oic')
+          groupModal.value.getPersonnelList(formState.chairOffice, 'oic')
+          formState.chairId = {
+            value: record.oic_id,
+            label: record.oic_name,
+          }
         }
-        details.effectivity = record.effective_until
+        formState.effectivity = record.effective_until
         if (record.supervising_id) {
-          details.supervising = {
+          formState.supervising = {
             value: record.supervising_id,
             label: record.supervising_name,
           }
@@ -173,7 +172,7 @@ export default defineComponent({
             },
             dataId: item.id,
           }
-          details.members.push(data)
+          formState.members.push(data)
         })
       }
       changeAction(event)
@@ -215,7 +214,7 @@ export default defineComponent({
             // console.log(toRaw(formState))
             store.dispatch('formManager/CREATE_GROUP', { payload: toRaw(formState) })
           } else {
-            // store.dispatch('formManager/UPDATE_GROUP', { payload: formState })
+            store.dispatch('formManager/UPDATE_GROUP', { payload: toRaw(formState) })
           }
           isOpenModal.value = false
           resetFields()

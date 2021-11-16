@@ -11,11 +11,11 @@
       <a-form :label-col="labelCol"
               :wrapper-col="wrapperCol">
         <a-form-item label="Name" v-bind="validateInfos.name">
-          <a-input v-model:value="form.name" />
+          <a-input v-model:value="form.name" :disabled="actionType === 'view'" />
         </a-form-item>
 
         <a-form-item label="Has OIC?">
-          <a-switch v-model:checked="form.hasChair" />
+          <a-switch v-model:checked="form.hasChair" :disabled="actionType === 'view'" />
         </a-form-item>
 
         <template v-if="form.hasChair">
@@ -33,6 +33,7 @@
               tree-node-filter-prop="title"
               show-search
               label-in-value
+              :disabled="actionType === 'view'"
               @change="getPersonnelList($event, 'oic')"
             />
             <div class="mt-2">
@@ -44,6 +45,7 @@
                 tree-node-filter-prop="title"
                 show-search
                 label-in-value
+                :disabled="actionType === 'view'"
                 @change="validate('chairId', { trigger: 'blur' }).catch(() => {})"
               />
             </div>
@@ -51,7 +53,7 @@
         </template>
 
         <a-form-item label="Effective until" v-bind="validateInfos.effectivity">
-          <a-select v-model:value="form.effectivity" placeholder="Select year" style="width: 200px" >
+          <a-select v-model:value="form.effectivity" placeholder="Select year" style="width: 200px" :disabled="actionType === 'view'">
             <template v-for="(y, i) in years" :key="i">
               <a-select-option :value="y">
                 {{ y }}
@@ -65,6 +67,7 @@
                     placeholder="Select Supervising Office"
                     option-label-prop="title"
                     :options="supervisingList"
+                    :disabled="actionType === 'view'"
                     label-in-value>
             <template #option="{ title }">
               {{ title }}
@@ -86,6 +89,7 @@
             show-search
             allow-clear
             label-in-value
+            :disabled="actionType === 'view'"
             @change="getPersonnelList($event, 'member')"
           />
           <a-input-group compact class="mt-2">
@@ -99,6 +103,7 @@
               show-search
               allow-clear
               label-in-value
+              :disabled="actionType === 'view'"
             />
             <a-button type="primary" class="mr-3" :disabled="!member.id" @click="addMember">
               <template #icon><UserAddOutlined /></template>
@@ -108,7 +113,7 @@
             <a-list item-layout="horizontal" :data-source="form.members">
               <template #renderItem="{ item, index }">
                 <a-list-item>
-                  <template #actions>
+                  <template #actions v-if="actionType !== 'view'">
                     <a @click="deleteMember(index)" >
                       delete
                     </a>
@@ -202,7 +207,7 @@ export default defineComponent({
     const groupRef = ref()
 
     let isVisible = ref()
-    const form = toRef(props, 'formState')
+    let form = ref()
 
     let memberList = ref([])
     let oicList = ref([])
@@ -248,9 +253,11 @@ export default defineComponent({
     const member = reactive(memberIntial())
 
     // EVENTS
-    watch(props.visible, (visible, prevVisble) => {
+    watch(() => [props.visible, props.formState] , ([visible, formState]) => {
       isVisible.value = visible
+      form.value = formState
     })
+
     // METHODS
     const okAction = () => {
       if (props.actionType === 'view') {
@@ -279,11 +286,12 @@ export default defineComponent({
       emit('close-modal')
     }
 
-    const getPersonnelList = (data, field) => {
+    const getPersonnelList = async (data, field) => {
       if (field === 'oic') {
-        form.value.chairOffice = data
         oicList.value = []
-        form.value.chairId = undefined
+        if(typeof form.value !== 'undefined') {
+          form.value.chairId = undefined
+        }
       } else {
         memberList.value = []
         member.id = undefined
@@ -292,7 +300,7 @@ export default defineComponent({
         const id = data.value
         formLoading.value = true
         const getPersonnelByOffice = hris.getPersonnelByOffice
-        getPersonnelByOffice(id).then(response => {
+        await getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
             formLoading.value = false
@@ -327,11 +335,11 @@ export default defineComponent({
     }
 
     const deleteMember = index => {
-      // const details = form.value.members[index]
+      const data = form.value.members[index]
       form.value.members.splice(index, 1)
-      // if (this.actionType === 'update' && (typeof (member.status) === 'undefined' || member.status !== 'new')) {
-      //   this.form.deleted.push(member.dataId)
-      // }
+      if (props.actionType === 'update' && (typeof (data.status) === 'undefined' || data.status !== 'new')) {
+        form.value.deleted.push(data.dataId)
+      }
     }
 
     const updateFormDetail = data => {
