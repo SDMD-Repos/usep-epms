@@ -44,6 +44,13 @@ const router = createRouter({
           },
           component: () => import('./views/manager/groups'),
         },
+        {
+          path: '/manager/measures',
+          meta: {
+            title: 'Measures Manager',
+          },
+          component: () => import('./views/manager/measures'),
+        },
 
         // VB:REPLACE-END:ROUTER-CONFIG
       ],

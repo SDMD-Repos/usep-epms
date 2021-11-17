@@ -43,7 +43,7 @@
 </template>
 <script>
 import FormModal from './partials/formModal'
-import {computed, defineComponent, ref, reactive, toRaw, toRefs, onMounted, createVNode} from 'vue'
+import { computed, defineComponent, ref, reactive, toRaw, toRefs, onMounted, createVNode } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import { Form, Modal } from 'ant-design-vue'
