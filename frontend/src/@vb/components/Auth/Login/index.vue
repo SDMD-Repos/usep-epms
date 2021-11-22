@@ -18,7 +18,7 @@
           <a-input v-model:value="loginForm.pmapsId" placeholder="PMAPS ID" />
         </a-form-item>
         <a-form-item name="password">
-          <a-input v-model:value="loginForm.password" placeholder="Password" type="password" />
+          <a-input-password v-model:value="loginForm.password" placeholder="Password" />
         </a-form-item>
         <a-button type="primary" html-type="submit" class="text-center w-100" :loading="loading">
           <strong>Sign in</strong>

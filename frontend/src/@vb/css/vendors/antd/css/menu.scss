@@ -3,6 +3,8 @@
 .ant-menu {
   &-item {
     &-selected {
+      background-color: $primary !important;
+
       a {
         color: $gray-2 !important;
 
@@ -13,6 +15,16 @@
     }
     &-disabled {
       color: $gray-4 !important;
+    }
+  }
+
+  &-inline {
+    &-collapsed {
+      &-tooltip {
+        a {
+          color: $gray-2 !important;
+        }
+      }
     }
   }
 }

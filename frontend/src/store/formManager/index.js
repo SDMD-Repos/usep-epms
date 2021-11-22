@@ -262,7 +262,7 @@ export default {
       createMeasure(data).then(response => {
         if (response) {
           dispatch('FETCH_MEASURES')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Measure created successfully',
           })
@@ -287,7 +287,7 @@ export default {
       updateMeasure(data, id).then(response => {
         if (response) {
           dispatch('FETCH_MEASURES')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Measure updated successfully',
           })
@@ -307,7 +307,7 @@ export default {
       deleteMeasure(id).then(response => {
         if (response) {
           dispatch('FETCH_MEASURES')
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Measure deleted successfully',
           })
@@ -381,7 +381,7 @@ export default {
       saveSignatories(payload).then(response => {
         if (response) {
           dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Your changes were saved successfully',
           })
@@ -400,7 +400,7 @@ export default {
       updateSignatories(payload).then(response => {
         if (response) {
           dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Signatory updated successfully',
           })
@@ -420,7 +420,7 @@ export default {
       deleteSignatory(id).then(response => {
         if (response) {
           dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
-          Vue.prototype.$notification.success({
+          notification.success({
             message: 'Success',
             description: 'Personnel deleted successfully',
           })

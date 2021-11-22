@@ -1,5 +1,7 @@
 <template>
-  <measures />
+  <a-card>
+    <measures />
+  </a-card>
 </template>
 <script>
 import Measures from '@/components/Manager/Measures'

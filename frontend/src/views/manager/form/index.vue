@@ -5,9 +5,9 @@
         <div class="card">
           <div class="card-body">
             <a-tabs v-model:activeKey="activeKey" :animated="false">
-              <a-tab-pane tab="Functions" key="1"><categories-form /></a-tab-pane>
-              <a-tab-pane tab="Programs" key="2"><programs-form /></a-tab-pane>
-              <a-tab-pane tab="Sub Categories" key="3"><sub-categories-form /></a-tab-pane>
+              <a-tab-pane tab="Functions" key="1"><categories-form v-if="activeKey === '1'"/></a-tab-pane>
+              <a-tab-pane tab="Programs" key="2"><programs-form v-if="activeKey === '2'" /></a-tab-pane>
+              <a-tab-pane tab="Sub Categories" key="3"><sub-categories-form v-if="activeKey === '3'"/></a-tab-pane>
             </a-tabs>
           </div>
         </div>
@@ -29,7 +29,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      activeKey: ref('1'),
+      activeKey: ref(1),
     }
   },
 })

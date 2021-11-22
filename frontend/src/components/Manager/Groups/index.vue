@@ -43,7 +43,7 @@
 </template>
 <script>
 import FormModal from './partials/formModal'
-import { computed, defineComponent, ref, reactive, toRaw, toRefs, onMounted, createVNode } from 'vue'
+import { computed, defineComponent, ref, reactive, toRaw, onMounted, createVNode } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 import { Form, Modal } from 'ant-design-vue'
@@ -78,7 +78,6 @@ export default defineComponent({
     let action = ref('')
     let modalTitle = ref('')
     let okText = ref('')
-    let groupId = ref(null)
     const groupModal = ref()
 
     const formState = reactive({
@@ -137,8 +136,8 @@ export default defineComponent({
     const openModal = (event, record) => {
       resetModalData()
       isOpenModal.value = true
-      groupId.value = record !== null ? record.id : record
-      if (groupId.value) {
+      const groupId = record !== null ? record.id : record
+      if (groupId) {
         formState.id = record.id
         formState.name = record.name
         if (record.oic_id) {
@@ -179,7 +178,6 @@ export default defineComponent({
     }
 
     const changeAction = event => {
-      console.log(event)
       if (event === 'create') {
         modalTitle.value = 'New Group'
         okText.value = 'Create'
@@ -211,7 +209,6 @@ export default defineComponent({
         cancelText: 'No',
         onOk() {
           if (action.value === 'create') {
-            // console.log(toRaw(formState))
             store.dispatch('formManager/CREATE_GROUP', { payload: toRaw(formState) })
           } else {
             store.dispatch('formManager/UPDATE_GROUP', { payload: toRaw(formState) })

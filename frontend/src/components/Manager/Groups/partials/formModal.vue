@@ -23,7 +23,6 @@
             <template #label>
               <span class="required-indicator">Officer-in-Charge</span>
             </template>
-            <!-- Custom component for Officer-In-Charge field -->
             <a-tree-select
               v-model:value="form.chairOffice"
               style="width: 100%"
@@ -129,9 +128,9 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, computed, toRef, watch, ref, reactive } from 'vue'
+import { defineComponent, computed, watch, ref, reactive } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
-import { Form, message } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import * as hris from '@/services/hris'
 
 export default defineComponent({
@@ -168,10 +167,6 @@ export default defineComponent({
           deleted: [],
         }
       },
-    },
-    formRules: {
-      type: Object,
-      default: () => { return {} },
     },
     officeList: {
       type: Array,
@@ -212,35 +207,6 @@ export default defineComponent({
     let memberList = ref([])
     let oicList = ref([])
     let formLoading = ref(false)
-
-    // let checkIfEmpty = async (rule, value) => {
-    //   if (form.value.hasChair && (value === '' || typeof value === 'undefined' || value.length === 0)) {
-    //     return Promise.reject('This field is required')
-    //   } else {
-    //     return Promise.resolve()
-    //   }
-    // }
-
-    /*const rules = reactive({
-      name: [
-        { required: true, message: 'This field is required', trigger: 'change' },
-        { whitespace: true, message: 'Please input a valid Group name', trigger: 'change' },
-        { min: 3, message: 'Length should be at least 3 characters', trigger: 'change' },
-      ],
-      effectivity: [
-        { required: true, message: 'Please pick a date' },
-      ],
-      supervising: [
-        { required: true, message: 'Please choose one' },
-      ],
-      chairId: [
-        { validator: checkIfEmpty, trigger: 'change' },
-      ],
-    })*/
-
-    /*const formProperties = toRef(props, 'formProp')
-    const { validate, validateInfos } = formProperties.value
-    console.log(formProperties)*/
 
     const labelCol = { span: 6 }
     const wrapperCol = { span: 16 }
@@ -354,14 +320,10 @@ export default defineComponent({
       groupRef,
       isVisible,
       form,
-      // rules,
       labelCol,
       wrapperCol,
       member,
       formLoading,
-
-      // validate,
-      // validateInfos,
 
       okAction,
       onClose,

@@ -51,6 +51,13 @@ const router = createRouter({
           },
           component: () => import('./views/manager/measures'),
         },
+        {
+          path: '/manager/signatories',
+          meta: {
+            title: 'Signatories Manager',
+          },
+          component: () => import('./views/manager/signatory'),
+        },
 
         // VB:REPLACE-END:ROUTER-CONFIG
       ],

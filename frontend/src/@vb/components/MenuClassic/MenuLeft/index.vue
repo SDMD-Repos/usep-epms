@@ -1,7 +1,7 @@
 <template>
   <a-layout-sider
     :width="settings.leftMenuWidth"
-    :collapsible="settings.isMobileView ? false : true"
+    :collapsible="!settings.isMobileView"
     :collapsed="settings.isMenuCollapsed && !settings.isMobileView"
     :class="{
       [$style.menu]: true,
