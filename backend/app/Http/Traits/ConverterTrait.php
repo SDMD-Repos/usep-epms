@@ -209,4 +209,17 @@ trait ConverterTrait {
         ];
     }
 
+    public function checkArrayObjectsValue($lists, $object, $value)
+    {
+        $found = false;
+
+        foreach ($lists as $list) {
+            if ($list->$object === $value) {
+                $found = true;
+            }
+        }
+
+        return $found;
+    }
+
 }

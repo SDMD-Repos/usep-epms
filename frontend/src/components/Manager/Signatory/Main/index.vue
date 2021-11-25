@@ -25,12 +25,15 @@
                   :modal-title="modalTitle"
                   :ok-text="okText"
                   :action-type="action"
+                  :office-list="offices"
+                  :position-list="positionList"
+                  :form-state="formState"
                   @close-modal="resetFormModal"/>
     </div>
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, watch, onMounted } from 'vue'
+import { computed, defineComponent, ref, watch, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import SignatoryList from './partials/list'
 import FormModal from './partials/formModal'
@@ -55,6 +58,11 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const isOpenModal = ref(false)
+
+    const formState = reactive({
+      signatories: [],
+    })
+
     let formId = ref(props.formName)
     let action = ref('')
     let modalTitle = ref('')
@@ -62,6 +70,8 @@ export default defineComponent({
 
     // COMPUTED
     const signatoryTypes = computed(() => store.getters['formManager/manager'].signatoryTypes)
+    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const positionList = computed(() => store.getters['external/external'].positionList)
 
     const yearList = computed(() => {
       const now = new Date().getFullYear()
@@ -74,11 +84,21 @@ export default defineComponent({
     })
 
     const signatoryList = computed(() => store.getters['formManager/manager'].signatories)
-    const loading = computed(() => store.getters['formManager/manager'].loading)
+    const loading = computed(() => store.getters['external/external'].loading)
 
     // EVENTS
     onMounted(() => {
+      let params = {
+        selectable: {
+          allColleges: true,
+          mains: true,
+        },
+        isAcronym: false,
+      }
+      params = encodeURIComponent(JSON.stringify(params))
+      store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
+      store.dispatch('external/FETCH_ALL_POSITIONS')
       fetchSignatories()
     })
 
@@ -92,7 +112,6 @@ export default defineComponent({
         year: year.value,
         formId: formId.value,
       }
-      console.log(data)
       store.commit('formManager/SET_STATE', {
         signatories: [],
       })
@@ -125,6 +144,13 @@ export default defineComponent({
         modalTitle.value = 'New Signatory'
         okText.value = 'Create'
         action.value = 'create'
+        formState.signatories.push({
+          id: 'new',
+          officeId: undefined,
+          personnelId: undefined,
+          position: undefined,
+          isCustom: false,
+        })
       } else if (event === 'update') {
         modalTitle.value = 'Update Signatory'
         okText.value = 'Update'
@@ -141,12 +167,15 @@ export default defineComponent({
       year,
       formId,
       isOpenModal,
+      formState,
       action,
       modalTitle,
       okText,
 
       yearList,
       signatoryTypes,
+      offices,
+      positionList,
       signatoryList,
       loading,
 

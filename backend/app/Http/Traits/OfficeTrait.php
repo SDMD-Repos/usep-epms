@@ -286,9 +286,14 @@ trait OfficeTrait {
 
         $positionList = [];
 
-        foreach($data as $list) {
-            if(!in_array($list->Name, $positionList)) {
-                array_push($positionList, $list->Name);
+        foreach($data as $key => $list) {
+            if(!$this->checkArrayObjectsValue($positionList, 'value', $list->Name)) {
+                $obj = new \stdClass();
+
+                $obj->value = $list->Name;
+                $obj->key = $key;
+
+                array_push($positionList, $obj);
             }
         }
 
@@ -296,6 +301,7 @@ trait OfficeTrait {
             'positionList' => $positionList
         ], 200);
     }
+
     public function getUserOffices($form)
     {
         try{
