@@ -10,7 +10,8 @@
     <a-spin :spinning="formLoading">
       <a-form ref="signatoryRef" layout="vertical" :model="form">
         <template v-for="(data, index) in form.signatories" :key="index">
-          <a-form-item>
+          <a-divider v-if="index" style="margin-top: 10px"/>
+          <a-form-item :name="['signatories', index, 'isCustom']">
             <a-checkbox v-model:checked="data.isCustom" @change="handleCustomChange(index)">
               Custom
             </a-checkbox>
@@ -65,24 +66,35 @@
                       placeholder="Select Personnel's Position"
                       style="width: 100%"
                       show-search
-                      allow-clear @change="positionChange"/>
+                      allow-clear />
             <a-input v-else
                      v-model:value="data.position"
                      style="width: 100%"
                      placeholder="Personnel's Position"/>
           </a-form-item>
+          <template v-if="allowMultiple">
+            <div class="pull-right signatory-icon" style="margin-top: -10px; padding-bottom: 10px">
+              <plus-circle-outlined v-if="(index+1) === form.signatories.length" @click="addRow" class="mr-2"/>
+              <minus-circle-outlined v-if="form.signatories.length > 1 && data.id === 'new'" @click="deleteRow" />
+            </div>
+          </template>
         </template>
       </a-form>
     </a-spin>
   </a-modal>
 </template>
 <script>
-import { defineComponent, ref, watch } from "vue"
+import { defineComponent, ref, watch, toRaw, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
-import _ from "lodash"
 import * as hris from '@/services/hris'
+import { Modal } from "ant-design-vue"
+import { ExclamationCircleOutlined, PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
+  components: {
+    PlusCircleOutlined,
+    MinusCircleOutlined,
+  },
   props: {
     visible: Boolean,
     modalTitle: {
@@ -92,6 +104,10 @@ export default defineComponent({
     okText: {
       type: String,
       default: '',
+    },
+    details: {
+      type: Object,
+      default: () => { return {} },
     },
     actionType: {
       type: String,
@@ -110,8 +126,8 @@ export default defineComponent({
       default: () => { return {} },
     },
   },
-  emits: ['close-modal'],
-  setup(props, context) {
+  emits: ['close-modal', 'submit-form', 'add-signatory', 'delete-signatory'],
+  setup(props, { emit }) {
     const store = useStore()
 
     // DATA
@@ -157,6 +173,11 @@ export default defineComponent({
       },
     }
 
+    // COMPUTED
+    const allowMultiple = computed(() => {
+      return props.details.formId === 'cpcr' && props.details.typeId === 'reviewed_by'
+    })
+
     // EVENTS
     watch(() => [props.visible] , ([visible]) => {
       isVisible.value = visible
@@ -164,7 +185,6 @@ export default defineComponent({
 
     watch(() =>  props.formState, formState => {
       form.value = formState
-      console.log(formState)
     }, { deep: true })
 
     // METHODS
@@ -201,19 +221,48 @@ export default defineComponent({
           return i.DepartmentID === office.value
         })[0]
         if (typeof officePosition !== 'undefined') {
-          positionField.value.focus()
           form.value.signatories[index].position = officePosition.PositionName
+          signatoryRef.value.validate()
         }
       }
     }
 
-    const positionChange = () => {
-      console.log('position change', positionField)
+    const addRow = () => {
+      emit('add-signatory')
+    }
+
+    const deleteRow = index => {
+      emit('delete-signatory', index)
     }
 
     const onOk = () => {
       signatoryRef.value.validate().then(() => {
-        console.log('values', form.value.signatories);
+        Modal.confirm({
+          title: () => 'Are you sure you want to save this?',
+          icon: () => createVNode(ExclamationCircleOutlined),
+          content: () => '',
+          okText: 'Yes',
+          cancelText: 'No',
+          onOk() {
+            const propsDetails = props.details
+            const data = ref({
+              typeId: propsDetails.typeId,
+              formId: propsDetails.formId,
+              year: propsDetails.year,
+              signatories: toRaw(form.value.signatories),
+            })
+            if (propsDetails.formId === 'vpopcr') {
+              data.value.officeId = propsDetails.office
+            }
+            if (props.actionType === 'create') {
+              store.dispatch('formManager/SAVE_POSITION_SIGNATORIES', { payload: data.value })
+            } else {
+              store.dispatch('formManager/UPDATE_POSITION_SIGNATORIES', { payload: data.value })
+            }
+            emit('close-modal')
+          },
+          onCancel() {},
+        });
       })
       .catch(error => {
         console.log('error', error);
@@ -221,7 +270,7 @@ export default defineComponent({
     }
 
     const onCancel = () => {
-      context.emit('close-modal')
+      emit('close-modal')
     }
 
     return {
@@ -236,13 +285,21 @@ export default defineComponent({
       signatoryRef,
       rules,
 
+      allowMultiple,
+
       handleCustomChange,
       getPersonnelList,
       getPersonnelPosition,
-      positionChange,
+      addRow,
+      deleteRow,
       onOk,
       onCancel,
     }
   },
 })
 </script>
+<style scoped>
+.signatory-icon {
+  font-size: 20px;
+}
+</style>

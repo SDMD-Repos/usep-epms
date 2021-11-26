@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table :columns="columns" :data-source="list" :loading="loading" bordered>
+    <a-table :columns="columns" :data-source="list" bordered>
       <template #operation="{ record }">
         <a-popconfirm
           title="Are you sure you want to delete this?"
@@ -44,11 +44,6 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    /*officeId: {
-      type: String,
-      default: '',
-    },*/
-    loading: Boolean,
   },
   setup(props) {
     const store = useStore()

@@ -618,13 +618,13 @@ class SettingController extends Controller
                 if($check) {
                     $original = $check->getOriginal();
 
-                    if ($check->office_id !== $officeId) {
+                    if ($check->office_id !== $officeId || ($signatory['isCustom'] && $check->office_name !== $officeName)) {
                         $check->office_id = $officeId;
                         $check->office_name = $officeName;
                         $history .= "Updated office from '" . $original['office_name'] . "' to '" . $officeName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
                     }
 
-                    if($check->personnel_id !== $personnelId) {
+                    if($check->personnel_id !== $personnelId || ($signatory['isCustom'] && $check->personnel_name !== $personnelName)) {
                         $check->personnel_id = $personnelId;
                         $check->personnel_name = $personnelName;
                         $history .= "Updated personnel from '" . $original['personnel_name'] . "' to '" . $personnelName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
