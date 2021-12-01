@@ -59,6 +59,14 @@ const router = createRouter({
           component: () => import('./views/manager/signatory'),
         },
 
+        // Main Forms
+        {
+          path: '/list/:formId',
+          name: 'form.list',
+          props: true,
+          component: () => import('./views/forms/list.vue'),
+        },
+
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },
