@@ -19,7 +19,7 @@ export default {
     const router = useRouter()
     const store = useStore()
     const acronym = computed(() => store.getters.settings.acronym)
-    const routeTitle = computed(() => route.meta.title)
+    const routeTitle = computed(() => route.meta.title || store.state.settings.dynamicPageTitle)
     const currentRoute = computed(() => route)
     const authorized = computed(() => store.getters['user/user'].authorized)
 

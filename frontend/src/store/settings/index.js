@@ -14,11 +14,12 @@ export default {
     ...STORED_SETTINGS({
       // VB:REPLACE-START:SETTINGS
       authProvider: 'jwt',
+      acronym: 'e-PMS',
       logo: 'USeP',
       logoName: 'University of Southeastern Philippines',
       description: 'Electronic Performance Management System',
-      acronym: 'e-PMS',
       officeName: 'Systems Data and Management Division',
+      dynamicPageTitle: '',
       version: 'fluent',
       theme: 'default',
       locale: 'en-US',
@@ -133,6 +134,9 @@ export default {
       document.querySelector('html').setAttribute('data-vb-theme', nextTheme)
       state.theme = nextTheme
       store.set('app.settings.theme', nextTheme)
+    },
+    SET_DYNAMIC_PAGE_TITLE(state, payload) {
+      state.dynamicPageTitle = payload.pageTitle
     },
   },
   actions: {},
