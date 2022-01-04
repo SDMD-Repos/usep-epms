@@ -65,3 +65,8 @@ export async function logout() {
     })
     .catch(err => console.log(err))
 }
+
+export async function isLoggedIn() {
+  return apiClient
+    .get('/auth/account')
+}

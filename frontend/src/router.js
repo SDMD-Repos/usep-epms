@@ -2,7 +2,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import AuthLayout from '@/layouts/Auth'
 import MainLayout from '@/layouts/Main'
-import store from '@/store'
+import ViewerLayout from '@/layouts/Forms/pdfViewer'
+import storeState from '@/store'
 
 const router = createRouter({
   base: process.env.BASE_URL,
@@ -64,10 +65,37 @@ const router = createRouter({
           path: '/list/:formId',
           name: 'form.list',
           props: true,
+          meta: {
+            title: storeState.state.settings.tabTitle,
+          },
           component: () => import('./views/forms/list.vue'),
         },
 
         // VB:REPLACE-END:ROUTER-CONFIG
+      ],
+    },
+
+    // PDF Viewer
+    {
+      path: '/viewer',
+      name: 'viewerComponent',
+      // VB:REPLACE-NEXT-LINE:ROUTER-REDIRECT
+      redirect: 'viewer/pdf',
+      component: ViewerLayout,
+      meta: {
+        authRequired: true,
+        hidden: true,
+      },
+      children: [
+        {
+          path: '/viewer/pdf/:formId/:id/:documentName',
+          name: 'viewerPdf',
+          props: true,
+          meta: {
+            title: 'File Viewer',
+          },
+          component: () => import('./views/viewer'),
+        },
       ],
     },
 
@@ -112,19 +140,45 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  NProgress.start()
-  setTimeout(() => {
-    NProgress.done()
-  }, 300)
+  if (to.name !== 'viewerPdf') {
+    NProgress.start()
+    setTimeout(() => {
+      NProgress.done()
+    }, 300)
+  }
 
   if (to.matched.some(record => record.meta.authRequired)) {
-    if (!store.state.user.authorized) {
+    const accessToken = localStorage.getItem('accessToken')
+    if(typeof accessToken === 'undefined' || accessToken == null) {
       next({
         path: '/auth/login',
         query: { redirect: to.fullPath },
       })
     } else {
-      next()
+      if(to.name === 'viewerPdf') {
+        storeState.state.user.accountFetchIsTouched.then(response => {
+          if(response) {
+            const { accessToken } = response.data
+            if (!accessToken) {
+              next({
+                path: '/auth/login',
+                query: { redirect: to.fullPath },
+              })
+            } else {
+              next()
+            }
+          }
+        })
+      } else {
+        if(!storeState.state.user.authorized) {
+          next({
+            path: '/auth/login',
+            query: { redirect: to.fullPath },
+          })
+        }else {
+          next()
+        }
+      }
     }
   } else {
     next()

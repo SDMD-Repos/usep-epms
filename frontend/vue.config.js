@@ -17,4 +17,7 @@ module.exports = {
       },
     },
   },
+  devServer: {
+    host: 'usepepms.local',
+  },
 }

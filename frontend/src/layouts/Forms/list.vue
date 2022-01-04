@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="columns" :data-source="dataList">
+  <a-table :columns="columns" :data-source="dataList" :loading="loading" bordered>
     <template #dateCreated="{ record }">
       {{ moment(record.created_at).format(mainStore.dateFormat) }}
     </template>
@@ -25,21 +25,18 @@
         <a-tooltip>
           <template #title><span>Update</span></template>
           <EditOutlined :style="{ fontSize: '18px' }" />
-          <!--            <a-icon type="edit" :style="{fontSize: '18px'}" @click="handleUpdate(record.id)" />-->
         </a-tooltip>
         <a-divider type="vertical" />
       </template>
       <a-tooltip>
         <template #title><span>View PDF</span></template>
         <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
-        <!--          <a-icon type="file-pdf" :style="{fontSize: '18px'}" @click="viewPdf(record.id, record.document_name)"/>-->
       </a-tooltip>
       <template v-if="record.finalized_date && !record.published_date && record.is_active">
         <a-divider type="vertical" />
         <a-tooltip>
           <template #title><span>Publish</span></template>
           <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
-          <!--            <a-icon type="file-done" :style="{ fontSize: '18px' }" @click="handlePublish(record.id, record.year)"/>-->
         </a-tooltip>
       </template>
       <template v-if="record.published_date && record.is_active">
@@ -47,7 +44,6 @@
         <a-tooltip>
           <template #title><span>Unpublish</span></template>
           <CloseSquareFilled :style="{ fontSize: '18px' }" />
-          <!--            <a-icon type="close-square" theme="filled" :style="{fontSize: '18px'}" @click="onUnpublish(record.id)"/>-->
         </a-tooltip>
       </template>
       <template v-if="record.files.length">
@@ -94,6 +90,7 @@ export default defineComponent({
       default: () => { return [] },
     },
     form: { type: String, default: '' },
+    loading: Boolean,
   },
   emits: ['publish', 'view-pdf'],
   setup(props, { emit }) {

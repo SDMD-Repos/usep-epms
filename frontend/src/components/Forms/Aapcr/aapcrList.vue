@@ -1,14 +1,16 @@
 <template>
   <div>
     <form-list-layout :columns="columns" :data-list="list" :form="formId"
-                      @publish="publish" @view-pdf="viewPdf"/>
+                      @publish="publish" @view-pdf="viewPdf" :loading="loading"/>
+
+
   </div>
 </template>
 <script>
 import { computed, defineComponent, ref, onMounted } from "vue"
+import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import moment from 'moment'
-import * as apiForm from '@/services/mainForms/aapcr'
 import ListMixin from '@/services/formMixins/list'
 import FormListLayout from '@/layouts/Forms/list'
 
@@ -19,10 +21,11 @@ export default defineComponent({
   props: {
     formId: { type: String, default: '' },
   },
-  setup() {
+  setup(props) {
     const PAGE_TITLE = 'AAPCR List'
 
     const store = useStore()
+    const router = useRouter()
 
     // DATA
     const documentName = ref(null)
@@ -31,6 +34,7 @@ export default defineComponent({
     const { listTableColumns } = ListMixin()
     const mainStore = computed(() => store.getters.mainStore)
     const list = computed(() => store.getters['aapcr/form'].list)
+    const loading = computed(() => store.getters['aapcr/form'].loading)
 
     // EVENTS
     onMounted(() => {
@@ -48,20 +52,15 @@ export default defineComponent({
     }
 
     const viewPdf = data => {
-      const id = data.id
-      const name = data.document_name
-      const fetchPdfData = apiForm.fetchPdfData
-      fetchPdfData(id, name).then(response => {
-        if (response) {
-          // self.visible = true
-          const blob = new Blob([response], { type: 'application/pdf' })
-          documentName.value = window.URL.createObjectURL(blob)
-          // self.fileName = documentName
-        }
-        /*this.$store.commit('aapcr/SET_STATE', {
-          loading: false,
-        })*/
-      })
+      const route = router.resolve({
+        name: "viewerPdf",
+        params: {
+          formId: props.formId,
+          id: data.id,
+          documentName: data.document_name,
+        },
+      });
+      window.open(route.href, "_blank");
     }
 
     return {
@@ -72,6 +71,7 @@ export default defineComponent({
       columns: listTableColumns,
       mainStore,
       list,
+      loading,
 
       publish,
       viewPdf,

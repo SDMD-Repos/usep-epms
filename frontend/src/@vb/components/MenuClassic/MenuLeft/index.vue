@@ -122,7 +122,6 @@ export default {
     }
 
     const handleOpenChange = openKeys => {
-      console.log(openKeys)
       localStore.set('app.menu.openedKeys', openKeys)
       openKeys.value = openKeys
     }

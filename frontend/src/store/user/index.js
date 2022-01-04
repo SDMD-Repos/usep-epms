@@ -16,6 +16,7 @@ const mapAuthProviders = {
     register: jwt.register,
     currentAccount: jwt.currentAccount,
     logout: jwt.logout,
+    isLoggedIn: jwt.isLoggedIn,
   },
 }
 
@@ -30,7 +31,9 @@ export default {
     avatar: '',
     authorized: process.env.VUE_APP_AUTHENTICATED || false,
     loading: false,
-    accountFetchIsTouched: false,
+    accountFetchIsTouched: jwt.isLoggedIn().then(response => {
+      return response
+    }),
   },
   mutations: {
     SET_STATE(state, payload) {

@@ -86,7 +86,7 @@
 <script>
 import { defineComponent, ref, watch, toRaw, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
-import * as hris from '@/services/hris'
+import { getPersonnelByOffice } from '@/services/hris'
 import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined, PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons-vue"
 
@@ -201,7 +201,6 @@ export default defineComponent({
       if (officeId && !form.value.isCustom) {
         formLoading.value = true
         const id = officeId.value
-        const getPersonnelByOffice = hris.getPersonnelByOffice
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response

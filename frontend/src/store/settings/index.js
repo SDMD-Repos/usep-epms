@@ -54,6 +54,7 @@ export default {
       layoutFooter: 'v1',
       flyoutMenuType: 'flyout',
       flyoutMenuColor: 'blue',
+      tabTitle: '',
 
       // VB:REPLACE-END:SETTINGS
     }),

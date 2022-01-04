@@ -131,7 +131,7 @@
 import { defineComponent, computed, watch, ref, reactive } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import * as hris from '@/services/hris'
+import { getPersonnelByOffice } from '@/services/hris'
 
 export default defineComponent({
   name: 'FormModal',
@@ -265,7 +265,6 @@ export default defineComponent({
       if (typeof data !== 'undefined') {
         const id = data.value
         formLoading.value = true
-        const getPersonnelByOffice = hris.getPersonnelByOffice
         await getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response

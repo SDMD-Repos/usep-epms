@@ -36,7 +36,7 @@
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, watch, createVNode, onMounted } from 'vue'
+import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'

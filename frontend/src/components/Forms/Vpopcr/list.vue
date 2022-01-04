@@ -1,13 +1,14 @@
 <template>
   <div>
     <form-list-layout :columns="columns" :data-list="list" :form="formId"
-                      @publish="publish"/>
+                      @publish="publish" @view-pdf="viewPdf" :loading="loading"/>
   </div>
 </template>
 
 <script>
 import { computed, defineComponent, ref, onMounted } from "vue"
 import { useStore } from "vuex"
+import { useRouter } from "vue-router"
 import ListMixin from '@/services/formMixins/list'
 import FormListLayout from '@/layouts/Forms/list'
 
@@ -18,10 +19,11 @@ export default defineComponent({
   props: {
     formId: { type: String, default: '' },
   },
-  setup() {
+  setup(props) {
     const PAGE_TITLE = 'OPCR (VP) List'
 
     const store = useStore()
+    const router = useRouter()
 
     // DATA
     let columns = ref([])
@@ -29,6 +31,7 @@ export default defineComponent({
 
     // COMPUTED
     const list = computed(() => store.getters['opcrvp/form'].list)
+    const loading = computed(() => store.getters['opcrvp/form'].loading)
 
     onMounted(() => {
       renderColumns()
@@ -60,11 +63,26 @@ export default defineComponent({
       store.dispatch('opcrvp/PUBLISH', { payload: payload })
     }
 
+    const viewPdf = data => {
+      const route = router.resolve({
+        name: "viewerPdf",
+        params: {
+          formId: props.formId,
+          id: data.id,
+          documentName: data.office_name,
+        },
+      });
+      window.open(route.href, "_blank");
+    }
+
     return {
       columns,
+
       list,
+      loading,
 
       publish,
+      viewPdf,
     }
   },
 })

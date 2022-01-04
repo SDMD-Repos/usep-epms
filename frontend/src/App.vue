@@ -36,7 +36,7 @@ export default {
 
     // redirect if authorized and current page is login
     watch(authorized, authorized => {
-      if (authorized) {
+      if (authorized && currentRoute.value.name !== 'viewerPdf') {
         const query = qs.parse(currentRoute.value.fullPath.split('?')[1], {
           ignoreQueryPrefix: true,
         })
