@@ -1,8 +1,8 @@
 import router from '@/router'
 import { notification } from 'ant-design-vue'
 
-import * as firebase from '@/services/firebase'
-import * as jwt from '@/services/jwt'
+import * as firebase from '@/services/api/firebase'
+import * as jwt from '@/services/api/jwt'
 
 const mapAuthProviders = {
   firebase: {

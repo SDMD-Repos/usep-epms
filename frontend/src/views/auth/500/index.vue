@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import VbError500 from '@/@vb/components/Errors/500'
+import VbError500 from '@/components/Errors/500'
 export default {
   components: {
     VbError500,

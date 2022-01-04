@@ -131,7 +131,7 @@
 import { defineComponent, computed, watch, ref, reactive } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import { getPersonnelByOffice } from '@/services/hris'
+import { getPersonnelByOffice } from '@/services/api/hris'
 
 export default defineComponent({
   name: 'FormModal',

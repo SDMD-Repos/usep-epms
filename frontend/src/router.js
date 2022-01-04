@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import AuthLayout from '@/layouts/Auth'
 import MainLayout from '@/layouts/Main'
-import ViewerLayout from '@/layouts/Forms/pdfViewer'
+import ViewerLayout from '@/layouts/Forms/PdfViewer'
 import storeState from '@/store'
 
 const router = createRouter({

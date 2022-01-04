@@ -108,7 +108,7 @@ module.exports = (config, content) => {
         let imports = ''
         filteredWidgetsList.forEach(widget => {
           const [folder, name] = widget.split('-')
-          imports = imports + 'import ' + 'Vb' + folder + name + ' from \'@/@vb/widgets/' + folder + '/' + name + '\'\n'
+          imports = imports + 'import ' + 'Vb' + folder + name + ' from \'@/widgets/' + folder + '/' + name + '\'\n'
         })
         return `
           ${imports}

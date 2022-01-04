@@ -1,4 +1,4 @@
-import * as manager from '@/services/manager'
+import * as manager from '@/services/api/manager'
 import { notification } from 'ant-design-vue'
 
 const mapApiProviders = {

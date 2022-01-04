@@ -86,7 +86,7 @@
 <script>
 import { defineComponent, ref, watch, toRaw, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
-import { getPersonnelByOffice } from '@/services/hris'
+import { getPersonnelByOffice } from '@/services/api/hris'
 import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined, PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons-vue"
 

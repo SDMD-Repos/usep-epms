@@ -9,8 +9,8 @@
 import { computed, defineComponent, ref, onMounted } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
-import ListMixin from '@/services/formMixins/list'
-import FormListLayout from '@/layouts/Forms/list'
+import { listTableColumns } from '@/services/columns'
+import FormListLayout from '@/layouts/Forms/List'
 
 export default defineComponent({
   components: {
@@ -27,7 +27,6 @@ export default defineComponent({
 
     // DATA
     let columns = ref([])
-    const { listTableColumns } = ListMixin()
 
     // COMPUTED
     const list = computed(() => store.getters['opcrvp/form'].list)

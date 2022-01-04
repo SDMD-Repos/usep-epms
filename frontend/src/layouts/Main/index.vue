@@ -52,16 +52,16 @@
 <script>
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
-import VbTopbar from '@/@vb/components/Topbar'
-// import VbSidebar from '@/@vb/components/Sidebar'
-// import VbSupportChat from '@/@vb/components/SupportChat'
-import VbVariants from '@/@vb/components/Variants'
-import VbMenuClassic from '@/@vb/components/MenuClassic'
-import VbMenuFlyout from '@/@vb/components/MenuFlyout'
-import VbMenuSimply from '@/@vb/components/MenuSimply'
-import VbBreadcrumbs from '@/@vb/components/Breadcrumbs'
-import VbBreadcrumbs2 from '@/@vb/components/Breadcrumbs2'
-import VbFooter from '@/@vb/components/Footer'
+import VbTopbar from '@/components/Topbar'
+// import VbSidebar from '@/components/Sidebar'
+// import VbSupportChat from '@/components/SupportChat'
+import VbVariants from '@/components/Variants'
+import VbMenuClassic from '@/components/MenuClassic'
+import VbMenuFlyout from '@/components/MenuFlyout'
+import VbMenuSimply from '@/components/MenuSimply'
+import VbBreadcrumbs from '@/components/Breadcrumbs'
+import VbBreadcrumbs2 from '@/components/Breadcrumbs2'
+import VbFooter from '@/components/Footer'
 
 export default {
   name: 'MainLayout',

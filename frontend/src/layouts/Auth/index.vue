@@ -63,8 +63,8 @@
 <script>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-// import VbSidebar from '@/@vb/components/Sidebar'
-// import VbSupportChat from '@/@vb/components/SupportChat'
+// import VbSidebar from '@/components/Sidebar'
+// import VbSupportChat from '@/components/SupportChat'
 
 export default {
   name: 'AuthLayout',

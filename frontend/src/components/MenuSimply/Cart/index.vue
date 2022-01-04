@@ -2,13 +2,13 @@
   <a-dropdown :trigger="['click']" placement="bottomLeft" @visibleChange="addCount">
     <div :class="$style.dropdown">
       <a-badge :count="count">
-        <i class="fe fe-bell" :class="$style.icon" />
+        <i class="fe fe-shopping-cart" :class="$style.icon" />
       </a-badge>
     </div>
     <template #overlay>
       <div class="card vb__utils__shadow width-350">
-        <div class="card-body p-0">
-          <list5 />
+        <div class="card-body">
+          <general26 />
         </div>
       </div>
     </template>
@@ -17,14 +17,14 @@
 
 <script>
 import { ref } from 'vue'
-import List5 from '@/@vb/widgets/WidgetsLists/5'
+import General26 from '@/widgets/WidgetsGeneral/26'
 
 export default {
   components: {
-    List5,
+    General26,
   },
   setup() {
-    const count = ref(7)
+    const count = ref(2)
     const addCount = () => {
       count.value++
     }

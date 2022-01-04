@@ -1,4 +1,4 @@
-export const getFormColumns = [
+export const formTableColumns = [
   {
     title: 'Sub Category',
     key: 'subCategory',

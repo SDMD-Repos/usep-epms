@@ -9,8 +9,8 @@
   </div>
 </template>
 <script>
-import { fetchPdfData } from '@/services/mainForms/aapcr'
-import { renderPdf } from '@/services/mainForms/opcrvp'
+import { fetchPdfData } from '@/services/api/mainForms/aapcr'
+import { renderPdf } from '@/services/api/mainForms/opcrvp'
 import { mapState } from 'vuex'
 import NProgress from 'nprogress'
 

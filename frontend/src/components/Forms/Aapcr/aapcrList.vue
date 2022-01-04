@@ -3,7 +3,7 @@
     <form-list-layout :columns="columns" :data-list="list" :form="formId"
                       @publish="publish" @view-pdf="viewPdf" :loading="loading"/>
 
-
+    <upload-publish />
   </div>
 </template>
 <script>
@@ -11,12 +11,14 @@ import { computed, defineComponent, ref, onMounted } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import moment from 'moment'
-import ListMixin from '@/services/formMixins/list'
-import FormListLayout from '@/layouts/Forms/list'
+import { listTableColumns } from '@/services/columns'
+import FormListLayout from '@/layouts/Forms/List'
+import UploadPublish from '@/components/Modals/UploadPublish'
 
 export default defineComponent({
   components: {
     FormListLayout,
+    UploadPublish,
   },
   props: {
     formId: { type: String, default: '' },
@@ -31,7 +33,6 @@ export default defineComponent({
     const documentName = ref(null)
 
     // COMPUTED
-    const { listTableColumns } = ListMixin()
     const mainStore = computed(() => store.getters.mainStore)
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
@@ -61,6 +62,10 @@ export default defineComponent({
         },
       });
       window.open(route.href, "_blank");
+    }
+
+    const unpublish = id => {
+
     }
 
     return {

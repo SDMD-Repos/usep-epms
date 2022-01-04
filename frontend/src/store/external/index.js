@@ -1,4 +1,4 @@
-import * as hris from '@/services/hris'
+import * as hris from '@/services/api/hris'
 
 const mapApiProviders = {
   getMainOfficesWithChildren: hris.getMainOfficesWithChildren,

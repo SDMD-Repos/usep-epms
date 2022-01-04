@@ -1,6 +1,6 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrvpForm from '@/services/mainForms/opcrvp'
+import * as opcrvpForm from '@/services/api/mainForms/opcrvp'
 
 const mapApiProviders = {
   save: opcrvpForm.save,

@@ -43,7 +43,7 @@
         <a-divider type="vertical" />
         <a-tooltip>
           <template #title><span>Unpublish</span></template>
-          <CloseSquareFilled :style="{ fontSize: '18px' }" />
+          <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record.id)" />
         </a-tooltip>
       </template>
       <template v-if="record.files.length">
@@ -92,7 +92,7 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['publish', 'view-pdf'],
+  emits: ['publish', 'view-pdf', 'unpublish'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -135,6 +135,20 @@ export default defineComponent({
       emit('view-pdf', data)
     }
 
+    const onUnpublish = id => {
+      Modal.confirm({
+        title: () => 'Are you sure you want to unpublish this?',
+        icon: () => createVNode(ExclamationCircleOutlined),
+        content: () => 'You won\'t be able to revert this!',
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk() {
+          // emit('unpublish', id)
+        },
+        onCancel() {},
+      });
+    }
+
     return {
       moment,
       mainStore,
@@ -142,6 +156,7 @@ export default defineComponent({
       deactivate,
       handlePublish,
       viewPdf,
+      onUnpublish,
     }
   },
 })

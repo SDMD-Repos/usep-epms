@@ -110,5 +110,5 @@ export default {
 }
 </script>
 <style lang="scss" module>
-@import '@/@vb/components/Auth/style.module.scss';
+@import '@/components/Auth/style.module.scss';
 </style>
