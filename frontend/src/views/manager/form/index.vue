@@ -29,7 +29,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      activeKey: ref(1),
+      activeKey: ref('1'),
     }
   },
 })

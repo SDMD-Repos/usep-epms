@@ -8,7 +8,7 @@
     </template>
 
     <template #dateCreated="{ record }">
-      {{ moment(record.created_at).format(mainStore.dateFormat)}}
+      {{ moment(record.created_at).format(mainStore.dateFormat) }}
     </template>
 
     <template #operation="{ record }">

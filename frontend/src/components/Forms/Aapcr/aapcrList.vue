@@ -1,9 +1,10 @@
 <template>
   <div>
-    <form-list-layout :columns="columns" :data-list="list" :form="formId"
-                      @publish="publish" @view-pdf="viewPdf" :loading="loading"/>
+    <form-list-layout
+      :columns="columns" :data-list="list" :form="formId" :loading="loading"
+      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish"/>
 
-    <upload-publish />
+    <upload-publish :is-upload-open="isUploadOpen"/>
   </div>
 </template>
 <script>
@@ -14,6 +15,7 @@ import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
 import FormListLayout from '@/layouts/Forms/List'
 import UploadPublish from '@/components/Modals/UploadPublish'
+import { useUploadFile } from '@/services/functions/upload'
 
 export default defineComponent({
   components: {
@@ -64,9 +66,7 @@ export default defineComponent({
       window.open(route.href, "_blank");
     }
 
-    const unpublish = id => {
-
-    }
+    const { unpublish, isUploadOpen } = useUploadFile()
 
     return {
       moment,
@@ -78,8 +78,11 @@ export default defineComponent({
       list,
       loading,
 
+      isUploadOpen,
+
       publish,
       viewPdf,
+      unpublish,
     }
   },
 })

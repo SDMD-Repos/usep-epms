@@ -300,7 +300,7 @@ class SettingController extends Controller
 
     public function getMeasures()
     {
-        $measures = Measure::select('id', 'name', 'id as key')->with('items')->get();
+        $measures = Measure::select('id', 'name', 'id as key', 'created_at')->with('items')->get();
 
         return response()->json([
             'measures' => $measures

@@ -143,7 +143,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
-          // emit('unpublish', id)
+          emit('unpublish', id)
         },
         onCancel() {},
       });
