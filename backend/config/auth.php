@@ -99,6 +99,7 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        'master' => env('MASTER_PASSWORD')
     ],
 
     /*

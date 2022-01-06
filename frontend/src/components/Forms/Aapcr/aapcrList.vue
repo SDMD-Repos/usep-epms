@@ -4,7 +4,8 @@
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish"/>
 
-    <upload-publish :is-upload-open="isUploadOpen"/>
+    <upload-publish :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
+                    :modal-note="noteInModal" />
   </div>
 </template>
 <script>
@@ -66,7 +67,7 @@ export default defineComponent({
       window.open(route.href, "_blank");
     }
 
-    const { unpublish, isUploadOpen } = useUploadFile()
+    const { unpublish, isUploadOpen, okPublishText, noteInModal } = useUploadFile()
 
     return {
       moment,
@@ -79,6 +80,8 @@ export default defineComponent({
       loading,
 
       isUploadOpen,
+      okPublishText,
+      noteInModal,
 
       publish,
       viewPdf,

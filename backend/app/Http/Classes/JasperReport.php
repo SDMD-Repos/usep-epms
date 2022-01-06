@@ -95,7 +95,7 @@ class Jasperreport
 
         if (strtoupper($repFormat) == 'PDF') {
             $fileName = preg_replace('/\s+/', '_', $fileName);
-            $outputPath  = env('FILE_BACKEND_STORAGE') . $fileName . ".pdf";
+            $outputPath  = config('tomcat.file_backend_storage') . $fileName . ".pdf";
 
             /*header("Content-Type: application/pdf; charset=utf-8");
             header("Content-Disposition: filename=".$fileName);*/

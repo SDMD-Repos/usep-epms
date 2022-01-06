@@ -1,6 +1,6 @@
 <template>
-  <a-modal v-model:visible="isVisible">
-    <p>hi there</p>
+  <a-modal v-model:visible="isVisible" title="File Upload">
+    <p>{{ modalNote }}</p>
   </a-modal>
 </template>
 <script>
@@ -10,6 +10,14 @@ export default defineComponent({
   name: "UploadPublish",
   props: {
     isUploadOpen: Boolean,
+    okPublishText: {
+      type: String,
+      default: "",
+    },
+    modalNote: {
+      type: String,
+      default: "",
+    },
   },
   setup(props) {
     let isVisible = ref()

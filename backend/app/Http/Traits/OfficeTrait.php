@@ -24,7 +24,7 @@ trait OfficeTrait {
             }
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
-                'token' => env('DATA_HRIS_API_TOKEN')
+                'token' => config('services.hris.data')
             ]);
 
             $vpoffices = json_decode($response->body());
@@ -88,7 +88,7 @@ trait OfficeTrait {
             $isAcronym = isset($status->isAcronym) && $status->isAcronym;
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
-                'token' => env('DATA_HRIS_API_TOKEN')
+                'token' => config('services.hris.data')
             ]);
 
             $vpoffices = json_decode($response->body());
@@ -172,12 +172,12 @@ trait OfficeTrait {
         try {
             if($vp_id === 'allColleges'){
                 $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/college', [
-                    'token' => env('DATA_HRIS_API_TOKEN')
+                    'token' => config('services.hris.data')
                 ]);
             }else{
                 $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/structure', [
                     "department_id" => (int)$vp_id,
-                    "token" => env("DATA_HRIS_API_TOKEN")
+                    "token" => config('services.hris.data')
                 ]);
 
             }
@@ -221,7 +221,7 @@ trait OfficeTrait {
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/department', [
                 "department_id" => (int)$id,
-                "token" => env("DATA_HRIS_API_TOKEN")
+                "token" => config('services.hris.data')
             ]);
 
             $lists = json_decode($response->body());
@@ -279,7 +279,7 @@ trait OfficeTrait {
     public function getAllPositions()
     {
         $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/position/list', [
-            "token" => env("DATA_HRIS_API_TOKEN")
+            "token" => config('services.hris.data')
         ]);
 
         $data = json_decode($response->body());
@@ -307,7 +307,7 @@ trait OfficeTrait {
         try{
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
                 "pmaps_id" => $this->login_user->pmaps_id,
-                "token" => env("DATA_HRIS_API_TOKEN")
+                "token" => config('services.hris.data')
             ]);
 
             $data = json_decode($response->body());
@@ -356,7 +356,7 @@ trait OfficeTrait {
 
         if($form === 'opcr'){
             $params = array(
-                "token" => env("DATA_HRIS_API_TOKEN"),
+                "token" => config('services.hris.data'),
                 "department_id" => $officeId
             );
 

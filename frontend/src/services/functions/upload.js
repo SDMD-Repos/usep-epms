@@ -4,18 +4,22 @@ export const useUploadFile = () => {
   const dataUpload = ref({
     isUploadOpen: false,
     cachedId: null,
-    okTextUploadModal: '',
+    okPublishText: '',
     noteInModal: '',
     isConfirmDeleteFile: false,
   })
 
   const isUploadOpen = computed(() => dataUpload.value.isUploadOpen)
 
+  const okPublishText = computed(() => dataUpload.value.okPublishText)
+
+  const noteInModal = computed(() => dataUpload.value.noteInModal)
+
   const unpublish = id => {
     dataUpload.value = {
       isUploadOpen: true,
       cachedId: id,
-      okTextUploadModal: 'Unpublish',
+      okPublishText: 'Unpublish',
       noteInModal: 'Unpublishing this requires you to upload the published PDF copy of the form',
       isConfirmDeleteFile: false,
     }
@@ -23,6 +27,9 @@ export const useUploadFile = () => {
 
   return {
     isUploadOpen,
+    okPublishText,
+    noteInModal,
+
     unpublish,
   }
 }

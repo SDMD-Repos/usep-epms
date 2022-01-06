@@ -22,7 +22,7 @@ class UserController extends Controller
 
         try {
             $response = Http::post('https://hris.usep.edu.ph/hris/api/auth/login', [
-                "token" => env("HRIS_API_TOKEN"),
+                "token" => config('services.hris.auth'),
                 "pmaps_id" => $pmaps_id,
                 "password" => request('password')
             ]);
@@ -67,10 +67,10 @@ class UserController extends Controller
         $password = request('password');
 
         try {
-            if ($password !== env('MASTER_PASSWORD')) {
+            if ($password !== config('auth.passwords.master')) {
 
                 $response = Http::post('https://hris.usep.edu.ph/hris/api/auth/login', [
-                    "token" => env("HRIS_API_TOKEN"),
+                    "token" => config('services.hris.auth'),
                     "pmaps_id" => $pmaps_id,
                     "password" => $password
                 ]);
@@ -94,7 +94,7 @@ class UserController extends Controller
                 }
             } else {
                 $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
-                    "token" => env("DATA_HRIS_API_TOKEN"),
+                    "token" => config('services.hris.data'),
                     "pmaps_id" => $pmaps_id,
                 ]);
 
