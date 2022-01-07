@@ -9,6 +9,8 @@ export const useUploadFile = () => {
     isConfirmDeleteFile: false,
   })
 
+  const fileList = ref([])
+
   const isUploadOpen = computed(() => dataUpload.value.isUploadOpen)
 
   const okPublishText = computed(() => dataUpload.value.okPublishText)
@@ -23,6 +25,10 @@ export const useUploadFile = () => {
       noteInModal: 'Unpublishing this requires you to upload the published PDF copy of the form',
       isConfirmDeleteFile: false,
     }
+  }
+
+  const addUploadItem = file => {
+    fileList.value = [...fileList.value, file]
   }
 
   return {
