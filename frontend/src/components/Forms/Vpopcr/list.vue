@@ -1,7 +1,13 @@
 <template>
   <div>
-    <form-list-layout :columns="columns" :data-list="list" :form="formId"
-                      @publish="publish" @view-pdf="viewPdf" :loading="loading"/>
+    <form-list-layout
+      :columns="columns" :data-list="list" :form="formId" :loading="loading"
+      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish"/>
+
+    <upload-publish
+      :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
+      :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
+      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="cancelUpload"/>
   </div>
 </template>
 
@@ -11,10 +17,13 @@ import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 import FormListLayout from '@/layouts/Forms/List'
+import UploadPublish from '@/components/Modals/UploadPublish'
+import { useUploadFile } from '@/services/functions/upload'
 
 export default defineComponent({
   components: {
     FormListLayout,
+    UploadPublish,
   },
   props: {
     formId: { type: String, default: '' },
@@ -27,6 +36,14 @@ export default defineComponent({
 
     // DATA
     let columns = ref([])
+
+
+    const {
+      // DATA
+      isUploadOpen, cachedId, okPublishText, noteInModal, fileList,
+      // METHODS
+      unpublish, addUploadItem, removeFile, cancelUpload,
+    } = useUploadFile()
 
     // COMPUTED
     const list = computed(() => store.getters['opcrvp/form'].list)
@@ -53,6 +70,16 @@ export default defineComponent({
       columns.value = [...copyColumns.filter(i => i.key !== 'documentName')]
     }
 
+    const uploadFile = async () => {
+      const formData = new FormData()
+      fileList.value.forEach(file => {
+        formData.append('files[]', file)
+      })
+      formData.append('id', cachedId.value)
+      await store.dispatch('aapcr/UNPUBLISH', { payload: formData })
+      await cancelUpload()
+    }
+
     const publish = data => {
       const payload = {
         id: data.id,
@@ -77,11 +104,22 @@ export default defineComponent({
     return {
       columns,
 
+      isUploadOpen,
+      okPublishText,
+      noteInModal,
+      cachedId,
       list,
       loading,
+      fileList,
 
       publish,
       viewPdf,
+      uploadFile,
+
+      unpublish,
+      addUploadItem,
+      removeFile,
+      cancelUpload,
     }
   },
 })
