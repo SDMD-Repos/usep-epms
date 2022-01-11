@@ -1,9 +1,10 @@
 <template>
   <a-modal v-model:visible="isVisible" title="File Upload"
-           :ok-text="okPublishText" :closable="false">
+           :ok-text="okPublishText" :closable="false" :confirm-loading="isUploading"
+           @ok="onOkClick" @cancel="onClose">
     <p>{{ modalNote }}</p>
     <a-upload-dragger
-      v-model:fileList="fileList"
+      :file-list="fileList"
       :before-upload="beforeUpload"
       :remove="handleRemove"
       name="file"
@@ -43,9 +44,9 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
-    uploading: Boolean,
+    isUploading: Boolean,
   },
-  emits: ['add-to-list', 'remove-file'],
+  emits: ['add-to-list', 'remove-file', 'upload', 'cancel-upload'],
   setup(props, { emit }) {
     let isVisible = ref()
     const fileList = ref([])
@@ -62,7 +63,6 @@ export default defineComponent({
       if (!isPdf) {
         message.error('You can only upload a PDF file!')
       }
-      console.log('file size: ' + file.size)
       const isLt5M = file.size / 1024 / 1024 < 5
       if (!isLt5M) {
         message.error('File size must not exceed to 5MB')
@@ -71,11 +71,13 @@ export default defineComponent({
       if (!isListEmpty) {
         message.error('Only one file is allowed to upload')
       }
+
       if (isPdf && isLt5M && isListEmpty) {
         emit('add-to-list', file)
         return false
-      } else {
-        return isPdf && isLt5M && isListEmpty
+      }else {
+        // return isPdf && isLt5M && isListEmpty
+        return true
       }
     }
 
@@ -83,11 +85,26 @@ export default defineComponent({
       emit('remove-file', file)
     }
 
+    const onOkClick = () => {
+      if (fileList.value.length < 1) {
+        message.error('No file was selected')
+      } else {
+        emit('upload')
+      }
+    }
+
+    const onClose = () => {
+      emit('cancel-upload')
+    }
+
     return {
       isVisible,
       fileList,
 
       beforeUpload,
+      handleRemove,
+      onOkClick,
+      onClose,
     }
   },
 })

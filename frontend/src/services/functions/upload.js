@@ -13,6 +13,8 @@ export const useUploadFile = () => {
 
   const isUploadOpen = computed(() => dataUpload.value.isUploadOpen)
 
+  const cachedId = computed(() => dataUpload.value.cachedId)
+
   const okPublishText = computed(() => dataUpload.value.okPublishText)
 
   const noteInModal = computed(() => dataUpload.value.noteInModal)
@@ -31,11 +33,33 @@ export const useUploadFile = () => {
     fileList.value = [...fileList.value, file]
   }
 
+  const removeFile = file => {
+    const index = fileList.value.indexOf(file)
+    const newFileList = fileList.value.slice()
+    newFileList.splice(index, 1)
+    fileList.value = newFileList
+  }
+
+  const cancelUpload = () => {
+    dataUpload.value = {
+      isUploadOpen: false,
+      cachedId: null,
+      okPublishText: '',
+      noteInModal: '',
+      isConfirmDeleteFile: false,
+    }
+  }
+
   return {
     isUploadOpen,
+    cachedId,
     okPublishText,
     noteInModal,
+    fileList,
 
     unpublish,
+    addUploadItem,
+    removeFile,
+    cancelUpload,
   }
 }

@@ -1,11 +1,11 @@
 <template>
   <a-table :columns="columns" :data-source="dataList" :loading="loading" bordered>
     <template #dateCreated="{ record }">
-      {{ moment(record.created_at).format(mainStore.dateFormat) }}
+      {{ moment(record.created_at).format(dateFormat) }}
     </template>
 
     <template #datePublished="{ record }">
-      {{ record.published_date ? moment(record.published_date).format(mainStore.dateFormat) : 'Unpublished' }}
+      {{ record.published_date ? moment(record.published_date).format(dateFormat) : 'Unpublished' }}
     </template>
 
     <template #status="{ record }">
@@ -51,7 +51,6 @@
         <a-tooltip>
           <template #title><span>View Archived</span></template>
           <UnorderedListOutlined :style="{ fontSize: '18px' }" />
-          <!--            <a-icon type="unordered-list" :style="{fontSize: '18px'}" @click="viewUploadedList(record)"/>-->
         </a-tooltip>
       </template>
     </template>
@@ -97,7 +96,7 @@ export default defineComponent({
     const store = useStore()
 
     // COMPUTED
-    const mainStore = computed(() => store.getters.mainStore)
+    const dateFormat = computed(() => store.getters.mainStore.dateFormat)
 
     // METHODS
     const deactivate = (id) => {
@@ -151,7 +150,7 @@ export default defineComponent({
 
     return {
       moment,
-      mainStore,
+      dateFormat,
 
       deactivate,
       handlePublish,

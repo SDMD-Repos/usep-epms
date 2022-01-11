@@ -4,8 +4,11 @@
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish"/>
 
-    <upload-publish :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
-                    :modal-note="noteInModal" />
+    <upload-publish
+      :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
+      :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
+      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="cancelUpload"/>
+
   </div>
 </template>
 <script>
@@ -35,8 +38,14 @@ export default defineComponent({
     // DATA
     const documentName = ref(null)
 
+    const {
+      // DATA
+      isUploadOpen, cachedId, okPublishText, noteInModal, fileList,
+      // METHODS
+      unpublish, addUploadItem, removeFile, cancelUpload,
+    } = useUploadFile()
+
     // COMPUTED
-    const mainStore = computed(() => store.getters.mainStore)
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
 
@@ -55,6 +64,16 @@ export default defineComponent({
       store.dispatch('aapcr/PUBLISH', { payload: payload })
     }
 
+    const uploadFile = async () => {
+      const formData = new FormData()
+      fileList.value.forEach(file => {
+        formData.append('files[]', file)
+      })
+      formData.append('id', cachedId.value)
+      await store.dispatch('aapcr/UNPUBLISH', { payload: formData })
+      await cancelUpload()
+    }
+
     const viewPdf = data => {
       const route = router.resolve({
         name: "viewerPdf",
@@ -67,25 +86,29 @@ export default defineComponent({
       window.open(route.href, "_blank");
     }
 
-    const { unpublish, isUploadOpen, okPublishText, noteInModal } = useUploadFile()
-
     return {
       moment,
 
       documentName,
 
       columns: listTableColumns,
-      mainStore,
       list,
       loading,
 
       isUploadOpen,
+      cachedId,
       okPublishText,
       noteInModal,
+      fileList,
 
       publish,
       viewPdf,
+      uploadFile,
+
       unpublish,
+      addUploadItem,
+      removeFile,
+      cancelUpload,
     }
   },
 })
