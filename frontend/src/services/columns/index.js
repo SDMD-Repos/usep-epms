@@ -168,3 +168,23 @@ export const listTableColumns = [
     slots: { customRender: 'operation' },
   },
 ]
+
+export const uploadedListColumns = [
+  {
+    title: 'File Name',
+    dataIndex: 'file_name',
+    width: 350,
+    slots: { customRender: 'fileName' },
+  },
+  {
+    title: 'Date & Time Uploaded',
+    dataIndex: 'created_at_disp',
+    className: 'column-created-at',
+  },
+  {
+    title: '',
+    key: 'operation',
+    className: 'column-action',
+    slots: { customRender: 'operation' },
+  },
+]

@@ -19,6 +19,8 @@ export const useUploadFile = () => {
 
   const noteInModal = computed(() => dataUpload.value.noteInModal)
 
+  const isConfirmDeleteFile = computed(() => dataUpload.value.isConfirmDeleteFile)
+
   const unpublish = id => {
     dataUpload.value = {
       isUploadOpen: true,
@@ -48,6 +50,17 @@ export const useUploadFile = () => {
       noteInModal: '',
       isConfirmDeleteFile: false,
     }
+    fileList.value = []
+  }
+
+  const openUploadOnDelete = data => {
+    dataUpload.value = {
+      isUploadOpen: true,
+      cachedId: data.id,
+      okPublishText: 'Confirm Deletion',
+      noteInModal: 'Deleting this requires you to upload the new published PDF copy of the form to be deleted',
+      isConfirmDeleteFile: true,
+    }
   }
 
   return {
@@ -56,10 +69,12 @@ export const useUploadFile = () => {
     okPublishText,
     noteInModal,
     fileList,
+    isConfirmDeleteFile,
 
     unpublish,
     addUploadItem,
     removeFile,
     cancelUpload,
+    openUploadOnDelete,
   }
 }

@@ -45,8 +45,9 @@ export default defineComponent({
       default: () => [],
     },
     isUploading: Boolean,
+    isDeleteUploaded: Boolean,
   },
-  emits: ['add-to-list', 'remove-file', 'upload', 'cancel-upload'],
+  emits: ['add-to-list', 'remove-file', 'upload', 'cancel-upload', 'view-uploaded-list'],
   setup(props, { emit }) {
     let isVisible = ref()
     const fileList = ref([])
@@ -95,6 +96,9 @@ export default defineComponent({
 
     const onClose = () => {
       emit('cancel-upload')
+      if(props.isDeleteUploaded) {
+        emit('view-uploaded-list', true)
+      }
     }
 
     return {

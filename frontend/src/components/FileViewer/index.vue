@@ -9,7 +9,7 @@
   </div>
 </template>
 <script>
-import { fetchPdfData } from '@/services/api/mainForms/aapcr'
+import { fetchPdfData, viewUploadedFile } from '@/services/api/mainForms/aapcr'
 import { renderPdf } from '@/services/api/mainForms/opcrvp'
 import { mapState } from 'vuex'
 import NProgress from 'nprogress'
@@ -28,6 +28,7 @@ export default {
       type: String,
       default: "",
     },
+    fromUploaded: Boolean,
   },
   data() {
     return {
@@ -91,19 +92,19 @@ export default {
       })
     },
     initializePdf() {
-      const { id, documentName, formId } = this
+      const { id, documentName, formId, fromUploaded } = this
       if (!this.adobeApiReady) {
         return
       }
       this.loading = true
       NProgress.start()
-      /*this.$refs.pdfContainer.innerHTML = ""
-      let viewer = document.createElement("div")
-      viewer.id = "viewer"
-      this.$refs.pdfContainer.appendChild(viewer)*/
       let renderer;
       if(formId === 'aapcr') {
-        renderer = fetchPdfData(id, documentName)
+        if(fromUploaded) {
+          renderer = viewUploadedFile(id)
+        } else {
+          renderer = fetchPdfData(id, documentName)
+        }
       } else if (formId === 'opcrvp') {
         renderer = renderPdf(id)
       }

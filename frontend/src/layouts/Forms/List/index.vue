@@ -50,7 +50,7 @@
         <a-divider type="vertical" />
         <a-tooltip>
           <template #title><span>View Archived</span></template>
-          <UnorderedListOutlined :style="{ fontSize: '18px' }" />
+          <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUploadedList(record)"/>
         </a-tooltip>
       </template>
     </template>
@@ -91,7 +91,7 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['publish', 'view-pdf', 'unpublish'],
+  emits: ['publish', 'view-pdf', 'unpublish', 'view-uploaded-list'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -148,6 +148,10 @@ export default defineComponent({
       });
     }
 
+    const openUploadedList = details => {
+      emit('view-uploaded-list', details)
+    }
+
     return {
       moment,
       dateFormat,
@@ -156,6 +160,7 @@ export default defineComponent({
       handlePublish,
       viewPdf,
       onUnpublish,
+      openUploadedList,
     }
   },
 })
