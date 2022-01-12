@@ -76,7 +76,7 @@ export default defineComponent({
         formData.append('files[]', file)
       })
       formData.append('id', cachedId.value)
-      await store.dispatch('aapcr/UNPUBLISH', { payload: formData })
+      await store.dispatch('opcrvp/UNPUBLISH', { payload: formData })
       await cancelUpload()
     }
 
