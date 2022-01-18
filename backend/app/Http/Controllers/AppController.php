@@ -42,9 +42,11 @@ class AppController extends Controller
     }
 
     // AAPCR
-    public function viewAapcrPdf($id, $documentName)
+    public function viewAapcrPdf($id)
     {
         $aapcr = Aapcr::find($id);
+
+        $documentName = $aapcr->document_name;
 
         $officeModel = new AapcrDetailOffice();
 

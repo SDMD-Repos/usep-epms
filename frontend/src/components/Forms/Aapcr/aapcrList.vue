@@ -1,38 +1,38 @@
 <template>
   <div>
-    <form-list-layout
+    <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList"/>
+      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
 
-    <upload-publish
+    <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
-      :modal-note="noteInModal" :list="fileList" :is-uploading="loading" :is-delete-uploaded="isConfirmDeleteFile"
-      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="cancelUpload"
-      @view-uploaded-list="uploadedListState"/>
+      :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
+      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload" />
 
-    <uploaded-list :modal-state="isUploadedViewed" :form-details="viewedForm"
-                   @close-list-modal="onCloseList" @view-file="viewPdf" @delete-file="openUploadOnDelete" />
+    <uploaded-list-modal
+      :modal-state="isUploadedViewed" :form-details="viewedForm"
+      @close-list-modal="closeListModal" @view-file="viewPdf" @delete-file="openUploadOnDelete" />
   </div>
 </template>
 <script>
 import { computed, defineComponent, ref, onMounted } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { notification } from 'ant-design-vue'
+import { notification, message } from 'ant-design-vue'
 import { listTableColumns } from '@/services/columns'
 import { useUploadFile } from '@/services/functions/upload'
 import { useViewPublishedFiles } from '@/services/functions/published'
-import { updateFile } from '@/services/api/mainForms/aapcr'
-import FormListLayout from '@/layouts/Forms/List'
-import UploadPublish from '@/components/Modals/UploadPublish'
-import UploadedList from '@/components/Modals/UploadedList'
+import { updateFile, fetchPdfData, viewUploadedFile } from '@/services/api/mainForms/aapcr'
+import FormListTable from '@/components/Tables/Forms/List'
+import UploadPublishModal from '@/components/Modals/UploadPublish'
+import UploadedListModal from '@/components/Modals/UploadedList'
 import moment from 'moment'
 
 export default defineComponent({
   components: {
-    FormListLayout,
-    UploadPublish,
-    UploadedList,
+    FormListTable,
+    UploadPublishModal,
+    UploadedListModal,
   },
   props: {
     formId: { type: String, default: '' },
@@ -49,7 +49,6 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
-    const dateFormat = computed(() => store.getters.mainStore.dateFormat)
 
     const {
       // DATA
@@ -58,12 +57,8 @@ export default defineComponent({
       unpublish, addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
     } = useUploadFile()
 
-    const args = {
-      dateFormat: dateFormat,
-    }
-
     const { isUploadedViewed, viewedForm,
-      viewUploadedList, onCloseList, uploadedListState } = useViewPublishedFiles(args)
+      viewUploadedList, onCloseList, uploadedListState } = useViewPublishedFiles()
 
     // EVENTS
     onMounted(() => {
@@ -90,11 +85,11 @@ export default defineComponent({
         await store.dispatch('aapcr/UNPUBLISH', { payload: formData })
         await cancelUpload()
       } else {
-        store.commit('aapcr/SET_STATE', {
-          loading: true,
-        })
+        store.commit('aapcr/SET_STATE', { loading: true })
+
         await cancelUpload()
         await onCloseList()
+
         await updateFile(formData).then(response => {
           if (response) {
             store.dispatch('aapcr/FETCH_LIST').then(() => {
@@ -105,26 +100,58 @@ export default defineComponent({
               message: 'Success',
               description: 'File was deleted successfully',
             })
+            store.commit('aapcr/SET_STATE', {loading: false })
           }
-          store.commit('aapcr/SET_STATE', {
-            loading: false,
-          })
         })
       }
-
     }
 
     const viewPdf = data => {
-      const route = router.resolve({
-        name: "viewerPdf",
-        params: {
-          fromUploaded: !!data.file_name,
-          formId: props.formId,
-          id: data.id,
-          documentName: data.document_name || data.file_name,
-        },
-      });
-      window.open(route.href, "_blank")
+      let renderer = null
+      const documentName = data.document_name || data.file_name
+
+      if(!isUploadedViewed.value) {
+        store.commit('aapcr/SET_STATE', { loading: true })
+
+        renderer = fetchPdfData
+      }else {
+        message.loading('Loading...')
+
+        renderer = viewUploadedFile
+      }
+
+      renderer(data.id).then(response => {
+        if (response) {
+          const blob = new Blob([response], { type: 'application/pdf' })
+          const fileUrl = window.URL.createObjectURL(blob)
+
+          localStorage.setItem('pdf.document.url', fileUrl)
+          localStorage.setItem('pdf.document.name', documentName)
+
+          const route = router.resolve({ name: "viewerPdf" });
+          window.open(route.href, "_blank")
+        }
+        if(!isUploadedViewed.value) {
+          store.commit('aapcr/SET_STATE', { loading: false })
+        }else {
+          message.destroy()
+        }
+      })
+    }
+
+    const handleCancelUpload = () => {
+      if(isConfirmDeleteFile.value) {
+        uploadedListState(true)
+      }
+      cancelUpload()
+    }
+
+    const closeListModal = () => {
+      if(!isConfirmDeleteFile.value) {
+        onCloseList()
+      } else {
+        uploadedListState(false)
+      }
     }
 
     return {
@@ -149,6 +176,8 @@ export default defineComponent({
       publish,
       viewPdf,
       uploadFile,
+      handleCancelUpload,
+      closeListModal,
 
       unpublish,
       addUploadItem,
@@ -158,7 +187,6 @@ export default defineComponent({
 
       viewUploadedList,
       onCloseList,
-      uploadedListState,
     }
   },
 })

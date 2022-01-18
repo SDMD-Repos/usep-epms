@@ -88,9 +88,8 @@ const router = createRouter({
       },
       children: [
         {
-          path: '/viewer/pdf/:fromUploaded/:formId/:id/:documentName',
+          path: '/viewer/pdf',
           name: 'viewerPdf',
-          props: true,
           meta: {
             title: 'File Viewer',
           },

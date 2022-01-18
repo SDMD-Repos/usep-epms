@@ -16,6 +16,8 @@ export default {
   state: {
     loading: false,
     list: [],
+    fileUrl: null,
+    documentName: null,
   },
   mutations: {
     SET_STATE(state, payload) {

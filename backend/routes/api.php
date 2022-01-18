@@ -91,7 +91,7 @@ Route::group([
         Route::post('/unpublish', 'Form\AapcrController@unpublish');
         Route::post('/deactivate', 'Form\AapcrController@deactivate');
         Route::get('/view/{id}', 'Form\AapcrController@view');
-        Route::get('/viewPdf/{id}/{documentName}', 'AppController@viewAapcrPdf');
+        Route::get('/viewPdf/{id}', 'AppController@viewAapcrPdf');
         Route::post('/update/{id}', 'Form\AapcrController@update');
         Route::get('/viewUploadedFile/{id}', 'Form\AapcrController@viewUploadedFile');
         Route::post('/update-file', 'Form\AapcrController@updateFile');

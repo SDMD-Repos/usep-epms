@@ -1,13 +1,17 @@
 <template>
   <div>
-    <form-list-layout
+    <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish"/>
+      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
 
-    <upload-publish
+    <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
       :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
-      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="cancelUpload"/>
+      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload"/>
+
+    <uploaded-list-modal
+      :modal-state="isUploadedViewed" :form-details="viewedForm"
+      @close-list-modal="closeListModal" @view-file="viewPdf" @delete-file="openUploadOnDelete" />
   </div>
 </template>
 
@@ -16,14 +20,19 @@ import { computed, defineComponent, ref, onMounted } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
-import FormListLayout from '@/layouts/Forms/List'
-import UploadPublish from '@/components/Modals/UploadPublish'
 import { useUploadFile } from '@/services/functions/upload'
+import { useViewPublishedFiles } from '@/services/functions/published'
+import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
+import FormListTable from '@/components/Tables/Forms/List'
+import UploadPublishModal from '@/components/Modals/UploadPublish'
+import UploadedListModal from '@/components/Modals/UploadedList'
+import { message, notification } from "ant-design-vue"
 
 export default defineComponent({
   components: {
-    FormListLayout,
-    UploadPublish,
+    FormListTable,
+    UploadPublishModal,
+    UploadedListModal,
   },
   props: {
     formId: { type: String, default: '' },
@@ -40,10 +49,13 @@ export default defineComponent({
 
     const {
       // DATA
-      isUploadOpen, cachedId, okPublishText, noteInModal, fileList,
+      isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
       // METHODS
-      unpublish, addUploadItem, removeFile, cancelUpload,
+      unpublish, addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
     } = useUploadFile()
+
+    const { isUploadedViewed, viewedForm,
+      viewUploadedList, onCloseList, uploadedListState } = useViewPublishedFiles()
 
     // COMPUTED
     const list = computed(() => store.getters['opcrvp/form'].list)
@@ -70,16 +82,6 @@ export default defineComponent({
       columns.value = [...copyColumns.filter(i => i.key !== 'documentName')]
     }
 
-    const uploadFile = async () => {
-      const formData = new FormData()
-      fileList.value.forEach(file => {
-        formData.append('files[]', file)
-      })
-      formData.append('id', cachedId.value)
-      await store.dispatch('opcrvp/UNPUBLISH', { payload: formData })
-      await cancelUpload()
-    }
-
     const publish = data => {
       const payload = {
         id: data.id,
@@ -90,15 +92,82 @@ export default defineComponent({
     }
 
     const viewPdf = data => {
-      const route = router.resolve({
-        name: "viewerPdf",
-        params: {
-          formId: props.formId,
-          id: data.id,
-          documentName: data.office_name,
-        },
-      });
-      window.open(route.href, "_blank");
+      let renderer = null
+      const documentName = data.office_name || data.file_name
+
+      if(!isUploadedViewed.value) {
+        store.commit('opcrvp/SET_STATE', { loading: true })
+
+        renderer = renderPdf
+      }else {
+        message.loading('Loading...')
+
+        renderer = viewUploadedFile
+      }
+
+      renderer(data.id).then(response => {
+        if (response) {
+          const blob = new Blob([response], { type: 'application/pdf' })
+          const fileUrl = window.URL.createObjectURL(blob)
+
+          localStorage.setItem('pdf.document.url', fileUrl)
+          localStorage.setItem('pdf.document.name', documentName)
+
+          const route = router.resolve({ name: "viewerPdf" })
+          window.open(route.href, "_blank")
+        }
+        if(!isUploadedViewed.value) {
+          store.commit('opcrvp/SET_STATE', { loading: false })
+        }else {
+          message.destroy()
+        }
+      })
+    }
+
+    const uploadFile = async () => {
+      const formData = new FormData()
+      fileList.value.forEach(file => {
+        formData.append('files[]', file)
+      })
+      formData.append('id', cachedId.value)
+      if(!isConfirmDeleteFile.value) {
+        await store.dispatch('opcrvp/UNPUBLISH', { payload: formData })
+        await cancelUpload()
+      }else {
+        store.commit('opcrvp/SET_STATE', { loading: true })
+
+        await cancelUpload()
+        await onCloseList()
+
+        await updateFile(formData).then(response => {
+          if(response) {
+            store.dispatch('opcrvp/FETCH_LIST').then(() => {
+              const { data } = response
+              viewUploadedList(data) // open List of Uploaded Files Modal
+            })
+            notification.success({
+              message: 'Success',
+              description: 'File was deleted successfully',
+              })
+            store.commit('opcrvp/SET_STATE', { loading: false })
+          }
+        })
+      }
+    }
+
+    const handleCancelUpload = () => {
+      if(isConfirmDeleteFile.value) {
+        uploadedListState(true)
+      }
+      cancelUpload()
+    }
+
+    const closeListModal = () => {
+      if(!isConfirmDeleteFile.value) {
+        onCloseList()
+      } else {
+        uploadedListState(false)
+      }
     }
 
     return {
@@ -112,14 +181,23 @@ export default defineComponent({
       loading,
       fileList,
 
+      isUploadedViewed,
+      viewedForm,
+
       publish,
       viewPdf,
       uploadFile,
+      handleCancelUpload,
+      closeListModal,
 
       unpublish,
       addUploadItem,
       removeFile,
       cancelUpload,
+      openUploadOnDelete,
+
+      viewUploadedList,
+      onCloseList,
     }
   },
 })

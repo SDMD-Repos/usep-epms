@@ -34,6 +34,7 @@ import { uploadedListColumns } from '@/services/columns'
 import { DeleteOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
+  name: 'UploadedListModal',
   components: { DeleteOutlined },
   props: {
     modalState: Boolean,

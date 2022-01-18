@@ -1,45 +1,25 @@
 <template>
   <div>
-    <div class="viewer__loading" v-if="loading">
-      <img class="loading_img" :src="`${imagesPath}USeP Logo.png`" alt="USeP Logo" height="300">
-    </div>
     <div ref="pdfContainer" style="height: 100vh;">
       <div id="viewer"></div>
     </div>
   </div>
 </template>
 <script>
-import { fetchPdfData, viewUploadedFile } from '@/services/api/mainForms/aapcr'
-import { renderPdf } from '@/services/api/mainForms/opcrvp'
 import { mapState } from 'vuex'
-import NProgress from 'nprogress'
 
 export default {
-  props: {
-    formId: {
-      type: String,
-      default: "",
-    },
-    id: {
-      type: String,
-      default: "",
-    },
-    documentName: {
-      type: String,
-      default: "",
-    },
-    fromUploaded: Boolean,
-  },
   data() {
     return {
       adobeApiReady: false,
       previewFilePromise: null,
-      loading: false,
     }
   },
   computed: {
     ...mapState({
       imagesPath: state => state.imagesPath,
+      fileUrl: state => state.aapcr.fileUrl,
+      documentName: state => state.aapcr.documentName,
     }),
   },
   mounted() {
@@ -51,75 +31,62 @@ export default {
       })
     }
     this.initializePdf()
+    const { fileUrl, documentName } = this
+    window.onbeforeunload = function() {
+      localStorage.setItem('pdf.document.url', fileUrl)
+      localStorage.setItem('pdf.document.name', documentName)
+    }
   },
   methods: {
-    nextPage() {
-      this.previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.getCurrentPage()
-            .then(currentPage => apis.gotoLocation(currentPage + 1))
-            .catch(error => console.error(error))
-        })
-      })
-    },
-    previousPage() {
-      this.previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.getCurrentPage()
-            .then(currentPage => {
-              if (currentPage > 1) {
-                return apis.gotoLocation(currentPage - 1)
-              }
-            })
-            .catch(error => console.error(error))
-        })
-      })
-    },
-    zoomIn() {
-      this.previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.getZoomAPIs().zoomIn()
-            .catch(error => console.error(error))
-        })
-      })
-    },
-    zoomOut() {
-      this.previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.getZoomAPIs().zoomOut()
-            .catch(error => console.error(error))
-        })
-      })
-    },
+    // nextPage() {
+    //   this.previewFilePromise.then(adobeViewer => {
+    //     adobeViewer.getAPIs().then(apis => {
+    //       apis.getCurrentPage()
+    //         .then(currentPage => apis.gotoLocation(currentPage + 1))
+    //         .catch(error => console.error(error))
+    //     })
+    //   })
+    // },
+    // previousPage() {
+    //   this.previewFilePromise.then(adobeViewer => {
+    //     adobeViewer.getAPIs().then(apis => {
+    //       apis.getCurrentPage()
+    //         .then(currentPage => {
+    //           if (currentPage > 1) {
+    //             return apis.gotoLocation(currentPage - 1)
+    //           }
+    //         })
+    //         .catch(error => console.error(error))
+    //     })
+    //   })
+    // },
+    // zoomIn() {
+    //   this.previewFilePromise.then(adobeViewer => {
+    //     adobeViewer.getAPIs().then(apis => {
+    //       apis.getZoomAPIs().zoomIn()
+    //         .catch(error => console.error(error))
+    //     })
+    //   })
+    // },
+    // zoomOut() {
+    //   this.previewFilePromise.then(adobeViewer => {
+    //     adobeViewer.getAPIs().then(apis => {
+    //       apis.getZoomAPIs().zoomOut()
+    //         .catch(error => console.error(error))
+    //     })
+    //   })
+    // },
     initializePdf() {
-      const { id, documentName, formId, fromUploaded } = this
-      if (!this.adobeApiReady) {
-        return
+      if (!this.fileUrl) {
+        this.$store.commit('aapcr/SET_STATE', {
+          fileUrl: localStorage.getItem('pdf.document.url'),
+          documentName: localStorage.getItem('pdf.document.name'),
+        })
       }
-      this.loading = true
-      NProgress.start()
-      let renderer;
-      if(formId === 'aapcr') {
-        if(fromUploaded) {
-          renderer = viewUploadedFile(id)
-        } else {
-          renderer = fetchPdfData(id, documentName)
-        }
-      } else if (formId === 'opcrvp') {
-        renderer = renderPdf(id)
-      }
-      console.log(renderer)
-      renderer.then(response => {
-        if (response) {
-          const blob = new Blob([response], { type: 'application/pdf' })
-          const fileUrl = window.URL.createObjectURL(blob)
-          this.renderPdf(fileUrl, documentName)
-        }
-        this.loading = false
-        NProgress.done()
-      })
+      this.renderPdf()
     },
-    renderPdf(url, fileName) {
+    renderPdf() {
+      const { fileUrl, documentName } = this
       const previewConfig = {
         defaultViewMode: 'FIT_WIDTH',
         showAnnotationTools: false,
@@ -132,14 +99,16 @@ export default {
       this.previewFilePromise = adobeDCView.previewFile({
         content: {
           location: {
-            url: url,
+            url: fileUrl,
           },
         },
         metaData: {
-          fileName: fileName,
-          id: fileName,
+          fileName: documentName,
+          id: documentName,
         },
       }, previewConfig)
+      localStorage.removeItem('pdf.document.url')
+      localStorage.removeItem('pdf.document.name')
     },
   },
 }
@@ -148,14 +117,5 @@ export default {
 html, body {
   height: 100%;
   margin: 0;
-}
-
-.viewer__loading {
-  position: fixed;
-  width: 50px;
-  height: 50px;
-  top: 30%;
-  left: 42%;
-  margin: -25px 0 0 -25px
 }
 </style>

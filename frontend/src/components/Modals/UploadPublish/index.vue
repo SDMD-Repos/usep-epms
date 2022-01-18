@@ -26,7 +26,7 @@ import { CloudUploadOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
 export default defineComponent({
-  name: "UploadPublish",
+  name: "UploadPublishModal",
   components: {
     CloudUploadOutlined,
   },
@@ -45,9 +45,8 @@ export default defineComponent({
       default: () => [],
     },
     isUploading: Boolean,
-    isDeleteUploaded: Boolean,
   },
-  emits: ['add-to-list', 'remove-file', 'upload', 'cancel-upload', 'view-uploaded-list'],
+  emits: ['add-to-list', 'remove-file', 'upload', 'cancel-upload'],
   setup(props, { emit }) {
     let isVisible = ref()
     const fileList = ref([])
@@ -96,9 +95,6 @@ export default defineComponent({
 
     const onClose = () => {
       emit('cancel-upload')
-      if(props.isDeleteUploaded) {
-        emit('view-uploaded-list', true)
-      }
     }
 
     return {

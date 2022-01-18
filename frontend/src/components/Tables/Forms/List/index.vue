@@ -72,6 +72,7 @@ import {
 import { Modal } from "ant-design-vue"
 
 export default defineComponent({
+  name: "FormListTable",
   components: {
     EditOutlined,
     FilePdfOutlined,
