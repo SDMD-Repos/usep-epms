@@ -52,7 +52,7 @@ class AppController extends Controller
 
         $signatory = $this->getSignatories($aapcr, "aapcr");
 
-        $programs = Program::all();
+        $programs = Program::orderBy('category_id', 'asc')->get();
 
         $programsDataSet = array();
 
@@ -66,7 +66,6 @@ class AppController extends Controller
                 'programPercentage' => $program->percentage
             );
         }
-
         $data[0] = array();
 
         $details = $aapcr->details()->where('parent_id', NULL)
