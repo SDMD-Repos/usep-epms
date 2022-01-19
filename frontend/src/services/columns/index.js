@@ -5,7 +5,7 @@ export const formTableColumns = [
     dataIndex: 'subCategory',
     className: 'column-sub-category',
     width: 280,
-    scopedSlots: { customRender: 'subCategory' },
+    slots: { customRender: 'subCategory' },
   },
   {
     title: 'Performance Indicator',
@@ -20,7 +20,7 @@ export const formTableColumns = [
     dataIndex: 'isHeader',
     className: 'column-is-header',
     width: 100,
-    scopedSlots: { customRender: 'isHeader' },
+    slots: { customRender: 'isHeader' },
   },
   {
     title: 'Success Indicators',
@@ -48,7 +48,7 @@ export const formTableColumns = [
         dataIndex: 'measures',
         className: 'column-measures',
         width: 145,
-        scopedSlots: { customRender: 'measures' },
+        slots: { customRender: 'measures' },
       },
     ],
   },
@@ -62,7 +62,7 @@ export const formTableColumns = [
         dataIndex: 'budget',
         className: 'column-in-php',
         width: 150,
-        scopedSlots: { customRender: 'budget' },
+        slots: { customRender: 'budget' },
       },
     ],
   },
@@ -79,7 +79,7 @@ export const formTableColumns = [
     dataIndex: 'cascadingLevel',
     className: 'column-cascading-level',
     width: 190,
-    scopedSlots: { customRender: 'cascadingLevel' },
+    slots: { customRender: 'cascadingLevel' },
   },
   {
     title: 'Office/s Accountable',
@@ -91,7 +91,7 @@ export const formTableColumns = [
         dataIndex: 'implementing',
         className: 'column-implementing',
         width: 350,
-        scopedSlots: { customRender: 'implementing' },
+        slots: { customRender: 'implementing' },
       },
       {
         title: 'Supporting Office',
@@ -99,7 +99,7 @@ export const formTableColumns = [
         dataIndex: 'supporting',
         className: 'column-supporting',
         width: 350,
-        scopedSlots: { customRender: 'supporting' },
+        slots: { customRender: 'supporting' },
       },
     ],
   },
@@ -117,7 +117,7 @@ export const formTableColumns = [
     fixed: 'right',
     className: 'column-action',
     width: 100,
-    scopedSlots: { customRender: 'action' },
+    slots: { customRender: 'action' },
   },
 ]
 

@@ -1,0 +1,33 @@
+@import '@/mixins.scss';
+
+th.column-category,
+th.column-sub-category,
+th.column-pi-name,
+th.column-is-header,
+td.column-is-header,
+th.column-success-indicator,
+th.column-target,
+th.column-target-year,
+th.column-measures,
+th.column-allocated-budget,
+th.column-in-php,
+th.column-targets-basis,
+th.column-cascading-level,
+th.column-office-accountable,
+th.column-implementing,
+th.column-supporting,
+th.column-other-remarks,
+th.column-action,
+td.column-action,
+th.column-year,
+th.column-document-name,
+th.column-created-at,
+td.column-created-at,
+th.column-published-date,
+td.column-published-date,
+th.column-status,
+td.column-status,
+th.column-count,
+td.column-count {
+  text-align: center !important;
+}

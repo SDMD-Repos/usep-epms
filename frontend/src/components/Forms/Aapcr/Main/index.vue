@@ -9,7 +9,7 @@
     <div class="mt-4">
       <a-collapse v-model:activeKey="activeKey" accordion>
         <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-
+          <indicator-component :function-id="category.id" :form-id="formId"/>
         </a-collapse-panel>
       </a-collapse>
     </div>
@@ -18,9 +18,11 @@
 <script>
 import { computed, defineComponent, ref, onMounted } from "vue";
 import { useStore } from 'vuex'
+import IndicatorComponent from './partials/items'
 
 export default defineComponent({
   name: "AAPCRForm",
+  components: { IndicatorComponent },
   props: {
     formId: { type: String, default: '' },
   },
