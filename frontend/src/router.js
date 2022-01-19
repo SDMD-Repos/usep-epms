@@ -62,13 +62,16 @@ const router = createRouter({
 
         // Main Forms
         {
+          path: '/form/:formId',
+          name: 'main.form',
+          props: true,
+          component: () => import('./views/forms/main'),
+        },
+        {
           path: '/list/:formId',
           name: 'form.list',
           props: true,
-          meta: {
-            title: storeState.state.settings.tabTitle,
-          },
-          component: () => import('./views/forms/list.vue'),
+          component: () => import('./views/forms/list'),
         },
 
         // VB:REPLACE-END:ROUTER-CONFIG

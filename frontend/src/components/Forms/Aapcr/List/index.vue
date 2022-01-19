@@ -37,7 +37,7 @@ export default defineComponent({
   props: {
     formId: { type: String, default: '' },
   },
-  setup(props) {
+  setup() {
     const PAGE_TITLE = 'AAPCR List'
 
     const store = useStore()

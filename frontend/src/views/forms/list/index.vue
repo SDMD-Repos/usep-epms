@@ -9,8 +9,8 @@
 <script>
 import { defineComponent, ref, watch, onMounted } from "vue"
 import { useRoute } from 'vue-router'
-import AapcrList from '@/components/Forms/Aapcr/aapcrList'
-import VpOpcrList from '@/components/Forms/Vpopcr/list'
+import AapcrList from '@/components/Forms/Aapcr/List'
+import VpOpcrList from '@/components/Forms/Vpopcr/List'
 
 export default defineComponent({
   components: {
