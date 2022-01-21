@@ -9,7 +9,8 @@
     <div class="mt-4">
       <a-collapse v-model:activeKey="activeKey" accordion>
         <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-          <indicator-component :function-id="category.id" :form-id="formId"/>
+          <indicator-component
+            :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"/>
         </a-collapse-panel>
       </a-collapse>
     </div>
@@ -34,6 +35,8 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const activeKey = ref('0')
+    const dataSource = ref([])
+    const targetsBasisList = ref([])
 
     // COMPUTED
     const years = computed(() => {
@@ -51,12 +54,24 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('formManager/FETCH_FUNCTIONS')
+      initializeFormFields()
     })
+
+    // METHODS
+    const initializeFormFields = async () => {
+      // formLoading.value = true
+      await store.dispatch('formManager/FETCH_FUNCTIONS')
+      await store.dispatch('formManager/FETCH_SUB_CATEGORIES')
+      await store.dispatch('formManager/FETCH_MEASURES')
+      await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
+      // formLoading.value = false
+    }
 
     return {
       year,
       activeKey,
+      dataSource,
+      targetsBasisList,
 
       years,
       categories,
@@ -64,3 +79,6 @@ export default defineComponent({
   },
 })
 </script>
+<style lang="scss">
+@import "@/components/Forms/style.module.scss";
+</style>

@@ -40,7 +40,7 @@
         </a-menu-item> -->
         <a-menu-divider />
         <a-menu-item>
-          <a href="javascript: void(0);" @click="logout">
+          <a @click="logout">
             <i class="fe fe-log-out mr-2" />
             {{ $t('topBar.profileMenu.logout') }}
           </a>

@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import moment from 'moment'
 
-export const useViewPublishedFiles = args => {
+export const useViewPublishedFiles = () => {
   const store = useStore()
 
   const data = ref({
