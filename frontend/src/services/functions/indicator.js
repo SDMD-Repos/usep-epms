@@ -59,6 +59,8 @@ const defaultAapcrFormData = {
 
 export const useDefaultFormData = formId => {
   const defaultData = ref({})
+  const rules = ref({})
+
   switch (formId) {
     case 'aapcr':
       defaultData.value = defaultAapcrFormData

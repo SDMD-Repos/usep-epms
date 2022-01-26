@@ -10,7 +10,8 @@
       <a-collapse v-model:activeKey="activeKey" accordion>
         <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
           <indicator-component
-            :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"/>
+            :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
+            :categories="categories" :year="year"/>
         </a-collapse-panel>
       </a-collapse>
     </div>
