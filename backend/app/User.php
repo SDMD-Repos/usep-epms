@@ -33,4 +33,11 @@ class User extends Authenticatable
     protected $keyType = 'string';
 
     public $incrementing = false;
+
+    public function accessrights()
+    {
+        return $this->belongsToMany('App\AccessRight', 'user_access_rights', 'user_id', 'access_right_id')
+            ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
+    }
+
 }

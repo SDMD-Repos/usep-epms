@@ -134,6 +134,14 @@ Route::group([
 });
 
 Route::group([
+    'prefix' => 'system',
+    'middleware' => 'auth:api'
+], function() {
+    Route::get('/permission', 'Permission\PermissionController@detailsPermission');
+    Route::post('/save-permission', 'Permission\PermissionController@savePermission');
+});
+
+Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
 ], function() {

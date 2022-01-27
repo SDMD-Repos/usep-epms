@@ -101,6 +101,31 @@ const router = createRouter({
       ],
     },
 
+      // System Admin
+      {
+        path: '/system',
+        name: 'systemComponent',
+        // VB:REPLACE-NEXT-LINE:ROUTER-REDIRECT
+        redirect: 'system/admin',
+        component: MainLayout,
+        meta: {
+          authRequired: true,
+          hidden: true,
+        },
+        children: [
+          {
+            path: '/system/admin/permisson',
+            name: 'systemAdmin',
+            props: true,
+            meta: {
+              title: 'Permission',
+            },
+            component: () => import('./views/system/admin'),
+          },
+        ],
+      },
+  
+
     // System Pages
     {
       path: '/auth',
