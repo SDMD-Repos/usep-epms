@@ -25,15 +25,10 @@
           <span class="required-indicator" v-if="drawerId !== 'support_functions'">Sub Category</span>
         </template>
         <a-tree-select
-          v-model:value="form.subCategory"
-          style="width: 100%"
+          v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories"
-          placeholder="Select"
-          :replace-fields="{ title: 'name', value: 'id',}"
-          allow-clear
-          tree-default-expand-all
-          label-in-value
+          :tree-data="subCategories" :replace-fields="{ title: 'name', value: 'id',}"
+          allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
         ></a-tree-select>
@@ -43,7 +38,8 @@
         <template #label>
           <span class="required-indicator">Performance Indicator</span>
         </template>
-        <a-textarea v-model:value="form.name" auto-size />
+        <a-textarea v-model:value="form.name" auto-size
+                    @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
       <a-form-item label="Header PI?" v-bind="validateInfos.isHeader">
@@ -59,14 +55,16 @@
         <a-form-item v-bind="validateInfos.target">
           <template #label><span class="required-indicator">Target</span></template>
 
-          <a-input v-model:value="form.target" />
+          <a-input v-model:value="form.target"
+                   @blur="validate('target', { trigger: 'blur' }).catch(() => {})"/>
         </a-form-item>
 
         <a-form-item v-bind="validateInfos.measures">
           <template #label><span class="required-indicator">Measures</span></template>
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                    style="width: 100%" label-in-value allow-clear >
+                    style="width: 100%" label-in-value allow-clear
+                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
             <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
               {{ measure.name }}
             </a-select-option>
@@ -84,10 +82,9 @@
           <template #label><span class="required-indicator">Targets Basis</span></template>
 
           <a-auto-complete
-            v-model:value="form.targetsBasis"
-            :options="targetsBasisList"
-            :filter-option="filterBasisOption"
+            v-model:value="form.targetsBasis" :options="targetsBasisList" :filter-option="filterBasisOption"
             :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
+            @blur="validate('targetsBasis', { trigger: 'blur' }).catch(() => {})"
           />
         </a-form-item>
 
@@ -95,7 +92,8 @@
           <template #label><span class="required-indicator">Casading Level</span></template>
 
           <a-select v-model:value="form.cascadingLevel" placeholder="Select" style="width: 100%"
-                    label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader">
+                    label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
+                    @blur="validate('cascadingLevel', { trigger: 'blur' }).catch(() => {})">
             <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
               {{ levelItem.name }}
             </a-select-option>
@@ -108,17 +106,10 @@
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.implementing"
-                style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                :tree-data="officesList"
-                placeholder="Select an office/s"
-                tree-node-filter-prop="title"
-                :show-checked-strategy="SHOW_PARENT"
-                :max-tag-count="6"
-                :disabled="form.implementing.length > 0"
-                allow-clear
-                tree-checkable
-                label-in-value
+                style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
+                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing.length > 0"
+                allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'implementing') }" />
             </a-col>
             <a-col :span="2">
@@ -155,23 +146,15 @@
           </div>
         </div>
 
-        <a-form-item v-bind="validateInfos.supporting">
-          <template #label><span class="required-indicator">Supporting Office</span></template>
+        <a-form-item label="Supporting Office">
           <a-row :gutter="0">
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.supporting"
-                style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                :tree-data="officesList"
-                placeholder="Select an office/s"
-                tree-node-filter-prop="title"
-                :show-checked-strategy="SHOW_PARENT"
-                :max-tag-count="6"
-                :disabled="form.supporting.length > 0"
-                allow-clear
-                tree-checkable
-                label-in-value
+                style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
+                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting.length > 0"
+                allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'supporting') }" />
             </a-col>
             <a-col :span="2">
@@ -221,13 +204,8 @@
       </a-button>
       <template v-else>
         <a-popconfirm
-          title="Create a new parent PI?"
-          placement="top"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="resetFormData(1)"
-          @cancel="resetFormData(0)"
-        >
+          title="Create a new parent PI?" placement="top" ok-text="Yes" cancel-text="No"
+          @confirm="resetFormData(1)" @cancel="resetFormData(0)" >
           <a-button :style="{ marginRight: '8px' }" :loading="isSubmmiting" >
             Cancel
           </a-button>
@@ -238,13 +216,11 @@
   </a-drawer>
 </template>
 <script>
-import { defineComponent, ref, watch, computed, reactive, onMounted, createVNode } from "vue"
-import { useStore} from "vuex"
-import { TreeSelect } from "ant-design-vue"
-import { Modal, Form } from "ant-design-vue"
-import { CheckOutlined, EditOutlined, DeleteFilled, ExclamationCircleOutlined } from '@ant-design/icons-vue'
-
-const useForm = Form.useForm
+import { defineComponent, ref, watch, computed, onMounted  } from "vue"
+import { useStore } from "vuex"
+import { TreeSelect} from "ant-design-vue"
+import { useFormFields } from '@/services/functions/form/main'
+import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: "AapcrFormDrawer",
@@ -256,6 +232,8 @@ export default defineComponent({
     targetsBasisList: { type: Array, default: () => { return [] }},
     categories: { type: Array, default: () => { return [] }},
     currentYear: { type: Number, default: new Date().getFullYear() },
+    validate: { type: Function, default: () => {} },
+    validateInfos: { type: Object, default: () => { return {} }},
   },
   emits: ['close-drawer', 'toggle-is-header'],
   setup(props, { emit }) {
@@ -265,24 +243,6 @@ export default defineComponent({
     const config = ref({})
     const isSubmmiting = ref(false)
     const form = ref({})
-    const storedOffices = ref({ implementing: [], supporting: [] })
-    const cachedOffice = ref({ implementing: [], supporting: [] })
-
-    const rules = reactive({
-      subCategory: [
-        { validator: subCategoryValidator, trigger: 'blur' },
-        { type: 'object' },
-      ],
-      name: [{ required: true, message: 'This field is required' }],
-      target: [{ validator: validateNonHeader, trigger: 'blur' }],
-      measures: [{ validator: validateNonHeader, trigger: 'blur' }],
-      targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
-      cascadingLevel: [{ validator: validateNonHeader, trigger: 'blur' }],
-      implementing: [
-        { validator: validateNonHeader, trigger: 'blur' },
-        { type: 'array' },
-      ],
-    })
 
     // STATIC DATA
     const SHOW_PARENT = TreeSelect.SHOW_PARENT
@@ -310,32 +270,11 @@ export default defineComponent({
       onLoad()
     })
 
-    // VALIDATORS
-    const { resetFields, validate, validateInfos } = useForm(form, rules)
-
-    const validateNonHeader = (rule, value) => {
-      if (!form.value.isHeader) {
-        if (value === '' || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
-          if (rule.field === 'implementing' && form.value.options.implementing.length) {
-            return Promise.reject('Please click the check icon to save the data')
-          } else {
-            return Promise.reject('This field is required')
-          }
-        } else {
-          return Promise.resolve()
-        }
-      } else {
-        return Promise.resolve()
-      }
-    }
-
-    const subCategoryValidator = (rule, value) => {
-      if ((props.drawerId !== 'support_functions') && value === null) {
-        return Promise.reject('Please select at least one')
-      } else {
-        return Promise.resolve()
-      }
-    }
+    const {
+      // DATA
+      // METHODS
+      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
+    } = useFormFields(form)
 
     // METHODS
     const onLoad = () => {
@@ -351,104 +290,34 @@ export default defineComponent({
       store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 
-    const changeNullValue = (value, label) => {
-      if (typeof value === 'undefined' || value === 0) {
-        form.value[label] = null
-      }
-    }
-
-    const filterBasisOption = (input, option) => {
-      return (
-        option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
-      )
-    }
-
     const toggleIsHeader = checked => {
       if(checked) {
         emit('toggle-is-header')
       }
     }
 
-    const onOfficeChange = (value, label, extra, field) => {
-      storedOffices.value[field] = []
-      const { allCheckedNodes } = extra
-      if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
-        allCheckedNodes.forEach(item => {
-          const { dataRef } = (typeof item.node !== 'undefined') ? item.node.props : item.data.props
-          storedOffices.value[field].push(dataRef)
-        })
-      }
-    }
-
-    const deleteOfficeItem = (field, index) => {
-      Modal.confirm({
-        title: () => 'Are you sure you want to delete this?',
-        icon: () => createVNode(ExclamationCircleOutlined),
-        content: () => '',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          form.value[field].splice(index, 1)
-        },
-        onCancel() {},
-      })
-    }
-
-    const saveOfficeList = field => {
-      const list = storedOffices.value[field]
-      form.value[field] = mappedOfficeList(list, field)
-      form.value.options[field] = []
-      storedOffices.value[field] = []
-      if (cachedOffice.value[field].length) {
-        cachedOffice.value[field] = []
-      }
-    }
-
-    const updateOfficeList = field => {
-      form.value.options[field] = form.value[field]
-      cachedOffice.value[field] = form.value[field]
-      storedOffices.value[field] = form.value[field]
-      form.value[field] = []
-    }
-
-    const mappedOfficeList = (list, field) => {
-      const cascadeTo = field === 'implementing' ? 'core_functions' : 'support_functions'
-      return list.map(item => {
-        const container = {}
-        let tempCascadeTo = ''
-        container.value = item.value
-        container.label = typeof item.title !== 'undefined' ? item.title : item.label
-        if (typeof item.children !== 'undefined') {
-          container.children = true
-        } else {
-          if (typeof item.isGroup === 'undefined') {
-            container.acronym = item.acronym
-          }
-          container.pId = item.pId
-        }
-        const hasCached = cachedOffice.value[field].filter(i => i.value === item.value)
-        if (hasCached.length) {
-          tempCascadeTo = hasCached[0].cascadeTo
-        } else if (typeof (item.cascadeTo) !== 'undefined' && item.cascadeTo) {
-          tempCascadeTo = item.cascadeTo
-        } else {
-          tempCascadeTo = cascadeTo
-        }
-        container.cascadeTo = tempCascadeTo
-        if (typeof item.isGroup !== 'undefined') {
-          container.isGroup = item.isGroup
-        }
-        return container
-      })
-    }
-
     const resetFormData = isNewIndicator => {
       emit('close-drawer', isNewIndicator)
     }
 
-    const validateFields = () => {
-      console.log('validated')
+    const validateFields = async () => {
+      isSubmmiting.value = true
+      /*const tempImplementing = await mappedOfficeList(form.value.implementing, 'implementing')
+      const tempSupporting = await mappedOfficeList(form.value.supporting, 'supporting')
+      form.value.implementing = tempImplementing
+      form.value.supporting = tempSupporting*/
+
+      await props.validate()
+        .then(() => {
+          isSubmmiting.value = !isSubmmiting.value
+          console.log('success', form.value)
+        })
+        .catch(err => {
+          isSubmmiting.value = !isSubmmiting.value
+          console.log('error', err);
+        });
     }
+
 
     return {
       SHOW_PARENT,
@@ -465,15 +334,15 @@ export default defineComponent({
       cascadingList,
       officesList,
 
-      validateInfos,
-
+      // useFormFields
       changeNullValue,
       filterBasisOption,
-      toggleIsHeader,
       onOfficeChange,
-      deleteOfficeItem,
       saveOfficeList,
       updateOfficeList,
+      deleteOfficeItem,
+
+      toggleIsHeader,
       resetFormData,
       validateFields,
     }

@@ -10,13 +10,14 @@
       <indicator-table :form-id="formId" @open-drawer="openDrawer"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
-                             :target-basis-list="targetsBasisList" :categories="categories" :current-year="year"
-                             @toggle-is-header="resetFormAsHeader" @close-drawer="closeDrawer"/>
+                         :target-basis-list="targetsBasisList" :categories="categories" :current-year="year"
+                         :validate="validate" :validate-infos="validateInfos"
+                         @toggle-is-header="resetFormAsHeader" @close-drawer="closeDrawer"/>
     </div>
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, onMounted } from "vue"
+import {computed, defineComponent, ref, reactive, onMounted} from "vue"
 import { useStore } from 'vuex'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
@@ -52,12 +53,14 @@ export default defineComponent({
       drawerConfig,
       openDrawer, resetDrawerSettings } = useDrawerSettings()
 
-    const { formData, resetFormAsHeader } = useDefaultFormData(props.formId)
+    const { formData, rules, resetFormAsHeader } = useDefaultFormData(props)
 
     // EVENTS
     onMounted(() => {
       store.dispatch('formManager/FETCH_PROGRAMS')
     })
+
+    const { resetFields, validate, validateInfos } = useForm(formData, rules)
 
     // METHODS
     const loadPIs = e => {
@@ -66,8 +69,9 @@ export default defineComponent({
       }
     }
 
-    const closeDrawer = () => {
-      resetDrawerSettings()
+    const closeDrawer = async () => {
+      await resetDrawerSettings()
+      await resetFields()
     }
 
     return {
@@ -82,6 +86,9 @@ export default defineComponent({
       // useDefaultFormData
       formData,
       resetFormAsHeader,
+
+      validateInfos,
+      validate,
 
       loadPIs,
       closeDrawer,

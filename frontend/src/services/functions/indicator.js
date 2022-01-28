@@ -57,24 +57,78 @@ const defaultAapcrFormData = {
   otherRemarks: '',
 }
 
-export const useDefaultFormData = formId => {
+export const useDefaultFormData = props => {
   const defaultData = ref({})
-  const rules = ref({})
+  let rules
 
-  switch (formId) {
+  switch (props.formId) {
     case 'aapcr':
       defaultData.value = defaultAapcrFormData
   }
-  const defaultFormData = () => (defaultData.value)
 
-  const formData = reactive(defaultFormData())
+  const formData = reactive(defaultData.value)
+
+  // VALIDATORS
+  let validateNonHeader = async (rule, value) => {
+    if (!formData.isHeader) {
+      if (value === '' || value === null || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
+        if((rule.field === 'implementing' && formData.options.implementing.length) || (rule.field === 'supporting' && formData.options.supporting.length)) {
+          return Promise.reject('Please click the check icon to save the data')
+        } else {
+          if(rule.field === 'supporting') {
+            return Promise.resolve()
+          }
+
+          return Promise.reject('This field is required')
+        }
+      } else {
+        return Promise.resolve()
+      }
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  let subCategoryValidator = async (rule, value) => {
+    if ((props.functionId !== 'support_functions') && value === null) {
+      return Promise.reject('Please select at least one')
+    } else {
+      console.log('resolve sub cateog')
+      return Promise.resolve()
+    }
+  }
+
+  switch (props.formId) {
+    case 'aapcr':
+      rules = reactive({
+        subCategory: [
+          { validator: subCategoryValidator },
+          { type: 'object' },
+        ],
+        name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
+        target: [{ validator: validateNonHeader, trigger: 'blur'}],
+        measures: [{ validator: validateNonHeader, trigger: 'blur'}],
+        targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
+        cascadingLevel: [{ validator: validateNonHeader, trigger: 'blur'}],
+        implementing: [
+          { validator: validateNonHeader, trigger: 'blur'},
+          { type: 'array' },
+        ],
+        supporting: [
+          { validator: validateNonHeader, trigger: 'blur'},
+          { type: 'array' },
+        ],
+      })
+  }
+
+  // const defaultFormData = () => (defaultData.value)
 
   const resetFormData = () => {
-    Object.assign(formData, defaultFormData())
+    // Object.assign(formData, defaultFormData())
   }
 
   const resetFormAsHeader = () => {
-    switch (formId) {
+    switch (props.formId) {
       case 'aapcr':
         formData.cascadingLevel = null
     }
@@ -92,6 +146,7 @@ export const useDefaultFormData = formId => {
 
   return {
     formData,
+    rules,
 
     resetFormData,
     resetFormAsHeader,
