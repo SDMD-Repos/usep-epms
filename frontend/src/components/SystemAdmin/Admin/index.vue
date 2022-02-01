@@ -23,10 +23,12 @@
               show-search
               allow-clear
               label-in-value
+              @change="getAccessList($event, index)"
             />
         <a-table  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data" :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" />
       </a-spin>
-    <a-button type="primary" @click="onOk" >Save</a-button>
+    <a-button v-if="updateBtn" type="primary" @click="onSave" >Save</a-button>
+    <a-button v-else type="primary" @click="onUpdate" >Update</a-button>
     </div>
     
 </template>
@@ -34,6 +36,8 @@
 import { computed, defineComponent, onMounted, ref  } from 'vue';
 import { useStore } from 'vuex'
 import { getPersonnelByOffice } from '@/services/api/hris';
+import { getAccessByUser } from '@/services/api/system/permission';
+import { stubFalse } from 'lodash';
 
 const columns = [
   {
@@ -53,7 +57,10 @@ export default defineComponent({
     const officeId = ref(undefined)
     const personnelId = ref(undefined)
     const memberList = ref([])
+    const accessList = ref([])
     const selectedRowKeys = ref([])
+    const updateBtn = ref(true)
+
     let formLoading = ref(false)
     const onSelectChange = selected => {
       selectedRowKeys.value = selected;
@@ -73,6 +80,26 @@ export default defineComponent({
       }
     }
 
+     const getAccessList = (personnelId, index) => {
+       accessList.value = []
+      if (personnelId) {
+        formLoading.value = true
+        const id = personnelId.value
+        getAccessByUser(id).then(response => {
+          if (response.status) {
+            response.accessLists.forEach((accessList) =>{
+            selectedRowKeys.value.push(accessList.access_right_id);
+            })
+            updateBtn.value = false ;
+          }else{
+            selectedRowKeys.value = [];
+            updateBtn.value = true ;
+          }
+          formLoading.value = false
+        })
+      }
+    }
+
     onMounted(() => {
        let params = {
         selectable: {
@@ -86,16 +113,19 @@ export default defineComponent({
       store.dispatch('system/FETCH_PERMISSION')
     })
 
-    const onOk = () => {
-        //  console.log(selectedRowKeys.value)
-        //  console.log(personnelId.value)
+    const onSave = () => {
          let params = {
                   personnelId: personnelId.value.value,
                   listPermissions : selectedRowKeys.value,
          }
         store.dispatch('system/SAVE_PERMISSION',{ payload: params })
-
-
+    }
+    const onUpdate = () => {
+         let params = {
+                  personnelId: personnelId.value.value,
+                  listPermissions : selectedRowKeys.value,
+         }
+        store.dispatch('system/UPDATE_PERMISSION',{ payload: params })
     }
 
     return {
@@ -109,7 +139,11 @@ export default defineComponent({
       selectedRowKeys,
       onSelectChange,
       formLoading,
-      onOk,
+      onSave,
+      getAccessList,
+      accessList,
+      updateBtn,
+      onUpdate,
     };
   },
 });

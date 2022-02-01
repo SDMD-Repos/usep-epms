@@ -13,6 +13,7 @@ use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
 use Illuminate\Support\Facades\DB;
 
+
 class PermissionController extends Controller
 {
     use OfficeTrait,FormTrait;
@@ -66,7 +67,7 @@ class PermissionController extends Controller
                                                         ])->get();
 
                                                         // dd($accessList.value);
-                                                        $accessAllLists = [];                      
+                $accessAllLists = [];                      
                 foreach ($accessLists as $list){
                             array_push($accessAllLists,$list['access_right_id']);
                 }
@@ -81,18 +82,104 @@ class PermissionController extends Controller
                         $userAccessRights->user_id = (string)$details->UserID;
                         $userAccessRights->access_right_id = $permission;
                         $userAccessRights->create_id = $this->login_user->pmaps_id;
-                        $userAccessRights->save();
+                        $userAccessRights->delete();
                     }
                     array_push($currentAccessList,$permission);
-            }
+                }
 
-            return response()->json("Access rights have been save!", 400);
+            return response()->json("Access rights have been save!", 200);
            
         }catch(\Exception $e){
             return response()->json($e->getMessage());
         }
         
     }
+
+    function fetchPermissionByUser($id, $withHeader=0, $update=0)
+    {   
+        try{
+            $lists = [];
+            
+            $userInfo  = User::where([
+                ['pmaps_id', $id],
+                ])->first();
+
+            $accessLists  = UserAccessRights::where([
+                ['user_id',$userInfo['id']],
+                ])->get();
+            if(count($accessLists)>0){
+                    $status = true;
+            }else{
+                $status = false;
+            }
+
+            return response()->json([
+                    'accessLists' => $accessLists,
+                    'status'=>$status
+                ], 200);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+      
+        
+    }
+
+    function updatePermission(StoreUserPermission $request)
+    {
+        try{
+            $personnelId = (int)$request->personnelId;
+            $listPermissions = $request->listPermissions;
+            $user = User::find($personnelId);
+            // dd($user);
+
+            $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+                "token" => config('services.hris.data'),
+                "pmaps_id" => $personnelId,
+            ]);
+           
+            $obj = json_decode($response->body());
+            $details = $obj[0];
+
+            $userAccessRights = new UserAccessRights();
+            $accessLists  = UserAccessRights::where([
+                                    ['user_id', $details->UserID],
+                                    ])->get();
+            $accessAllListsExist = [];                      
+            $currentList = [];                      
+            foreach ($accessLists as $list){
+                            array_push($accessAllListsExist,$list['access_right_id']);
+            }
+
+            foreach($listPermissions as $permission){
+                if(!in_array($permission,$accessAllListsExist)){
+                    $userAccessRights->user_id = (string)$details->UserID;
+                    $userAccessRights->access_right_id = $permission;
+                    $userAccessRights->create_id = $this->login_user->pmaps_id;
+                    $userAccessRights->save();
+                    array_push($accessAllListsExist,$permission);
+                }
+                array_push($currentList,$permission);
+            }
+
+            $removePermissionList= array_diff($accessAllListsExist,$currentList);
+            foreach($removePermissionList as $removeList){
+                $accessLists  = UserAccessRights::where([
+                    ['user_id', $details->UserID],
+                    ['access_right_id', $removeList]
+                    ])->get();
+                foreach($accessLists as $newList){
+                    $newList->delete();
+                }
+            }
+            
+            return response()->json("Access rights have been save!", 200);
+           
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+        
+    }
+    
 
   
 

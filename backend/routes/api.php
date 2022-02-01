@@ -139,6 +139,9 @@ Route::group([
 ], function() {
     Route::get('/permission', 'Permission\PermissionController@detailsPermission');
     Route::post('/save-permission', 'Permission\PermissionController@savePermission');
+    Route::get('/get-permission-by-user/{id}', 'Permission\PermissionController@fetchPermissionByUser');
+    Route::post('/update-permission', 'Permission\PermissionController@updatePermission');
+   
 });
 
 Route::group([

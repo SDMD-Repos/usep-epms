@@ -5,6 +5,7 @@ import * as system from '@/services/api/system/permission'
 const mapApiProviders = {
     getAllPermissionList: system.getAllPermissionList,
     savePermissionList: system.savePermissionList,
+    updatePermissionList: system.updatePermissionList,
   }
 
 export default {
@@ -45,9 +46,9 @@ export default {
             const savePermissionList = mapApiProviders.savePermissionList
             savePermissionList(payload).then(response => {
               if (response) {
-                const { accessPermission } = response
-                commit('SET_STATE', {
-                  list: accessPermission,
+                  notification.success({
+                  message: 'Success',
+                  description: 'Access Rights was saved successfully',
                 })
               }
               commit('SET_STATE', {
@@ -55,6 +56,24 @@ export default {
               })
             })
           },
+          UDPATE_PERMISSION({ commit }, { payload }) {
+            commit('SET_STATE', {
+              loading: true,
+            })
+            const updatePermissionList = mapApiProviders.updatePermissionList
+            updatePermissionList(payload).then(response => {
+              if (response) {
+                  notification.success({
+                  message: 'Success',
+                  description: 'Access Rights was saved successfully',
+                })
+              }
+              commit('SET_STATE', {
+                loading: false,
+              })
+            })
+          },
+
 
 
     },
