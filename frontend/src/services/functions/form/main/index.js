@@ -13,9 +13,7 @@ export const useFormFields = form => {
   }
 
   const filterBasisOption = (input, option) => {
-    return (
-      option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
-    )
+    return option.value.toUpperCase().indexOf(input.toUpperCase()) >= 0;
   }
 
   const onOfficeChange = (value, label, extra, field) => {

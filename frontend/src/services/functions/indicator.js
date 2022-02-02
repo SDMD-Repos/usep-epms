@@ -170,10 +170,13 @@ export const useFormOperations = () => {
     }else {
       dataSource.value = data
     }
+  }
 
+  const deleteSourceItem = key => {
+    dataSource.value.splice(key, 1)
   }
   const addTargetsBasisItem = data => {
-    targetsBasisList.value.push(data)
+    targetsBasisList.value.push({ value: data })
   }
 
   const updateSourceCount = data => {
@@ -188,5 +191,6 @@ export const useFormOperations = () => {
     updateDataSource,
     addTargetsBasisItem,
     updateSourceCount,
+    deleteSourceItem,
   }
 }

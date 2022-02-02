@@ -29,27 +29,66 @@
         </ul>
       </template>
 
-<!--      <template #budget="{ record }">-->
-<!--        {{ $filters.numbersWithCommasDecimal(record.budget) }}-->
-<!--      </template>-->
+      <template #budget="{ record }">
+        {{ $filters.numbersWithCommasDecimal(record.budget) }}
+      </template>
+
+      <template #cascadingLevel="{ record }">
+        <div v-if="!record.isHeader">
+          {{ record.cascadingLevel.label.children }}
+        </div>
+      </template>
+
+      <template #implementing="{ record }">
+        <ul class="form-ul-list">
+          <li v-for="office in record.implementing" :key="office.key">
+            {{ office.label }}
+          </li>
+        </ul>
+      </template>
+
+      <template #supporting="{ record }">
+        <ul class="form-ul-list">
+          <li v-for="office in record.supporting" :key="office.key">
+            {{ office.label }}
+          </li>
+        </ul>
+      </template>
+
+      <template #action="{ record }">
+        <EditFilled @click="handleEdit(record)"/>
+        <a-divider type="vertical" />
+        <template v-if="record.type === 'pi'">
+          <PlusCircleFilled @click="handleAddSub(record.key)"/>
+          <a-divider type="vertical" />
+        </template>
+        <a-popconfirm
+          title="Are you sure you want to delete this?"
+          @confirm="handleDelete(record)"
+          okText="Yes"
+          cancelText="No"
+        >
+          <DeleteFilled />
+        </a-popconfirm>
+      </template>
     </a-table>
   </div>
 </template>
 <script>
 import { defineComponent } from "vue"
 import { formTableColumns } from '@/services/columns'
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue'
+import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled } from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: "IndicatorListTable",
-  components: { CheckCircleFilled, CloseCircleFilled },
+  components: { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
     itemSource: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
   },
-  emits: ['open-drawer'],
+  emits: ['open-drawer', 'delete-item'],
   setup(props, { emit }) {
 
     //METHODS
@@ -57,10 +96,25 @@ export default defineComponent({
       emit('open-drawer', action)
     }
 
+    const handleEdit = data => {
+
+    }
+
+    const handleAddSub = key => {
+
+    }
+
+    const handleDelete = data => {
+      emit('delete-item', data)
+    }
+
     return {
       formTableColumns,
 
       openDrawer,
+      handleEdit,
+      handleAddSub,
+      handleDelete,
     }
   },
 })

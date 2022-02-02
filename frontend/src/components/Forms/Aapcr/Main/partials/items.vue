@@ -7,10 +7,11 @@
     </a-select>
 
     <div class="mt-4">
-      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :main-category="mainCategory" @open-drawer="openDrawer"/>
+      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :main-category="mainCategory"
+                       @open-drawer="openDrawer" @delete-item="deleteItem"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
-                         :target-basis-list="targetsBasisList" :categories="categories" :current-year="year"
+                         :targets-basis-list="targetsBasisList" :categories="categories" :current-year="year"
                          :validate="validate" :validate-infos="validateInfos"
                          @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @close-drawer="closeDrawer"/>
     </div>
@@ -39,7 +40,7 @@ export default defineComponent({
     targetsBasisList: { type: Array, default: () => { return [] }},
     counter: { type: Number, default: 0 },
   },
-  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source'],
+  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -108,8 +109,6 @@ export default defineComponent({
 
       if (drawerConfig.value.type === 'pi') {
         await emit('update-data-source', { data: newData, isNew: true })
-        await resetFields()
-        console.log('newData', newData)
         if (newData.isHeader) {
           Modal.confirm({
             title: () => 'Do you want to add a sub PI?',
@@ -131,16 +130,15 @@ export default defineComponent({
         if (typeof source[index].children === 'undefined') {
           source[index]['children'] = new Proxy([], {})
         }
-        // target['children'].push(newData)
-        console.log("dataSource.value",dataSource.value)
-        console.log("source",source)
-        // emit('update-data-source', { data: source, isNew: false })
+        target['children'].push(newData)
+        await emit('update-data-source', { data: source, isNew: false })
       }
+
+      await resetFields()
     }
 
     const handleAddSub = key => {
       const newData = dataSource.value.filter(item => key === item.key)[0]
-      console.log(newData)
       formData.subCategory = newData.subCategory
       if (!newData.isHeader) {
         formData.measures = newData.measures
@@ -150,6 +148,22 @@ export default defineComponent({
         formData.supporting = newData.supporting
       }
       openDrawer('newsub', { ...newData })
+    }
+
+    const deleteItem = data => {
+      let deletedData = null
+      if(data.type === 'pi') {
+        const recordKey = dataSource.value.findIndex((record, i) => record.key === data.key)
+        deletedData = dataSource.value[recordKey]
+        emit('delete-source-item', recordKey)
+      }
+
+      if (deletedData) {
+        const { id } = deletedData
+        if (id.toString().indexOf('new') === -1) {
+          emit('add-deleted-item', id)
+        }
+      }
     }
 
     const closeDrawer = async () => {
@@ -177,6 +191,7 @@ export default defineComponent({
       loadPIs,
       addTableItem,
       closeDrawer,
+      deleteItem,
     }
   },
 })

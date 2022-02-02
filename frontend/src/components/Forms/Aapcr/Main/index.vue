@@ -13,7 +13,8 @@
             <indicator-component
               :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
               :categories="categories" :year="year" :counter="counter"
-              @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" />
+              @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
+              @add-deleted-item="addDeletedItem"/>
           </a-collapse-panel>
         </a-collapse>
       </div>
@@ -40,12 +41,13 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const activeKey = ref('0')
+    const deletedItems = ref([])
 
     const {
       // DATA
       dataSource, targetsBasisList, counter,
       // METHODS
-      updateDataSource, addTargetsBasisItem, updateSourceCount } = useFormOperations()
+      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem } = useFormOperations()
 
     // COMPUTED
     const years = computed(() => {
@@ -78,6 +80,10 @@ export default defineComponent({
       // formLoading.value = false
     }
 
+    const addDeletedItem = id => {
+      deletedItems.value.push(id)
+    }
+
     return {
       year,
       activeKey,
@@ -86,6 +92,9 @@ export default defineComponent({
       years,
       categories,
       loading,
+      deletedItems,
+
+      addDeletedItem,
 
       // useFieldOperations
       targetsBasisList,
@@ -94,6 +103,7 @@ export default defineComponent({
       updateDataSource,
       addTargetsBasisItem,
       updateSourceCount,
+      deleteSourceItem,
     }
   },
 })
