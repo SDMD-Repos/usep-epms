@@ -12,7 +12,7 @@ export const useDrawerSettings = () => {
 
   const data = ref(initialData())
 
-  const openDrawer = action => {
+  const openDrawer = (action, parentDetails={}) => {
     switch(action) {
       case "Add":
         data.value = {
@@ -24,6 +24,15 @@ export const useDrawerSettings = () => {
           parentDetails: undefined,
         }
         return false
+      case 'newsub':
+        data.value = {
+          open: true,
+          okText: 'Add Sub PI',
+          modalTitle: 'New Sub PI',
+          updateId: null,
+          type: 'sub',
+          parentDetails: parentDetails,
+        }
     }
   }
 
@@ -38,6 +47,8 @@ export const useDrawerSettings = () => {
     resetDrawerSettings,
   }
 }
+
+/* ------------------------------------------ */
 
 const defaultAapcrFormData = {
   subCategory: null,
@@ -93,7 +104,6 @@ export const useDefaultFormData = props => {
     if ((props.functionId !== 'support_functions') && value === null) {
       return Promise.reject('Please select at least one')
     } else {
-      console.log('resolve sub cateog')
       return Promise.resolve()
     }
   }
@@ -121,12 +131,6 @@ export const useDefaultFormData = props => {
       })
   }
 
-  // const defaultFormData = () => (defaultData.value)
-
-  const resetFormData = () => {
-    // Object.assign(formData, defaultFormData())
-  }
-
   const resetFormAsHeader = () => {
     switch (props.formId) {
       case 'aapcr':
@@ -148,7 +152,41 @@ export const useDefaultFormData = props => {
     formData,
     rules,
 
-    resetFormData,
     resetFormAsHeader,
+  }
+}
+
+/* ------------------------------------------ */
+
+export const useFormOperations = () => {
+  const targetsBasisList = ref([])
+  const counter = ref(0)
+  const dataSource = ref([])
+
+  const updateDataSource = ({data, isNew}) => {
+    if(isNew) {
+      dataSource.value.push(data)
+      updateSourceCount(dataSource.value.length)
+    }else {
+      dataSource.value = data
+    }
+
+  }
+  const addTargetsBasisItem = data => {
+    targetsBasisList.value.push(data)
+  }
+
+  const updateSourceCount = data => {
+    counter.value = data
+  }
+
+  return {
+    dataSource,
+    targetsBasisList,
+    counter,
+
+    updateDataSource,
+    addTargetsBasisItem,
+    updateSourceCount,
   }
 }

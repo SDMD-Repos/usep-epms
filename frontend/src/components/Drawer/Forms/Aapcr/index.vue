@@ -146,7 +146,7 @@
           </div>
         </div>
 
-        <a-form-item label="Supporting Office">
+        <a-form-item label="Supporting Office" v-bind="validateInfos.supporting">
           <a-row :gutter="0">
             <a-col :span="22">
               <a-tree-select
@@ -218,7 +218,7 @@
 <script>
 import { defineComponent, ref, watch, computed, onMounted  } from "vue"
 import { useStore } from "vuex"
-import { TreeSelect} from "ant-design-vue"
+import { TreeSelect, message } from "ant-design-vue"
 import { useFormFields } from '@/services/functions/form/main'
 import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
 
@@ -235,7 +235,7 @@ export default defineComponent({
     validate: { type: Function, default: () => {} },
     validateInfos: { type: Object, default: () => { return {} }},
   },
-  emits: ['close-drawer', 'toggle-is-header'],
+  emits: ['close-drawer', 'toggle-is-header', 'add-table-item'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -272,6 +272,7 @@ export default defineComponent({
 
     const {
       // DATA
+      storedOffices,
       // METHODS
       changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
@@ -309,8 +310,7 @@ export default defineComponent({
 
       await props.validate()
         .then(() => {
-          isSubmmiting.value = !isSubmmiting.value
-          console.log('success', form.value)
+          saveForm()
         })
         .catch(err => {
           isSubmmiting.value = !isSubmmiting.value
@@ -318,6 +318,25 @@ export default defineComponent({
         });
     }
 
+    const saveForm = () => {
+      let msgContent = ''
+      for (let office in storedOffices) {
+        storedOffices[office] = []
+      }
+
+      if (config.value.updateId === null) {
+        emit('add-table-item', form)
+        msgContent = 'Added!'
+      } else {
+        // emit('update-table-item', { formData: form, updateId: config.updateId })
+        // msgContent = 'Updated!'
+      }
+      message.success(msgContent, 2)
+        .then(
+          () => isSubmmiting.value = !isSubmmiting.value,
+          () => {},
+        )
+    }
 
     return {
       SHOW_PARENT,

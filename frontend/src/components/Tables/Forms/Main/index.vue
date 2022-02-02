@@ -1,9 +1,9 @@
 <template>
   <div>
-    <a-table :columns="formTableColumns" size="middle" bordered
+    <a-table :columns="formTableColumns" :data-source="itemSource" size="middle" bordered
              :scroll="{ x: 'calc(2600px + 50%)', y: 600 }" >
       <template #title>
-        <a-button type="primary" @click="openDrawer('Add')">New</a-button>
+        <a-button type="primary" :disabled="Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
       </template>
 
       <template #subCategory="{ record }">
@@ -16,6 +16,22 @@
           <CloseCircleFilled v-else :style="{ fontSize: '18px', color: '#eb2f2f' }" />
         </div>
       </template>
+
+      <template #targetYearColumn>
+        {{ year }}
+      </template>
+
+      <template #measures="{ record }">
+        <ul class="form-ul-list">
+          <li v-for="measure in record.measures" :key="measure.key">
+            {{ measure.label.children }}
+          </li>
+        </ul>
+      </template>
+
+<!--      <template #budget="{ record }">-->
+<!--        {{ $filters.numbersWithCommasDecimal(record.budget) }}-->
+<!--      </template>-->
     </a-table>
   </div>
 </template>
@@ -28,7 +44,10 @@ export default defineComponent({
   name: "IndicatorListTable",
   components: { CheckCircleFilled, CloseCircleFilled },
   props: {
+    year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
+    itemSource: { type: Array, default: () => { return [] }},
+    mainCategory: { type: Object, default: () => { return {} }},
   },
   emits: ['open-drawer'],
   setup(props, { emit }) {

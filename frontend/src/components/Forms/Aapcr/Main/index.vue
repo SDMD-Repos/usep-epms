@@ -1,26 +1,30 @@
 <template>
   <div>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px">
-      <template v-for="(y, i) in years" :key="i">
-        <a-select-option :value="y"> {{ y }} </a-select-option>
-      </template>
-    </a-select>
+    <a-spin :spinning="loading" tip="Initializing form...">
+      <a-select v-model:value="year" placeholder="Select year" style="width: 200px">
+        <template v-for="(y, i) in years" :key="i">
+          <a-select-option :value="y"> {{ y }} </a-select-option>
+        </template>
+      </a-select>
 
-    <div class="mt-4">
-      <a-collapse v-model:activeKey="activeKey" accordion>
-        <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-          <indicator-component
-            :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
-            :categories="categories" :year="year"/>
-        </a-collapse-panel>
-      </a-collapse>
-    </div>
+      <div class="mt-4">
+        <a-collapse v-model:activeKey="activeKey" accordion>
+          <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
+            <indicator-component
+              :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
+              :categories="categories" :year="year" :counter="counter"
+              @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" />
+          </a-collapse-panel>
+        </a-collapse>
+      </div>
+    </a-spin>
   </div>
 </template>
 <script>
 import { computed, defineComponent, ref, onMounted } from "vue";
 import { useStore } from 'vuex'
 import IndicatorComponent from './partials/items'
+import { useFormOperations } from '@/services/functions/indicator'
 
 export default defineComponent({
   name: "AAPCRForm",
@@ -36,8 +40,12 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const activeKey = ref('0')
-    const dataSource = ref([])
-    const targetsBasisList = ref([])
+
+    const {
+      // DATA
+      dataSource, targetsBasisList, counter,
+      // METHODS
+      updateDataSource, addTargetsBasisItem, updateSourceCount } = useFormOperations()
 
     // COMPUTED
     const years = computed(() => {
@@ -51,6 +59,7 @@ export default defineComponent({
     })
 
     const categories = computed(() => store.getters['formManager/functions'])
+    const loading = computed(() => store.getters['formManager/manager'].loading)
 
     // EVENTS
     onMounted(() => {
@@ -65,6 +74,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES')
       await store.dispatch('formManager/FETCH_MEASURES')
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
+      await store.dispatch('formManager/FETCH_PROGRAMS')
       // formLoading.value = false
     }
 
@@ -72,10 +82,18 @@ export default defineComponent({
       year,
       activeKey,
       dataSource,
-      targetsBasisList,
 
       years,
       categories,
+      loading,
+
+      // useFieldOperations
+      targetsBasisList,
+      counter,
+
+      updateDataSource,
+      addTargetsBasisItem,
+      updateSourceCount,
     }
   },
 })

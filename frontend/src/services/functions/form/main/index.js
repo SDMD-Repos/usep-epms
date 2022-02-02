@@ -1,5 +1,5 @@
 import { Modal } from "ant-design-vue";
-import {createVNode, ref} from "vue";
+import { createVNode, ref } from "vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 
 export const useFormFields = form => {

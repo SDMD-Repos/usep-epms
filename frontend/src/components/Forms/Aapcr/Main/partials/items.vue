@@ -7,22 +7,23 @@
     </a-select>
 
     <div class="mt-4">
-      <indicator-table :form-id="formId" @open-drawer="openDrawer"/>
+      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :main-category="mainCategory" @open-drawer="openDrawer"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
                          :target-basis-list="targetsBasisList" :categories="categories" :current-year="year"
                          :validate="validate" :validate-infos="validateInfos"
-                         @toggle-is-header="resetFormAsHeader" @close-drawer="closeDrawer"/>
+                         @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @close-drawer="closeDrawer"/>
     </div>
   </div>
 </template>
 <script>
-import {computed, defineComponent, ref, reactive, onMounted} from "vue"
+import { computed, defineComponent, ref, watch, reactive, onMounted, createVNode } from "vue"
 import { useStore } from 'vuex'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
-import { Form } from 'ant-design-vue'
+import { Form, Modal } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 
 const useForm = Form.useForm
 
@@ -30,19 +31,23 @@ export default defineComponent({
   name: "AapcrItems",
   components: { IndicatorTable, AapcrFormDrawer },
   props: {
-    functionId: { type: String, default: "" },
-    formId: { type: String, default: "" },
-    itemSource: { type: Array, default: () => { return [] }},
-    targetsBasisList: { type: Array, default: () => { return [] }},
-    categories: { type: Array, default: () => { return [] }},
     year: { type: Number, default: new Date().getFullYear() },
+    functionId: { type: String, default: "" },
+    categories: { type: Array, default: () => { return [] }},
+    itemSource: { type: Array, default: () => { return [] }},
+    formId: { type: String, default: "" },
+    targetsBasisList: { type: Array, default: () => { return [] }},
+    counter: { type: Number, default: 0 },
   },
-  setup(props) {
+  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source'],
+  setup(props, { emit }) {
     const store = useStore()
 
     // DATA
     const mainCategory = ref(undefined)
     const displayIndicatorList = ref(0)
+    const count = ref(0)
+    const dataSource = ref([])
 
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
@@ -57,7 +62,12 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_PROGRAMS')
+
+    })
+
+    watch(() => [props.itemSource, props.counter], ([itemSource, counter]) => {
+      dataSource.value = itemSource
+      count.value = counter
     })
 
     const { resetFields, validate, validateInfos } = useForm(formData, rules)
@@ -67,6 +77,79 @@ export default defineComponent({
       if (e !== '' && typeof e !== 'undefined') {
         displayIndicatorList.value = 1
       }
+    }
+
+    const addTableItem = async data => {
+      if (!data.value.isHeader) {
+        const { targetsBasis } = data.value
+        if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && props.targetsBasisList.indexOf(targetsBasis) === -1) {
+          await emit('add-targets-basis-item', targetsBasis)
+        }
+      }
+
+      const key = 'new_' + count.value
+      const newData = {
+        key: key,
+        id: key,
+        type: drawerConfig.value.type,
+        subCategory: data.value.subCategory,
+        program: mainCategory.value.key,
+        name: data.value.name,
+        isHeader: data.value.isHeader,
+        target: data.value.target,
+        measures: data.value.measures,
+        budget: data.value.budget,
+        targetsBasis: data.value.targetsBasis,
+        cascadingLevel: data.value.cascadingLevel,
+        implementing: data.value.implementing,
+        supporting: data.value.supporting,
+        otherRemarks: data.value.otherRemarks,
+      }
+
+      if (drawerConfig.value.type === 'pi') {
+        await emit('update-data-source', { data: newData, isNew: true })
+        await resetFields()
+        console.log('newData', newData)
+        if (newData.isHeader) {
+          Modal.confirm({
+            title: () => 'Do you want to add a sub PI?',
+            icon: () => createVNode(ExclamationCircleOutlined),
+            content: () => '',
+            okText: 'Yes',
+            cancelText: 'No',
+            onOk() {
+              handleAddSub(key)
+            },
+            onCancel() {},
+          })
+        }
+      } else {
+        const { parentDetails } = drawerConfig.value
+        const source = [ ...dataSource.value ]
+        const target = reactive(dataSource.value.filter(item => parentDetails.key === item.key)[0])
+        const index = dataSource.value.findIndex(item => parentDetails.key === item.key)
+        if (typeof source[index].children === 'undefined') {
+          source[index]['children'] = new Proxy([], {})
+        }
+        // target['children'].push(newData)
+        console.log("dataSource.value",dataSource.value)
+        console.log("source",source)
+        // emit('update-data-source', { data: source, isNew: false })
+      }
+    }
+
+    const handleAddSub = key => {
+      const newData = dataSource.value.filter(item => key === item.key)[0]
+      console.log(newData)
+      formData.subCategory = newData.subCategory
+      if (!newData.isHeader) {
+        formData.measures = newData.measures
+        formData.targetsBasis = newData.targetsBasis
+        formData.cascadingLevel = newData.cascadingLevel
+        formData.implementing = newData.implementing
+        formData.supporting = newData.supporting
+      }
+      openDrawer('newsub', { ...newData })
     }
 
     const closeDrawer = async () => {
@@ -89,8 +172,10 @@ export default defineComponent({
 
       validateInfos,
       validate,
+      dataSource,
 
       loadPIs,
+      addTableItem,
       closeDrawer,
     }
   },
