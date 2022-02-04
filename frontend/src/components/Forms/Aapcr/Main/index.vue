@@ -12,24 +12,30 @@
           <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
             <indicator-component
               :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
-              :categories="categories" :year="year" :counter="counter"
+              :categories="categories" :year="year" :counter="counter" :budget-list="budgetList"
               @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
-              @add-deleted-item="addDeletedItem"/>
+              @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" @add-budget-list-item="addBudgetListItem"/>
           </a-collapse-panel>
         </a-collapse>
+      </div>
+
+      <div class="mt-4" v-if="budgetList.length">
+        <budget-list-component :budget-list="budgetList" @delete-budget-item="deleteBudgetItem"/>
       </div>
     </a-spin>
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { useStore } from 'vuex'
 import IndicatorComponent from './partials/items'
+import BudgetListComponent from './partials/budget'
 import { useFormOperations } from '@/services/functions/indicator'
+import { useProgramBudget } from '@/services/functions/form/main'
 
 export default defineComponent({
   name: "AAPCRForm",
-  components: { IndicatorComponent },
+  components: { IndicatorComponent, BudgetListComponent },
   props: {
     formId: { type: String, default: '' },
   },
@@ -47,7 +53,9 @@ export default defineComponent({
       // DATA
       dataSource, targetsBasisList, counter,
       // METHODS
-      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem } = useFormOperations()
+      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem } = useFormOperations()
+
+    const { budgetList, addBudgetListItem, deleteBudgetItem } = useProgramBudget()
 
     // COMPUTED
     const years = computed(() => {
@@ -96,14 +104,20 @@ export default defineComponent({
 
       addDeletedItem,
 
-      // useFieldOperations
+      // useFormOperations
       targetsBasisList,
       counter,
+
+      // useProgramBudget
+      budgetList,
+      addBudgetListItem,
+      deleteBudgetItem,
 
       updateDataSource,
       addTargetsBasisItem,
       updateSourceCount,
       deleteSourceItem,
+      updateSourceItem,
     }
   },
 })

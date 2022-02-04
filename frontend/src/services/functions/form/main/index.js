@@ -29,11 +29,13 @@ export const useFormFields = form => {
 
   const saveOfficeList = field => {
     const list = storedOffices.value[field]
-    form.value[field] = mappedOfficeList(list, field)
-    form.value.options[field] = []
-    storedOffices.value[field] = []
-    if (cachedOffice.value[field].length) {
-      cachedOffice.value[field] = []
+    if(list.length) {
+      form.value[field] = mappedOfficeList(list, field)
+      form.value.options[field] = []
+      storedOffices.value[field] = []
+      if (cachedOffice.value[field].length) {
+        cachedOffice.value[field] = []
+      }
     }
   }
 
@@ -98,5 +100,24 @@ export const useFormFields = form => {
     saveOfficeList,
     updateOfficeList,
     deleteOfficeItem,
+  }
+}
+
+export const useProgramBudget = () => {
+  const budgetList = ref([])
+
+  const addBudgetListItem = data => {
+    budgetList.value.push(data)
+  }
+
+  const deleteBudgetItem = index => {
+    budgetList.value.splice(index, 1)
+  }
+
+  return {
+    budgetList,
+
+    addBudgetListItem,
+    deleteBudgetItem,
   }
 }

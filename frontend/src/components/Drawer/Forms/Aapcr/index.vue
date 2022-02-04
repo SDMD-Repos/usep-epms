@@ -1,7 +1,7 @@
 <template>
   <a-drawer v-model:visible="config.open" :title="config.modalTitle" placement="right" :closable="false"
             :mask-closable="false" :body-style="{ paddingBottom: '80px' }" :width="800"
-            @close="resetFormData">
+            @close="resetFormData(0)">
 
     <a-form layout="horizontal" :hide-required-mark="true" :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol">
       <a-form-item label="Type">
@@ -22,7 +22,7 @@
 
       <a-form-item v-bind="validateInfos.subCategory">
         <template #label>
-          <span class="required-indicator" v-if="drawerId !== 'support_functions'">Sub Category</span>
+          <span :class="{'required-indicator': drawerId !== 'support_functions'}">Sub Category</span>
         </template>
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
@@ -191,8 +191,8 @@
           </div>
         </div>
 
-        <a-form-item label="Other Remarks" v-bind="validateInfos.otherRemarks">
-          <a-textarea v-model:value="form.otherRemarks" auto-size />
+        <a-form-item label="Other Remarks" v-bind="validateInfos.remarks">
+          <a-textarea v-model:value="form.remarks" auto-size />
         </a-form-item>
       </template>
     </a-form>
@@ -211,7 +211,7 @@
           </a-button>
         </a-popconfirm>
       </template>
-      <a-button type="primary" @click="validateFields" :loading="isSubmmiting">{{ config.okText }}</a-button>
+      <a-button type="primary" @click.prevent="validateFields" :loading="isSubmmiting">{{ config.okText }}</a-button>
     </div>
   </a-drawer>
 </template>
@@ -235,7 +235,7 @@ export default defineComponent({
     validate: { type: Function, default: () => {} },
     validateInfos: { type: Object, default: () => { return {} }},
   },
-  emits: ['close-drawer', 'toggle-is-header', 'add-table-item'],
+  emits: ['close-drawer', 'toggle-is-header', 'add-table-item', 'update-table-item'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -303,10 +303,6 @@ export default defineComponent({
 
     const validateFields = async () => {
       isSubmmiting.value = true
-      /*const tempImplementing = await mappedOfficeList(form.value.implementing, 'implementing')
-      const tempSupporting = await mappedOfficeList(form.value.supporting, 'supporting')
-      form.value.implementing = tempImplementing
-      form.value.supporting = tempSupporting*/
 
       await props.validate()
         .then(() => {
@@ -318,24 +314,21 @@ export default defineComponent({
         });
     }
 
-    const saveForm = () => {
+    const saveForm = async () => {
       let msgContent = ''
       for (let office in storedOffices) {
-        storedOffices[office] = []
+        storedOffices.value[office] = []
       }
 
       if (config.value.updateId === null) {
-        emit('add-table-item', form)
+        await emit('add-table-item', form)
         msgContent = 'Added!'
       } else {
-        // emit('update-table-item', { formData: form, updateId: config.updateId })
-        // msgContent = 'Updated!'
+        await emit('update-table-item', { updateData: form, updateId: config.value.updateId })
+        msgContent = 'Updated!'
       }
-      message.success(msgContent, 2)
-        .then(
-          () => isSubmmiting.value = !isSubmmiting.value,
-          () => {},
-        )
+      await message.success(msgContent, 2)
+      isSubmmiting.value = !isSubmmiting.value
     }
 
     return {

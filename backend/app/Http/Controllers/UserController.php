@@ -104,7 +104,7 @@ class UserController extends Controller
                     $details = $obj[0];
 
                     $user = User::updateOrCreate(
-                        ['id' => $obj->id ],
+                        ['id' => $obj->UserID ],
                         [
                             'pmaps_id' => $pmaps_id,
                             'firstName' => $details->FirstName,

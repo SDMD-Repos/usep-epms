@@ -174,8 +174,8 @@ export default defineComponent({
         })
       } else {
         Modal.error({
-          title: 'Up to 3 signatories are only allowed to be added',
-          content: '',
+          title: () => 'Up to 3 signatories are only allowed to be added',
+          content: () => '',
         })
       }
     }

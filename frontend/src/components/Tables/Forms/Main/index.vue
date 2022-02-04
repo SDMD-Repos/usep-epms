@@ -1,9 +1,33 @@
 <template>
   <div>
-    <a-table :columns="formTableColumns" :data-source="itemSource" size="middle" bordered
+    <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
              :scroll="{ x: 'calc(2600px + 50%)', y: 600 }" >
       <template #title>
         <a-button type="primary" :disabled="Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
+      </template>
+
+      <template #footer v-if="filteredSource.length">
+        <a-row :gutter="0">
+          <a-col :xs="{ span: 5 }" :sm="{ span: 5 }" :md="{ span: 5 }" :lg="{ span: 2}">
+            <label>Budget: </label>
+          </a-col>
+          <template v-if="!programBudget.length">
+            <a-col :xs="{ span: 12}" :sm="{ span: 12 }" :md="{ span: 8 }" :lg="{ span: 5 }">
+              <a-input-number v-model:value="categoryBudget" style="width: 100%"
+                              :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                              :parser="value => value.replace(/\$\s?|(,*)/g, '')"
+                              :min="0" @pressEnter="saveProgramBudget"/>
+            </a-col>
+            <a-col :span="2">
+              <a-button type="primary" @click="saveProgramBudget">
+                <template #icon><PlusOutlined /></template>
+              </a-button>
+            </a-col>
+          </template>
+          <a-col :xs="{ span: 12 }" :sm="{ span: 12 }" :lg="{ span: 4 }" v-else>
+            <label><b>₱ {{ $filters.numbersWithCommas(programBudget[0].categoryBudget) }}</b></label>
+          </a-col>
+        </a-row>
       </template>
 
       <template #subCategory="{ record }">
@@ -75,46 +99,82 @@
   </div>
 </template>
 <script>
-import { defineComponent } from "vue"
+import { defineComponent, ref, computed } from "vue"
 import { formTableColumns } from '@/services/columns'
-import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled } from '@ant-design/icons-vue'
+import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined } from '@ant-design/icons-vue'
+import { message, Modal } from "ant-design-vue"
 
 export default defineComponent({
   name: "IndicatorListTable",
-  components: { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled },
+  components: { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
     itemSource: { type: Array, default: () => { return [] }},
+    budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
   },
-  emits: ['open-drawer', 'delete-item'],
+  emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
+
+    // DATA
+    const categoryBudget = ref(null)
+
+    //COMPUTED
+    const filteredSource = computed(()=> {
+      return props.itemSource.filter(i => i.program === props.mainCategory.key)
+    })
+
+    const programBudget = computed(() => {
+      return props.budgetList.filter(i => i.mainCategory.key === props.mainCategory.key)
+    })
 
     //METHODS
     const openDrawer = action => {
-      emit('open-drawer', action)
+      emit('open-drawer', { action: action })
     }
 
     const handleEdit = data => {
-
+      emit('edit-item',data)
     }
 
     const handleAddSub = key => {
-
+      emit('add-sub-item', key)
     }
 
     const handleDelete = data => {
       emit('delete-item', data)
     }
 
+    const saveProgramBudget = async () => {
+      if(!categoryBudget.value) {
+        Modal.error({
+          title: () => 'No data was saved',
+          content: () => 'Please input a valid amount',
+        })
+      }else {
+        await emit('add-budget-list-item', { mainCategory: props.mainCategory, categoryBudget: categoryBudget.value })
+        await resetBudget()
+        message.success('Saved!', 2)
+      }
+    }
+
+    const resetBudget = () => {
+      categoryBudget.value = null
+    }
+
     return {
       formTableColumns,
+      categoryBudget,
+
+      filteredSource,
+      programBudget,
 
       openDrawer,
       handleEdit,
       handleAddSub,
       handleDelete,
+      saveProgramBudget,
     }
   },
 })

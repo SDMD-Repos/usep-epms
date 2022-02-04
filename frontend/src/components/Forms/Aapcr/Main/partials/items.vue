@@ -7,13 +7,15 @@
     </a-select>
 
     <div class="mt-4">
-      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :main-category="mainCategory"
-                       @open-drawer="openDrawer" @delete-item="deleteItem"/>
+      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :budget-list="budgetList" :main-category="mainCategory"
+                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
+                       @delete-item="deleteItem" @add-budget-list-item="addBudgetListItem"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
                          :targets-basis-list="targetsBasisList" :categories="categories" :current-year="year"
                          :validate="validate" :validate-infos="validateInfos"
-                         @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @close-drawer="closeDrawer"/>
+                         @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
+                         @close-drawer="closeDrawer" />
     </div>
   </div>
 </template>
@@ -38,9 +40,11 @@ export default defineComponent({
     itemSource: { type: Array, default: () => { return [] }},
     formId: { type: String, default: "" },
     targetsBasisList: { type: Array, default: () => { return [] }},
+    budgetList: { type: Array, default: () => { return [] }},
     counter: { type: Number, default: 0 },
   },
-  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item'],
+  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
+    'update-source-item', 'add-budget-list-item'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -59,7 +63,7 @@ export default defineComponent({
       drawerConfig,
       openDrawer, resetDrawerSettings } = useDrawerSettings()
 
-    const { formData, rules, resetFormAsHeader } = useDefaultFormData(props)
+    const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(props)
 
     // EVENTS
     onMounted(() => {
@@ -80,10 +84,19 @@ export default defineComponent({
       }
     }
 
+    const isTargetsExists = find => {
+      let isExists = false
+      props.targetsBasisList.forEach(data => {
+        isExists = data.value === find
+      })
+
+      return isExists
+    }
+
     const addTableItem = async data => {
       if (!data.value.isHeader) {
         const { targetsBasis } = data.value
-        if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && props.targetsBasisList.indexOf(targetsBasis) === -1) {
+        if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
           await emit('add-targets-basis-item', targetsBasis)
         }
       }
@@ -104,11 +117,12 @@ export default defineComponent({
         cascadingLevel: data.value.cascadingLevel,
         implementing: data.value.implementing,
         supporting: data.value.supporting,
-        otherRemarks: data.value.otherRemarks,
+        remarks: data.value.remarks,
       }
 
       if (drawerConfig.value.type === 'pi') {
         await emit('update-data-source', { data: newData, isNew: true })
+        await resetFields()
         if (newData.isHeader) {
           Modal.confirm({
             title: () => 'Do you want to add a sub PI?',
@@ -132,9 +146,9 @@ export default defineComponent({
         }
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
+        await resetFields()
+        await handleAddSub(parentDetails.key)
       }
-
-      await resetFields()
     }
 
     const handleAddSub = key => {
@@ -147,7 +161,58 @@ export default defineComponent({
         formData.implementing = newData.implementing
         formData.supporting = newData.supporting
       }
-      openDrawer('newsub', { ...newData })
+      openDrawer({ action: 'newsub', parentDetails: { ...newData }})
+    }
+
+    const editItem = data => {
+      let editData = null, updateId = null, parentDetails = undefined
+
+      if (data.type === 'pi') {
+        editData = dataSource.value.filter(item => data.key === item.key)[0]
+        updateId = dataSource.value.findIndex(record => record.key === data.key)
+      } else {
+        let shouldBreak = false
+
+        dataSource.value.forEach(item => {
+          if (typeof item.children !== 'undefined') {
+            const temp = item.children.filter(i => i.key === data.key)
+            if (shouldBreak) {
+              return
+            }
+            if (temp.length) {
+              editData = temp[0]
+              shouldBreak = true
+              updateId = item.children.findIndex(i => i.key === data.key)
+              parentDetails = { ...item }
+              return
+            }
+            console.log(temp)
+          }
+        })
+      }
+      assignFormData(editData)
+
+      openDrawer({ action: 'Update', updateId: updateId, type: data.type, parentDetails: parentDetails })
+    }
+
+    const updateTableItem = async data => {
+      if (drawerConfig.value.type === 'pi') {
+        if (!data.updateData.isHeader) {
+          const {targetsBasis} = data.updateData
+          if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
+            await emit('add-targets-basis-item', targetsBasis)
+          }
+        }
+      }
+
+      const { parentDetails } = drawerConfig.value
+      await emit('update-source-item', {
+        updateData: data.updateData,
+        updateId: data.updateId,
+        type: drawerConfig.value.type,
+        parentId: ((typeof parentDetails !== 'undefined') ? parentDetails.key : undefined),
+      })
+      await closeDrawer(0)
     }
 
     const deleteItem = data => {
@@ -156,6 +221,22 @@ export default defineComponent({
         const recordKey = dataSource.value.findIndex((record, i) => record.key === data.key)
         deletedData = dataSource.value[recordKey]
         emit('delete-source-item', recordKey)
+      }else {
+        dataSource.value.forEach((item) => {
+          if (typeof item.children !== 'undefined') {
+            const recordKey = item.children.findIndex(i => i.key === data.key)
+            if (recordKey !== -1) {
+              deletedData = item.children[recordKey]
+              item.children.splice(recordKey, 1)
+              if (!item.children.length) {
+                delete item.children
+              }
+              return
+            }
+            console.log(recordKey)
+          }
+        })
+        emit('update-data-source', { data: dataSource.value, isNew: false })
       }
 
       if (deletedData) {
@@ -166,9 +247,13 @@ export default defineComponent({
       }
     }
 
-    const closeDrawer = async () => {
-      await resetDrawerSettings()
+    const closeDrawer = async isNewIndicator => {
+      await resetDrawerSettings(isNewIndicator)
       await resetFields()
+    }
+
+    const addBudgetListItem = data => {
+      emit('add-budget-list-item', data)
     }
 
     return {
@@ -190,8 +275,12 @@ export default defineComponent({
 
       loadPIs,
       addTableItem,
+      handleAddSub,
       closeDrawer,
+      editItem,
+      updateTableItem,
       deleteItem,
+      addBudgetListItem,
     }
   },
 })
