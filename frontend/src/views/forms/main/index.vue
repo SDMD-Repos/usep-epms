@@ -2,6 +2,7 @@
   <div>
     <a-card>
       <aapcr-form v-if="formId === `aapcr`" :form-id="formId" />
+      <opcr-vp-form v-if="formId === `opcrvp`" :form-id="formId" />
     </a-card>
   </div>
 </template>
@@ -9,10 +10,12 @@
 import { defineComponent, ref, watch, onMounted } from "vue"
 import { useRoute } from 'vue-router'
 import AapcrForm from '@/components/Forms/Aapcr/Main'
+import OpcrVpForm from '@/components/Forms/Vpopcr/Main'
 
 export default defineComponent({
   components: {
     AapcrForm,
+    OpcrVpForm,
   },
   setup() {
     const formId = ref(null)

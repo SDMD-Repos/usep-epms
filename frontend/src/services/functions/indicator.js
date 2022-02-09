@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 export const useDrawerSettings = () => {
   const initialData = () => ({
@@ -197,6 +197,18 @@ export const useFormOperations = () => {
   const counter = ref(0)
   const dataSource = ref([])
   const deletedItems = ref([])
+  const year = ref(new Date().getFullYear())
+  const cachedYear = ref(null)
+
+  const years = computed(() => {
+    const now = new Date().getFullYear()
+    const min = 10
+    const lists = []
+    for (let i = now; i >= (now - min); i--) {
+      lists.push(i)
+    }
+    return lists
+  })
 
   const updateDataSource = ({data, isNew}) => {
     if(isNew) {
@@ -248,6 +260,10 @@ export const useFormOperations = () => {
     targetsBasisList,
     counter,
     deletedItems,
+    year,
+    cachedYear,
+
+    years,
 
     updateDataSource,
     addTargetsBasisItem,

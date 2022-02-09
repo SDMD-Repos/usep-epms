@@ -1,11 +1,16 @@
 <template>
   <div>
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
-      <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
-        <template v-for="(y, i) in years" :key="i">
-          <a-select-option :value="y"> {{ y }} </a-select-option>
-        </template>
-      </a-select>
+      <a-row type="flex">
+        <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
+        <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
+            <template v-for="(y, i) in years" :key="i">
+              <a-select-option :value="y"> {{ y }} </a-select-option>
+            </template>
+          </a-select>
+        </a-col>
+      </a-row>
 
       <div class="mt-4">
         <a-collapse v-model:activeKey="activeKey" accordion>
@@ -63,8 +68,6 @@ export default defineComponent({
     const route = useRoute()
 
     // DATA
-    const year = ref(new Date().getFullYear())
-    const cachedYear = ref(null)
     const activeKey = ref('0')
     const editMode = ref(false)
     const isFinalized = ref(false)
@@ -75,7 +78,7 @@ export default defineComponent({
 
     const {
       // DATA
-      dataSource, targetsBasisList, counter, deletedItems,
+      dataSource, targetsBasisList, counter, deletedItems, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
     } = useFormOperations()
@@ -83,16 +86,6 @@ export default defineComponent({
     const { budgetList, addBudgetListItem, deleteBudgetItem } = useProgramBudget()
 
     // COMPUTED
-    const years = computed(() => {
-      const now = new Date().getFullYear()
-      const min = 10
-      const lists = []
-      for (let i = now; i >= (now - min); i--) {
-        lists.push(i)
-      }
-      return lists
-    })
-
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
