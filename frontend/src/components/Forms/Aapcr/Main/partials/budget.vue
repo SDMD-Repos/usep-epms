@@ -6,7 +6,7 @@
           <template #title>
             <a-row :gutter="0">
               <a-col :xs="{ span: 12 }" :sm="{ span: 12 }" :md="{ span: 8 }" :lg="{ span: 5 }">
-                {{ item.mainCategory.label.children }} :
+                {{ item.mainCategory.label.children || item.mainCategory.label }} :
               </a-col>
               <a-col :xs="{ span: 9, offset: 1 }" :sm="{ span: 8 }" :md="{ span: 8 }" :lg="{ span: 5 }">
                 <a-input-number v-model:value="item.categoryBudget" style="width: 100%"
@@ -23,7 +23,7 @@
         </template>
       </a-list-item>
       <a-list-item v-else>
-        <span>{{ item.mainCategory.label.children }} - <b>₱ {{ $filters.numbersWithCommas(item.categoryBudget) }}</b></span>
+        <span>{{ item.mainCategory.label.children || item.mainCategory.label }} - <b>₱ {{ $filters.numbersWithCommas(item.categoryBudget) }}</b></span>
         <template #actions v-if="editingKey === ''">
           <a @click="editBudget(index)">edit</a>
           <a @click="deleteBudget(index)">delete</a>

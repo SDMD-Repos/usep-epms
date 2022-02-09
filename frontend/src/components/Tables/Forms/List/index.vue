@@ -24,7 +24,7 @@
       <template v-if="record.is_active && !record.published_date">
         <a-tooltip>
           <template #title><span>Update</span></template>
-          <EditOutlined :style="{ fontSize: '18px' }" />
+          <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
         </a-tooltip>
         <a-divider type="vertical" />
       </template>
@@ -92,7 +92,7 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['publish', 'view-pdf', 'unpublish', 'view-uploaded-list'],
+  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-uploaded-list'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -100,6 +100,10 @@ export default defineComponent({
     const dateFormat = computed(() => store.getters.mainStore.dateFormat)
 
     // METHODS
+    const handleUpdate = id => {
+      emit('update-form', id)
+    }
+
     const deactivate = (id) => {
       Modal.confirm({
         title: () => 'Are you sure you want to deactivate this?',
@@ -157,6 +161,7 @@ export default defineComponent({
       moment,
       dateFormat,
 
+      handleUpdate,
       deactivate,
       handlePublish,
       viewPdf,

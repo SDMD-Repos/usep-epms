@@ -15,9 +15,19 @@
     &:hover,
     &:active,
     &:focus {
-      background: lighten($blue-light, 0%) !important;
+      background: lighten($blue-light, 5%) !important;
       border-color: lighten($blue-light, 0%) !important;
       color: $white;
+    }
+  }
+  &-background {
+    &-ghost {
+      &:hover,
+      &:active,
+      &:focus {
+        background: $primary !important;
+        color: $white !important;
+      }
     }
   }
   &-danger {

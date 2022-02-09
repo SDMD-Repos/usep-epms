@@ -196,6 +196,7 @@ export const useFormOperations = () => {
   const targetsBasisList = ref([])
   const counter = ref(0)
   const dataSource = ref([])
+  const deletedItems = ref([])
 
   const updateDataSource = ({data, isNew}) => {
     if(isNew) {
@@ -238,15 +239,21 @@ export const useFormOperations = () => {
     }
   }
 
+  const addDeletedItem = id => {
+    deletedItems.value.push(id)
+  }
+
   return {
     dataSource,
     targetsBasisList,
     counter,
+    deletedItems,
 
     updateDataSource,
     addTargetsBasisItem,
     updateSourceCount,
     deleteSourceItem,
     updateSourceItem,
+    addDeletedItem,
   }
 }

@@ -48,7 +48,7 @@
       <template #measures="{ record }">
         <ul class="form-ul-list">
           <li v-for="measure in record.measures" :key="measure.key">
-            {{ measure.label.children }}
+            {{ measure.label.children || measure.label }}
           </li>
         </ul>
       </template>
@@ -59,7 +59,7 @@
 
       <template #cascadingLevel="{ record }">
         <div v-if="!record.isHeader">
-          {{ record.cascadingLevel.label.children }}
+          {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
         </div>
       </template>
 
@@ -99,10 +99,10 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from "vue"
+import { defineComponent, ref, computed } from 'vue'
 import { formTableColumns } from '@/services/columns'
 import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined } from '@ant-design/icons-vue'
-import { message, Modal } from "ant-design-vue"
+import { message, Modal } from 'ant-design-vue'
 
 export default defineComponent({
   name: "IndicatorListTable",

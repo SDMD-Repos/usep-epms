@@ -149,7 +149,7 @@ class AapcrController extends Controller
             $detail->allocated_budget = $values['budget'];
             $detail->targets_basis = $values['targetsBasis'];
             $detail->cascading_level = $values['cascadingLevel']['key'];
-            $detail->other_remarks = $values['otherRemarks'];
+            $detail->other_remarks = $values['remarks'];
         }
 
         $detail->parent_id = isset($values['detailId']) ? $values['detailId'] : null;
@@ -355,7 +355,7 @@ class AapcrController extends Controller
                         'cascadingLevel' => $extracted['cascadingLevel'],
                         'implementing' => $subImplementing,
                         'supporting' => $subSupporting,
-                        'otherRemarks' => $subPI->other_remarks,
+                        'remarks' => $subPI->other_remarks,
                     );
 
                     array_push($subs, $subItem);
@@ -383,7 +383,7 @@ class AapcrController extends Controller
                     'cascadingLevel' => $extracted['cascadingLevel'],
                     'implementing' => $implementing,
                     'supporting' => $supporting,
-                    'otherRemarks' => $detail->other_remarks
+                    'remarks' => $detail->other_remarks
                 );
 
                 if(count($subs)) {
@@ -519,7 +519,7 @@ class AapcrController extends Controller
                 $detail->allocated_budget = $data['budget'];
                 $detail->targets_basis = $data['targetsBasis'];
                 $detail->cascading_level = $cascadingLevel;
-                $detail->other_remarks = $data['otherRemarks'];
+                $detail->other_remarks = $data['remarks'];
                 $detail->modify_id = $this->login_user->pmaps_id;
 
                 $history = '';
@@ -561,7 +561,7 @@ class AapcrController extends Controller
                 }
 
                 if($detail->isDirty('other_remarks')){
-                    $history .= "Updated Other Remarks from '".$original['other_remarks']."' to '".$data['otherRemarks']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Other Remarks from '".$original['other_remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
                 }
 
                 $detail->history = $detail->history.$history;

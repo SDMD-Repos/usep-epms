@@ -22,11 +22,11 @@
 <script>
 import { computed, defineComponent, ref, watch, reactive, onMounted, createVNode } from "vue"
 import { useStore } from 'vuex'
+import { Form, Modal } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
-import { Form, Modal } from 'ant-design-vue'
-import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 
 const useForm = Form.useForm
 
@@ -87,6 +87,9 @@ export default defineComponent({
     const isTargetsExists = find => {
       let isExists = false
       props.targetsBasisList.forEach(data => {
+        if(isExists) {
+          return
+        }
         isExists = data.value === find
       })
 

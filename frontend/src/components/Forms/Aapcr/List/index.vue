@@ -2,7 +2,7 @@
   <div>
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
 
     <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
@@ -19,6 +19,7 @@ import { computed, defineComponent, ref, onMounted } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { notification, message } from 'ant-design-vue'
+import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
 import { useUploadFile } from '@/services/functions/upload'
 import { useViewPublishedFiles } from '@/services/functions/published'
@@ -26,7 +27,6 @@ import { updateFile, fetchPdfData, viewUploadedFile } from '@/services/api/mainF
 import FormListTable from '@/components/Tables/Forms/List'
 import UploadPublishModal from '@/components/Modals/UploadPublish'
 import UploadedListModal from '@/components/Modals/UploadedList'
-import moment from 'moment'
 
 export default defineComponent({
   components: {
@@ -37,7 +37,7 @@ export default defineComponent({
   props: {
     formId: { type: String, default: '' },
   },
-  setup() {
+  setup(props) {
     const PAGE_TITLE = 'AAPCR List'
 
     const store = useStore()
@@ -67,6 +67,13 @@ export default defineComponent({
     })
 
     // METHODS
+    const updateForm = id => {
+      router.push({
+        name: 'main.form',
+        params: { formId: props.formId, aapcrId: id },
+      })
+    }
+
     const publish = data => {
       const payload = {
         id: data.id,
@@ -173,6 +180,7 @@ export default defineComponent({
       isUploadedViewed,
       viewedForm,
 
+      updateForm,
       publish,
       viewPdf,
       uploadFile,

@@ -164,11 +164,15 @@ trait ConverterTrait {
     {
         if($targetsBasis) {
             $suggestExists = $this->array_any(function($x, $compare){
-                return $x === $compare;
+                return $x->value === $compare;
             }, $this->targetsBasisList, $targetsBasis);
 
             if(!$suggestExists){
-                array_push($this->targetsBasisList, $targetsBasis);
+                $basisObj = new \stdClass();
+
+                $basisObj->value = $targetsBasis;
+
+                array_push($this->targetsBasisList, $basisObj);
             }
         }
     }

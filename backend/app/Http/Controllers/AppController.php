@@ -182,7 +182,7 @@ class AppController extends Controller
         $params = [
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
             'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : "",
-            'totalBudget' => number_format($totalBudget, 2),
+            'totalBudget' => number_format($totalBudget, 0),
             'year' => $aapcr->year,
             'preparedBy' => strtoupper($signatory['preparedBy']),
             'preparedByPosition' => $signatory['preparedByPosition'],
