@@ -144,6 +144,16 @@ export const getMenuData = [
       },
     ],
   },
+  {
+    category: true,
+    title: 'System Admn',
+  },
+  {
+    title: 'Access Permission',
+    key: 'systemAdmin',
+    icon: 'fe fe-edit-2',
+    url: '/system/admin/permisson',
+  },
 
   // VB:REPLACE-END:MENU-CONFIG
 ]
