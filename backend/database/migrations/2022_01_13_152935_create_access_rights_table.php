@@ -15,7 +15,8 @@ class CreateAccessRightsTable extends Migration
     {
         Schema::create('access_rights', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->string('permission', 100);
+            $table->string('permission_id', 100);
+            $table->string('permission_name', 100);
             $table->integer('parent_id')->nullable();
             $table->softDeletes();
             $table->timestamp('created_at')->useCurrent();
@@ -23,6 +24,8 @@ class CreateAccessRightsTable extends Migration
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();
             $table->foreign('parent_id')->references('id')->on('access_rights')->onUpdate('cascade');
+
+            $table->primary('permission_id');
         });
     }
 

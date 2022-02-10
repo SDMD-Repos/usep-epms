@@ -42,8 +42,8 @@ import { stubFalse } from 'lodash';
 const columns = [
   {
     title: 'name',
-    dataIndex: 'permission',
-    key: 'permission',
+    dataIndex: 'permission_name',
+    key: 'permission_name',
   },
   
 ];

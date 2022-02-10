@@ -20,7 +20,7 @@ class PermissionController extends Controller
 
     function detailsPermission()
     {
-        $accessPermission = AccessRight::orderBy('created_at', 'ASC')->get();
+        $accessPermission = AccessRight::orderBy('id', 'ASC')->get();
         
         $modSubCategories = $this->getNestedChildren($accessPermission);
         return response()->json([
@@ -107,6 +107,7 @@ class PermissionController extends Controller
             $accessLists  = UserAccessRights::where([
                 ['user_id',$userInfo['id']],
                 ])->get();
+           
             if(count($accessLists)>0){
                     $status = true;
             }else{
