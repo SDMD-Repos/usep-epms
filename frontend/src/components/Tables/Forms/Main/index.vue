@@ -3,7 +3,7 @@
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
              :scroll="{ x: 'calc(2600px + 50%)', y: 600 }" >
       <template #title>
-        <a-button type="primary" :disabled="Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
+        <a-button type="primary" :disabled=" disabledNew === false ? disabledNew : Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
       </template>
 
       <template #footer v-if="filteredSource.length">
@@ -53,32 +53,6 @@
         </ul>
       </template>
 
-      <template #budget="{ record }">
-        {{ $filters.numbersWithCommasDecimal(record.budget) }}
-      </template>
-
-      <template #cascadingLevel="{ record }">
-        <div v-if="!record.isHeader">
-          {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
-        </div>
-      </template>
-
-      <template #implementing="{ record }">
-        <ul class="form-ul-list">
-          <li v-for="office in record.implementing" :key="office.key">
-            {{ office.label }}
-          </li>
-        </ul>
-      </template>
-
-      <template #supporting="{ record }">
-        <ul class="form-ul-list">
-          <li v-for="office in record.supporting" :key="office.key">
-            {{ office.label }}
-          </li>
-        </ul>
-      </template>
-
       <template #action="{ record }">
         <EditFilled @click="handleEdit(record)"/>
         <a-divider type="vertical" />
@@ -113,6 +87,7 @@ export default defineComponent({
     itemSource: { type: Array, default: () => { return [] }},
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
+    disabledNew: { type: Boolean, default: () => { return true }},
   },
   emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
