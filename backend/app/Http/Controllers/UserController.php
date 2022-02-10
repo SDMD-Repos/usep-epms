@@ -86,7 +86,7 @@ class UserController extends Controller
                             'middleName' => $obj->MiddleName,
                             'lastName' => $obj->LastName,
                             'email' => $obj->Email,
-                            'avatar' => $obj->Avatar || NULL
+                            'avatar' => $obj->Avatar ?? NULL
                         ]
                     );
                 } else {
@@ -104,14 +104,14 @@ class UserController extends Controller
                     $details = $obj[0];
 
                     $user = User::updateOrCreate(
-                        ['id' => $obj->UserID ],
+                        ['id' => $details->UserID ],
                         [
                             'pmaps_id' => $pmaps_id,
                             'firstName' => $details->FirstName,
                             'middleName' => $details->MiddleName,
                             'lastName' => $details->LastName,
                             'email' => $details->Email,
-                            'avatar' => $obj->Avatar || NULL
+                            'avatar' => $details->Avatar ?? NULL
                         ]
                     );
                 } else {
