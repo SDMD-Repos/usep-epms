@@ -15,7 +15,7 @@
       <div class="mt-4">
         <a-collapse v-model:activeKey="activeKey" accordion>
           <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-            <indicator-component
+            <indicator-component v-if="allowEdit"
               :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
               :categories="categories" :year="year" :counter="counter" :budget-list="budgetList"
               @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
@@ -69,16 +69,13 @@ export default defineComponent({
 
     // DATA
     const activeKey = ref('0')
-    const editMode = ref(false)
-    const isFinalized = ref(false)
-    const allowEdit = ref(false)
     const aapcrId = ref(null)
 
     const isCheckingForm = ref(false)
 
     const {
       // DATA
-      dataSource, targetsBasisList, counter, deletedItems, year, cachedYear, years,
+      dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
     } = useFormOperations()
@@ -157,10 +154,12 @@ export default defineComponent({
         if(response) {
           allowEdit.value = true
           initializeFormFields()
+          store.commit('aapcr/SET_STATE', {
+            dataSource: response.dataSource,
+          })
 
           year.value = response.year
           cachedYear.value = response.year
-          dataSource.value = response.dataSource
           budgetList.value = response.budgetList
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized

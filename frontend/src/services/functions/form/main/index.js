@@ -3,6 +3,10 @@ import { createVNode, ref } from "vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 
 export const useFormFields = form => {
+  const typeOptions = [{ label: 'PI', value: 'pi'}, { label: 'Sub PI', value: 'sub' }]
+  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 14 }}
+  const tooltipHeaderText = 'Check to disable the editing of Target to Other Remarks'
+
   const storedOffices = ref({ implementing: [], supporting: [] })
   const cachedOffice = ref({ implementing: [], supporting: [] })
 
@@ -92,6 +96,9 @@ export const useFormFields = form => {
   }
 
   return {
+    typeOptions,
+    formItemLayout,
+    tooltipHeaderText,
     storedOffices,
 
     changeNullValue,

@@ -112,7 +112,7 @@ export const formTableColumns = [
     ellipsis: true,
   },
   {
-    title: 'Action',
+    title: 'Actions',
     key: 'operation',
     fixed: 'right',
     className: 'column-action',

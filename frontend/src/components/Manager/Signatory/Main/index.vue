@@ -121,7 +121,7 @@ export default defineComponent({
       fetchSignatories()
     })
 
-    watch(() => props.formName , (formName) => {
+    watch(() => props.formName , formName => {
       formId.value = formName
     })
 

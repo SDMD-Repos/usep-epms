@@ -1,4 +1,5 @@
 import { ref, reactive, computed } from 'vue'
+import { useStore } from "vuex"
 
 export const useDrawerSettings = () => {
   const initialData = () => ({
@@ -193,12 +194,20 @@ export const useDefaultFormData = props => {
 /* ------------------------------------------ */
 
 export const useFormOperations = () => {
+  const store = useStore()
+
   const targetsBasisList = ref([])
   const counter = ref(0)
-  const dataSource = ref([])
   const deletedItems = ref([])
+
+  const editMode = ref(false)
+  const isFinalized = ref(false)
+  const allowEdit = ref(false)
+
   const year = ref(new Date().getFullYear())
   const cachedYear = ref(null)
+
+  const dataSource = computed(() => store.state.aapcr.dataSource )
 
   const years = computed(() => {
     const now = new Date().getFullYear()
@@ -210,13 +219,9 @@ export const useFormOperations = () => {
     return lists
   })
 
-  const updateDataSource = ({data, isNew}) => {
-    if(isNew) {
-      dataSource.value.push(data)
-    }else {
-      dataSource.value = data
-    }
-    updateSourceCount(counter.value + 1)
+  const updateDataSource = async ({data, isNew}) => {
+    await store.dispatch('aapcr/UPDATE_DATA_SOURCE', { payload : { data, isNew }})
+    await updateSourceCount(counter.value + 1)
   }
 
   const deleteSourceItem = key => {
@@ -230,24 +235,33 @@ export const useFormOperations = () => {
     counter.value = data
   }
 
-  const updateSourceItem = data => {
+  const updateSourceItem = async data => {
     const { updateData, updateId } = data
     if(data.type === 'pi') {
-      Object.assign(dataSource.value[updateId], updateData.value)
-      const { children } = dataSource.value[updateId]
-      if (typeof children !== 'undefined' && children.length) {
-        console.log('children', children)
-        children.forEach(i => {
-          i.subCategory = updateData.value.subCategory
-          i.targetsBasis = updateData.value.targetsBasis
-          i.cascadingLevel = updateData.value.cascadingLevel
-        })
-      }
+      await store.dispatch('aapcr/UPDATE_SOURCE_ITEM', { payload: { updateData, updateId }} )
+      await updateChildren(data)
     } else {
       const { parentId } = data
+      await store.dispatch('aapcr/UPDATE_SOURCE_SUB_ITEM', { payload: { updateData, updateId, parentId }} )
+      /*const { parentId } = data
       const parentIndex = dataSource.value.findIndex(i => i.key === parentId)
       const { children } = dataSource.value[parentIndex]
-      Object.assign(children[updateId], updateData.value)
+      Object.assign(children[updateId], updateData.value)*/
+    }
+  }
+
+  const updateChildren = data => {
+    const { updateData, updateId } = data
+    const { children } = dataSource.value[updateId]
+    console.log('children', children)
+    if (typeof children !== 'undefined' && children.length) {
+      children.forEach(i => {
+        i.subCategory = updateData.value.subCategory
+        if(!updateData.value.isHeader) {
+          i.targetsBasis = updateData.value.targetsBasis
+          i.cascadingLevel = updateData.value.cascadingLevel
+        }
+      })
     }
   }
 
@@ -260,6 +274,9 @@ export const useFormOperations = () => {
     targetsBasisList,
     counter,
     deletedItems,
+    editMode,
+    isFinalized,
+    allowEdit,
     year,
     cachedYear,
 

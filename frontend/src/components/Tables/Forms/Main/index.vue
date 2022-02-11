@@ -6,7 +6,7 @@
         <a-button type="primary" :disabled="Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
       </template>
 
-      <template #footer v-if="filteredSource.length">
+      <template #footer v-if="filteredSource.length && formId === `aapcr`">
         <a-row :gutter="0">
           <a-col :xs="{ span: 5 }" :sm="{ span: 5 }" :md="{ span: 5 }" :lg="{ span: 2}">
             <label>Budget: </label>
@@ -30,7 +30,7 @@
         </a-row>
       </template>
 
-      <template #subCategory="{ record }">
+      <template #subCategory="{ record }" v-if="formId === `aapcr`">
         {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
       </template>
 
@@ -57,7 +57,7 @@
         {{ $filters.numbersWithCommasDecimal(record.budget) }}
       </template>
 
-      <template #cascadingLevel="{ record }">
+      <template #cascadingLevel="{ record }" v-if="formId === `aapcr`">
         <div v-if="!record.isHeader">
           {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
         </div>
@@ -89,8 +89,8 @@
         <a-popconfirm
           title="Are you sure you want to delete this?"
           @confirm="handleDelete(record)"
-          okText="Yes"
-          cancelText="No"
+          ok-text="Yes"
+          cancel-text="No"
         >
           <DeleteFilled />
         </a-popconfirm>
@@ -100,7 +100,6 @@
 </template>
 <script>
 import { defineComponent, ref, computed } from 'vue'
-import { formTableColumns } from '@/services/columns'
 import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 
@@ -113,6 +112,7 @@ export default defineComponent({
     itemSource: { type: Array, default: () => { return [] }},
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
+    formTableColumns: { type: Array, default: () => { return [] }},
   },
   emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
@@ -164,7 +164,6 @@ export default defineComponent({
     }
 
     return {
-      formTableColumns,
       categoryBudget,
 
       filteredSource,

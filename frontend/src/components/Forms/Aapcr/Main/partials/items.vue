@@ -7,7 +7,8 @@
     </a-select>
 
     <div class="mt-4">
-      <indicator-table :year="year" :form-id="formId" :item-source="itemSource" :budget-list="budgetList" :main-category="mainCategory"
+      <indicator-table :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
+                       :main-category="mainCategory" :form-table-columns="formTableColumns"
                        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
                        @delete-item="deleteItem" @add-budget-list-item="addBudgetListItem"/>
 
@@ -20,10 +21,11 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, watch, reactive, onMounted, createVNode } from "vue"
+import { defineComponent, ref, watch, reactive, onMounted, createVNode, computed } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { formTableColumns } from "@/services/columns"
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
@@ -52,7 +54,7 @@ export default defineComponent({
     const mainCategory = ref(undefined)
     const displayIndicatorList = ref(0)
     const count = ref(0)
-    const dataSource = ref([])
+    const dataSource = computed(()=> { return props.itemSource })
 
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
@@ -70,8 +72,7 @@ export default defineComponent({
 
     })
 
-    watch(() => [props.itemSource, props.counter], ([itemSource, counter]) => {
-      dataSource.value = itemSource
+    watch(() => props.counter, counter => {
       count.value = counter
     })
 
@@ -169,9 +170,8 @@ export default defineComponent({
 
     const editItem = data => {
       let editData = null, updateId = null, parentDetails = undefined
-
       if (data.type === 'pi') {
-        editData = dataSource.value.filter(item => data.key === item.key)[0]
+        editData = dataSource.value.filter(item => item.key === data.key)[0]
         updateId = dataSource.value.findIndex(record => record.key === data.key)
       } else {
         let shouldBreak = false
@@ -260,6 +260,7 @@ export default defineComponent({
     }
 
     return {
+      formTableColumns,
       mainCategory,
 
       programsByFunction,

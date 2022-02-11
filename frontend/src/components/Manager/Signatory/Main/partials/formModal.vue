@@ -179,7 +179,7 @@ export default defineComponent({
     })
 
     // EVENTS
-    watch(() => [props.visible] , ([visible]) => {
+    watch(() => props.visible , visible => {
       isVisible.value = visible
     })
 

@@ -216,7 +216,7 @@
   </a-drawer>
 </template>
 <script>
-import { defineComponent, ref, watch, computed, onMounted  } from 'vue'
+import { defineComponent, ref, watch, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { TreeSelect, message } from 'ant-design-vue'
 import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
@@ -246,9 +246,6 @@ export default defineComponent({
 
     // STATIC DATA
     const SHOW_PARENT = TreeSelect.SHOW_PARENT
-    const typeOptions = [{ label: 'PI', value: 'pi'}, { label: 'Sub PI', value: 'sub' }]
-    const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 14 }}
-    const tooltipHeaderText = 'Check to disable the editing of Target to Other Remarks'
 
     // COMPUTED
     const subCategories = computed(() => {
@@ -272,7 +269,7 @@ export default defineComponent({
 
     const {
       // DATA
-      storedOffices,
+      typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
       // METHODS
       changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
@@ -337,16 +334,16 @@ export default defineComponent({
       isSubmmiting,
       form,
 
-      typeOptions,
-      formItemLayout,
-      tooltipHeaderText,
-
       subCategories,
       measuresList,
       cascadingList,
       officesList,
 
       // useFormFields
+      typeOptions,
+      formItemLayout,
+      tooltipHeaderText,
+
       changeNullValue,
       filterBasisOption,
       onOfficeChange,
