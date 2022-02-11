@@ -78,7 +78,7 @@ export default defineComponent({
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
-    } = useFormOperations()
+    } = useFormOperations(props)
 
     const { budgetList, addBudgetListItem, deleteBudgetItem } = useProgramBudget()
 
@@ -101,7 +101,10 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
+      store.commit('aapcr/SET_STATE', { dataSource: [] })
+
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
+
       if(aapcrId.value) {
         getFormDetails()
       } else {

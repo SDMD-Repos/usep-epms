@@ -193,7 +193,7 @@ export const useDefaultFormData = props => {
 
 /* ------------------------------------------ */
 
-export const useFormOperations = () => {
+export const useFormOperations = props => {
   const store = useStore()
 
   const targetsBasisList = ref([])
@@ -207,7 +207,7 @@ export const useFormOperations = () => {
   const year = ref(new Date().getFullYear())
   const cachedYear = ref(null)
 
-  const dataSource = computed(() => store.state.aapcr.dataSource )
+  const dataSource = computed(() => store.state[props.formId].dataSource )
 
   const years = computed(() => {
     const now = new Date().getFullYear()
@@ -220,13 +220,14 @@ export const useFormOperations = () => {
   })
 
   const updateDataSource = async ({data, isNew}) => {
-    await store.dispatch('aapcr/UPDATE_DATA_SOURCE', { payload : { data, isNew }})
+    await store.dispatch(props.formId + '/UPDATE_DATA_SOURCE', { payload : { data, isNew }})
     await updateSourceCount(counter.value + 1)
   }
 
   const deleteSourceItem = key => {
-    dataSource.value.splice(key, 1)
+    store.dispatch(props.formId + '/DELETE_SOURCE_ITEM', { payload : { key }})
   }
+
   const addTargetsBasisItem = data => {
     targetsBasisList.value.push({ value: data })
   }
@@ -238,15 +239,11 @@ export const useFormOperations = () => {
   const updateSourceItem = async data => {
     const { updateData, updateId } = data
     if(data.type === 'pi') {
-      await store.dispatch('aapcr/UPDATE_SOURCE_ITEM', { payload: { updateData, updateId }} )
+      await store.dispatch(props.formId + '/UPDATE_SOURCE_ITEM', { payload: { updateData, updateId }} )
       await updateChildren(data)
     } else {
       const { parentId } = data
-      await store.dispatch('aapcr/UPDATE_SOURCE_SUB_ITEM', { payload: { updateData, updateId, parentId }} )
-      /*const { parentId } = data
-      const parentIndex = dataSource.value.findIndex(i => i.key === parentId)
-      const { children } = dataSource.value[parentIndex]
-      Object.assign(children[updateId], updateData.value)*/
+      await store.dispatch(props.formId + '/UPDATE_SOURCE_SUB_ITEM', { payload: { updateData, updateId, parentId }} )
     }
   }
 

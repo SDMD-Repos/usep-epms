@@ -46,6 +46,10 @@ export default {
       const { children } = state[type][parentIndex]
       Object.assign(children[index], details)
     },
+    DELETE_STATE_ITEM(state, payload) {
+      const { type, key } = payload
+      state[type].splice(key, 1)
+    },
   },
   actions: {
     FETCH_LIST({ commit }) {
@@ -184,6 +188,12 @@ export default {
         details: payload.updateData.value,
         index: payload.updateId,
         parent: payload.parentId,
+      })
+    },
+    DELETE_SOURCE_ITEM({ commit }, { payload }) {
+      commit('DELETE_STATE_ITEM', {
+        type: 'dataSource',
+        key: payload.key,
       })
     },
   },

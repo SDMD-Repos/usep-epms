@@ -1,6 +1,6 @@
 <template>
   <div>
-    <indicator-table :year="year" :form-id="formId" :form-table-columns="modifiedTableColumns" />
+    <indicator-table :year="year" :form-id="formId" :function-id="functionId" :form-table-columns="modifiedTableColumns" :item-source="itemSource" />
   </div>
 </template>
 <script>
@@ -14,6 +14,8 @@ export default defineComponent({
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
+    functionId: { type: String, default: "" },
+    itemSource: { type: Array, default: () => { return [] }},
   },
   setup() {
     const modifiedTableColumns = ref()

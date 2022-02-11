@@ -109,6 +109,7 @@ export default defineComponent({
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
+    functionId: { type: String, default: "" },
     itemSource: { type: Array, default: () => { return [] }},
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
@@ -119,11 +120,21 @@ export default defineComponent({
 
     // DATA
     const categoryBudget = ref(null)
+    let filteredSource
 
     //COMPUTED
-    const filteredSource = computed(()=> {
-      return props.itemSource.filter(i => i.program === props.mainCategory.key)
-    })
+    switch (props.formId) {
+      case 'aapcr':
+        filteredSource = computed(()=> {
+          return props.itemSource.filter(i => i.program === props.mainCategory.key)
+        })
+        break;
+      case 'opcrvp':
+        filteredSource = computed(()=> {
+          return props.itemSource.filter(i => i.category === props.functionId)
+        })
+        break;
+    }
 
     const programBudget = computed(() => {
       return props.budgetList.filter(i => i.mainCategory.key === props.mainCategory.key)

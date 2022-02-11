@@ -16,6 +16,7 @@ export default {
   state: {
     loading: false,
     list: [],
+    dataSource: [],
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -134,6 +135,8 @@ export default {
         })
       })
     },
+
+
   },
   getters: {
     form: state => state,

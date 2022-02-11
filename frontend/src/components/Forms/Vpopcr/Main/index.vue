@@ -25,7 +25,7 @@
     <div class="mt-5">
       <template v-for="(category, key) in categories" :key="`${key}`">
         <a-divider><b>{{ category.name }}</b></a-divider>
-        <indicator-component />
+        <indicator-component :form-id="formId" :function-id="category.key" :item-source="dataSource"/>
       </template>
     </div>
   </div>
@@ -45,7 +45,7 @@ export default defineComponent({
   props: {
     formId: { type: String, default: '' },
   },
-  setup() {
+  setup(props) {
     const PAGE_TITLE = "OPCR (VP) Form"
 
     const store = useStore()
@@ -54,7 +54,7 @@ export default defineComponent({
     const aapcrId = ref(null)
     const counter = ref(0)
 
-    const { dataSource, targetsBasisList, year, cachedYear, years, allowEdit } = useFormOperations()
+    const { dataSource, targetsBasisList, year, cachedYear, years, allowEdit } = useFormOperations(props)
 
     const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const categories = computed(() => store.getters['formManager/functions'])
@@ -115,9 +115,11 @@ export default defineComponent({
       getAapcrDetailsByOffice(vpOffice.value.key, year.value).then(response => {
         if(response) {
           if(response.aapcrId) {
+            store.commit('opcrvp/SET_STATE', {
+              dataSource: response.dataSource,
+            })
             allowEdit.value = true
             aapcrId.value = response.aapcrId
-            dataSource.value = response.dataSource
             targetsBasisList.value = response.targetsBasisList
           }else {
             Modal.warning({
@@ -141,6 +143,7 @@ export default defineComponent({
       checkFormDetails,
 
       // useFormOperations
+      dataSource,
       year,
       cachedYear,
       years,
