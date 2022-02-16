@@ -5,6 +5,7 @@ import formManager from './formManager'
 import external from './external'
 import aapcr from './aapcr'
 import opcrvp from './opcrvp'
+import opcrtemplate from './opcr/template'
 
 export default createStore({
   modules: {
@@ -14,6 +15,7 @@ export default createStore({
     external,
     aapcr,
     opcrvp,
+    opcrtemplate,
   },
   state: {
     dateFormat: 'YYYY-MM-DD hh:mm A',
