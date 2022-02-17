@@ -3,6 +3,7 @@
     <a-card>
       <aapcr-list v-if="formId === `aapcr`" :form-id="formId" />
       <vp-opcr-list v-if="formId === `opcrvp`" :form-id="formId" />
+      <opcr-template-list v-if="formId === `opcrtemplate`" :form-id="formId" />
     </a-card>
   </div>
 </template>
@@ -11,11 +12,13 @@ import { defineComponent, ref, watch, onMounted } from "vue"
 import { useRoute } from 'vue-router'
 import AapcrList from '@/components/Forms/Aapcr/List'
 import VpOpcrList from '@/components/Forms/Vpopcr/List'
+import OpcrTemplateList from '@/components/Forms/OpcrTemplate/List'
 
 export default defineComponent({
   components: {
     AapcrList,
     VpOpcrList,
+    OpcrTemplateList,
   },
   setup() {
     const formId = ref(null)
