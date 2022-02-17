@@ -2,7 +2,6 @@
   <a-drawer v-model:visible="config.open" :title="config.modalTitle" placement="right" :closable="false"
             :mask-closable="false" :body-style="{ paddingBottom: '80px' }" :width="800"
             @close="resetFormData(0)">
-
     <a-form layout="horizontal" :hide-required-mark="true" :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol">
       <a-form-item label="Type">
         <a-radio-group :options="typeOptions" v-model:value="config.type" disabled/>
@@ -19,6 +18,18 @@
         </a-row>
         <br>
       </div>
+
+      <a-form-item v-bind="validateInfos.program">
+        <template #label>
+          <span class="required-indicator">Program</span>
+        </template>
+        <a-select v-model:value="form.program" placeholder="Select" :disabled="config.type === 'sub'"
+                  @blur="validate('program', { trigger: 'blur' }).catch(() => {})">
+          <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
+            {{ y.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
 
       <a-form-item v-bind="validateInfos.subCategory">
         <template #label>
@@ -75,7 +86,7 @@
           <a-input-number v-model:value="form.budget" :min="0" style="width: 50%" :step="0.01"
                           :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
                           :parser="value => value.replace(/\$\s?|(,*)/g, '')"
-                          />
+          />
         </a-form-item>
 
         <a-form-item v-bind="validateInfos.targetsBasis">
@@ -86,18 +97,6 @@
             :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
             @blur="validate('targetsBasis', { trigger: 'blur' }).catch(() => {})"
           />
-        </a-form-item>
-
-        <a-form-item v-bind="validateInfos.cascadingLevel">
-          <template #label><span class="required-indicator">Casading Level</span></template>
-
-          <a-select v-model:value="form.cascadingLevel" placeholder="Select" style="width: 100%"
-                    label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
-                    @blur="validate('cascadingLevel', { trigger: 'blur' }).catch(() => {})">
-            <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
-              {{ levelItem.name }}
-            </a-select-option>
-          </a-select>
         </a-form-item>
 
         <a-form-item v-bind="validateInfos.implementing">
@@ -191,7 +190,7 @@
           </div>
         </div>
 
-        <a-form-item label="Other Remarks" v-bind="validateInfos.remarks">
+        <a-form-item label="Remarks" v-bind="validateInfos.remarks">
           <a-textarea v-model:value="form.remarks" auto-size />
         </a-form-item>
       </template>
@@ -216,14 +215,14 @@
   </a-drawer>
 </template>
 <script>
-import { defineComponent, ref, watch, computed, onMounted } from 'vue'
+import { computed, defineComponent, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { TreeSelect, message } from 'ant-design-vue'
-import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
+import { message, TreeSelect } from "ant-design-vue"
+import { CheckOutlined, DeleteFilled, EditOutlined } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
 
 export default defineComponent({
-  name: "AapcrFormDrawer",
+  name: "OpcrVpFormDrawer",
   components: { CheckOutlined, EditOutlined, DeleteFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
@@ -248,17 +247,20 @@ export default defineComponent({
     const SHOW_PARENT = TreeSelect.SHOW_PARENT
 
     // COMPUTED
+    const programsByFunction = computed( () => {
+      const programs = store.getters['formManager/manager'].programs
+      return programs.filter(i => i.category_id === props.drawerId)
+    })
+
     const subCategories = computed(() => {
       const subs = store.getters['formManager/subCategories']
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
     const measuresList  = computed(() => store.getters['formManager/manager'].measures)
-    const cascadingList  = computed(() => store.getters['formManager/manager'].cascadingLevels)
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
 
-    // EVENTS
-    watch(() => [props.drawerConfig, props.formObject] , ([drawerConfig, formObject]) => {
+    watch(() => [props.drawerConfig, props.formObject], ([drawerConfig, formObject]) => {
       config.value = drawerConfig
       form.value = formObject
     })
@@ -270,16 +272,15 @@ export default defineComponent({
     const {
       // DATA
       typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
-      // METHODS
+      // METHOD
       changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
 
-    // METHODS
     const onLoad = () => {
       let params = {
         checkable: {
           allColleges: true,
-          mains: true,
+          mains: false,
         },
         isAcronym: true,
         currentYear: props.currentYear,
@@ -334,10 +335,14 @@ export default defineComponent({
       isSubmmitting,
       form,
 
+      programsByFunction,
       subCategories,
       measuresList,
-      cascadingList,
       officesList,
+
+      toggleIsHeader,
+      resetFormData,
+      validateFields,
 
       // useFormFields
       typeOptions,
@@ -350,10 +355,6 @@ export default defineComponent({
       saveOfficeList,
       updateOfficeList,
       deleteOfficeItem,
-
-      toggleIsHeader,
-      resetFormData,
-      validateFields,
     }
   },
 })

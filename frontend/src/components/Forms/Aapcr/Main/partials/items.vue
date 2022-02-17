@@ -8,7 +8,7 @@
 
     <div class="mt-4">
       <indicator-table :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
-                       :main-category="mainCategory" :form-table-columns="formTableColumns"
+                       :main-category="mainCategory" :form-table-columns="formTableColumns" :allow-edit="displayIndicatorList"
                        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
                        @delete-item="deleteItem" @add-budget-list-item="addBudgetListItem"/>
 
@@ -21,14 +21,14 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, onMounted, createVNode, computed } from "vue"
+import { defineComponent, ref, watch, reactive, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { formTableColumns } from "@/services/columns"
+import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
-import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 
 const useForm = Form.useForm
 
@@ -52,7 +52,7 @@ export default defineComponent({
 
     // DATA
     const mainCategory = ref(undefined)
-    const displayIndicatorList = ref(0)
+    const displayIndicatorList = ref(false)
     const count = ref(0)
     const dataSource = computed(()=> { return props.itemSource })
 
@@ -68,10 +68,6 @@ export default defineComponent({
     const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(props)
 
     // EVENTS
-    onMounted(() => {
-
-    })
-
     watch(() => props.counter, counter => {
       count.value = counter
     })
@@ -81,7 +77,7 @@ export default defineComponent({
     // METHODS
     const loadPIs = e => {
       if (e !== '' && typeof e !== 'undefined') {
-        displayIndicatorList.value = 1
+        displayIndicatorList.value = true
       }
     }
 
@@ -201,7 +197,7 @@ export default defineComponent({
     const updateTableItem = async data => {
       if (drawerConfig.value.type === 'pi') {
         if (!data.updateData.isHeader) {
-          const {targetsBasis} = data.updateData
+          const {targetsBasis} = data.updateData.value
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
             await emit('add-targets-basis-item', targetsBasis)
           }
@@ -262,6 +258,7 @@ export default defineComponent({
     return {
       formTableColumns,
       mainCategory,
+      displayIndicatorList,
 
       programsByFunction,
 

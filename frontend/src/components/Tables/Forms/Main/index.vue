@@ -1,9 +1,9 @@
 <template>
   <div>
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
-             :scroll="{ x: 'calc(2600px + 50%)', y: 600 }" >
+             :scroll="{ x: 'calc(2600px + 50%)', y: 600 }">
       <template #title>
-        <a-button type="primary" :disabled="Object.keys(mainCategory).length === 0" @click="openDrawer('Add')">New</a-button>
+        <a-button type="primary" :disabled="!allowEdit" @click="openDrawer('Add')">New</a-button>
       </template>
 
       <template #footer v-if="filteredSource.length && formId === `aapcr`">
@@ -32,6 +32,10 @@
 
       <template #subCategory="{ record }" v-if="formId === `aapcr`">
         {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
+      </template>
+
+      <template #count="{ record }" v-if="formId === `opcrvp`">
+        {{ record.count }}
       </template>
 
       <template #isHeader="{ record }">
@@ -80,17 +84,17 @@
       </template>
 
       <template #action="{ record }">
-        <EditFilled @click="handleEdit(record)"/>
-        <a-divider type="vertical" />
+        <EditFilled @click="handleEdit(record)" v-if="allowedAction(record)"/>
+        <a-divider type="vertical" v-if="allowedAction(record)" />
         <template v-if="record.type === 'pi'">
           <PlusCircleFilled @click="handleAddSub(record.key)"/>
-          <a-divider type="vertical" />
+          <a-divider type="vertical" v-if="allowedAction(record)"/>
         </template>
         <a-popconfirm
           title="Are you sure you want to delete this?"
           @confirm="handleDelete(record)"
-          ok-text="Yes"
-          cancel-text="No"
+          ok-text="Yes" cancel-text="No"
+          v-if="allowedAction(record)"
         >
           <DeleteFilled />
         </a-popconfirm>
@@ -114,6 +118,7 @@ export default defineComponent({
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
     formTableColumns: { type: Array, default: () => { return [] }},
+    allowEdit: { type: Boolean, default: false },
   },
   emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
@@ -131,7 +136,11 @@ export default defineComponent({
         break;
       case 'opcrvp':
         filteredSource = computed(()=> {
-          return props.itemSource.filter(i => i.category === props.functionId)
+          const source = props.itemSource.filter(i => i.category === props.functionId)
+          source.forEach((x, y) => {
+            source[y].count = y + 1
+          })
+          return source
         })
         break;
     }
@@ -155,6 +164,14 @@ export default defineComponent({
 
     const handleDelete = data => {
       emit('delete-item', data)
+    }
+
+    const allowedAction = data => {
+      let allow = false
+      if (props.formId === 'aapcr' || (props.formId === 'opcrvp' && !data.isCascaded)) {
+        allow = true
+      }
+      return allow
     }
 
     const saveProgramBudget = async () => {
@@ -184,6 +201,7 @@ export default defineComponent({
       handleEdit,
       handleAddSub,
       handleDelete,
+      allowedAction,
       saveProgramBudget,
     }
   },

@@ -84,6 +84,24 @@ const defaultAapcrFormData = {
   remarks: '',
 }
 
+const defaultOpcrVpFormData = {
+  program: null,
+  subCategory: null,
+  name: '',
+  isHeader: false,
+  target: '',
+  measures: [],
+  budget: null,
+  targetsBasis: '',
+  implementing: [],
+  supporting: [],
+  options: {
+    implementing: [],
+    supporting: [],
+  },
+  remarks: '',
+}
+
 export const useDefaultFormData = props => {
   const defaultData = ref({})
   let rules
@@ -91,6 +109,9 @@ export const useDefaultFormData = props => {
   switch (props.formId) {
     case 'aapcr':
       defaultData.value = defaultAapcrFormData
+      break;
+    case 'opcrvp':
+      defaultData.value = defaultOpcrVpFormData
   }
 
   const formData = reactive(defaultData.value)
@@ -117,7 +138,15 @@ export const useDefaultFormData = props => {
   }
 
   let subCategoryValidator = async (rule, value) => {
-    if ((props.functionId !== 'support_functions') && value === null) {
+    const allowValidate = props.functionId !== 'support_functions' && value === null
+
+    let hasParent = false
+    if(typeof props.config !== 'undefined') {
+      const { parentDetails } = props.config.value
+      hasParent = (typeof parentDetails === 'undefined') || (typeof parentDetails !== 'undefined' && parentDetails.subCategory !== null)
+    }
+
+    if ((allowValidate && props.formId === 'aapcr') || (props.formId === 'opcrvp' && allowValidate && hasParent)) {
       return Promise.reject('Please select at least one')
     } else {
       return Promise.resolve()
@@ -145,6 +174,38 @@ export const useDefaultFormData = props => {
           { type: 'array' },
         ],
       })
+      break;
+    case 'opcrvp':
+      let programValidator = async (rule, value) => {
+        const { parentDetails } = props.config.value
+        const hasParent = (typeof parentDetails === 'undefined') || (typeof parentDetails !== 'undefined' && parentDetails.subCategory !== null)
+        if (value === null && hasParent) {
+          return Promise.reject('Please select at least one')
+        } else {
+          return Promise.resolve()
+        }
+      }
+      rules = reactive({
+        program: [{ validator: programValidator, trigger: 'blur' }],
+        subCategory: [
+          { validator: subCategoryValidator, trigger: 'blur' },
+          { type: 'object' },
+        ],
+        name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
+        target: [{ validator: validateNonHeader, trigger: 'blur'}],
+        measures: [{ validator: validateNonHeader, trigger: 'blur'}],
+        targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
+        implementing: [
+          { validator: validateNonHeader, trigger: 'blur'},
+          { type: 'array' },
+        ],
+        supporting: [
+          { validator: validateNonHeader, trigger: 'blur'},
+          { type: 'array' },
+        ],
+      })
+      break;
+
   }
 
   const resetFormAsHeader = () => {
@@ -168,6 +229,10 @@ export const useDefaultFormData = props => {
     switch (props.formId) {
       case 'aapcr':
         formData.cascadingLevel = newData.cascadingLevel
+        break;
+      case 'opcrvp':
+        formData.program = newData.program
+        break;
     }
 
     formData.subCategory = newData.subCategory
@@ -250,13 +315,19 @@ export const useFormOperations = props => {
   const updateChildren = data => {
     const { updateData, updateId } = data
     const { children } = dataSource.value[updateId]
-    console.log('children', children)
     if (typeof children !== 'undefined' && children.length) {
       children.forEach(i => {
+        if(props.formId === 'opcrvp') {
+          i.program = updateData.value.program
+        }
+
         i.subCategory = updateData.value.subCategory
         if(!updateData.value.isHeader) {
           i.targetsBasis = updateData.value.targetsBasis
-          i.cascadingLevel = updateData.value.cascadingLevel
+
+          if(props.formId === 'aapcr') {
+            i.cascadingLevel = updateData.value.cascadingLevel
+          }
         }
       })
     }

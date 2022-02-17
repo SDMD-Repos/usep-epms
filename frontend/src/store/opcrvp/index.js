@@ -24,6 +24,30 @@ export default {
         ...payload,
       })
     },
+    ADD_STATE_ITEM(state, payload) {
+      const { type, details } = payload
+      state[type].push(details)
+
+      state[type] = [...state[type]]
+    },
+    UPDATE_STATE_ITEM(state, payload) {
+      const { type, details, index } = payload
+
+      Object.assign(state[type][index], details)
+
+      state[type] = [...state[type]]
+    },
+    UPDATE_STATE_SUB_ITEM(state, payload) {
+      const { type, details, index, parent } = payload
+
+      const parentIndex = state[type].findIndex(i => i.key === parent)
+      const { children } = state[type][parentIndex]
+      Object.assign(children[index], details)
+    },
+    DELETE_STATE_ITEM(state, payload) {
+      const { type, key } = payload
+      state[type].splice(key, 1)
+    },
   },
   actions: {
     FETCH_LIST({ commit }) {
@@ -136,7 +160,40 @@ export default {
       })
     },
 
-
+    UPDATE_DATA_SOURCE({ commit }, { payload }) {
+      const { isNew, data } = payload
+      if(isNew) {
+        commit('ADD_STATE_ITEM', {
+          type: 'dataSource',
+          details: data,
+        })
+      }else {
+        commit('SET_STATE', {
+          dataSource: data,
+        })
+      }
+    },
+    UPDATE_SOURCE_ITEM({ commit }, { payload }) {
+      commit('UPDATE_STATE_ITEM', {
+        type: 'dataSource',
+        details: payload.updateData.value,
+        index: payload.updateId,
+      })
+    },
+    UPDATE_SOURCE_SUB_ITEM({ commit }, { payload }) {
+      commit('UPDATE_STATE_SUB_ITEM', {
+        type: 'dataSource',
+        details: payload.updateData.value,
+        index: payload.updateId,
+        parent: payload.parentId,
+      })
+    },
+    DELETE_SOURCE_ITEM({ commit }, { payload }) {
+      commit('DELETE_STATE_ITEM', {
+        type: 'dataSource',
+        key: payload.key,
+      })
+    },
   },
   getters: {
     form: state => state,
