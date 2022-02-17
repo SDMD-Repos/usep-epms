@@ -3,10 +3,10 @@
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
              :scroll="{ x: 'calc(2600px + 50%)', y: 600 }">
       <template #title>
-        <a-button type="primary" :disabled="!allowEdit" @click="openDrawer('Add')">New</a-button>
+        <a-button type="primary" :disabled="disabledNew === false ? disabledNew : !allowEdit" @click="openDrawer('Add')">New</a-button>
       </template>
 
-      <template #footer v-if="filteredSource.length && formId === `aapcr`">
+      <template #footer v-if="filteredSource && filteredSource.length && formId === `aapcr`">
         <a-row :gutter="0">
           <a-col :xs="{ span: 5 }" :sm="{ span: 5 }" :md="{ span: 5 }" :lg="{ span: 2}">
             <label>Budget: </label>
@@ -117,6 +117,7 @@ export default defineComponent({
     itemSource: { type: Array, default: () => { return [] }},
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
+    disabledNew: { type: Boolean, default: () => { return true }},
     formTableColumns: { type: Array, default: () => { return [] }},
     allowEdit: { type: Boolean, default: false },
   },
@@ -142,6 +143,11 @@ export default defineComponent({
           })
           return source
         })
+        break;
+	case 'opcrtemplate':
+             filteredSource = computed(()=> {
+               return props.itemSource.filter(i => i.category === props.functionId)
+             })
         break;
     }
 
