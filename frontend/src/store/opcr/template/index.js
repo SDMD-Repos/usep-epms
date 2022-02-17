@@ -1,14 +1,14 @@
 import { notification } from 'ant-design-vue'
 
-// import * as aapcrForm from '@/services/api/mainForms/aapcr'
+import * as opcrTemplateForm from '@/services/api/mainForms/opcr/template'
 
 const mapApiProviders = {
-  // save: aapcrForm.save,
-  // getAapcrList: aapcrForm.fetchAapcrs,
-  // publish: aapcrForm.publish,
-  // unpublish: aapcrForm.unpublish,
-  // deactivate: aapcrForm.deactivate,
-  // update: aapcrForm.update,
+  save: opcrTemplateForm.save,
+  getList: opcrTemplateForm.fetchVpOpcrs,
+  publish: opcrTemplateForm.publish,
+  unpublish: opcrTemplateForm.unpublish,
+  deactivate: opcrTemplateForm.deactivate,
+  update: opcrTemplateForm.update,
 }
 
 export default {
@@ -16,8 +16,6 @@ export default {
   state: {
     loading: false,
     list: [],
-    fileUrl: null,
-    documentName: null,
     dataSource: [],
   },
   mutations: {
@@ -26,10 +24,176 @@ export default {
         ...payload,
       })
     },
+    ADD_STATE_ITEM(state, payload) {
+      const { type, details } = payload
+      state[type].push(details)
 
+      state[type] = [...state[type]]
+    },
+    UPDATE_STATE_ITEM(state, payload) {
+      const { type, details, index } = payload
+
+      Object.assign(state[type][index], details)
+
+      state[type] = [...state[type]]
+    },
+    UPDATE_STATE_SUB_ITEM(state, payload) {
+      const { type, details, index, parent } = payload
+
+      const parentIndex = state[type].findIndex(i => i.key === parent)
+      const { children } = state[type][parentIndex]
+      Object.assign(children[index], details)
+    },
+    DELETE_STATE_ITEM(state, payload) {
+      const { type, key } = payload
+      state[type].splice(key, 1)
+    },
   },
   actions: {
+    FETCH_LIST({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const getList = mapApiProviders.getList
+      getList().then(response => {
+        if (response) {
+          const { list } = response
+          commit('SET_STATE', {
+            list: list,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    SAVE({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
 
+      const save = mapApiProviders.save
+      save(payload).then(response => {
+        if (response) {
+          // dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was created successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    PUBLISH({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const publish = mapApiProviders.publish
+      publish(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was published successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UNPUBLISH({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const unpublish = mapApiProviders.unpublish
+      unpublish(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was unpublished successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DEACTIVATE({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const deactivate = mapApiProviders.deactivate
+      deactivate(payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was deactivated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const id = payload.vpOpcrId
+      const update = mapApiProviders.update
+      update(id, payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was updated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+
+    UPDATE_DATA_SOURCE({ commit }, { payload }) {
+      const { isNew, data } = payload
+      if(isNew) {
+        commit('ADD_STATE_ITEM', {
+          type: 'dataSource',
+          details: data,
+        })
+      }else {
+        commit('SET_STATE', {
+          dataSource: data,
+        })
+      }
+    },
+    UPDATE_SOURCE_ITEM({ commit }, { payload }) {
+      commit('UPDATE_STATE_ITEM', {
+        type: 'dataSource',
+        details: payload.updateData.value,
+        index: payload.updateId,
+      })
+    },
+    UPDATE_SOURCE_SUB_ITEM({ commit }, { payload }) {
+      commit('UPDATE_STATE_SUB_ITEM', {
+        type: 'dataSource',
+        details: payload.updateData.value,
+        index: payload.updateId,
+        parent: payload.parentId,
+      })
+    },
+    DELETE_SOURCE_ITEM({ commit }, { payload }) {
+      commit('DELETE_STATE_ITEM', {
+        type: 'dataSource',
+        key: payload.key,
+      })
+    },
   },
   getters: {
     form: state => state,

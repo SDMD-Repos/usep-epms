@@ -40,17 +40,17 @@ import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import IndicatorComponent from './partials/items'
 import { useFormOperations } from '@/services/functions/indicator'
-import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/aapcr'
+import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/opcr/template'
 
 export default defineComponent({
-  name: "AAPCRForm",
+  name: "OPCRTemplateForm",
   components: { IndicatorComponent },
   props: {
     formId: { type: String, default: '' },
     aapcrId: { type: Number, default: 0 },
   },
   setup(props) {
-    const PAGE_TITLE = "AAPCR Form"
+    const PAGE_TITLE = "OPCR Template Form"
 
     const store = useStore()
     const router = useRouter()
@@ -121,8 +121,8 @@ export default defineComponent({
             isCheckingForm.value = false
             if(hasSaved) {
               Modal.error({
-                title: () => 'Unable to create an AAPCR for the year ' + year.value,
-                content: () => 'Please check the AAPCR list or select a different year to create a new AAPCR',
+                title: () => 'Unable to create an OPCR Template for the year ' + year.value,
+                content: () => 'Please check the OPCR Template list or select a different year to create a new OPCR Template',
               })
               if (editMode.value) {
                 year.value = cachedYear.value
@@ -149,7 +149,7 @@ export default defineComponent({
     }
 
     const getFormDetails = () => {
-      store.commit('aapcr/SET_STATE', {
+      store.commit('opcr/template/SET_STATE', {
         loading: true,
       })
       fetchFormDetails(aapcrId.value).then(response => {
@@ -164,7 +164,7 @@ export default defineComponent({
           isFinalized.value = response.isFinalized
           editMode.value = true
         }
-        store.commit('aapcr/SET_STATE', {
+        store.commit('opcr/template/SET_STATE', {
           loading: false,
         })
       })
@@ -208,7 +208,7 @@ export default defineComponent({
       }
       if (!editMode.value) {
         details.isFinalized = isFinal
-        store.dispatch('aapcr/SAVE', { payload: details })
+        store.dispatch('opcr/template/SAVE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })
@@ -216,7 +216,7 @@ export default defineComponent({
         details.isFinalized = isFinal || isFinalized.value
         details.deletedIds = deletedItems.value
         details.aapcrId = aapcrId.value
-        store.dispatch('aapcr/UPDATE', { payload: details })
+        store.dispatch('opcr/template/UPDATE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })

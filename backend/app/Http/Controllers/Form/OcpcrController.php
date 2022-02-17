@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Form;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\OfficeTrait;
 use App\VpOpcr;
+use App\OpcrTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,31 +35,25 @@ class OcpcrController extends Controller
 
     }
 
-    public function getVpOpcrDetails($officeId, $year, $formId)
+    public function checkSaved($year)
     {
-        $vpOfficeId = $this->getOfficeParentId($officeId, $formId);
-
-        if($formId === 'opcr' && $vpOfficeId === null) {
-            return response()->json("Department selected has no VP office assigned. Please contact the administrator", 400);
-        }
-
-        $getPIs = VpOpcr::where([
+        $hasSaved = OpcrTemplate::where([
             ['year', $year],
             ['is_active', 1]
-        ])->whereNotNull('published_date')
-            ->with([
-                'detailsOrdered' => function ($que) use ($officeId, $vpOfficeId) {
-                    $que->whereHas('offices', function ($query) use ($officeId, $vpOfficeId)  {
-                        $query->where(function ($que) use ($officeId, $vpOfficeId) {
-                            $que->where(function($q) use ($vpOfficeId) {
-                                $q->where('office_id', '=', $vpOfficeId)
-                                    ->whereNull('vp_office_id');
-                            })->orWhere('office_id', '=', $officeId);
-                        });
-                    });
-                }, 'detailsOrdered.offices', 'detailsOrdered.measures'
-            ])->get();
+        ])->first();
 
-        dd($getPIs);
+        return response()->json([
+            'hasSaved' => $hasSaved !== null
+        ], 200);
     }
+
+    public function getAllOpcrTemplates()
+    {
+        $list = OpcrTemplate::select("*", "id as key")->orderBy('created_at', 'ASC')->get();
+
+        return response()->json([
+            'list' => $list
+        ], 200);
+    }
+
 }
