@@ -88,11 +88,8 @@ export default defineComponent({
         if(isExists) {
           return
         }
-        console.log("data.value", data.value)
-        console.log("find", find)
         isExists = data.value === find
       })
-      console.log('isExists', isExists)
       return isExists
     }
 

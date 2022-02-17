@@ -4,7 +4,8 @@
       <a-row type="flex">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
-          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormDetails">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" :disabled="editMode"
+                    @change="checkFormDetails">
             <template v-for="(y, i) in years" :key="i">
               <a-select-option :value="y"> {{ y }} </a-select-option>
             </template>
@@ -18,7 +19,7 @@
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>VP Office :</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
           <a-select v-model:value="vpOffice" placeholder="Select VP Office" style="width: 100%" :options="vpOfficesList"
-                    option-label-prop="title" allow-clear label-in-value @change="checkFormDetails()">
+                    option-label-prop="title" allow-clear label-in-value :disabled="editMode" @change="checkFormDetails()">
             <template #option="{ title }">
               {{ title }}
             </template>
@@ -53,11 +54,11 @@
 <script>
 import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
-import { checkSaved, getAapcrDetailsByOffice } from '@/services/api/mainForms/opcrvp'
+import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/opcrvp'
 import IndicatorComponent from './partials/items'
 
 export default defineComponent({
@@ -71,6 +72,7 @@ export default defineComponent({
 
     const store = useStore()
     const router = useRouter()
+    const route = useRoute()
 
     const vpOffice = ref(undefined)
     const aapcrId = ref(null)
@@ -101,7 +103,14 @@ export default defineComponent({
 
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      onLoad()
+
+      vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
+
+      if(vpOpcrId.value) {
+        getVpOpcrDetails()
+      } else {
+        onLoad()
+      }
     })
 
     // METHODS
@@ -188,6 +197,28 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_PROGRAMS')
     }
 
+    const getVpOpcrDetails = () => {
+      store.commit('opcrvp/SET_STATE', { loading: true })
+      fetchFormDetails(vpOpcrId.value).then(response => {
+        if(response.aapcrId) {
+          allowEdit.value = true
+
+          onLoad()
+          initializeVPForm()
+
+          store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
+
+          year.value = response.year
+          vpOffice.value = response.vpOffice
+          aapcrId.value = response.aapcrId
+          targetsBasisList.value = response.targetsBasisList
+          isFinalized.value = response.isFinalized
+          editMode.value = response.editMode
+        }
+        store.commit('opcrvp/SET_STATE', { loading: false })
+      })
+    }
+
     const validateForm = isFinal => {
       if(!dataSource.value.length) {
         Modal.error({
@@ -228,7 +259,7 @@ export default defineComponent({
         }
         store.dispatch('opcrvp/SAVE', { payload: details })
           .then(() => {
-            // router.push({ name: 'form.list', params: { formId: props.formId } })
+            router.push({ name: 'form.list', params: { formId: props.formId } })
           })
       }else {
         const details = {
@@ -239,7 +270,7 @@ export default defineComponent({
         }
         store.dispatch('opcrvp/UPDATE', { payload: details })
           .then(() => {
-            // router.push({ name: 'form.list', params: { formId: props.formId } })
+            router.push({ name: 'form.list', params: { formId: props.formId } })
           })
       }
     }

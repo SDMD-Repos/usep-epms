@@ -2,7 +2,7 @@
   <div>
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
 
     <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
@@ -68,6 +68,13 @@ export default defineComponent({
     })
 
     // METHODS
+    const updateForm = id => {
+      router.push({
+        name: 'main.form',
+        params: { formId: props.formId, vpOpcrId: id },
+      })
+    }
+
     const renderColumns = () => {
       const index = listTableColumns.findIndex(i => i.key === 'documentName')
       let copyColumns = []
@@ -184,6 +191,7 @@ export default defineComponent({
       isUploadedViewed,
       viewedForm,
 
+      updateForm,
       publish,
       viewPdf,
       uploadFile,
