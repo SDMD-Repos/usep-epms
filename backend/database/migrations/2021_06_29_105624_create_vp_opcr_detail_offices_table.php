@@ -16,8 +16,8 @@ class CreateVpOpcrDetailOfficesTable extends Migration
         Schema::create('vp_opcr_detail_offices', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->integer('detail_id');
-            $table->string('office_type_id', 15);
-            $table->string('cascade_to', 25);
+            $table->integer('office_type_id');
+            $table->integer('cascade_to');
             $table->string('vp_office_id', 15)->nullable();
             $table->string('office_id',25);
             $table->string('office_name',50);

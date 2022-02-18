@@ -14,14 +14,13 @@ class CreateOfficeTypesTable extends Migration
     public function up()
     {
         Schema::create('office_types', function (Blueprint $table) {
-            $table->string('id', 15);
+            $table->integer('id')->autoIncrement();
+            $table->string('code', 25);
             $table->string('name', 50);
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-
-            $table->primary('id');
         });
     }
 

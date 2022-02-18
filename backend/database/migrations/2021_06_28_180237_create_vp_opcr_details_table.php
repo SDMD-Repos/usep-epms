@@ -22,7 +22,7 @@ class CreateVpOpcrDetailsTable extends Migration
             $table->string('target')->nullable();
             $table->float('allocated_budget', 11, 2)->nullable();
             $table->string('targets_basis', 100)->nullable();
-            $table->string('category_id', 25);
+            $table->integer('category_id');
             $table->integer('sub_category_id')->nullable();
             $table->integer('program_id')->nullable();
             $table->text('remarks')->nullable();

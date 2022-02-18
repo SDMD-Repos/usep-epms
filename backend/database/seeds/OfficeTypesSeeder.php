@@ -14,12 +14,12 @@ class OfficeTypesSeeder extends Seeder
     {
         DB::table('office_types')->insert([
             [
-                'id' => 'implementing',
+                'code' => 'implementing',
                 'name' => 'Implementing Office',
                 'create_id' => 'admin'
             ],
             [
-                'id' => 'supporting',
+                'code' => 'supporting',
                 'name' => 'Support Office',
                 'create_id' => 'admin'
             ]

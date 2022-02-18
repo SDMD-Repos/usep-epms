@@ -14,13 +14,12 @@ class CreateSignatoryTypesTable extends Migration
     public function up()
     {
         Schema::create('signatory_types', function (Blueprint $table) {
-            $table->string('id', 15);
+            $table->integer('id')->autoIncrement();
+            $table->string('code', 25);
             $table->string('name', 200);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();
-
-            $table->primary('id');
         });
     }
 

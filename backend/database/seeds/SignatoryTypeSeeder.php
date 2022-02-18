@@ -14,15 +14,15 @@ class SignatoryTypeSeeder extends Seeder
     {
         DB::table('signatory_types')->insert([
             [
-                'id' => 'reviewed_by',
+                'code' => 'reviewed_by',
                 'name' => 'Reviewed by'
             ],
             [
-                'id' => 'approved_by',
+                'code' => 'approved_by',
                 'name' => 'Approved by'
             ],
             [
-                'id' => 'prepared_by',
+                'code' => 'prepared_by',
                 'name' => 'Prepared by'
             ]
         ]);

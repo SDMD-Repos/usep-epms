@@ -14,7 +14,7 @@ class CreateCategoriesTable extends Migration
     public function up()
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->string('id', 25);
+            $table->integer('id')->autoIncrement();
             $table->string('name', 100);
             $table->integer('percentage');
             $table->integer('order');
@@ -24,8 +24,6 @@ class CreateCategoriesTable extends Migration
             $table->string('modify_id', 35)->nullable();
             $table->softDeletes();
             $table->text('history');
-
-            $table->primary(['id', 'percentage']);
         });
     }
 

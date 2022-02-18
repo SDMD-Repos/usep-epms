@@ -16,7 +16,7 @@ class CreateProgramsTable extends Migration
         Schema::create('programs', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->string('name', 100);
-            $table->string('category_id', 25);
+            $table->integer('category_id');
             $table->integer('percentage')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);

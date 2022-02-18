@@ -14,7 +14,8 @@ class CreateCascadingLevelsTable extends Migration
     public function up()
     {
         Schema::create('cascading_levels', function (Blueprint $table) {
-            $table->string('id', 50);
+            $table->integer('id')->autoIncrement();
+            $table->string('code', 25);
             $table->string('name', 100);
             $table->integer('ordering');
             $table->timestamp('created_at')->useCurrent();
@@ -23,8 +24,6 @@ class CreateCascadingLevelsTable extends Migration
             $table->string('modify_id', 35)->nullable();
             $table->softDeletes();
             $table->text('history');
-
-            $table->primary('id');
         });
     }
 

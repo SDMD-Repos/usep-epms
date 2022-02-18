@@ -15,28 +15,28 @@ class CascadingLevelSeeder extends Seeder
     {
         DB::table('cascading_levels')->insert([
             [
-                'id' => 'vps',
+                'code' => 'vps',
                 'name' => 'VPs',
                 'ordering' => 1,
                 'create_id' => 'admin',
                 'history' => 'Created ' . Carbon::now() . " by admin\n"
             ],
             [
-                'id' => 'offices',
+                'code' => 'offices',
                 'name' => 'Offices',
                 'ordering' => 2,
                 'create_id' => 'admin',
                 'history' => 'Created ' . Carbon::now() . " by admin\n"
             ],
             [
-                'id' => 'colleges',
+                'code' => 'colleges',
                 'name' => 'Colleges',
                 'ordering' => 3,
                 'create_id' => 'admin',
                 'history' => 'Created ' . Carbon::now() . " by admin\n"
             ],
             [
-                'id' => 'individuals',
+                'code' => 'individuals',
                 'name' => 'Individuals',
                 'ordering' => 4,
                 'create_id' => 'admin',

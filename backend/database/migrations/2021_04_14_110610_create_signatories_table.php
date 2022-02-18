@@ -16,7 +16,7 @@ class CreateSignatoriesTable extends Migration
         Schema::create('signatories', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->year('year');
-            $table->string('type_id', 15);
+            $table->integer('type_id');
             $table->string('form_id', 15);
             $table->string('personnel_id', 30)->nullable();
             $table->string('personnel_name', 150);
