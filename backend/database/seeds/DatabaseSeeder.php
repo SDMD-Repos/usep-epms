@@ -13,14 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CascadingLevelSeeder::class,
-            CategorySeeder::class,
             FormSeeder::class,
-            MeasureSeeder::class,
-            MeasureItemsSeeder::class,
             OfficeTypesSeeder::class,
-            ProgramSeeder::class,
             SignatoryTypeSeeder::class,
-            SubCategorySeeder::class,
         ]);
     }
 }
