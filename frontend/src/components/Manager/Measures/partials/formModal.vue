@@ -50,7 +50,7 @@ import { PlusOutlined } from '@ant-design/icons-vue'
 import { message } from "ant-design-vue"
 
 export default defineComponent({
-  name: 'FormModal',
+  name: 'MeasuresFormModal',
   components: {
     PlusOutlined,
   },

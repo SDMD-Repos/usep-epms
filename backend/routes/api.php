@@ -52,7 +52,7 @@ Route::group([
     Route::post('/create-sub-category', 'SettingController@createSubCategory');
     Route::post('/delete-sub-category/{id}', 'SettingController@deleteSubCategory');
 
-    Route::get('/get-all-measures', 'SettingController@getMeasures');
+    Route::get('/get-all-measures/{year}', 'SettingController@getMeasures');
     Route::post('/create-measure', 'SettingController@createMeasure');
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');

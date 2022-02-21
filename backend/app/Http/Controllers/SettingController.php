@@ -298,9 +298,9 @@ class SettingController extends Controller
         }
     }
 
-    public function getMeasures()
+    public function getMeasures($year)
     {
-        $measures = Measure::select('id', 'name', 'id as key', 'created_at')->with('items')->get();
+        $measures = Measure::select('id', 'name', 'year', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
 
         return response()->json([
             'measures' => $measures
@@ -318,6 +318,7 @@ class SettingController extends Controller
             $measure = new Measure;
 
             $measure->name = $validated['name'];
+            $measure->year = $validated['year'];
             $measure->create_id = $this->login_user->pmaps_id;
             $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 

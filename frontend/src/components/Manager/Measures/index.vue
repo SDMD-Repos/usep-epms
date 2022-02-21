@@ -1,48 +1,59 @@
 <template>
-  <a-table :columns="columns" :data-source="measuresList" :loading="loading" bordered>
-    <template #title>
-      <a-button type="primary" class="mr-3" @click="openModal('create', null)">
-        <template #icon><PlusOutlined /></template>
-        New Measure
-      </a-button>
-    </template>
+  <div>
+    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchMeasures">
+      <template v-for="(y, i) in years" :key="i">
+        <a-select-option :value="y">
+          {{ y }}
+        </a-select-option>
+      </template>
+    </a-select>
 
-    <template #dateCreated="{ record }">
-      {{ moment(record.created_at).format(mainStore.dateFormat) }}
-    </template>
+    <div class="mt-4">
+      <a-table :columns="columns" :data-source="measuresList" :loading="loading" bordered>
+        <template #title>
+          <a-button type="primary" class="mr-3" @click="openModal('create', null)">
+            <template #icon><PlusOutlined /></template>
+            New Measure
+          </a-button>
+          <a-button type="link" v-if="previousMeasures.length" @click="openPreviousMeasures">Add {{ year - 1}} measures</a-button>
+        </template>
 
-    <template #operation="{ record }">
-      <a @click="openModal('view', record)">View</a>
-      <a-divider type="vertical" />
-      <a-popconfirm
-        title="Are you sure you want to delete this?"
-        @confirm="onDelete(record.key)"
-        ok-text="Yes"
-        cancel-text="No"
-      >
-        <template #icon><warning-outlined /></template>
-        <a type="primary">Delete</a>
-      </a-popconfirm>
-    </template>
-  </a-table>
-  <form-modal :visible="isOpenModal"
-              :action-type="action"
-              :modal-title="modalTitle"
-              :ok-text="okText"
-              :form-state="formState"
-              :validate="validate"
-              :validate-infos="validateInfos"
-              @close-modal="resetModalData"
-              @change-action="changeAction"
-              @submit-form="onSubmit"/>
+        <template #dateCreated="{ record }">
+          {{ moment(record.created_at).format(mainStore.dateFormat) }}
+        </template>
+
+        <template #operation="{ record }">
+          <a @click="openModal('view', record)">View</a>
+          <a-divider type="vertical" />
+          <a-popconfirm
+            title="Are you sure you want to delete this?"
+            @confirm="onDelete(record.key)"
+            ok-text="Yes"
+            cancel-text="No"
+          >
+            <template #icon><warning-outlined /></template>
+            <a type="primary">Delete</a>
+          </a-popconfirm>
+        </template>
+      </a-table>
+    </div>
+
+    <form-modal :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"
+                :form-state="formState" :validate="validate" :validate-infos="validateInfos"
+                @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"/>
+
+    <measures-previous-list :visible="isPreviousViewed" :year="year" :list="previousMeasures"
+                            @save-measures="onMultipleSave" @close-modal="closePreviousMeasure" />
+  </div>
 </template>
 <script>
 import { computed, defineComponent, ref, reactive, toRaw, createVNode, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import moment from 'moment'
-import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import FormModal from './partials/formModal'
 import { Form, Modal } from "ant-design-vue";
+import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import moment from 'moment'
+import FormModal from './partials/formModal'
+import MeasuresPreviousList from './partials/previousList'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -53,10 +64,12 @@ const columns = [
 const useForm = Form.useForm
 
 export default defineComponent({
+  name: 'MeasuresList',
   components: {
     WarningOutlined,
     PlusOutlined,
     FormModal,
+    MeasuresPreviousList,
   },
   setup() {
     const store = useStore()
@@ -66,10 +79,12 @@ export default defineComponent({
     let action = ref('')
     let modalTitle = ref('')
     let okText = ref('')
-    const measureId = ref()
+    const year = ref(new Date().getFullYear())
+    const isPreviousViewed = ref(false)
 
     const formState = reactive({
       id: null,
+      year: year.value,
       name: '',
       items: [],
       deleted: [],
@@ -77,7 +92,7 @@ export default defineComponent({
 
     const rules = reactive({
       name: [
-        { required: true, message: 'This field is required', trigger: 'change' },
+        { required: true, message: 'This field is required', trigger: 'blur' },
         { whitespace: true, message: 'Please input a valid Group name', trigger: 'change' },
         { min: 3, message: 'Length should be at least 3 characters', trigger: 'change' },
       ],
@@ -86,20 +101,35 @@ export default defineComponent({
     // COMPUTED
     const mainStore = computed(() => store.getters.mainStore)
     const measuresList = computed(() => store.getters['formManager/manager'].measures)
+    const previousMeasures = computed(() => store.getters['formManager/manager'].previousMeasures)
     const loading = computed(() => store.getters['formManager/manager'].loading)
+
+    const years = computed(() => {
+      const max = new Date().getFullYear() + 1
+      const min = 10
+      const lists = []
+      for (let i = max; i >= (max - min); i--) {
+        lists.push(i)
+      }
+      return lists
+    })
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_MEASURES')
+      fetchMeasures(year.value)
     })
 
     // METHODS
+    const fetchMeasures = async selectedYear => {
+      await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: (selectedYear - 1), isPrevious: true }})
+    }
+
     const openModal = (event, record) => {
       resetModalData()
       isOpenModal.value = true
       const measureId = record !== null ? record.id : record
       if (measureId) {
-        // const formItems = record.items
         formState.id = record.id
         formState.name = record.name
         formState.items = record.items
@@ -124,7 +154,7 @@ export default defineComponent({
     }
 
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_MEASURE', { payload: key })
+      store.dispatch('formManager/DELETE_MEASURE', { payload: { id: key, year: year.value } })
     }
 
     const { resetFields, validate, validateInfos } = useForm(formState, rules)
@@ -154,6 +184,30 @@ export default defineComponent({
       });
     }
 
+    const openPreviousMeasures = () => {
+      isPreviousViewed.value = true
+    }
+
+    const closePreviousMeasure = () => {
+      isPreviousViewed.value = false
+    }
+
+    const onMultipleSave = keys => {
+      const saveKeys = previousMeasures.value.filter(item => {
+        return keys.indexOf(item.key) !== -1
+      })
+
+      saveKeys.forEach(item => {
+        const data = {
+          name: item.name,
+          year: year.value,
+          items: item.items,
+        }
+        store.dispatch('formManager/CREATE_MEASURE', { payload: data })
+      })
+      closePreviousMeasure()
+    }
+
     return {
       columns,
       moment,
@@ -162,20 +216,28 @@ export default defineComponent({
       action,
       modalTitle,
       okText,
+      year,
+      isPreviousViewed,
       formState,
 
       mainStore,
       measuresList,
+      previousMeasures,
       loading,
+      years,
 
       validate,
       validateInfos,
 
+      fetchMeasures,
       openModal,
       onDelete,
       resetModalData,
       changeAction,
       onSubmit,
+      openPreviousMeasures,
+      closePreviousMeasure,
+      onMultipleSave,
     }
   },
 })

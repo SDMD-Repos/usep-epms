@@ -81,9 +81,9 @@ export async function deleteSubCategory(id) {
     .catch(err => console.log(err))
 }
 
-export async function getMeasures() {
+export async function getMeasures(year) {
   return apiClient
-    .get('/settings/get-all-measures')
+    .get('/settings/get-all-measures/' + year)
     .then(response => {
       return response.data
     })

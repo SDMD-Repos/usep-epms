@@ -15,6 +15,7 @@ class CreateMeasuresTable extends Migration
     {
         Schema::create('measures', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
+            $table->year('year');
             $table->string('name', 50);
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);

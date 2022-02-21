@@ -35,6 +35,7 @@ export default {
     programs: [],
     subCategories: [],
     measures: [],
+    previousMeasures: [],
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -231,18 +232,22 @@ export default {
         })
       })
     },
-    FETCH_MEASURES({ commit }) {
+    FETCH_MEASURES({ commit }, { payload }) {
+      const { year } = payload
+
       commit('SET_STATE', {
         loading: true,
       })
 
       const getMeasures = mapApiProviders.getMeasures
-      getMeasures().then(response => {
+      getMeasures(year).then(response => {
         if (response) {
           const { measures } = response
-          commit('SET_STATE', {
-            measures: measures,
-          })
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousMeasures: measures })
+          }else {
+            commit('SET_STATE', { measures: measures })
+          }
         }
         commit('SET_STATE', {
           loading: false,
@@ -255,21 +260,22 @@ export default {
       })
       const data = {
         name: payload.name,
+        year: payload.year,
         items: payload.items,
       }
 
       const createMeasure = mapApiProviders.createMeasure
       createMeasure(data).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES')
+          dispatch('FETCH_MEASURES', { payload : { year: payload.year }})
           notification.success({
             message: 'Success',
             description: 'Measure created successfully',
           })
         }
-        commit('SET_STATE', {
+        /*commit('SET_STATE', {
           loading: false,
-        })
+        })*/
       })
     },
     UPDATE_MEASURE({ commit, dispatch }, { payload }) {
@@ -286,7 +292,7 @@ export default {
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES')
+          dispatch('FETCH_MEASURES', { payload : { year: payload.year }})
           notification.success({
             message: 'Success',
             description: 'Measure updated successfully',
@@ -298,7 +304,7 @@ export default {
       })
     },
     DELETE_MEASURE({ commit, dispatch }, { payload }) {
-      const id = payload
+      const { id, year } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -306,7 +312,7 @@ export default {
       const deleteMeasure = mapApiProviders.deleteMeasure
       deleteMeasure(id).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES')
+          dispatch('FETCH_MEASURES', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Measure deleted successfully',
