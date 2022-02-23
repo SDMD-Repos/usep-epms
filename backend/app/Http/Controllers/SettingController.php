@@ -220,9 +220,9 @@ class SettingController extends Controller
         }
     }
 
-    public function getPrograms()
+    public function getPrograms($year)
     {
-        $programs = Program::select("*", "id as key")->with('category')->get();
+        $programs = Program::select("*", "id as key")->where('year', $year)->with('category')->get();
 
         return response()->json([
             'programs' => $programs
@@ -241,6 +241,7 @@ class SettingController extends Controller
             $program->name = $validated['name'];
             $program->category_id = $validated['category_id'];
             $program->percentage = $validated['percentage'];
+            $program->year = $validated['year'];
             $program->create_id = $this->login_user->pmaps_id;
             $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 

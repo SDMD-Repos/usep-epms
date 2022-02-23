@@ -36,6 +36,7 @@ export default {
     subCategories: [],
     measures: [],
     previousMeasures: [],
+    previousPrograms: [],
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -108,18 +109,26 @@ export default {
         })
       })
     },
-    FETCH_PROGRAMS({ commit }) {
+    FETCH_PROGRAMS({ commit }, { payload }) {
+      console.log("payload")
+      console.log(payload)
+      const { year } = payload
+
       commit('SET_STATE', {
         loading: true,
       })
 
       const getPrograms = mapApiProviders.getPrograms
-      getPrograms().then(response => {
+      getPrograms(year).then(response => {
         if (response) {
           const { programs } = response
-          commit('SET_STATE', {
-            programs: programs,
-          })
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousPrograms: programs })
+          }else{
+            commit('SET_STATE', {
+              programs: programs,
+            })
+          }
         }
         commit('SET_STATE', {
           loading: false,

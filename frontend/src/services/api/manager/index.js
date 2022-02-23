@@ -27,9 +27,9 @@ export function deleteFunction(id) {
     .catch(err => console.log(err))
 }
 
-export async function getPrograms() {
+export async function getPrograms(year) {
   return apiClient
-    .get('/settings/get-all-programs')
+    .get('/settings/get-all-programs/' + year)
     .then(response => {
       return response.data
     })

@@ -30,12 +30,16 @@ export default defineComponent({
   components: {
     WarningOutlined,
   },
-  setup() {
+  props: {
+    year: { type: Number, default: null },
+  },
+
+  setup(props, { emit }) {
     const store = useStore()
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
     onMounted(() => {
-      store.dispatch('formManager/FETCH_PROGRAMS')
+      store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: props.year, isPrevious: false }})
     })
 
     // METHODS

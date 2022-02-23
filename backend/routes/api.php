@@ -44,7 +44,7 @@ Route::group([
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
 
-    Route::get('/get-all-programs', 'SettingController@getPrograms');
+    Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
     Route::post('/delete-program/{id}', 'SettingController@deleteProgram');
 
