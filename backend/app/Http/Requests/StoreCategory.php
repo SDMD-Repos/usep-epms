@@ -25,8 +25,12 @@ class StoreCategory extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', Rule::unique('categories')->whereNull('deleted_at')],
-            'percentage' => 'required|integer'
+            'name' => [
+                'required',
+                Rule::unique('categories')->whereNull('deleted_at')->where('year', $this->year)
+            ],
+            'percentage' => 'required|integer',
+            'year' => ''
         ];
     }
 }

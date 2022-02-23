@@ -64,7 +64,7 @@ export default defineComponent({
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
-        return i.category_id === formState.category_id
+        return i.category_id === parseInt(formState.category_id)
       })
       parents.forEach(item => {
         item.selectable = true

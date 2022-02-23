@@ -40,7 +40,7 @@ Route::group([
     'prefix' => 'settings',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('/get-all-functions', 'SettingController@getFunctions');
+    Route::get('/get-all-functions/{year}', 'SettingController@getFunctions');
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
 

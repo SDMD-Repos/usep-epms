@@ -1,6 +1,6 @@
 <template>
   <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
-           @ok="addPreviousPrograms" @cancel="closeModal">
+           @ok="addPreviousFunctions" @cancel="closeModal">
     <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false"
              :row-class-name="(record, index) => (index % 2 === 1 ? 'table-striped' : null)"
@@ -14,7 +14,6 @@ import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
-  { title: 'Function', dataIndex: 'category.name', key: 'category_id' },
   { title: 'Percentage', dataIndex: 'percentage' },
 ]
 
@@ -24,7 +23,7 @@ export default defineComponent({
     year: { type: Number, default: new Date().getFullYear() },
     list: { type: Array, default: () => { return [] }},
   },
-  emits: ['close-modal', 'save-programs'],
+  emits: ['close-modal', 'save-functions'],
   setup(props, { emit }) {
     const isVisible = ref(false)
     const state = reactive({
@@ -40,7 +39,7 @@ export default defineComponent({
       state.selectedRowKeys = selectedRowKeys;
     }
 
-    const addPreviousPrograms = () => {
+    const addPreviousFunctions = () => {
       Modal.confirm({
         title: () => 'Are you sure you want to add this to list?',
         icon: () => createVNode(ExclamationCircleOutlined),
@@ -48,7 +47,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
-          emit('save-programs', state.selectedRowKeys)
+          emit('save-functions', state.selectedRowKeys)
           state.selectedRowKeys = []
         },
         onCancel() {},
@@ -67,7 +66,7 @@ export default defineComponent({
       ...toRefs(state),
 
       onSelectChange,
-      addPreviousPrograms,
+      addPreviousFunctions,
       closeModal,
     }
   },

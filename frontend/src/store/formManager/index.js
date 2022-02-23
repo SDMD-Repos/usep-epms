@@ -32,6 +32,7 @@ export default {
   namespaced: true,
   state: {
     functions: [],
+    previousFunctions: [],
     programs: [],
     subCategories: [],
     measures: [],
@@ -52,18 +53,21 @@ export default {
     },
   },
   actions: {
-    FETCH_FUNCTIONS({ commit }) {
+    FETCH_FUNCTIONS({ commit }, { payload }) {
+      const { year } = payload
       commit('SET_STATE', {
         loading: true,
       })
 
       const getFunctions = mapApiProviders.getFunctions
-      getFunctions().then(response => {
+      getFunctions(year).then(response => {
         if (response) {
           const { categories } = response
-          commit('SET_STATE', {
-            functions: categories,
-          })
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousFunctions: categories })
+          }else {
+            commit('SET_STATE', { functions: categories })
+          }
         }
         commit('SET_STATE', {
           loading: false,
@@ -71,47 +75,42 @@ export default {
       })
     },
     CREATE_FUNCTION({ commit, dispatch }, { payload }) {
-      commit('SET_STATE', {
-        loading: true,
-      })
+      const { year } = payload
+
+      commit('SET_STATE', { loading: true })
 
       const createFunction = mapApiProviders.createFunction
       createFunction(payload).then(response => {
         if (response) {
-          dispatch('FETCH_FUNCTIONS')
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
           notification.success({
             message: 'Success',
             description: 'Function created successfully',
           })
+        }else {
+          commit('SET_STATE', { loading: false })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     DELETE_FUNCTION({ commit, dispatch }, { payload }) {
-      const id = payload
-      commit('SET_STATE', {
-        loading: true,
-      })
+      const { id, year } = payload
+
+      commit('SET_STATE', { loading: true })
 
       const deleteFunction = mapApiProviders.deleteFunction
       deleteFunction(id).then(response => {
         if (response) {
-          dispatch('FETCH_FUNCTIONS')
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
           notification.success({
             message: 'Success',
             description: 'Function deleted successfully',
           })
+        }else {
+          commit('SET_STATE', { loading: false })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     FETCH_PROGRAMS({ commit }, { payload }) {
-      console.log("payload")
-      console.log(payload)
       const { year } = payload
 
       commit('SET_STATE', {
@@ -124,6 +123,7 @@ export default {
           const { programs } = response
           if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousPrograms: programs })
+
           }else{
             commit('SET_STATE', {
               programs: programs,
@@ -141,6 +141,7 @@ export default {
       })
       const data = {
         name: payload.name,
+        year: payload.year,
         category_id: payload.category_id,
         percentage: payload.percentage,
       }
@@ -148,7 +149,7 @@ export default {
       const createProgram = mapApiProviders.createProgram
       createProgram(data).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS')
+          dispatch('FETCH_PROGRAMS', { payload : { year: payload.year }})
           notification.success({
             message: 'Success',
             description: 'Program created successfully',
@@ -168,7 +169,7 @@ export default {
       const deleteProgram = mapApiProviders.deleteProgram
       deleteProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS')
+          dispatch('FETCH_PROGRAMS', { payload : { year: payload.year }})
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',
@@ -281,10 +282,9 @@ export default {
             message: 'Success',
             description: 'Measure created successfully',
           })
+        }else {
+          commit('SET_STATE', { loading: false })
         }
-        /*commit('SET_STATE', {
-          loading: false,
-        })*/
       })
     },
     UPDATE_MEASURE({ commit, dispatch }, { payload }) {
@@ -306,10 +306,9 @@ export default {
             message: 'Success',
             description: 'Measure updated successfully',
           })
+        }else {
+          commit('SET_STATE', { loading: false })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     DELETE_MEASURE({ commit, dispatch }, { payload }) {
@@ -326,10 +325,9 @@ export default {
             message: 'Success',
             description: 'Measure deleted successfully',
           })
+        }else {
+          commit('SET_STATE', { loading: false })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     FETCH_ALL_FORMS({ commit }) {

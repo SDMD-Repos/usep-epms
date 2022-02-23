@@ -28,7 +28,7 @@ class StoreProgram extends FormRequest
             'name' => [
                 'required',
                 'max:100',
-                Rule::unique('programs')->whereNull('deleted_at')->where(function ($query) {
+                Rule::unique('programs')->where('year', $this->year)->whereNull('deleted_at')->where(function ($query) {
                     return $query->where('name', $this->name)->where('category_id', $this->category_id);
                 })
             ],

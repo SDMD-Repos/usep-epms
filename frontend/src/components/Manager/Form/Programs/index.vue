@@ -1,55 +1,52 @@
 <template>
-  <div>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
+    <a-select v-model:value="formState.year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
       <template v-for="(y, i) in years" :key="i">
         <a-select-option :value="y">
           {{ y }}
         </a-select-option>
       </template>
     </a-select>
+    <div class="mt-5">
+      <a-spin :spinning="loading">
+        <a-form layout="vertical"
+                ref="formRef"
+                :model="formState"
+                :rules="rules">
+          <div class="row">
+            <div class="col-lg-6">
+              <a-form-item ref="name" label="Program Name" name="name">
+                <a-input v-model:value="formState.name" />
+              </a-form-item>
+            </div>
+            <div class="col-lg-4">
+              <a-form-item ref="category_id" label="Functions" name="category_id">
+                <a-select v-model:value="formState.category_id" >
+                  <a-select-option v-for="func in functions"
+                                   :value="func.id"
+                                   :key="func.id"
+                                   :label="func.name">
+                    {{ func.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </div>
+            <div class="col-lg-2">
+              <a-form-item ref='percentage' label="Percentage" name="percentage">
+                <a-input-number v-model:value="formState.percentage" :min="1" :max="100" style="width: 100%"/>
+              </a-form-item>
+            </div>
+          </div>
+          <div class="form-actions mt-0">
+            <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+            <a-button type="link" v-if="previousPrograms.length" @click="changePreviousModal">Add {{ formState.year - 1}} Programs</a-button>
+          </div>
+        </a-form>
+        <programs-table/>
 
-    <a-spin :spinning="loading">
-      <a-form layout="vertical"
-              ref="formRef"
-              :model="formState"
-              :rules="rules">
-        <div class="row">
-          <div class="col-lg-6">
-            <a-form-item ref="name" label="Program Name" name="name">
-              <a-input v-model:value="formState.name" />
-            </a-form-item>
-          </div>
-          <div class="col-lg-4">
-            <a-form-item ref="category_id" label="Functions" name="category_id">
-              <a-select v-model:value="formState.category_id" >
-                <a-select-option v-for="func in functions"
-                                 :value="func.id"
-                                 :key="func.id"
-                                 :label="func.name">
-                  {{ func.name }}
-                </a-select-option>
-              </a-select>
-            </a-form-item>
-          </div>
-          <div class="col-lg-2">
-            <a-form-item ref='percentage' label="Percentage" name="percentage">
-              <a-input-number v-model:value="formState.percentage" :min="1" :max="100" style="width: 100%"/>
-            </a-form-item>
-          </div>
-        </div>
-        <template #title>
-          <a-button type="primary" class="mr-3" @click="openModal('create', null)">
-            <template #icon><PlusOutlined /></template>
-            New Program
-          </a-button>
-          <a-button type="link" v-if="previousPrograms.length" @click="openPreviousPrograms">Add {{ year - 1}} Programs</a-button>
-        </template>
-      </a-form>
-      <programs-previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"
-                              @save-measures="onMultipleSave" @close-modal="closePreviousPrograms" />
-      <programs-table :year="year" />
-    </a-spin>
-  </div>
+        <previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"
+                       @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
+      </a-spin>
+    </div>
 </template>
 <script>
 import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
@@ -57,12 +54,12 @@ import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import ProgramsTable from './partials/lists'
-import ProgramsPreviousList from './partials/previousList'
+import PreviousList from './partials/previousList'
 
 export default defineComponent({
   components: {
     ProgramsTable,
-    ProgramsPreviousList,
+    PreviousList,
   },
   setup() {
     const store = useStore()
@@ -71,7 +68,9 @@ export default defineComponent({
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const programsList = computed(() => store.getters['formManager/manager'].programs)
     const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
+
     const formRef = ref()
+    const isPreviousViewed = ref(false)
     const formState = reactive({
       name: '',
       year: year.value,
@@ -116,7 +115,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      store.dispatch('formManager/FETCH_FUNCTIONS')
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
       fetchPrograms(year.value)
     })
 
@@ -147,17 +146,30 @@ export default defineComponent({
         });
     };
 
-    const openPreviousPrograms = () => {
-      isPreviousViewed.value = true
-    }
-
-    const closePreviousPrograms = () => {
-      isPreviousViewed.value = false
-    }
-
     const resetForm = () => {
       formRef.value.resetFields();
     };
+
+    const changePreviousModal = () => {
+      isPreviousViewed.value = !isPreviousViewed.value
+    }
+
+    const onMultipleSave = keys => {
+      const saveKeys = previousPrograms.value.filter(item => {
+        return keys.indexOf(item.key) !== -1
+      })
+
+      saveKeys.forEach(item => {
+        const data = {
+          name: item.name,
+          year: formState.year,
+          category_id: item.category_id,
+          percentage: item.percentage,
+        }
+        store.dispatch('formManager/CREATE_PROGRAM', { payload: data })
+      })
+      changePreviousModal()
+    }
 
     return {
       formRef,
@@ -169,10 +181,12 @@ export default defineComponent({
       years,
       year,
       onSubmit,
-      openPreviousPrograms,
       resetForm,
       fetchPrograms,
-
+      changePreviousModal,
+      previousPrograms,
+      isPreviousViewed,
+      onMultipleSave,
     };
   },
 });

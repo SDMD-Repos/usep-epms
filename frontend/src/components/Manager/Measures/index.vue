@@ -15,7 +15,7 @@
             <template #icon><PlusOutlined /></template>
             New Measure
           </a-button>
-          <a-button type="link" v-if="previousMeasures.length" @click="openPreviousMeasures">Add {{ year - 1}} measures</a-button>
+          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal">Add {{ year - 1}} measures</a-button>
         </template>
 
         <template #dateCreated="{ record }">
@@ -43,7 +43,7 @@
                 @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"/>
 
     <measures-previous-list :visible="isPreviousViewed" :year="year" :list="previousMeasures"
-                            @save-measures="onMultipleSave" @close-modal="closePreviousMeasure" />
+                            @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
   </div>
 </template>
 <script>
@@ -133,6 +133,7 @@ export default defineComponent({
         formState.id = record.id
         formState.name = record.name
         formState.items = record.items
+        formState.year = record.year
       }
       changeAction(event)
     }
@@ -184,12 +185,8 @@ export default defineComponent({
       });
     }
 
-    const openPreviousMeasures = () => {
-      isPreviousViewed.value = true
-    }
-
-    const closePreviousMeasure = () => {
-      isPreviousViewed.value = false
+    const changePreviousModal = () => {
+      isPreviousViewed.value = !isPreviousViewed.value
     }
 
     const onMultipleSave = keys => {
@@ -205,7 +202,7 @@ export default defineComponent({
         }
         store.dispatch('formManager/CREATE_MEASURE', { payload: data })
       })
-      closePreviousMeasure()
+      changePreviousModal()
     }
 
     return {
@@ -235,8 +232,7 @@ export default defineComponent({
       resetModalData,
       changeAction,
       onSubmit,
-      openPreviousMeasures,
-      closePreviousMeasure,
+      changePreviousModal,
       onMultipleSave,
     }
   },
