@@ -34,6 +34,7 @@ export default {
     accountFetchIsTouched: jwt.isLoggedIn().then(response => {
       return response
     }),
+    accessRights:[],
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -73,7 +74,7 @@ export default {
       const currentAccount = mapAuthProviders[rootState.settings.authProvider].currentAccount
       currentAccount().then(response => {
         if (response) {
-          const { id, lastName, firstName, pmapsId, avatar, role } = response
+          const { id, lastName, firstName, pmapsId, avatar, role , accessRights } = response
           commit('SET_STATE', {
             id,
             lastName,
@@ -82,12 +83,16 @@ export default {
             avatar,
             role,
             authorized: true,
+            accessRights,
           })
+
         }
         commit('SET_STATE', {
           loading: false,
         })
       })
+
+ 
     },
     LOGOUT({ commit, rootState }) {
       const logout = mapAuthProviders[rootState.settings.authProvider].logout
@@ -101,6 +106,7 @@ export default {
           role: '',
           authorized: false,
           loading: false,
+          accessRights : [],
         })
         router.push('/auth/login')
       })
@@ -108,5 +114,6 @@ export default {
   },
   getters: {
     user: state => state,
+    access: state => state.accessRights,
   },
 }

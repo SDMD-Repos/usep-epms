@@ -56,7 +56,7 @@ export default {
               })
             })
           },
-          UDPATE_PERMISSION({ commit }, { payload }) {
+          UPDATE_PERMISSION({ commit }, { payload }) {
             commit('SET_STATE', {
               loading: true,
             })

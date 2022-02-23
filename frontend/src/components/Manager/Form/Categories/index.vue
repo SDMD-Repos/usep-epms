@@ -29,7 +29,8 @@
         </div>
       </div>
       <div class="form-actions mt-0">
-        <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+        <a-button :disabled="isPermission[0].permission_id !== 'mff-delete'" style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+       
       </div>
     </a-form>
     <categories-table />
@@ -49,11 +50,35 @@ export default defineComponent({
   setup() {
     const store = useStore()
     const loading = computed(() => store.getters['formManager/manager'].loading)
+    const accessLists = computed(() => store.getters['user/access'])
+   
+    const formPermission = accessLists.value.filter((value)=>{
+      return  value.permission_id == "m-form" || 
+              value.permission_id == "manager" || 
+              value.permission_id == "mf-functions" || 
+              value.permission_id == "mff-create" ||
+              value.permission_id == "mff-delete";
+    });
+
+    const isPermission = formPermission.filter((value)=>{
+      return (value.permission_id === "manager" ||value.permission_id === "m-form"  ||  value.permission_id === "mf-functions" ||  value.permission_id === "mff-create") && 
+         value.permission_id !== "mff-delete";
+    })
+
+    console.log(isPermission)
+
+    //  isPermission = ((listPermission) => {
+    //   if(){
+    //     isPermission =  true;
+    //   }
+    // })
+    
     const formRef = ref()
     const formState = reactive({
       name: '',
       percentage: null,
     })
+
     const rules = {
       name: [
         {
@@ -113,6 +138,12 @@ export default defineComponent({
       loading,
       onSubmit,
       resetForm,
+      accessLists,
+      // listPermission,
+      isPermission,
+      formPermission,
+     
+      
     };
   },
 });

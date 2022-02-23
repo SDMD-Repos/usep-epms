@@ -35,7 +35,6 @@ class PermissionController extends Controller
             $personnelId = (int)$request->personnelId;
             $listPermissions = $request->listPermissions;
             $user = User::find($personnelId);
-            // dd($personnelId,);
             
                 $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
                     "token" => config('services.hris.data'),
@@ -72,6 +71,7 @@ class PermissionController extends Controller
                             array_push($accessAllLists,$list['access_right_id']);
                 }
                 $currentAccessList = [];
+               
                 foreach ($listPermissions as $permission) {
                   $userAccessRights = new UserAccessRights();
                   $accessList  = UserAccessRights::where([
@@ -82,7 +82,7 @@ class PermissionController extends Controller
                         $userAccessRights->user_id = (string)$details->UserID;
                         $userAccessRights->access_right_id = $permission;
                         $userAccessRights->create_id = $this->login_user->pmaps_id;
-                        $userAccessRights->delete();
+                        $userAccessRights->save();
                     }
                     array_push($currentAccessList,$permission);
                 }
@@ -99,7 +99,6 @@ class PermissionController extends Controller
     {   
         try{
             $lists = [];
-            
             $userInfo  = User::where([
                 ['pmaps_id', $id],
                 ])->first();
@@ -115,7 +114,7 @@ class PermissionController extends Controller
             }
 
             return response()->json([
-                    'accessLists' => $accessLists,
+                    'accessLists' => isset($accessLists) ? $accessLists : "",
                     'status'=>$status
                 ], 200);
         }catch(\Exception $e){
