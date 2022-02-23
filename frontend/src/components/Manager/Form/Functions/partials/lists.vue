@@ -14,7 +14,7 @@
   </a-table>
 </template>
 <script>
-import { defineComponent, computed, onMounted } from 'vue';
+import { defineComponent, computed, watch, ref, onMounted } from 'vue';
 import { useStore } from 'vuex'
 import { WarningOutlined } from '@ant-design/icons-vue'
 
@@ -29,22 +29,36 @@ export default defineComponent({
   components: {
     WarningOutlined,
   },
-  setup() {
+  props: {
+    year: { type: Number, default: new Date().getFullYear() },
+  },
+  setup(props) {
     const store = useStore()
     const functions = computed(() => store.getters['formManager/manager'].functions)
 
+    // EVENTS
+    watch(() => [props.year], ([year]) => {
+      fetchFunctions(year)
+    })
+
     onMounted(() => {
-      store.dispatch('formManager/FETCH_FUNCTIONS')
+      fetchFunctions(props.year)
     })
 
     // METHODS
+    const fetchFunctions = year => {
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
+    }
+
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_FUNCTION', { payload: key })
+      store.dispatch('formManager/DELETE_FUNCTION', { payload: { id: key, year: props.year } })
     }
 
     return {
       columns,
+
       functions,
+
       onDelete,
     }
   },

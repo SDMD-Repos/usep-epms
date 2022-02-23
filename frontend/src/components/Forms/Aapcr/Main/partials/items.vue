@@ -59,7 +59,7 @@ export default defineComponent({
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
-    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === props.functionId) })
+    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === parseInt(props.functionId)) })
 
     const {
       drawerConfig,

@@ -5,9 +5,10 @@
         <div class="card">
           <div class="card-body">
             <a-tabs v-model:activeKey="activeKey" :animated="false">
-              <a-tab-pane tab="Functions" key="1"><categories-form v-if="activeKey === '1'"/></a-tab-pane>
+              <a-tab-pane tab="Functions" key="1"><functions-form v-if="activeKey === '1'"/></a-tab-pane>
               <a-tab-pane tab="Programs" key="2"><programs-form v-if="activeKey === '2'" /></a-tab-pane>
               <a-tab-pane tab="Sub Categories" key="3"><sub-categories-form v-if="activeKey === '3'"/></a-tab-pane>
+              <a-tab-pane tab="Office/s Accountable" key="4"><offices-accountable-form v-if="activeKey === '4'"/></a-tab-pane>
             </a-tabs>
           </div>
         </div>
@@ -16,16 +17,18 @@
   </div>
 </template>
 <script>
-import CategoriesForm from '@/components/Manager/Form/Categories'
+import FunctionsForm from '@/components/Manager/Form/Functions'
 import ProgramsForm from '@/components/Manager/Form/Programs'
 import SubCategoriesForm from '@/components/Manager/Form/SubCategories'
+import OfficesAccountableForm from '@/components/Manager/Form/OfficesAccountable'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   components: {
-    CategoriesForm,
+    FunctionsForm,
     ProgramsForm,
     SubCategoriesForm,
+    OfficesAccountableForm,
   },
   setup() {
     return {

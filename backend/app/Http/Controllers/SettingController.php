@@ -51,9 +51,9 @@ class SettingController extends Controller
 
     }
 
-    public function getFunctions()
+    public function getFunctions($year)
     {
-        $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->get();
+        $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
 
         foreach ($categories as $key => $category) {
             $categories[$key]['header'] = $this->integerToRomanNumeral($category->order) . ". " . mb_strtoupper($category->name);
@@ -71,14 +71,12 @@ class SettingController extends Controller
 
             DB::beginTransaction();
 
-            $id = str_replace(" ", "_", strtolower($validated['name']));
-
             $order = Category::max('order');
 
             $category = new Category();
 
-            $category->id = $id;
             $category->name = $validated['name'];
+            $category->year = $validated['year'];
             $category->percentage = $validated['percentage'];
             $category->order = ++$order;
             $category->create_id = $this->login_user->pmaps_id;

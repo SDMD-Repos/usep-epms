@@ -15,6 +15,7 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
+            $table->year('year');
             $table->string('name', 100);
             $table->integer('percentage');
             $table->integer('order');
