@@ -41,7 +41,7 @@ export default defineComponent({
 
     const addPreviousFunctions = () => {
       Modal.confirm({
-        title: () => 'Are you sure you want to add this to list?',
+        title: () => 'Are you sure you want to add this in to the list?',
         icon: () => createVNode(ExclamationCircleOutlined),
         content: () => '',
         okText: 'Yes',

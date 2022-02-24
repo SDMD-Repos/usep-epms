@@ -34,7 +34,7 @@ export default defineComponent({
     year: { type: Number, default: null },
   },
 
-  setup(props, { emit }) {
+  setup(props) {
     const store = useStore()
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
@@ -44,7 +44,7 @@ export default defineComponent({
 
     // METHODS
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_PROGRAM', { payload: key })
+      store.dispatch('formManager/DELETE_PROGRAM', { payload: { id: key, year: props.year }})
     }
 
     return {

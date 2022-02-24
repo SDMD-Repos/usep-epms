@@ -161,7 +161,7 @@ export default {
       })
     },
     DELETE_PROGRAM({ commit, dispatch }, { payload }) {
-      const id = payload
+      const { id, year } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -169,7 +169,7 @@ export default {
       const deleteProgram = mapApiProviders.deleteProgram
       deleteProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS', { payload : { year: payload.year }})
+          dispatch('FETCH_PROGRAMS', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',

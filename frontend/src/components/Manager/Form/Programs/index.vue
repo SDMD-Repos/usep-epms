@@ -1,5 +1,5 @@
 <template>
-    <a-select v-model:value="formState.year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
+    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
       <template v-for="(y, i) in years" :key="i">
         <a-select-option :value="y">
           {{ y }}
@@ -38,10 +38,11 @@
           </div>
           <div class="form-actions mt-0">
             <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-            <a-button type="link" v-if="previousPrograms.length" @click="changePreviousModal">Add {{ formState.year - 1}} Programs</a-button>
+            <a-button type="link" v-if="previousPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
           </div>
         </a-form>
-        <programs-table/>
+
+        <programs-table :year="year" />
 
         <previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"
                        @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
@@ -49,7 +50,7 @@
     </div>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
+import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -57,6 +58,7 @@ import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
 
 export default defineComponent({
+  name: "ProgramsManager",
   components: {
     ProgramsTable,
     PreviousList,
@@ -66,7 +68,6 @@ export default defineComponent({
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
-    const programsList = computed(() => store.getters['formManager/manager'].programs)
     const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
 
     const formRef = ref()
@@ -114,13 +115,13 @@ export default defineComponent({
       value: 'id',
     }
 
+    // EVENTS
     onMounted(() => {
+      store.commit('formManager/SET_STATE', { previousPrograms: [] })
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
-      fetchPrograms(year.value)
     })
 
     // METHODS
-
     const fetchPrograms = async selectedYear => {
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})
@@ -135,6 +136,7 @@ export default defineComponent({
             icon: () => createVNode(ExclamationCircleOutlined),
             content: () => '',
             onOk() {
+              formState.year = year.value
               store.dispatch('formManager/CREATE_PROGRAM', { payload: toRaw(formState) })
               resetForm()
             },
@@ -162,7 +164,7 @@ export default defineComponent({
       saveKeys.forEach(item => {
         const data = {
           name: item.name,
-          year: formState.year,
+          year: year.value,
           category_id: item.category_id,
           percentage: item.percentage,
         }

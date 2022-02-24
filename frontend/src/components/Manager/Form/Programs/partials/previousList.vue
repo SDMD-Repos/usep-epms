@@ -1,6 +1,6 @@
 <template>
   <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
-           @ok="addPreviousPrograms" @cancel="closeModal">
+           @ok="addPreviousPrograms" @cancel="closeModal" width="700px">
     <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false"
              :row-class-name="(record, index) => (index % 2 === 1 ? 'table-striped' : null)"
@@ -42,7 +42,7 @@ export default defineComponent({
 
     const addPreviousPrograms = () => {
       Modal.confirm({
-        title: () => 'Are you sure you want to add this to list?',
+        title: () => 'Are you sure you want to add this in to the list?',
         icon: () => createVNode(ExclamationCircleOutlined),
         content: () => '',
         okText: 'Yes',

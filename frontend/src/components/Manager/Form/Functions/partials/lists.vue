@@ -25,7 +25,7 @@ const columns = [
 ]
 
 export default defineComponent({
-  name: 'ProgramsTable',
+  name: 'FunctionsTable',
   components: {
     WarningOutlined,
   },
@@ -51,7 +51,7 @@ export default defineComponent({
     }
 
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_FUNCTION', { payload: { id: key, year: props.year } })
+      store.dispatch('formManager/DELETE_FUNCTION', { payload: { id: key, year: props.year }} )
     }
 
     return {
