@@ -1,5 +1,12 @@
 <template>
   <a-spin :spinning="loading">
+     <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchFunctions">
+      <template v-for="(y, i) in years" :key="i">
+        <a-select-option :value="y">
+          {{ y }}
+        </a-select-option>
+      </template>
+      </a-select>
       <a-form layout="vertical"
               ref="formRef"
               :model="formState"
@@ -45,7 +52,7 @@
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
+import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -57,7 +64,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-
+    const year = ref(new Date().getFullYear())
     // COMPUTED
     const functions = computed(() => store.getters['formManager/functions'])
     const subCategories = computed(() => store.getters['formManager/subCategories'])
@@ -71,6 +78,15 @@ export default defineComponent({
       })
       return parents
     })
+    const years = computed(() => {
+      const max = new Date().getFullYear() + 1
+      const min = 10
+      const lists = []
+      for (let i = max; i >= (max - min); i--) {
+        lists.push(i)
+      }
+      return lists
+    })
 
     // DATA
     const formRef = ref()
@@ -78,6 +94,7 @@ export default defineComponent({
       name: '',
       category_id: undefined,
       parentId: null,
+      year : year.value,
     })
     const rules = {
       name: [
@@ -102,14 +119,23 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_SUB_CATEGORIES')
-      store.dispatch('formManager/FETCH_FUNCTIONS')
+      fetchFunctions(year.value)
     })
 
-    // METHODS
+  
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_SUB_CATEGORY', { payload: key })
+      store.dispatch('formManager/DELETE_SUB_CATEGORY', { payload: { id: key, year: year.value }  })
     }
+
+    const fetchFunctions = year => {
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
+      fetchSubCategories(year)
+    }
+
+    const fetchSubCategories = year => {
+        store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
+    }
+
 
     const onSubmit = () => {
       formRef.value
@@ -120,6 +146,7 @@ export default defineComponent({
             icon: () => createVNode(ExclamationCircleOutlined),
             content: () => '',
             onOk() {
+              formState.year = year.value
               store.dispatch('formManager/CREATE_SUB_CATEGORY', { payload: toRaw(formState) })
               resetForm()
             },
@@ -136,16 +163,19 @@ export default defineComponent({
     };
 
     return {
+      year,
       functions,
       subCategories,
       loading,
+      years,
       parentSubs,
 
       formRef,
       formState,
       rules,
       normalizer,
-
+      
+      fetchFunctions,
       onSubmit,
       resetForm,
       onDelete,

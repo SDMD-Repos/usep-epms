@@ -180,13 +180,15 @@ export default {
         })
       })
     },
-    FETCH_SUB_CATEGORIES({ commit }) {
+    FETCH_SUB_CATEGORIES({ commit },{payload}) {
+      const { year } = payload
+
       commit('SET_STATE', {
         loading: true,
       })
 
       const getSubCategories = mapApiProviders.getSubCategories
-      getSubCategories().then(response => {
+      getSubCategories(year).then(response => {
         if (response) {
           const { subCategories } = response
           commit('SET_STATE', {
@@ -199,19 +201,21 @@ export default {
       })
     },
     CREATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
+      const { year, category_id, parentId, name} = payload
       commit('SET_STATE', {
         loading: true,
       })
       const data = {
-        name: payload.name,
-        category_id: payload.category_id,
-        parentId: payload.parentId,
+        name: name,
+        category_id: category_id,
+        parentId: parentId,
+        year : year,
       }
 
       const createSubCategory = mapApiProviders.createSubCategory
       createSubCategory(data).then(response => {
         if (response) {
-          dispatch('FETCH_SUB_CATEGORIES')
+          dispatch('FETCH_SUB_CATEGORIES', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Sub category created successfully',
@@ -223,7 +227,7 @@ export default {
       })
     },
     DELETE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
-      const id = payload
+    const { id, year } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -231,7 +235,7 @@ export default {
       const deleteSubCategory = mapApiProviders.deleteSubCategory
       deleteSubCategory(id).then(response => {
         if (response) {
-          dispatch('FETCH_SUB_CATEGORIES')
+          dispatch('FETCH_SUB_CATEGORIES', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Sub category deleted successfully',

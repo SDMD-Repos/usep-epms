@@ -33,7 +33,8 @@ class StoreSubCategory extends FormRequest
                 })
             ],
             'category_id' => 'required',
-            'parentId' => ''
+            'parentId' => '',
+            'year'=>'',
         ];
     }
     /**

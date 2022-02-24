@@ -40,7 +40,7 @@
   </a-spin>
 </template>
 <script>
-import {computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted} from 'vue'
+import { computed, defineComponent, reactive, ref, toRaw, createVNode } from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -103,11 +103,6 @@ export default defineComponent({
       return lists
     })
 
-    // EVENTS
-    onMounted(() => {
-      store.commit('formManager/SET_STATE', { previousFunctions: [] })
-    })
-
     // METHODS
     const fetchPreviousFunctions = year => {
       resetForm()
@@ -123,7 +118,6 @@ export default defineComponent({
             icon: () => createVNode(ExclamationCircleOutlined),
             content: () => '',
             onOk() {
-              formState.year = year.value
               store.dispatch('formManager/CREATE_FUNCTION', { payload: toRaw(formState) })
               resetForm()
             },

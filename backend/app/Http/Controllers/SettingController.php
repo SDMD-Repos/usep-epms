@@ -131,9 +131,9 @@ class SettingController extends Controller
         }
     }
 
-    public function getSubCategories()
+    public function getSubCategories($year)
     {
-        $subCategories = SubCategory::with('category')->get();
+        $subCategories = SubCategory::with('category')->where('year', $year)->get();
 
         $modSubCategories = $this->getNestedChildren($subCategories);
 
@@ -150,10 +150,11 @@ class SettingController extends Controller
             DB::beginTransaction();
 
             $subcategory = new SubCategory();
-
+         
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
+            $subcategory->year = $validated['year'];
             $subcategory->create_id = $this->login_user->pmaps_id;
             $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
