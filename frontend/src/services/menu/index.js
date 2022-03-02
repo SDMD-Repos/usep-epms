@@ -81,6 +81,18 @@ export const getMenuData = [
     icon: 'fe fe-file',
     children: [
       {
+        title: 'Manager',
+        key: 'opcrManager',
+        children: [
+          {
+            title: 'Programs',
+            key: 'opcrProgram',
+            url: '/manager/opcr',
+            level: 3,
+          },
+        ],
+      },
+      {
         title: 'Template',
         key: 'opcrTemplate',
         children: [
