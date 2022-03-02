@@ -12,4 +12,13 @@ class Form extends Model
      * @var string
      */
     protected $keyType = 'string';
+
+    /**
+     * The category that belong to the opcrOtherPrograms.
+     */
+    public function programs()
+    {
+        return $this->hasMany('App\OtherProgram');
+    }
+
 }

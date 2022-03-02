@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="columns" :data-source="programs" bordered>
+  <a-table :columns="columns" :data-source="otherPrograms" bordered>
     <template #operation="{ record }">
       <a-popconfirm
         title="Are you sure you want to delete this?"
@@ -26,31 +26,40 @@ const columns = [
 ]
 
 export default defineComponent({
-  name: 'ProgramsTable',
+  name: 'OtherProgramsTable',
   components: {
     WarningOutlined,
   },
   props: {
     year: { type: Number, default: null },
+    form_id: { type: String, default: null },
   },
 
   setup(props) {
     const store = useStore()
-    const programs = computed(() => store.getters['formManager/manager'].programs)
+    const otherPrograms = computed(() => { return store.getters['formManager/manager'].otherPrograms.map(x => Object.assign({}, x, { "is_other": true }))})
+    const programs = computed(() => { return store.getters['formManager/manager'].programs.map(x => Object.assign({}, x, { "is_other": true }))})
+
+    const mergePrograms = computed(() => {
+      return otherPrograms.value.concat(programs)
+    })
 
     onMounted(() => {
+      store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id:props.form_id, year: props.year, isPrevious: false }})
       store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: props.year, isPrevious: false }})
     })
 
     // METHODS
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_PROGRAM', { payload: { id: key, year: props.year }})
+      store.dispatch('formManager/DELETE_OTHER_PROGRAM', { payload: { form_id: props.form_id, id: key, year: props.year }})
     }
 
     return {
       columns,
-      programs,
+      otherPrograms,
       onDelete,
+      mergePrograms,
+      programs,
     }
   },
 })

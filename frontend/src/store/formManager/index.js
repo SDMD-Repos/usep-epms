@@ -7,7 +7,10 @@ const mapApiProviders = {
   deleteFunction: manager.deleteFunction,
   getPrograms: manager.getPrograms,
   createProgram: manager.addNewProgram,
+  getOtherPrograms: manager.getOtherPrograms,
+  createOtherProgram: manager.addNewOtherProgram,
   deleteProgram: manager.deleteProgram,
+  deleteOtherProgram: manager.deleteOtherProgram,
   getSubCategories: manager.getSubCategories,
   createSubCategory: manager.createSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
@@ -34,10 +37,12 @@ export default {
     functions: [],
     previousFunctions: [],
     programs: [],
+    otherPrograms: [],
     subCategories: [],
     measures: [],
     previousMeasures: [],
     previousPrograms: [],
+    previousOtherPrograms: [],
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -170,6 +175,77 @@ export default {
       deleteProgram(id).then(response => {
         if (response) {
           dispatch('FETCH_PROGRAMS', { payload : { year: year }})
+          notification.success({
+            message: 'Success',
+            description: 'Program deleted successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CREATE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const data = {
+        name: payload.name,
+        year: payload.year,
+        category_id: payload.category_id,
+        percentage: payload.percentage,
+        form_id: payload.form_id,
+      }
+
+      const createOtherProgram = mapApiProviders.createOtherProgram
+      createOtherProgram(data).then(response => {
+        if (response) {
+          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: payload.year, form_id: payload.form_id }})
+          notification.success({
+            message: 'Success',
+            description: 'Program created successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_OTHER_PROGRAMS({ commit }, { payload }) {
+      const { year,form_id } = payload
+
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getOtherPrograms = mapApiProviders.getOtherPrograms
+      getOtherPrograms(year,form_id).then(response => {
+        if (response) {
+          const { otherPrograms } = response
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousOtherPrograms: otherPrograms })
+
+          }else{
+            commit('SET_STATE', {
+              otherPrograms: otherPrograms,
+            })
+          }
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DELETE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
+      const { id, year, form_id} = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const deleteOtherProgram = mapApiProviders.deleteOtherProgram
+      deleteOtherProgram(id).then(response => {
+        if (response) {
+          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: year, form_id: form_id }})
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',

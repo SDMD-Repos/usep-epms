@@ -1,5 +1,5 @@
 <template>
-  <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
+  <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchOtherPrograms">
     <template v-for="(y, i) in years" :key="i">
       <a-select-option :value="y">
         {{ y }}
@@ -38,14 +38,14 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-          <a-button type="link" v-if="previousPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
+          <a-button type="link" v-if="previousOtherPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
         </div>
       </a-form>
 
-<!--      <programs-table :year="year" />-->
+      <programs-table :year="year" :form_id="form_id"/>
 
-<!--      <previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"-->
-<!--                     @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>-->
+      <previous-list :visible="isPreviousViewed" :year="year" :list="previousOtherPrograms"
+                     @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
     </a-spin>
   </div>
 </template>
@@ -54,22 +54,22 @@ import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
-// import ProgramsTable from './partials/lists'
-// import PreviousList from './partials/previousList'
+import ProgramsTable from './partials/lists'
+import PreviousList from './partials/previousList'
 
 export default defineComponent({
-  name: "ProgramsManager",
+  name: "OtherProgramsManager",
   components: {
-    // ProgramsTable,
-    // PreviousList,
+    ProgramsTable,
+    PreviousList,
   },
   setup() {
+    const form_id = 'opcr'
     const store = useStore()
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
-    const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
-
+    const previousOtherPrograms = computed(() => store.getters['formManager/manager'].previousOtherPrograms)
     const formRef = ref()
     const isPreviousViewed = ref(false)
     const formState = reactive({
@@ -77,6 +77,7 @@ export default defineComponent({
       year: year.value,
       category_id: undefined,
       percentage: null,
+      form_id:form_id,
     })
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
@@ -117,14 +118,15 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.commit('formManager/SET_STATE', { previousPrograms: [] })
+      store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
     })
 
     // METHODS
-    const fetchPrograms = async selectedYear => {
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})
+    const fetchOtherPrograms = async selectedYear => {
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: (selectedYear - 1), isPrevious: true }})
     }
 
     const onSubmit = () => {
@@ -137,7 +139,7 @@ export default defineComponent({
             content: () => '',
             onOk() {
               formState.year = year.value
-              store.dispatch('formManager/CREATE_PROGRAM', { payload: toRaw(formState) })
+              store.dispatch('formManager/CREATE_OTHER_PROGRAM', { payload: toRaw(formState) })
               resetForm()
             },
             onCancel() {},
@@ -157,7 +159,7 @@ export default defineComponent({
     }
 
     const onMultipleSave = keys => {
-      const saveKeys = previousPrograms.value.filter(item => {
+      const saveKeys = previousOtherPrograms.value.filter(item => {
         return keys.indexOf(item.key) !== -1
       })
 
@@ -167,8 +169,9 @@ export default defineComponent({
           year: year.value,
           category_id: item.category_id,
           percentage: item.percentage,
+          form_id: form_id,
         }
-        store.dispatch('formManager/CREATE_PROGRAM', { payload: data })
+        store.dispatch('formManager/CREATE_OTHER_PROGRAM', { payload: data })
       })
       changePreviousModal()
     }
@@ -184,11 +187,14 @@ export default defineComponent({
       year,
       onSubmit,
       resetForm,
-      fetchPrograms,
+      fetchOtherPrograms,
       changePreviousModal,
-      previousPrograms,
+      previousOtherPrograms,
       isPreviousViewed,
       onMultipleSave,
+      PreviousList,
+      ProgramsTable,
+      form_id,
     };
   },
 });
