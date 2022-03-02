@@ -1,12 +1,14 @@
 <template>
   <a-spin :spinning="loading">
-     <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchFunctions">
-      <template v-for="(y, i) in years" :key="i">
-        <a-select-option :value="y">
-          {{ y }}
-        </a-select-option>
-      </template>
-      </a-select>
+   <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchFunctions">
+    <template v-for="(y, i) in years" :key="i">
+      <a-select-option :value="y">
+        {{ y }}
+      </a-select-option>
+    </template>
+    </a-select>
+
+    <div class="mt-5">
       <a-form layout="vertical"
               ref="formRef"
               :model="formState"
@@ -19,7 +21,7 @@
           </div>
           <div class="col-lg-4">
             <a-form-item ref="category_id" label="Functions" name="category_id">
-              <a-select v-model:value="formState.category_id">
+              <a-select v-model:value="formState.category_id" @change="onFunctionsChange">
                 <a-select-option v-for="func in functions"
                                  :value="func.id"
                                  :key="func.id"
@@ -48,7 +50,9 @@
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
         </div>
       </a-form>
-      <sub-categories-table :sub-category-list="subCategories" @delete="onDelete"/>
+    </div>
+
+    <sub-categories-table :sub-category-list="subCategories" @delete="onDelete"/>
   </a-spin>
 </template>
 <script>
@@ -122,12 +126,13 @@ export default defineComponent({
       fetchFunctions(year.value)
     })
 
-  
+
     const onDelete = key => {
       store.dispatch('formManager/DELETE_SUB_CATEGORY', { payload: { id: key, year: year.value }  })
     }
 
     const fetchFunctions = year => {
+      resetForm()
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
       fetchSubCategories(year)
     }
@@ -136,6 +141,9 @@ export default defineComponent({
         store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
     }
 
+    const onFunctionsChange = () => {
+      formState.parentId = null
+    }
 
     const onSubmit = () => {
       formRef.value
@@ -147,6 +155,7 @@ export default defineComponent({
             content: () => '',
             onOk() {
               formState.year = year.value
+              formState.parentId = typeof formState.parentId === 'undefined' ? null : formState.parentId
               store.dispatch('formManager/CREATE_SUB_CATEGORY', { payload: toRaw(formState) })
               resetForm()
             },
@@ -174,11 +183,12 @@ export default defineComponent({
       formState,
       rules,
       normalizer,
-      
+
+      onDelete,
       fetchFunctions,
+      onFunctionsChange,
       onSubmit,
       resetForm,
-      onDelete,
     };
   },
 });

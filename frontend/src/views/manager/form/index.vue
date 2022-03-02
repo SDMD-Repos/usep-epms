@@ -8,7 +8,7 @@
               <a-tab-pane tab="Functions" key="1"><functions-form v-if="activeKey === '1'"/></a-tab-pane>
               <a-tab-pane tab="Programs" key="2"><programs-form v-if="activeKey === '2'" /></a-tab-pane>
               <a-tab-pane tab="Sub Categories" key="3"><sub-categories-form v-if="activeKey === '3'"/></a-tab-pane>
-              <a-tab-pane tab="Office/s Accountable" key="4"><offices-accountable-form v-if="activeKey === '4'"/></a-tab-pane>
+              <a-tab-pane tab="Fields" key="4"><fields-form v-if="activeKey === '4'"/></a-tab-pane>
             </a-tabs>
           </div>
         </div>
@@ -20,7 +20,7 @@
 import FunctionsForm from '@/components/Manager/Form/Functions'
 import ProgramsForm from '@/components/Manager/Form/Programs'
 import SubCategoriesForm from '@/components/Manager/Form/SubCategories'
-import OfficesAccountableForm from '@/components/Manager/Form/OfficesAccountable'
+import FieldsForm from '@/components/Manager/Form/Fields'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -28,7 +28,7 @@ export default defineComponent({
     FunctionsForm,
     ProgramsForm,
     SubCategoriesForm,
-    OfficesAccountableForm,
+    FieldsForm,
   },
   setup() {
     return {

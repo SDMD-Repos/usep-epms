@@ -42,7 +42,7 @@ export default defineComponent({
   components: { DownCircleFilled, UpCircleFilled },
   props: {
     visible: Boolean,
-    year: { type: Number, default: null },
+    year: { type: Number, default: new Date().getFullYear() },
     list: { type: Array, default: () => { return [] }},
   },
   emits: ['close-modal', 'save-measures'],

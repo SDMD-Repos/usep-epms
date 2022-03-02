@@ -173,6 +173,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
+          formState.year = year.value
           if (action.value === 'create') {
             store.dispatch('formManager/CREATE_MEASURE', { payload: toRaw(formState) })
           } else {

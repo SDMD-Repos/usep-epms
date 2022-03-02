@@ -25,6 +25,7 @@
     "firebase": "^8.2.5",
     "he-tree-vue": "3",
     "lodash": "^4.17.20",
+    "lodash-es": "^4.17.21",
     "nprogress": "^0.2.0",
     "qs": "^6.9.6",
     "readline-sync": "^1.4.10",

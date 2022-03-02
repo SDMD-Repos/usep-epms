@@ -72,6 +72,8 @@ Route::group([
     Route::post('/delete-group/{id}', 'SettingController@deleteGroup');
 
     Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
+
+    Route::get('/get-all-form-fields', 'SettingController@getAllFormFields');
 });
 
 Route::group([

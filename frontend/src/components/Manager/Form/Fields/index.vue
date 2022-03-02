@@ -9,15 +9,17 @@
     </a-select>
 
     <div class="mt-4">
-
+      <form-table :year="year" />
     </div>
   </div>
 </template>
 <script>
-import {computed, defineComponent, ref} from "vue"
+import { defineComponent, ref, computed } from "vue"
+import FormTable from './partials/formTable'
 
 export default defineComponent({
-  name: 'OfficesAccountableComponent',
+  name: 'FieldsManager',
+  components: { FormTable },
   setup() {
     // DATA
     const year = ref(new Date().getFullYear())

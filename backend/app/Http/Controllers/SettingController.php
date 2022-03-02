@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\CascadingLevel;
 use App\Category;
 use App\Form;
+use App\FormField;
 use App\Group;
 use App\GroupMember;
 use App\Http\Requests\StoreCategory;
@@ -951,6 +952,15 @@ class SettingController extends Controller
 
         return response()->json([
             'cascadingLevels' => $cascadingLevels
+        ], 200);
+    }
+
+    public function getAllFormFields()
+    {
+        $formFields = FormField::all();
+
+        return response()->json([
+            'formFields' => $formFields
         ], 200);
     }
 }

@@ -34,7 +34,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore()
-    const functions = computed(() => store.getters['formManager/manager'].functions)
+    const functions = computed(() => store.getters['formManager/functions'])
 
     // EVENTS
     watch(() => [props.year], ([year]) => {

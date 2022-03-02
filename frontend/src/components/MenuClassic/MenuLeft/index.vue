@@ -39,7 +39,6 @@
       <perfect-scrollbar :style="{ height: '100%' }">
         <a-menu
           v-model:open-keys="openKeys"
-          :inline-collapsed="settings.isMobileView ? false : settings.isMenuCollapsed"
           :mode="'inline'"
           :selected-keys="selectedKeys"
           :inline-indent="15"

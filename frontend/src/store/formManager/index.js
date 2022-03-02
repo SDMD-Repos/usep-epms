@@ -26,6 +26,7 @@ const mapApiProviders = {
   updateGroup: manager.updateGroup,
   deleteGroup: manager.deleteGroup,
   getCascadingLevels: manager.getCascadingLevels,
+  getAllFormFields: manager.getAllFormFields,
 }
 
 export default {
@@ -43,6 +44,7 @@ export default {
     signatories: [],
     cascadingLevels: [],
     groups: [],
+    formFields: [],
     loading: false,
   },
   mutations: {
@@ -272,16 +274,17 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
+      const { name, year, items } = payload
       const data = {
-        name: payload.name,
-        year: payload.year,
-        items: payload.items,
+        name: name,
+        year: year,
+        items: items,
       }
 
       const createMeasure = mapApiProviders.createMeasure
       createMeasure(data).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload : { year: payload.year }})
+          dispatch('FETCH_MEASURES', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Measure created successfully',
@@ -295,17 +298,17 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
+      const { name, items, deleted, id, year } = payload
       const data = {
-        name: payload.name,
-        items: payload.items,
-        deleted: payload.deleted,
+        name: name,
+        items: items,
+        deleted: deleted,
       }
-      const id = payload.id
 
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload : { year: payload.year }})
+          dispatch('FETCH_MEASURES', { payload : { year: year }})
           notification.success({
             message: 'Success',
             description: 'Measure updated successfully',
@@ -535,6 +538,24 @@ export default {
           const { cascadingLevels } = response
           commit('SET_STATE', {
             cascadingLevels: cascadingLevels,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_FORM_FIELDS({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getAllFormFields = mapApiProviders.getAllFormFields
+      getAllFormFields().then(response => {
+        if (response) {
+          const { formFields } = response
+          commit('SET_STATE', {
+            formFields: formFields,
           })
         }
         commit('SET_STATE', {

@@ -215,3 +215,12 @@ export async function getCascadingLevels() {
     })
     .catch(err => console.log(err))
 }
+
+export async function getAllFormFields() {
+  return apiClient
+    .get('/settings/get-all-form-fields')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

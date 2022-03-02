@@ -123,6 +123,7 @@ export default defineComponent({
 
     // METHODS
     const fetchPrograms = async selectedYear => {
+      resetForm()
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})
     }

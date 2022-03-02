@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             FormSeeder::class,
             OfficeTypesSeeder::class,
             SignatoryTypeSeeder::class,
+            FormFieldSeeder::class,
         ]);
     }
 }

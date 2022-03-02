@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
+  <a-modal v-model:visible="isVisible" :title="`${year-1} programs`" ok-text="Add to list"
            @ok="addPreviousPrograms" @cancel="closeModal" width="700px">
     <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false"
