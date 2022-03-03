@@ -1,5 +1,5 @@
 <template>
-  <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchOtherPrograms">
+  <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchAllPrograms">
     <template v-for="(y, i) in years" :key="i">
       <a-select-option :value="y">
         {{ y }}
@@ -69,7 +69,15 @@ export default defineComponent({
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
+    const programs = computed(() => store.getters['formManager/manager'].programs)
+    const otherPrograms = computed(() => store.getters['formManager/manager'].otherPrograms)
+    const allPrograms = computed(() => {
+      const programData = addArrayColumn(programs.value,"is_other",false) && typeof addArrayColumn(programs.value) != 'undefined' ? addArrayColumn(programs.value) : []
+      const otherProgramData = addArrayColumn(otherPrograms.value,"is_other",true) && typeof addArrayColumn(otherPrograms.value) != 'undefined' ? addArrayColumn(otherPrograms.value) : []
+      return programData.concat(otherProgramData)
+    })
     const previousOtherPrograms = computed(() => store.getters['formManager/manager'].previousOtherPrograms)
+
     const formRef = ref()
     const isPreviousViewed = ref(false)
     const formState = reactive({
@@ -120,11 +128,30 @@ export default defineComponent({
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
+      fetchAllPrograms(year.value)
     })
 
     // METHODS
-    const fetchOtherPrograms = async selectedYear => {
+    const fetchAllPrograms = async selectedYear => {
+      await fetchPrograms(selectedYear)
+      await fetchOtherPrograms(selectedYear)
+
+
+
+      // await store.commit('formManager/SET_STATE', { allPrograms: allProgramData })
+    }
+
+    const addArrayColumn = (data,index,value) => {
+      console.log(data)
+      return data.map(x => Object.assign({}, x, { index: value }))
+    }
+
+    const fetchPrograms = async selectedYear => {
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { form_id: form_id, year: (selectedYear - 1), isPrevious: true }})
+    }
+
+    const fetchOtherPrograms = async selectedYear => {
       await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: (selectedYear - 1), isPrevious: true }})
     }
@@ -187,7 +214,7 @@ export default defineComponent({
       year,
       onSubmit,
       resetForm,
-      fetchOtherPrograms,
+      fetchAllPrograms,
       changePreviousModal,
       previousOtherPrograms,
       isPreviousViewed,
@@ -195,6 +222,10 @@ export default defineComponent({
       PreviousList,
       ProgramsTable,
       form_id,
+
+      allPrograms,
+      otherPrograms,
+      programs,
     };
   },
 });

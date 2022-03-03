@@ -37,6 +37,7 @@ export default {
     functions: [],
     previousFunctions: [],
     programs: [],
+    allPrograms: [],
     otherPrograms: [],
     subCategories: [],
     measures: [],
