@@ -10,6 +10,7 @@ const mapApiProviders = {
   createProgram: manager.addNewProgram,
   deleteProgram: manager.deleteProgram,
   getSubCategories: manager.getSubCategories,
+  getPrevSubCategories: manager.getPrevSubCategories,
   createSubCategory: manager.createSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
   getMeasures: manager.getMeasures,
@@ -42,6 +43,8 @@ export default {
     measures: [],
     previousMeasures: [],
     previousPrograms: [],
+    previousCategories: [],
+    prevSubCategories: [],
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -196,9 +199,34 @@ export default {
       getSubCategories(year).then(response => {
         if (response) {
           const { subCategories } = response
-          commit('SET_STATE', {
-            subCategories: subCategories,
-          })
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousCategories: subCategories })
+
+          }else{
+            commit('SET_STATE', {
+              subCategories: subCategories,
+            })
+          }
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_PREV_SUB_CATEGORIES({ commit },{payload}) {
+      const { year } = payload
+
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getPrevSubCategories = mapApiProviders.getPrevSubCategories
+      getPrevSubCategories(year).then(response => {
+        if (response) {
+          const { categories } = response
+            commit('SET_STATE', {
+              categories: categories,
+            })
         }
         commit('SET_STATE', {
           loading: false,

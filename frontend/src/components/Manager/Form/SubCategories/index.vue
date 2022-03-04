@@ -15,7 +15,28 @@
               :rules="rules">
         <div class="row">
           <div class="col-lg-4">
-            <a-form-item ref="name" label="Sub Category Name" name="name">
+            
+             <a-form-item ref='name' v-if="checked" label="Sub Category Name" name="name">
+              <!-- <a-tree-select
+                v-model:value="formState.name"
+                style="width: 100%"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                :tree-data="prevSub"
+                :replace-fields="normalizer"
+                allow-clear
+                tree-default-expand-all
+              >
+              </a-tree-select> -->
+               <a-select v-model:value="formState.name" >
+                <a-select-option v-for="categories in categories"
+                                 :value="categories.id"
+                                 :key="categories.id"
+                                 :label="categories.name">
+                  {{ categories.name }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item ref="name" v-else label="Sub Category Name" name="name">
               <a-input v-model:value="formState.name" />
             </a-form-item>
           </div>
@@ -48,6 +69,10 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+           <a-checkbox v-model:checked="checked" v-if="previousCategories.length" >
+                Add {{ year - 1}} Sub Categories
+                </a-checkbox>
+          <a-button type="link" v-if="previousCategories.length" @click="changePreviousModal"></a-button>
         </div>
       </a-form>
     </div>
@@ -74,6 +99,9 @@ export default defineComponent({
     const functions = computed(() => store.getters['formManager/functions'])
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
+    const previousCategories = computed(() => store.getters['formManager/manager'].previousCategories)
+    const categories = computed(() => store.getters['formManager/manager'].previousCategories)
+    
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
         return i.category_id === parseInt(formState.category_id)
@@ -92,6 +120,8 @@ export default defineComponent({
       }
       return lists
     })
+    const checked = ref(false);
+    const isPreviousViewed = ref(false)
 
     // DATA
     const formRef = ref()
@@ -124,6 +154,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
+       store.commit('formManager/SET_STATE', { previousCategories: [] })
       fetchFunctions(year.value)
     })
 
@@ -140,6 +171,7 @@ export default defineComponent({
 
     const fetchSubCategories = year => {
         store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
+        store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
     }
 
     const onFunctionsChange = () => {
@@ -172,6 +204,42 @@ export default defineComponent({
       formRef.value.resetFields();
     };
 
+    const changePreviousModal = () => {
+      isPreviousViewed.value = !isPreviousViewed.value
+    }
+
+    const onMultipleSave = keys => {
+      const saveKeys = previousCategories.value.filter(item => {
+        return keys.indexOf(item.key) !== -1
+      })
+      // saveKeys.forEach(item => {
+      //   const data = {
+      //     name: item.name,
+      //     year: year.value,
+      //     category_id: item.category_id,
+      //     parentId: item.parent_id,
+      //   }
+      // store.dispatch('formManager/CREATE_SUB_CATEGORY', { payload: data })
+        
+        
+      
+      // })
+
+      keys.forEach(item =>{
+       
+        const data = {
+          id : item,
+          year: year.value,
+          prev : true,
+        }
+        console.log(keys)
+        // store.dispatch('formManager/CREATE_PREV_SUB_CATEGORY', { payload: data })
+        // console.log(data)
+      })
+        
+      // changePreviousModal()
+     }
+
     return {
       year,
       functions,
@@ -179,7 +247,11 @@ export default defineComponent({
       loading,
       years,
       parentSubs,
-
+      isPreviousViewed,
+      previousCategories,
+      categories,
+      
+      checked,
       formRef,
       formState,
       rules,
@@ -190,6 +262,8 @@ export default defineComponent({
       onFunctionsChange,
       onSubmit,
       resetForm,
+      changePreviousModal,
+      onMultipleSave,
     };
   },
 });
