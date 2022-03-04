@@ -60,9 +60,9 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-           <a-checkbox v-model:checked="checked" v-if="previousCategories.length" @change="isCheck" >
+           <a-checkbox v-model:checked="checked" v-if="previousCategories.length" @change="resetForm" >
                 Add {{ year - 1}} Sub Categories
-                </a-checkbox>
+            </a-checkbox>
           <a-button type="link" v-if="previousCategories.length" @click="changePreviousModal"></a-button>
         </div>
       </a-form>
@@ -91,7 +91,7 @@ export default defineComponent({
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousCategories = computed(() => store.getters['formManager/manager'].previousCategories)
-    const categories = computed(() => store.getters['formManager/manager'].previousCategories)
+    const categories = computed(() => store.getters['formManager/manager'].categories)
     
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
@@ -156,6 +156,7 @@ export default defineComponent({
 
     const fetchFunctions = year => {
       resetForm()
+       checked.value = false;
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
       fetchSubCategories(year)
     }
@@ -163,6 +164,7 @@ export default defineComponent({
     const fetchSubCategories = year => {
         store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
         store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
+         store.dispatch('formManager/FETCH_PREV_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
     }
 
     const onFunctionsChange = () => {
@@ -193,6 +195,7 @@ export default defineComponent({
 
     const resetForm = () => {
       formRef.value.resetFields();
+     
     };
 
     const changePreviousModal = () => {

@@ -150,7 +150,7 @@ class SettingController extends Controller
     }
     public function getPrevSubCategories($year)
     {
-        $subCategories = SubCategory::select('*')->where('year', $year -1)->whereNotNull('parent_id')->get();
+        $subCategories = SubCategory::select('*')->where('year', $year )->get();
      
         return response()->json([
             'categories' => $subCategories
