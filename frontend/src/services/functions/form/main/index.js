@@ -42,19 +42,20 @@ export const useFormFields = form => {
 
     if(list.length) {
       const filtered = formFields.value.filter(i => i.code === field)
-      console.log(filtered.code, field)
-      if(filtered.settings === null) {
-        Modal.error({
-          title: () => 'Unable to save data',
-          content: () => 'No cascading option set in Form Manager for this field',
-        })
-      }else {
-        console.log(filtered)
-        form.value[field] = mappedOfficeList(list, field, filtered.settings.setting)
-        form.value.options[field] = []
-        storedOffices.value[field] = []
-        if (cachedOffice.value[field].length) {
-          cachedOffice.value[field] = []
+
+      if(filtered.length) {
+        if(filtered[0].settings === null) {
+          Modal.error({
+            title: () => 'Unable to save data',
+            content: () => 'No cascading option set in Form Manager for this field',
+          })
+        }else {
+          form.value[field] = mappedOfficeList(list, field, filtered[0].settings.setting)
+          form.value.options[field] = []
+          storedOffices.value[field] = []
+          if (cachedOffice.value[field].length) {
+            cachedOffice.value[field] = []
+          }
         }
       }
     }

@@ -137,29 +137,9 @@ export const useDefaultFormData = props => {
     }
   }
 
-  let subCategoryValidator = async (rule, value) => {
-    const allowValidate = props.functionId !== 'support_functions' && value === null
-
-    let hasParent = false
-    if(typeof props.config !== 'undefined') {
-      const { parentDetails } = props.config.value
-      hasParent = (typeof parentDetails === 'undefined') || (typeof parentDetails !== 'undefined' && parentDetails.subCategory !== null)
-    }
-
-    if ((allowValidate && props.formId === 'aapcr') || (props.formId === 'opcrvp' && allowValidate && hasParent)) {
-      return Promise.reject('Please select at least one')
-    } else {
-      return Promise.resolve()
-    }
-  }
-
   switch (props.formId) {
     case 'aapcr':
       rules = reactive({
-        subCategory: [
-          { validator: subCategoryValidator, trigger: 'blur' },
-          { type: 'object' },
-        ],
         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
         target: [{ validator: validateNonHeader, trigger: 'blur'}],
         measures: [{ validator: validateNonHeader, trigger: 'blur'}],
@@ -187,10 +167,6 @@ export const useDefaultFormData = props => {
       }
       rules = reactive({
         program: [{ validator: programValidator, trigger: 'blur' }],
-        subCategory: [
-          { validator: subCategoryValidator, trigger: 'blur' },
-          { type: 'object' },
-        ],
         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
         target: [{ validator: validateNonHeader, trigger: 'blur'}],
         measures: [{ validator: validateNonHeader, trigger: 'blur'}],

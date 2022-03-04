@@ -10,7 +10,7 @@
             </a-select-option>
           </a-select>
         </span>
-        <template v-else>{{ record.settingLabel }}</template>
+        <template v-else>Cascade to: <b>{{ record.settingLabel }}</b></template>
       </div>
     </template>
 

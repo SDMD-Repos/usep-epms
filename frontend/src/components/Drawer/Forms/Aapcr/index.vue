@@ -20,10 +20,7 @@
         <br>
       </div>
 
-      <a-form-item v-bind="validateInfos.subCategory">
-        <template #label>
-          <span :class="{'required-indicator': drawerId !== SUPPORT_FUNCTIONS_ID}">Sub Category</span>
-        </template>
+      <a-form-item label="Sub Category" v-bind="validateInfos.subCategory">
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -222,8 +219,6 @@ import { TreeSelect, message } from 'ant-design-vue'
 import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
 
-const SUPPORT_FUNCTIONS_ID = '2'
-
 export default defineComponent({
   name: "AapcrFormDrawer",
   components: { CheckOutlined, EditOutlined, DeleteFilled },
@@ -331,7 +326,6 @@ export default defineComponent({
     }
 
     return {
-      SUPPORT_FUNCTIONS_ID,
       SHOW_PARENT,
       config,
       isSubmmitting,

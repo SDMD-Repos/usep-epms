@@ -108,6 +108,7 @@ class AppController extends Controller
 
             $data[$PICount] = array(
                 'category_id' => $detail->category_id,
+                'category_order' => $detail->category->order,
                 'function' => $function,
                 'program' => $program,
                 'subCategory' => $subCategory,
@@ -150,6 +151,7 @@ class AppController extends Controller
 
                     $data[$PICount] = array(
                         'category_id' => $detail->category_id,
+                        'category_order' => $detail->category->order,
                         'function' => $function,
                         'program' => $program,
                         'subCategory' => $subCategory,

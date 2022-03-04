@@ -31,10 +31,7 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-bind="validateInfos.subCategory">
-        <template #label>
-          <span :class="{'required-indicator': drawerId !== 'support_functions'}">Sub Category</span>
-        </template>
+      <a-form-item label="Sub Category" v-bind="validateInfos.subCategory">
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"

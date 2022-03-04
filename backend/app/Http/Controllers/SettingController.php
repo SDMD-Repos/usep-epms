@@ -72,14 +72,16 @@ class SettingController extends Controller
         try{
             $validated = $request->validated();
 
+            $year = $validated['year'];
+
             DB::beginTransaction();
 
-            $order = Category::max('order');
+            $order = Category::where('year', $year)->max('order');
 
             $category = new Category();
 
             $category->name = $validated['name'];
-            $category->year = $validated['year'];
+            $category->year = $year;
             $category->percentage = $validated['percentage'];
             $category->order = ++$order;
             $category->create_id = $this->login_user->pmaps_id;
