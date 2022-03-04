@@ -146,7 +146,7 @@ class UserController extends Controller
     public function account()
     {
         $user = Auth::user();
-
+        
         if($user) {
 
             return response()->json([
@@ -156,7 +156,8 @@ class UserController extends Controller
                 'pmapsId' => $user->pmaps_id,
                 'avatar' => $user->avatar,
                 'role' => '',
-                'accessToken' => $user->remember_token
+                'accessToken' => $user->remember_token,
+                'accessRights'=> $user->accessrights,
             ], $this->successStatus);
         }else{
             return response()->json("Error", 400);
