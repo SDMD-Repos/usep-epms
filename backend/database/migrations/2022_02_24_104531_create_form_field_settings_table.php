@@ -17,7 +17,7 @@ class CreateFormFieldSettingsTable extends Migration
             $table->integer('id')->autoIncrement();
             $table->year('year');
             $table->integer('field_id');
-            $table->string('setting');
+            $table->string('setting', 100);
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();

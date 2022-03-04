@@ -1,5 +1,6 @@
 import * as manager from '@/services/api/manager'
 import { notification } from 'ant-design-vue'
+import {updateFormFieldSettings} from "../../services/api/manager";
 
 const mapApiProviders = {
   getFunctions: manager.getFunctions,
@@ -27,6 +28,8 @@ const mapApiProviders = {
   deleteGroup: manager.deleteGroup,
   getCascadingLevels: manager.getCascadingLevels,
   getAllFormFields: manager.getAllFormFields,
+  saveFormFieldSettings: manager.saveFormFieldSettings,
+  updateFormFieldSettings: manager.updateFormFieldSettings,
 }
 
 export default {
@@ -545,17 +548,58 @@ export default {
         })
       })
     },
-    FETCH_FORM_FIELDS({ commit }) {
+    FETCH_FORM_FIELDS({ commit }, { payload }) {
+      const { year } = payload
       commit('SET_STATE', {
         loading: true,
       })
 
       const getAllFormFields = mapApiProviders.getAllFormFields
-      getAllFormFields().then(response => {
+      getAllFormFields(year).then(response => {
         if (response) {
           const { formFields } = response
           commit('SET_STATE', {
             formFields: formFields,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    SAVE_FORM_FIELD_SETTINGS({ commit, dispatch }, { payload }) {
+      const { year } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const saveFormFieldSettings = mapApiProviders.saveFormFieldSettings
+      saveFormFieldSettings(payload).then(response => {
+        if (response) {
+          notification.success({
+            message: 'Success',
+            description: 'Settings was saved successfully',
+          })
+        }
+        dispatch('FETCH_FORM_FIELDS', { payload: { year: year }})
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE_FORM_FIELD_SETTINGS({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const { settingId, year } = payload
+
+      const updateFormFieldSettings = mapApiProviders.updateFormFieldSettings
+      updateFormFieldSettings(payload, settingId).then(response => {
+        if (response) {
+          dispatch('FETCH_FORM_FIELDS', { payload: { year: year }})
+          notification.success({
+            message: 'Success',
+            description: 'Settings was updated successfully',
           })
         }
         commit('SET_STATE', {

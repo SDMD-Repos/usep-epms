@@ -25,7 +25,7 @@ const columns = [
 ]
 
 export default defineComponent({
-  name: 'ProgramsTable',
+  name: 'SubCategoriesTable',
   components: {
     WarningOutlined,
   },
@@ -38,7 +38,7 @@ export default defineComponent({
   emits: ['delete'],
   setup(props, { emit } ) {
     const store = useStore()
-    const loading = computed( () => store.getters['formManager/formManager'].loading)
+    const loading = computed( () => store.getters['formManager/manager'].loading)
 
     // METHODS
     const onDelete = key => {

@@ -6,9 +6,11 @@ use App\CascadingLevel;
 use App\Category;
 use App\Form;
 use App\FormField;
+use App\FormFieldSetting;
 use App\Group;
 use App\GroupMember;
 use App\Http\Requests\StoreCategory;
+use App\Http\Requests\StoreFormFieldSetting;
 use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
 use App\Http\Requests\StoreProgram;
@@ -104,6 +106,10 @@ class SettingController extends Controller
 
             $category = Category::find($id);
 
+            if((isset($category->programs) && count($category->programs)) && (isset($category->subCategory) && count($category->subCategory))) {
+                return response()->json('Sorry, unable to delete '.$category->name.'. There were saved Programs and Sub Categories under this category', 409);
+            }
+
             $category->modify_id = $this->login_user->pmaps_id;
             $category->updated_at = Carbon::now();
             $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -151,7 +157,7 @@ class SettingController extends Controller
             DB::beginTransaction();
 
             $subcategory = new SubCategory();
-         
+
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
@@ -269,6 +275,8 @@ class SettingController extends Controller
         try {
 
             $program = Program::find($id);
+
+            if($program)
 
             $program->modify_id = $this->login_user->pmaps_id;
             $program->updated_at = Carbon::now();
@@ -955,12 +963,104 @@ class SettingController extends Controller
         ], 200);
     }
 
-    public function getAllFormFields()
+    public function getAllFormFields($year)
     {
-        $formFields = FormField::all();
+        $formFields = FormField::with(['settings' => function($query) use ($year) {
+            $query->where('year', $year);
+        }])->get();
 
         return response()->json([
             'formFields' => $formFields
         ], 200);
+    }
+
+    public function saveFormFieldSettings(StoreFormFieldSetting $request)
+    {
+        try{
+            $validated = $request->validated();
+
+            $year = $validated['year'];
+            $fieldId = $validated['fieldId'];
+            $setting = $validated['setting'];
+
+            DB::beginTransaction();
+
+            $isExists = FormFieldSetting::where('year', $year)->where('field_id', $fieldId)->first();
+
+            if ($isExists) {
+                return response()->json('Unable to save data. Settings has already been set', 409);
+            }
+
+            $settings = new FormFieldSetting();
+
+            $settings->year = $year;
+            $settings->field_id = $fieldId;
+            $settings->setting = $setting['value'];
+            $settings->create_id = $this->login_user->pmaps_id;
+            $settings->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if(!$settings->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Form Field Setting created successfully'
+            ], 200);
+
+        }catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function updateFormFieldSettings(StoreFormFieldSetting $request, $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            $setting = $validated['setting'];
+            DB::beginTransaction();
+
+            $settings = FormFieldSetting::find($id);
+
+            $original = $settings->getOriginal();
+
+            $settings->setting = $setting['value'];
+
+            $settings->modify_id = $this->login_user->pmaps_id;
+            $settings->updated_at = Carbon::now();
+
+            $history = '';
+
+            if($settings->isDirty('setting')){
+                $history .= "Updated Setting from '".$original['setting']."' to '".$setting['value']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            $settings->history = $settings->history . $history;
+
+            if(!$settings->save()){
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json('Settings updated successfully', 200);
+
+        }catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 }

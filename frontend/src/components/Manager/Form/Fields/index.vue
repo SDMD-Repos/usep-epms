@@ -8,19 +8,22 @@
       </template>
     </a-select>
 
-    <div class="mt-4">
-      <form-table :year="year" />
+    <div class="mt-5">
+      <form-table :year="year" @handle-save="handleSave"/>
     </div>
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from "vue"
+import { defineComponent, ref, computed, onMounted } from "vue"
+import { useStore } from "vuex";
 import FormTable from './partials/formTable'
 
 export default defineComponent({
   name: 'FieldsManager',
   components: { FormTable },
   setup() {
+    const store = useStore()
+
     // DATA
     const year = ref(new Date().getFullYear())
 
@@ -35,9 +38,40 @@ export default defineComponent({
       return lists
     })
 
-    //METHODS
-    const fetchSettings = () => {
+    // EVEMTS
+    onMounted(() => {
+      fetchSettings(year.value)
+    })
 
+    //METHODS
+    const fetchSettings = value => {
+      store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: value }})
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: value }})
+    }
+
+    const handleSave = data => {
+      const { code, id } = data
+
+      switch (code) {
+        case 'implementing':
+        case 'supporting':
+          const params = {
+            year: year.value,
+            fieldId: id,
+            setting: data.settings.settings,
+          }
+
+          if(!data.isUpdate) {
+            store.dispatch('formManager/SAVE_FORM_FIELD_SETTINGS', { payload: { ...params }})
+          } else {
+            params.settingId = data.settings.settingId
+            store.dispatch('formManager/UPDATE_FORM_FIELD_SETTINGS', { payload: { ...params }})
+          }
+
+          break;
+        default:
+          console.log("Try looking up for a hint.")
+      }
     }
 
     return {
@@ -46,6 +80,7 @@ export default defineComponent({
       years,
 
       fetchSettings,
+      handleSave,
     }
   },
 })

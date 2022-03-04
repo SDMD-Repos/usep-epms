@@ -63,6 +63,7 @@ import { Modal } from 'ant-design-vue'
 import SubCategoriesTable from './partials/lists'
 
 export default defineComponent({
+  name: "SubCategoriesManager",
   components: {
     SubCategoriesTable,
   },

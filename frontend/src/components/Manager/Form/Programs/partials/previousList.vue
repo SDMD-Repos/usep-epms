@@ -19,6 +19,7 @@ const columns = [
 ]
 
 export default defineComponent({
+  name: "ProgramsPreviousList",
   props: {
     visible: Boolean,
     year: { type: Number, default: new Date().getFullYear() },

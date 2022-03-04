@@ -275,7 +275,7 @@ export const useFormOperations = props => {
   const dataSource = computed(() => store.state[props.formId].dataSource )
 
   const years = computed(() => {
-    const now = new Date().getFullYear()
+    const now = new Date().getFullYear() + 1
     const min = 10
     const lists = []
     for (let i = now; i >= (now - min); i--) {

@@ -216,9 +216,27 @@ export async function getCascadingLevels() {
     .catch(err => console.log(err))
 }
 
-export async function getAllFormFields() {
+export async function getAllFormFields(year) {
   return apiClient
-    .get('/settings/get-all-form-fields')
+    .get('/settings/get-all-form-fields/' + year)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function saveFormFieldSettings(data) {
+  return apiClient
+    .post('/settings/save-form-field-settings', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function updateFormFieldSettings(data, id) {
+  return apiClient
+    .post('/settings/update-form-field-settings/' + id, data)
     .then(response => {
       return response.data
     })

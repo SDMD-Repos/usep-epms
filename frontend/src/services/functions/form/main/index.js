@@ -1,14 +1,20 @@
 import { Modal } from "ant-design-vue";
-import { createVNode, ref } from "vue";
+import { ref, createVNode, computed } from "vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+import { useStore } from "vuex"
 
 export const useFormFields = form => {
+  const store = useStore()
+
   const typeOptions = [{ label: 'PI', value: 'pi'}, { label: 'Sub PI', value: 'sub' }]
   const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 14 }}
   const tooltipHeaderText = 'Check to disable the editing of Target to Other Remarks'
 
   const storedOffices = ref({ implementing: [], supporting: [] })
   const cachedOffice = ref({ implementing: [], supporting: [] })
+
+  // COMPUTED
+  const formFields = computed(() => store.getters['formManager/manager'].formFields)
 
   const changeNullValue = (value, label) => {
     if (typeof value === 'undefined' || value === 0) {
@@ -33,12 +39,23 @@ export const useFormFields = form => {
 
   const saveOfficeList = field => {
     const list = storedOffices.value[field]
+
     if(list.length) {
-      form.value[field] = mappedOfficeList(list, field)
-      form.value.options[field] = []
-      storedOffices.value[field] = []
-      if (cachedOffice.value[field].length) {
-        cachedOffice.value[field] = []
+      const filtered = formFields.value.filter(i => i.code === field)
+      console.log(filtered.code, field)
+      if(filtered.settings === null) {
+        Modal.error({
+          title: () => 'Unable to save data',
+          content: () => 'No cascading option set in Form Manager for this field',
+        })
+      }else {
+        console.log(filtered)
+        form.value[field] = mappedOfficeList(list, field, filtered.settings.setting)
+        form.value.options[field] = []
+        storedOffices.value[field] = []
+        if (cachedOffice.value[field].length) {
+          cachedOffice.value[field] = []
+        }
       }
     }
   }
@@ -50,8 +67,7 @@ export const useFormFields = form => {
     form.value[field] = []
   }
 
-  const mappedOfficeList = (list, field) => {
-    const cascadeTo = field === 'implementing' ? 'core_functions' : 'support_functions'
+  const mappedOfficeList = (list, field, cascadeTo) => {
     return list.map(item => {
       const container = {}
       let tempCascadeTo = ''

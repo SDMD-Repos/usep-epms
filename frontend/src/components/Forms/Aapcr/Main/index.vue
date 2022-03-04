@@ -142,11 +142,12 @@ export default defineComponent({
     }
 
     const initializeFormFields = async () => {
-      await store.dispatch('formManager/FETCH_FUNCTIONS')
-      await store.dispatch('formManager/FETCH_SUB_CATEGORIES')
-      await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
     }
 
     const getFormDetails = () => {

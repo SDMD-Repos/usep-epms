@@ -118,6 +118,7 @@ export default defineComponent({
             icon: () => createVNode(ExclamationCircleOutlined),
             content: () => '',
             onOk() {
+              formState.year = year.value
               store.dispatch('formManager/CREATE_FUNCTION', { payload: toRaw(formState) })
               resetForm()
             },

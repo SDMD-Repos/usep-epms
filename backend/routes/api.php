@@ -73,7 +73,9 @@ Route::group([
 
     Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
 
-    Route::get('/get-all-form-fields', 'SettingController@getAllFormFields');
+    Route::get('/get-all-form-fields/{year}', 'SettingController@getAllFormFields');
+    Route::post('/save-form-field-settings', 'SettingController@saveFormFieldSettings');
+    Route::post('/update-form-field-settings/{id}', 'SettingController@updateFormFieldSettings');
 });
 
 Route::group([

@@ -1,0 +1,19 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class FormFieldSetting extends Model
+{
+    use SoftDeletes;
+
+    /**
+     * Get the form field that owns the settings.
+     */
+    public function formField()
+    {
+        return $this->belongsTo('App\FormField');
+    }
+}
