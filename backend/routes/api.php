@@ -126,6 +126,8 @@ Route::group([
         'prefix' => 'ocpcr'
     ], function() {
         Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
+        Route::get('/check-saved-template/{year}', 'Form\OcpcrController@checkSaved');
+        Route::get('/template-list', 'Form\OcpcrController@getAllOpcrTemplates');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
         Route::post('/save', 'Form\VpopcrController@save');
         Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
