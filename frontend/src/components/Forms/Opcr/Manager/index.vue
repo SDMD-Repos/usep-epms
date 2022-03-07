@@ -38,13 +38,13 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-          <a-button type="link" v-if="previousOtherPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
+          <a-button type="link" v-if="allPreviousPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
         </div>
       </a-form>
 
-      <programs-table :year="year" :form_id="form_id"/>
+      <programs-table :year="year" :form-id="formId" :all-programs="allPrograms" />
 
-      <previous-list :visible="isPreviousViewed" :year="year" :list="previousOtherPrograms"
+      <previous-list :visible="isPreviousViewed" :year="year" :list="allPreviousPrograms"
                      @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
     </a-spin>
   </div>
@@ -63,20 +63,31 @@ export default defineComponent({
     ProgramsTable,
     PreviousList,
   },
-  setup() {
-    const form_id = 'opcr'
+  props: {
+    formId: { type: String, default: null },
+  },
+  setup(props) {
     const store = useStore()
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
+
     const programs = computed(() => store.getters['formManager/manager'].programs)
     const otherPrograms = computed(() => store.getters['formManager/manager'].otherPrograms)
     const allPrograms = computed(() => {
-      const programData = addArrayColumn(programs.value,"is_other",false) && typeof addArrayColumn(programs.value) != 'undefined' ? addArrayColumn(programs.value) : []
-      const otherProgramData = addArrayColumn(otherPrograms.value,"is_other",true) && typeof addArrayColumn(otherPrograms.value) != 'undefined' ? addArrayColumn(otherPrograms.value) : []
+      const programData = programs.value && typeof programs.value != 'undefined' ? programs.value.map(x=> Object.assign({}, x, {"is_other":false})) : []
+      const otherProgramData = otherPrograms.value && typeof otherPrograms.value != 'undefined' ? otherPrograms.value.map(x=> Object.assign({}, x, {"is_other":true})) : []
       return programData.concat(otherProgramData)
     })
+
+    const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
     const previousOtherPrograms = computed(() => store.getters['formManager/manager'].previousOtherPrograms)
+
+    const allPreviousPrograms = computed(() => {
+      const previousProgramData = previousPrograms.value && typeof previousPrograms.value != 'undefined' ? previousPrograms.value.map(x=> Object.assign({}, x, {"is_other":false})) : []
+      const previousOtherProgramsData = previousOtherPrograms.value && typeof previousOtherPrograms.value != 'undefined' ? previousOtherPrograms.value.map(x=> Object.assign({}, x, {"is_other":true})) : []
+      return previousProgramData.concat(previousOtherProgramsData)
+    })
 
     const formRef = ref()
     const isPreviousViewed = ref(false)
@@ -85,7 +96,7 @@ export default defineComponent({
       year: year.value,
       category_id: undefined,
       percentage: null,
-      form_id:form_id,
+      formId:props.formId,
     })
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
@@ -135,25 +146,16 @@ export default defineComponent({
     const fetchAllPrograms = async selectedYear => {
       await fetchPrograms(selectedYear)
       await fetchOtherPrograms(selectedYear)
-
-
-
-      // await store.commit('formManager/SET_STATE', { allPrograms: allProgramData })
-    }
-
-    const addArrayColumn = (data,index,value) => {
-      console.log(data)
-      return data.map(x => Object.assign({}, x, { index: value }))
     }
 
     const fetchPrograms = async selectedYear => {
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { form_id: form_id, year: (selectedYear - 1), isPrevious: true }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { formId: props.formId, year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { formId: props.formId, year: (selectedYear - 1), isPrevious: true }})
     }
 
     const fetchOtherPrograms = async selectedYear => {
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: selectedYear, isPrevious: false }})
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { form_id: form_id, year: (selectedYear - 1), isPrevious: true }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: props.formId, year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: props.formId, year: (selectedYear - 1), isPrevious: true }})
     }
 
     const onSubmit = () => {
@@ -186,7 +188,7 @@ export default defineComponent({
     }
 
     const onMultipleSave = keys => {
-      const saveKeys = previousOtherPrograms.value.filter(item => {
+      const saveKeys = allPreviousPrograms.value.filter(item => {
         return keys.indexOf(item.key) !== -1
       })
 
@@ -196,7 +198,7 @@ export default defineComponent({
           year: year.value,
           category_id: item.category_id,
           percentage: item.percentage,
-          form_id: form_id,
+          formId: props.formId,
         }
         store.dispatch('formManager/CREATE_OTHER_PROGRAM', { payload: data })
       })
@@ -221,11 +223,10 @@ export default defineComponent({
       onMultipleSave,
       PreviousList,
       ProgramsTable,
-      form_id,
-
       allPrograms,
       otherPrograms,
       programs,
+      allPreviousPrograms,
     };
   },
 });

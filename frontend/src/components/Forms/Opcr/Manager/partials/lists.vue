@@ -32,24 +32,22 @@ export default defineComponent({
   },
   props: {
     year: { type: Number, default: null },
-    form_id: { type: String, default: null },
+    formId: { type: String, default: null },
+    allPrograms: { type: Object, default: () => {} },
   },
   setup(props) {
     const store = useStore()
-
-    const allPrograms = computed(() => store.getters['formManager/manager'].allPrograms)
 
     onMounted(() => {})
 
     // METHODS
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_OTHER_PROGRAM', { payload: { form_id: props.form_id, id: key, year: props.year }})
+      store.dispatch('formManager/DELETE_OTHER_PROGRAM', { payload: { formId: props.formId, id: key, year: props.year }})
     }
 
     return {
       columns,
       onDelete,
-      allPrograms,
     }
   },
 })

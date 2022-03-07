@@ -195,13 +195,13 @@ export default {
         year: payload.year,
         category_id: payload.category_id,
         percentage: payload.percentage,
-        form_id: payload.form_id,
+        formId: payload.formId,
       }
 
       const createOtherProgram = mapApiProviders.createOtherProgram
       createOtherProgram(data).then(response => {
         if (response) {
-          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: payload.year, form_id: payload.form_id }})
+          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: payload.year, formId: payload.formId }})
           notification.success({
             message: 'Success',
             description: 'Program created successfully',
@@ -213,14 +213,14 @@ export default {
       })
     },
     FETCH_OTHER_PROGRAMS({ commit }, { payload }) {
-      const { year,form_id } = payload
+      const { year,formId } = payload
 
       commit('SET_STATE', {
         loading: true,
       })
 
       const getOtherPrograms = mapApiProviders.getOtherPrograms
-      getOtherPrograms(year,form_id).then(response => {
+      getOtherPrograms(year,formId).then(response => {
         if (response) {
           const { otherPrograms } = response
           if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
@@ -238,7 +238,7 @@ export default {
       })
     },
     DELETE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
-      const { id, year, form_id} = payload
+      const { id, year, formId} = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -246,7 +246,7 @@ export default {
       const deleteOtherProgram = mapApiProviders.deleteOtherProgram
       deleteOtherProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: year, form_id: form_id }})
+          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: year, formId: formId }})
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',

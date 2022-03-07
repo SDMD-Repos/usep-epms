@@ -285,7 +285,7 @@ class SettingController extends Controller
 
             $program->name = $validated['name'];
             $program->category_id = $validated['category_id'];
-            $program->form_id = $validated['form_id'];
+            $program->form_id = $validated['formId'];
             $program->percentage = $validated['percentage'];
             $program->year = $validated['year'];
             $program->create_id = $this->login_user->pmaps_id;
