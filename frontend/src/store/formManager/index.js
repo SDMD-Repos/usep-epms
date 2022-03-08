@@ -1,6 +1,5 @@
 import * as manager from '@/services/api/manager'
 import { notification } from 'ant-design-vue'
-import {updateFormFieldSettings} from "../../services/api/manager";
 
 const mapApiProviders = {
   getFunctions: manager.getFunctions,
@@ -41,16 +40,15 @@ export default {
     functions: [],
     previousFunctions: [],
     programs: [],
+    previousPrograms: [],
     allPrograms: [],
     otherPrograms: [],
-    subCategories: [],
-    measures: [],
-    previousMeasures: [],
-    previousPrograms: [],
     previousOtherPrograms: [],
-    previousCategories: [],
+    subCategories: [],
     prevSubCategories: [],
-
+    measures: [],
+    previousCategories: [],
+    previousMeasures: [],
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -263,28 +261,26 @@ export default {
         })
       })
     },
-     FETCH_SUB_CATEGORIES({ commit },{payload}) {
+     FETCH_SUB_CATEGORIES({ commit },{ payload }) {
       const { year } = payload
 
-      commit('SET_STATE', {
-        loading: true,
-      })
+      const isPrevious = (typeof payload.isPrevious !== 'undefined' && payload.isPrevious)
+
+      commit('SET_STATE', { loading: true })
 
       const getSubCategories = mapApiProviders.getSubCategories
-      getSubCategories(year).then(response => {
+      getSubCategories(year, !isPrevious).then(response => {
         if (response) {
           const { subCategories } = response
-          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
-            commit('SET_STATE', { previousCategories: subCategories })
+          if(isPrevious) {
+            commit('SET_STATE', { prevSubCategories: subCategories })
           }else{
             commit('SET_STATE', {
               subCategories: subCategories,
             })
           }
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
+        commit('SET_STATE', { loading: false })
       })
     },
     CREATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {

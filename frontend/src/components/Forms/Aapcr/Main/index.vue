@@ -102,6 +102,7 @@ export default defineComponent({
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('aapcr/SET_STATE', { dataSource: [] })
+      resetFormFields()
 
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
 
@@ -114,6 +115,8 @@ export default defineComponent({
 
     // METHODS
     const checkFormAvailability = () => {
+      resetFormFields()
+
       if(year.value !== cachedYear.value) {
         isCheckingForm.value = true
         checkSavedForm(year.value).then(response => {
@@ -148,6 +151,17 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+    }
+
+    const resetFormFields = () => {
+      store.commit('formManager/SET_STATE', {
+        functions: [],
+        subCategories: [],
+        measures: [],
+        cascadingLevels: [],
+        programs: [],
+        formFields: [],
+      })
     }
 
     const getFormDetails = () => {

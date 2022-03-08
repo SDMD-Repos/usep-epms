@@ -81,9 +81,9 @@ export async function deleteOtherProgram(id) {
     .catch(err => console.log(err))
 }
 
-export async function getSubCategories(year) {
+export async function getSubCategories(year, isPrevious) {
   return apiClient
-    .get('/settings/get-sub-categories/' + year)
+    .get('/settings/get-sub-categories/' + year + '/'+ isPrevious)
     .then(response => {
       return response.data
     })

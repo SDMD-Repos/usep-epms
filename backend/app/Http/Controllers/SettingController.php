@@ -142,11 +142,13 @@ class SettingController extends Controller
         }
     }
 
-    public function getSubCategories($year)
+    public function getSubCategories($year, $isNested=0)
     {
         $subCategories = SubCategory::with('category')->where('year', $year)->get();
 
-        $modSubCategories = $this->getNestedChildren($subCategories);
+        $isNested = filter_var($isNested, FILTER_VALIDATE_BOOLEAN);
+
+        $modSubCategories = $isNested ? $this->getNestedChildren($subCategories) : $subCategories;
 
         return response()->json([
             'subCategories' => $modSubCategories

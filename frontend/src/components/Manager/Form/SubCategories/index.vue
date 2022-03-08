@@ -17,11 +17,11 @@
           <div class="col-lg-4">
             <a-form-item ref='name' label="Sub Category Name" name="name">
               <a-select v-model:value="formState.name"  v-if="checked"  >
-                <a-select-option v-for="category in categories"
-                                 :value="category.name"
-                                 :key="category.id"
-                                 :label="category.name">
-                  {{ category.name }}
+                <a-select-option v-for="previous in prevSubCategories"
+                                 :value="previous.name"
+                                 :key="previous.id"
+                                 :label="previous.name">
+                  {{ previous.name }}
                 </a-select-option>
               </a-select>
               <a-input v-model:value="formState.name" v-else />
@@ -58,10 +58,10 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-           <a-checkbox v-model:checked="checked" v-if="previousCategories.length" @change="resetForm" >
+           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length" @change="resetForm" >
                 Add {{ year - 1}} Sub Categories
             </a-checkbox>
-          <a-button type="link" v-if="previousCategories.length" @click="changePreviousModal"></a-button>
+          <a-button type="link" v-if="prevSubCategories.length" @click="changePreviousModal"></a-button>
         </div>
       </a-form>
     </div>
@@ -89,8 +89,7 @@ export default defineComponent({
     const functions = computed(() => store.getters['formManager/functions'])
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
-    const previousCategories = computed(() => store.getters['formManager/manager'].previousCategories)
-    const categories = computed(() => store.getters['formManager/manager'].categories)
+    const prevSubCategories = computed(() => store.getters['formManager/manager'].prevSubCategories)
 
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
@@ -144,7 +143,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.commit('formManager/SET_STATE', { previousCategories: [] })
+      store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
     })
 
@@ -210,8 +209,7 @@ export default defineComponent({
       years,
       parentSubs,
       isPreviousViewed,
-      previousCategories,
-      categories,
+      prevSubCategories,
 
       checked,
       formRef,

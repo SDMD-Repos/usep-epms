@@ -52,7 +52,7 @@ Route::group([
     Route::post('/create-other-program', 'SettingController@createOtherProgram');
     Route::post('/delete-other-program/{id}', 'SettingController@deleteOtherProgram');
 
-    Route::get('/get-sub-categories/{year}', 'SettingController@getSubCategories');
+    Route::get('/get-sub-categories/{year}/{isNested}', 'SettingController@getSubCategories');
     Route::post('/create-sub-category', 'SettingController@createSubCategory');
     Route::post('/delete-sub-category/{id}', 'SettingController@deleteSubCategory');
     Route::get('/get-all-measures/{year}', 'SettingController@getMeasures');
