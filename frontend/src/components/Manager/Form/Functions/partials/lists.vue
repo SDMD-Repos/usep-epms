@@ -52,6 +52,7 @@ export default defineComponent({
     // METHODS
     const fetchFunctions = year => {
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: (year - 1), isPrevious: true }})
     }
 
     const onDelete = key => {

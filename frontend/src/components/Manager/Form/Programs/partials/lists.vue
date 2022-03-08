@@ -38,10 +38,6 @@ export default defineComponent({
     const store = useStore()
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
-    onMounted(() => {
-      store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: props.year, isPrevious: false }})
-    })
-
     // METHODS
     const onDelete = key => {
       store.dispatch('formManager/DELETE_PROGRAM', { payload: { id: key, year: props.year }})

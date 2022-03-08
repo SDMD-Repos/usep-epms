@@ -1,5 +1,5 @@
 <template>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchPrograms">
+    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchData">
       <template v-for="(y, i) in years" :key="i">
         <a-select-option :value="y">
           {{ y }}
@@ -118,12 +118,13 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousPrograms: [] })
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
+      fetchData(year.value)
     })
 
     // METHODS
-    const fetchPrograms = async selectedYear => {
+    const fetchData = async selectedYear => {
       resetForm()
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})
     }
@@ -185,7 +186,7 @@ export default defineComponent({
       year,
       onSubmit,
       resetForm,
-      fetchPrograms,
+      fetchData,
       changePreviousModal,
       previousPrograms,
       isPreviousViewed,
