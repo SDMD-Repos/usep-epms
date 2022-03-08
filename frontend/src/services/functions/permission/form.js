@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref} from 'vue'
 import { useStore } from 'vuex'
 
 
@@ -21,9 +21,25 @@ export const usePermissionForm = () => {
     });
 
     const notInclude = accessLists.value.filter((value)=>{
-      return  (value.permission_id == "m-group" || 
+      return (value.permission_id == "m-group" || 
+              value.permission_id == "mg-create" || 
+              value.permission_id == "mg-delete" || 
+              value.permission_id == "m-measures" || 
               value.permission_id == "mm-create" || 
-              value.permission_id == "mm-delete");
+              value.permission_id == "mm-delete" ||
+              value.permission_id == "m-signatories" ||
+              value.permission_id == "ms-aapcr" ||
+              value.permission_id == "ms-opcrvp" ||
+              value.permission_id == "ms-opcr" ||
+              value.permission_id == "ms-cpcr" ||
+              value.permission_id == "ms-ipcr" ||
+              value.permission_id == "mf-programs" ||
+              value.permission_id == "mfp-create" ||
+              value.permission_id == "mfp-delete" ||
+              value.permission_id == "mf-subcat" ||
+              value.permission_id == "mfs-create" ||
+              value.permission_id == "mfs-delete"
+            );
     })
 
     const funcPermission = accessLists.value.filter((value)=>{
@@ -31,49 +47,55 @@ export const usePermissionForm = () => {
               value.permission_id == "mf-functions";
     });
     
-
-    let isCreate = true;
-    let isDelete = true;
-    let allAccess = true;
-    let returns = "";
-
-    if (formPermission.length > 0 || notInclude.length > 0){
-    allAccess = true;
+    const isCreate = ref(true)
+    const isDelete = ref(true)
+    const allAccess = ref(true)
     
-    if (notInclude.length > 0 && funcPermission.length > 0 ){
-      allAccess = true;
-      isCreate = false;
-      isDelete = false;
-      
-    }
+    if(formPermission.length > 0 || notInclude.length > 0){
+      allAccess.value = true
+      if(notInclude.length > 0 && funcPermission.length > 0 ){
+        allAccess.value = true;
+        isCreate.value = false;
+        isDelete.value = false;
+       
+      }
 
-    if(notInclude.length > 0 && formPermission.length > 0)
-    allAccess = true;
-    isCreate = false;
-    isDelete = false;
+      if(notInclude.length > 0 && formPermission.length > 0 ){
+        allAccess.value = false;
+        isCreate.value = false;
+        isDelete.value = false;  
+        if(funcPermission.length > 0){
+          allAccess.value = true; 
+        }
+      }
     }
    
-    if (formDeletePermission.length > 0 ) {
-      isCreate = false;
-      isDelete = true;
-      allAccess = false;
-    }
-    if (formCreatePermission.length > 0) {
-      isCreate = true;
-      isDelete = false;
-      allAccess = false;
+    if(formDeletePermission.length > 0){
+      isCreate.value = false;
+      isDelete.value = true;
+      allAccess.value = false; 
+     
     }
 
-    if (formCreatePermission.length > 0 && formDeletePermission.length > 0){
-      isCreate = true;
-      isDelete = true;
+    if(formCreatePermission.length > 0){
+      isCreate.value = true;
+      isDelete.value = false;
+      allAccess.value = false; 
     }
 
+    if(formCreatePermission.length > 0 && formDeletePermission.length > 0){
+      isCreate.value = true;
+      isDelete.value = true; 
+    
+    }
+
+    // alert(isCreate)
+    // alert(allAccess)
   return {
     isDelete,
     isCreate,
     accessLists,
     allAccess,
-    returns,
+   
   }
 }
