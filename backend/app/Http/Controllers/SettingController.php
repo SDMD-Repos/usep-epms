@@ -153,6 +153,14 @@ class SettingController extends Controller
             'subCategories' => $modSubCategories
         ], 200);
     }
+    public function getPrevSubCategories($year)
+    {
+        $subCategories = SubCategory::select('*')->where('year', $year )->get();
+     
+        return response()->json([
+            'categories' => $subCategories
+        ], 200);
+    }
     public function createSubCategory(StoreSubCategory $request)
     {
         try {

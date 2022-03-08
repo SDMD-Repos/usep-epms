@@ -89,6 +89,14 @@ export async function getSubCategories(year) {
     })
     .catch(err => console.log(err))
 }
+export async function getPrevSubCategories(year) {
+  return apiClient
+    .get('/settings/get-prev-sub-categories/' + year)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
 
 export async function createSubCategory(data) {
   return apiClient

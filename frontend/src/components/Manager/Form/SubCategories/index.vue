@@ -15,9 +15,21 @@
               :rules="rules">
         <div class="row">
           <div class="col-lg-4">
-            <a-form-item ref="name" label="Sub Category Name" name="name">
-              <a-input v-model:value="formState.name" />
+            
+             <a-form-item ref='name' label="Sub Category Name" name="name">
+               <a-select v-model:value="formState.name"  v-if="checked"  >
+                <a-select-option v-for="categories in categories"
+                                 :value="categories.name"
+                                 :key="categories.id"
+                                 :label="categories.name">
+                  {{ categories.name }}
+                </a-select-option>
+              </a-select>
+               <a-input v-model:value="formState.name" v-else />
             </a-form-item>
+            
+             
+            
           </div>
           <div class="col-lg-4">
             <a-form-item ref="category_id" label="Functions" name="category_id">
@@ -48,6 +60,10 @@
         </div>
         <div class="form-actions mt-0">
           <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+           <a-checkbox v-model:checked="checked" v-if="previousCategories.length" @change="resetForm" >
+                Add {{ year - 1}} Sub Categories
+            </a-checkbox>
+          <a-button type="link" v-if="previousCategories.length" @click="changePreviousModal"></a-button>
         </div>
       </a-form>
     </div>
@@ -74,6 +90,9 @@ export default defineComponent({
     const functions = computed(() => store.getters['formManager/functions'])
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
+    const previousCategories = computed(() => store.getters['formManager/manager'].previousCategories)
+    const categories = computed(() => store.getters['formManager/manager'].categories)
+    
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
         return i.category_id === parseInt(formState.category_id)
@@ -92,6 +111,8 @@ export default defineComponent({
       }
       return lists
     })
+    const checked = ref(false);
+    const isPreviousViewed = ref(false)
 
     // DATA
     const formRef = ref()
@@ -124,6 +145,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
+       store.commit('formManager/SET_STATE', { previousCategories: [] })
       fetchFunctions(year.value)
     })
 
@@ -134,12 +156,15 @@ export default defineComponent({
 
     const fetchFunctions = year => {
       resetForm()
+       checked.value = false;
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
       fetchSubCategories(year)
     }
 
     const fetchSubCategories = year => {
         store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
+        store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
+         store.dispatch('formManager/FETCH_PREV_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
     }
 
     const onFunctionsChange = () => {
@@ -170,8 +195,20 @@ export default defineComponent({
 
     const resetForm = () => {
       formRef.value.resetFields();
+     
     };
 
+    const changePreviousModal = () => {
+      isPreviousViewed.value = !isPreviousViewed.value
+    }
+
+
+    const isCheck = () => {
+      formRef.value.resetFields();
+    };
+   
+
+ 
     return {
       year,
       functions,
@@ -179,17 +216,23 @@ export default defineComponent({
       loading,
       years,
       parentSubs,
-
+      isPreviousViewed,
+      previousCategories,
+      categories,
+      
+      checked,
       formRef,
       formState,
       rules,
       normalizer,
-
+      
+      isCheck,
       onDelete,
       fetchFunctions,
       onFunctionsChange,
       onSubmit,
       resetForm,
+      changePreviousModal,
     };
   },
 });

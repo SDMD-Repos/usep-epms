@@ -13,6 +13,7 @@ const mapApiProviders = {
   deleteProgram: manager.deleteProgram,
   deleteOtherProgram: manager.deleteOtherProgram,
   getSubCategories: manager.getSubCategories,
+  getPrevSubCategories: manager.getPrevSubCategories,
   createSubCategory: manager.createSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
   getMeasures: manager.getMeasures,
@@ -48,6 +49,9 @@ export default {
     previousMeasures: [],
     previousPrograms: [],
     previousOtherPrograms: [],
+    previousCategories: [],
+    prevSubCategories: [],
+
     forms: [],
     signatoryTypes: [],
     signatories: [],
@@ -191,7 +195,7 @@ export default {
         })
       })
     },
-    CREATE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
+     CREATE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -262,7 +266,7 @@ export default {
         })
       })
     },
-    FETCH_SUB_CATEGORIES({ commit },{payload}) {
+     FETCH_SUB_CATEGORIES({ commit },{payload}) {
       const { year } = payload
 
       commit('SET_STATE', {
@@ -273,9 +277,34 @@ export default {
       getSubCategories(year).then(response => {
         if (response) {
           const { subCategories } = response
-          commit('SET_STATE', {
-            subCategories: subCategories,
-          })
+          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousCategories: subCategories })
+
+          }else{
+            commit('SET_STATE', {
+              subCategories: subCategories,
+            })
+          }
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_PREV_SUB_CATEGORIES({ commit },{payload}) {
+      const { year } = payload
+
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getPrevSubCategories = mapApiProviders.getPrevSubCategories
+      getPrevSubCategories(year).then(response => {
+        if (response) {
+          const { categories } = response
+            commit('SET_STATE', {
+              categories: categories,
+            })
         }
         commit('SET_STATE', {
           loading: false,
