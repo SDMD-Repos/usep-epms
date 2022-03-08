@@ -138,12 +138,12 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
       fetchAllPrograms(year.value)
     })
 
     // METHODS
     const fetchAllPrograms = async selectedYear => {
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
       await fetchPrograms(selectedYear)
       await fetchOtherPrograms(selectedYear)
     }
@@ -188,15 +188,18 @@ export default defineComponent({
     }
 
     const onMultipleSave = keys => {
+      const selectedProgram = keys[0]
+      const selectedFunction = keys[1]
+
       const saveKeys = allPreviousPrograms.value.filter(item => {
-        return keys.indexOf(item.key) !== -1
+        return selectedProgram.indexOf(item.key) !== -1
       })
 
       saveKeys.forEach(item => {
         const data = {
           name: item.name,
           year: year.value,
-          category_id: item.category_id,
+          category_id: selectedFunction,
           percentage: item.percentage,
           formId: props.formId,
         }
