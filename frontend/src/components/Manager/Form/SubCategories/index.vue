@@ -15,22 +15,19 @@
               :rules="rules">
         <div class="row">
           <div class="col-lg-4">
-            
-             <a-form-item ref='name' label="Sub Category Name" name="name">
-               <a-select v-model:value="formState.name"  v-if="checked"  >
-                <a-select-option v-for="categories in categories"
-                                 :value="categories.name"
-                                 :key="categories.id"
-                                 :label="categories.name">
-                  {{ categories.name }}
+            <a-form-item ref='name' label="Sub Category Name" name="name">
+              <a-select v-model:value="formState.name"  v-if="checked"  >
+                <a-select-option v-for="category in categories"
+                                 :value="category.name"
+                                 :key="category.id"
+                                 :label="category.name">
+                  {{ category.name }}
                 </a-select-option>
               </a-select>
-               <a-input v-model:value="formState.name" v-else />
+              <a-input v-model:value="formState.name" v-else />
             </a-form-item>
-            
-             
-            
           </div>
+
           <div class="col-lg-4">
             <a-form-item ref="category_id" label="Functions" name="category_id">
               <a-select v-model:value="formState.category_id" @change="onFunctionsChange">
@@ -43,6 +40,7 @@
               </a-select>
             </a-form-item>
           </div>
+
           <div class="col-lg-4">
             <a-form-item ref='parentId' label="Parent Sub Category" name="parentId">
               <a-tree-select
@@ -86,13 +84,14 @@ export default defineComponent({
   setup() {
     const store = useStore()
     const year = ref(new Date().getFullYear())
+
     // COMPUTED
     const functions = computed(() => store.getters['formManager/functions'])
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousCategories = computed(() => store.getters['formManager/manager'].previousCategories)
     const categories = computed(() => store.getters['formManager/manager'].categories)
-    
+
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
         return i.category_id === parseInt(formState.category_id)
@@ -149,7 +148,6 @@ export default defineComponent({
       fetchFunctions(year.value)
     })
 
-
     const onDelete = key => {
       store.dispatch('formManager/DELETE_SUB_CATEGORY', { payload: { id: key, year: year.value }  })
     }
@@ -195,20 +193,16 @@ export default defineComponent({
 
     const resetForm = () => {
       formRef.value.resetFields();
-     
-    };
+    }
 
     const changePreviousModal = () => {
       isPreviousViewed.value = !isPreviousViewed.value
     }
 
-
     const isCheck = () => {
       formRef.value.resetFields();
     };
-   
 
- 
     return {
       year,
       functions,
@@ -219,13 +213,13 @@ export default defineComponent({
       isPreviousViewed,
       previousCategories,
       categories,
-      
+
       checked,
       formRef,
       formState,
       rules,
       normalizer,
-      
+
       isCheck,
       onDelete,
       fetchFunctions,

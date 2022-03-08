@@ -33,7 +33,7 @@
       </a-form>
     </div>
 
-    <functions-table :year="year" :is-delete="isDelete" :allAccess="allAccess" />
+    <functions-table :year="year" :is-delete="isDelete" :all-access="allAccess" />
 
     <previous-list :visible="isPreviousViewed" :year="year" :list="previousFunctions"
                    @close-modal="changePreviousModal" @save-functions="onMultipleSave"/>
@@ -82,6 +82,11 @@ export default defineComponent({
           message: 'This field must be a number',
           trigger: 'blur',
         },
+        {
+          required: true,
+          message: 'This field is required',
+          trigger: 'blur',
+        },
       ],
     }
 
@@ -108,10 +113,10 @@ export default defineComponent({
       // DATA
       isDelete, isCreate, accessLists, allAccess,returns,
       // METHODS
-    
+
     } = usePermissionForm()
 
-   
+
     // METHODS
     const fetchPreviousFunctions = year => {
       resetForm()
@@ -176,7 +181,7 @@ export default defineComponent({
       allAccess,
       isCreate,
       isDelete,
-  
+
       fetchPreviousFunctions,
       onSubmit,
       resetForm,
