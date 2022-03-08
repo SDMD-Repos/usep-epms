@@ -163,7 +163,7 @@ export const getMenuData = [
   {
     title: 'Access Permission',
     key: 'systemAdmin',
-    icon: 'fe fe-edit-2',
+    icon: 'fe fe-lock',
     url: '/system/admin/permisson',
   },
 

@@ -111,7 +111,7 @@ export default defineComponent({
 
     const {
       // DATA
-      isDelete, isCreate, accessLists, allAccess,returns,
+      isDelete, isCreate, allAccess,
       // METHODS
 
     } = usePermissionForm()
