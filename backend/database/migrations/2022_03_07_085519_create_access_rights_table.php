@@ -24,8 +24,6 @@ class CreateAccessRightsTable extends Migration
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();
             $table->foreign('parent_id')->references('id')->on('access_rights')->onUpdate('cascade');
-
-            $table->primary('permission_id');
         });
     }
 

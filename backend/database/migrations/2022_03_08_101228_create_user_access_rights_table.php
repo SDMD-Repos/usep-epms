@@ -22,10 +22,9 @@ class CreateUserAccessRightsTable extends Migration
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();
+
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade');
             $table->foreign('access_right_id')->references('id')->on('access_rights')->onUpdate('cascade');
-            
-
         });
     }
 

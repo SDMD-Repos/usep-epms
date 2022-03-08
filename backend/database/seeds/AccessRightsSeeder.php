@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AccessRightsSeeder extends Seeder
 {
@@ -11,285 +12,256 @@ class AccessRightsSeeder extends Seeder
      */
     public function run()
     {
-        //
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('access_rights')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         DB::table('access_rights')->insert([
             [
-               
-                'permission_name' => 'Manager',
                 'permission_id' => 'manager',
+                'permission_name' => 'Manager',
                 'create_id' => 'admin',
             ],
-            
+
             [
-               
-                'permission_name' => 'APPCR',
                 'permission_id' => 'aapcr',
+                'permission_name' => 'APPCR',
                 'create_id' => 'admin',
             ],
             [
-               
-                'permission_name' => 'OPCR(VP)',
                 'permission_id' => 'opcrvp',
+                'permission_name' => 'OPCR(VP)',
                 'create_id' => 'admin',
             ],
             [
-               
-                'permission_name' => 'OPCR',
                 'permission_id' => 'opcr',
+                'permission_name' => 'OPCR',
                 'create_id' => 'admin',
             ],
             [
-               
                 'permission_id' => 'cpcr',
                 'permission_name' => 'CPCR',
                 'create_id' => 'admin',
             ],
             [
-               
                 'permission_id' => 'ipcr',
                 'permission_name' => 'IPCR',
                 'create_id' => 'admin',
             ],
-
         ]);
 
-        
-
         DB::table('access_rights')->insert([
-           
             [
-                'permission_name' => 'Group',
                 'permission_id' => 'm-group',
-                'create_id' => 'admin',
+                'permission_name' => 'Group',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'Measures',
                 'permission_id' => 'm-measures',
-                'create_id' => 'admin',
+                'permission_name' => 'Measures',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'Signatories',
                 'permission_id' => 'm-signatories',
-                'create_id' => 'admin',
+                'permission_name' => 'Signatories',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
+                'create_id' => 'admin',
             ],
-             [
-                'permission_name' => 'Form',
+            [
                 'permission_id' => 'm-form',
-                'create_id' => 'admin',
+                'permission_name' => 'Form',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
+                'create_id' => 'admin',
             ],
         ]);
 
         DB::table('access_rights')->insert([
             [
-                'permission_name' => 'Functions',
                 'permission_id' => 'mf-functions',
-                'create_id' => 'admin',
+                'permission_name' => 'Functions',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-form")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'Programs',
                 'permission_id' => 'mf-programs',
-                'create_id' => 'admin',
+                'permission_name' => 'Programs',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-form")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'Sub Categories',
                 'permission_id' => 'mf-subcat',
-                'create_id' => 'admin',
+                'permission_name' => 'Sub Categories',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-form")->first()->id,
+                'create_id' => 'admin',
             ],
-          
-            
         ]);
 
         DB::table('access_rights')->insert([
             [
-                'permission_name' => 'AAPCR Signatory',
                 'permission_id' => 'ms-aapcr',
-                'create_id' => 'admin',
+                'permission_name' => 'AAPCR Signatory',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'OPCR (VPs) Signatory',
                 'permission_id' => 'ms-opcrvp',
-                'create_id' => 'admin',
+                'permission_name' => 'OPCR (VPs) Signatory',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'OPCR Signatory',
                 'permission_id' => 'ms-opcr',
-                'create_id' => 'admin',
+                'permission_name' => 'OPCR Signatory',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'CPCR Signatory',
                 'permission_id' => 'ms-cpcr',
-                'create_id' => 'admin',
+                'permission_name' => 'CPCR Signatory',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'IPCR Signatory',
                 'permission_id' => 'ms-ipcr',
-                'create_id' => 'admin',
+                'permission_name' => 'IPCR Signatory',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+                'create_id' => 'admin',
             ],
-          
-            
         ]);
 
         DB::table('access_rights')->insert([
             [
-                'permission_name' => 'create',
                 'permission_id' => 'mff-create',
-                'create_id' => 'admin',
+                'permission_name' => 'create',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-functions")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'delete',
                 'permission_id' => 'mff-delete',
-                'create_id' => 'admin',
+                'permission_name' => 'delete',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-functions")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_name' => 'create',
                 'permission_id' => 'mg-create',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-group")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'delete',
                 'permission_id' => 'mg-delete',
+                'permission_name' => 'delete',
                 'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-group")->first()->id,
             ],
             [
-                'permission_name' => 'create',
                 'permission_id' => 'mm-create',
-                'create_id' => 'admin',
+                'permission_name' => 'create',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-measures")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'delete',
                 'permission_id' => 'mm-delete',
-                'create_id' => 'admin',
+                'permission_name' => 'delete',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-measures")->first()->id,
+                'create_id' => 'admin',
             ],
-
         ]);
 
         DB::table('access_rights')->insert([
             [
-                'permission_name' => 'create',
                 'permission_id' => 'mfp-create',
-                'create_id' => 'admin',
+                'permission_name' => 'create',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-programs")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'delete',
                 'permission_id' => 'mfp-delete',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-programs")->first()->id,
-            ],
-        ]);
-
-        DB::table('access_rights')->insert([
-            [
-                'permission_name' => 'create',
-                'permission_id' => 'mfs-create',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-subcat")->first()->id,
-            ],
-            [
                 'permission_name' => 'delete',
-                'permission_id' => 'mfs-delete',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-programs")->first()->id,
                 'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-subcat")->first()->id,
             ],
-            
         ]);
 
         DB::table('access_rights')->insert([
             [
+                'permission_id' => 'mfs-create',
                 'permission_name' => 'create',
-                'permission_id' => 'msa-create',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-subcat")->first()->id,
                 'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'mfs-delete',
+                'permission_name' => 'delete',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","mf-subcat")->first()->id,
+                'create_id' => 'admin',
+            ],
+
+        ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'msa-create',
+                'permission_name' => 'create',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-aapcr")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'msa-delete',
                 'permission_name' => 'delete',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-aapcr")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission__id' => 'msovp-create',
                 'permission_name' => 'create',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcrvp")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'msovp-delete',
                 'permission_name' => 'delete',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcrvp")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'mso-create',
                 'permission_name' => 'create',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcr")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'mso-delete',
                 'permission_name' => 'delete',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcr")->first()->id,
+                'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'msc-create',
                 'permission_name' => 'create',
-                'create_id' => 'admin',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-cpcr")->first()->id,
+                'create_id' => 'admin',
             ],
             [
-                'permission_name' => 'msc-delete',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-cpcr")->first()->id,
-            ],
-            [
-                'permission_name' => 'msi-create',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
-            ],
-            [
-                'permission_name' => 'msi-delete',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
-            ], 
-        ]);
-
-        DB::table('access_rights')->insert([
-            [
-                'permission_name' => 'create',
-                'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_name","Sub Categories")->first()->id,
-            ],
-            [
+                'permission_id' => 'msc-delete',
                 'permission_name' => 'delete',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-cpcr")->first()->id,
                 'create_id' => 'admin',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_name","Sub Categories")->first()->id,
             ],
-            
+            [
+                'permission_id' => 'msi-create',
+                'permission_name' => 'create',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'msi-delete',
+                'permission_name' => 'delete',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
+                'create_id' => 'admin',
+            ],
         ]);
-
-
     }
 }

@@ -25,7 +25,6 @@ class OpcrTemplate extends Migration
             $table->string('modify_id', 35)->nullable();
             $table->softDeletes();
             $table->text('history');
-
         });
     }
 
