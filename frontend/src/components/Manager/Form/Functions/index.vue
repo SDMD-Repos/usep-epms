@@ -46,7 +46,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import FunctionsTable from './partials/lists'
 import PreviousList from './partials/previousList'
-import { usePermission } from '@/services/functions/permission'
+import { usePermissionForm } from '@/services/functions/permission/form'
 
 export default defineComponent({
   name: "FunctionsManager",
@@ -109,7 +109,7 @@ export default defineComponent({
       isDelete, isCreate, accessLists, allAccess,returns,
       // METHODS
     
-    } = usePermission()
+    } = usePermissionForm()
 
    
     // METHODS
