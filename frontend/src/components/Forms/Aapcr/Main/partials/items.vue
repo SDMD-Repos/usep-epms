@@ -196,8 +196,8 @@ export default defineComponent({
 
     const updateTableItem = async data => {
       if (drawerConfig.value.type === 'pi') {
-        if (!data.updateData.isHeader) {
-          const {targetsBasis} = data.updateData.value
+        if (!data.updateData.value.isHeader) {
+          const { targetsBasis } = data.updateData.value
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
             await emit('add-targets-basis-item', targetsBasis)
           }

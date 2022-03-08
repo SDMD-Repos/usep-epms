@@ -17,4 +17,13 @@ class FormField extends Model
     {
         return $this->hasOne('App\FormFieldSetting', 'field_id');
     }
+
+    /**
+     * Get the aapcr detail for the form field.
+     */
+
+    public function aapcrDetail()
+    {
+        return $this->hasMany('App\AapcrDetail', 'office_type_id');
+    }
 }

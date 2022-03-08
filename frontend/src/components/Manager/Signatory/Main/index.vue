@@ -47,14 +47,15 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, watch, reactive, onMounted } from 'vue'
+import { defineComponent, ref, watch, reactive, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
-import SignatoryList from './partials/list'
-import FormModal from './partials/formModal'
 import { UserAddOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue"
+import SignatoryList from './partials/list'
+import FormModal from './partials/formModal'
 
 export default defineComponent({
+  name: "SignatoryManager",
   components: {
     SignatoryList,
     FormModal,
@@ -136,7 +137,6 @@ export default defineComponent({
       })
       if (formId.value === 'vpopcr') {
         if (typeof selectedOffice.value !== 'undefined') {
-          console.log(selectedOffice.value)
           data.officeId = selectedOffice.value
           store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
         }
@@ -147,7 +147,7 @@ export default defineComponent({
 
     const filterBySignatory = type => {
       return signatoryList.value.filter((i) => {
-        return i.type_id === type
+        return i.type_id === parseInt(type)
       })
     }
 

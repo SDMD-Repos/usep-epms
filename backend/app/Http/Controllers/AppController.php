@@ -52,7 +52,7 @@ class AppController extends Controller
 
         $signatory = $this->getSignatories($aapcr, "aapcr");
 
-        $programs = Program::orderBy('category_id', 'asc')->get();
+        $programs = Program::where('year', $aapcr->year)->orderBy('category_id', 'asc')->get();
 
         $programsDataSet = array();
 
@@ -86,8 +86,6 @@ class AppController extends Controller
 
             $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-            $program = ($detail->category_id === 'core_functions' ? strtoupper($detail->program->name) : $detail->program->name);
-
             $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
 
             $measures = $this->fetchMeasuresPdf($detail->measures);
@@ -110,7 +108,7 @@ class AppController extends Controller
                 'category_id' => $detail->category_id,
                 'category_order' => $detail->category->order,
                 'function' => $function,
-                'program' => $program,
+                'program' => $detail->program->name,
                 'subCategory' => $subCategory,
                 'pi_name' => $detail->pi_name,
                 'target' => $detail->target,
@@ -153,7 +151,7 @@ class AppController extends Controller
                         'category_id' => $detail->category_id,
                         'category_order' => $detail->category->order,
                         'function' => $function,
-                        'program' => $program,
+                        'program' => $detail->program->name,
                         'subCategory' => $subCategory,
                         'pi_name' => $subPi->pi_name,
                         'target' => $subPi->target,
@@ -476,21 +474,22 @@ class AppController extends Controller
         $signatoryList = [];
 
         foreach($signatories as $signatory) {
+            $code = $signatory->type->code;
+
             $dataSignatories = [
                 'name' => strtoupper($signatory['personnel_name']),
                 'position' => $signatory['position'],
                 'office_name' => $signatory['office_name'],
             ];
 
-            if(!array_key_exists($signatory->type_id, $signatoryList)) {
-                $signatoryList[$signatory->type_id] = [];
+            if(!array_key_exists($code, $signatoryList)) {
+                $signatoryList[$code] = [];
             }
 
-            array_push($signatoryList[$signatory->type_id], $dataSignatories);
+            array_push($signatoryList[$code], $dataSignatories);
         }
 
         $preparedDate = ($model->finalized_date ? date("d F Y", strtotime($model->finalized_date)) : '');
-
         if(isset($signatoryList['prepared_by'])) {
             $preparedBy = $signatoryList['prepared_by'][0];
 
@@ -578,11 +577,11 @@ class AppController extends Controller
                 $officeName = $getOffice->group->name;
             }
 
-            if($getOffice['office_type_id'] === 'implementing') {
-                array_push($allOffices['implementing'], $officeName);
-            }else{
+            //if($getOffice['office_type_id'] === 'implementing') {
+                array_push($allOffices[$getOffice->field->code], $officeName);
+            /*}else{
                 array_push($allOffices['supporting'], $officeName);
-            }
+            }*/
         }
 
         return $allOffices;

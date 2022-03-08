@@ -8,6 +8,7 @@ use App\AapcrDetailMeasure;
 use App\AapcrDetailOffice;
 use App\AapcrFile;
 use App\AapcrProgramBudget;
+use App\FormField;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateAapcr;
@@ -129,6 +130,8 @@ class AapcrController extends Controller
 
     public function saveAapcrDetails($aapcrId, $values)
     {
+        $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
+
         $detail = new AapcrDetail();
 
         if($values['subCategory']){
@@ -162,19 +165,14 @@ class AapcrController extends Controller
 
             $officeModel = new AapcrDetailOffice();
 
-            $this->saveOffices([
-                'model' => $officeModel,
-                'detailId' => $detail->id,
-                'offices' => $values['implementing'],
-                'fieldName' => 'implementing'
-            ]);
-
-            $this->saveOffices([
-                'model' => $officeModel,
-                'detailId' => $detail->id,
-                'offices' => $values['supporting'],
-                'fieldName' => 'supporting'
-            ]);
+            foreach($formFields as $formField) {
+                $this->saveOffices([
+                    'model' => $officeModel,
+                    'detailId' => $detail->id,
+                    'offices' => $values[$formField->code],
+                    'fieldName' => $formField->id
+                ]);
+            }
 
             if(isset($values['children']) && count($values['children'])) {
 
@@ -493,6 +491,8 @@ class AapcrController extends Controller
     public function updateDetails($data, $aapcrId)
     {
         if (strpos((string)$data['id'], 'new') === false) {
+            $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
+
             $detail = AapcrDetail::find($data['id']);
 
             if($detail) {
@@ -574,7 +574,16 @@ class AapcrController extends Controller
 
                 $officeModel = new AapcrDetailOffice();
 
-                $this->updateOffices([
+                foreach($formFields as $formField) {
+                    $this->updateOffices([
+                        'model' => $officeModel,
+                        'detailId' => $data['id'],
+                        'offices' => $data[$formField->code],
+                        'type' => $formField->id,
+                    ]);
+                }
+
+                /*$this->updateOffices([
                     'model' => $officeModel,
                     'detailId' => $data['id'],
                     'offices' => $data['implementing'],
@@ -586,7 +595,7 @@ class AapcrController extends Controller
                     'detailId' => $data['id'],
                     'offices' => $data['supporting'],
                     'type' => 'supporting',
-                ]);
+                ]);*/
 
                 if(isset($data['children']) && count($data['children'])) {
 

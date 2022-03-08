@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class SignatoryType extends Model
 {
     /**
-     * The "type" of the auto-incrementing ID.
-     *
-     * @var string
+     * Get the aapcr detail for the form field.
      */
-    protected $keyType = 'string';
+
+    public function signatory()
+    {
+        return $this->hasMany('App\Signatory', 'type_id');
+    }
 }

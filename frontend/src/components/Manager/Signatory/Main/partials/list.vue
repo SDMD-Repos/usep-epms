@@ -28,6 +28,7 @@ const columns = [
 ]
 
 export default defineComponent({
+  name: "SignatoryList",
   components: {
     WarningOutlined,
   },

@@ -5,7 +5,7 @@
            :mask-closable="false"
            :ok-text="okText"
            width="700px"
-           @ok="onOk"
+           @ok="onOkClick"
            @cancel="onCancel">
     <a-spin :spinning="formLoading">
       <a-form ref="signatoryRef" layout="vertical" :model="form">
@@ -91,6 +91,7 @@ import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined, PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
+  name: "SignatoryFormModal",
   components: {
     PlusCircleOutlined,
     MinusCircleOutlined,
@@ -234,7 +235,7 @@ export default defineComponent({
       emit('delete-signatory', index)
     }
 
-    const onOk = () => {
+    const onOkClick = () => {
       signatoryRef.value.validate().then(() => {
         Modal.confirm({
           title: () => 'Are you sure you want to save this?',
@@ -291,7 +292,7 @@ export default defineComponent({
       getPersonnelPosition,
       addRow,
       deleteRow,
-      onOk,
+      onOkClick,
       onCancel,
     }
   },

@@ -102,7 +102,7 @@ trait ConverterTrait {
 
         foreach($data as $datum) {
 
-            $officeType = $datum->office_type_id;
+            $officeType = $datum->field->code;
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
 
@@ -127,15 +127,15 @@ trait ConverterTrait {
                 $ipcrPeriod = $datum->ipcrPeriod;
             }*/
 
-            $offices[$datum->office_type_id][$counter] = array(
+            $offices[$officeType][$counter] = array(
                 'label' => $officeName,
                 'value' => $officeId,
-                'cascadeTo' => $datum->cascade_to,
+                'cascadeTo' => (string)$datum->cascade_to,
 //                'ipcrPeriod' => $ipcrPeriod
             );
 
             if ($datum->is_group) {
-                $offices[$datum->office_type_id][$counter]['isGroup'] = true;
+                $offices[$officeType][$counter]['isGroup'] = true;
             }
 
             /*if($splitCollege && $officeId === "allColleges") {
@@ -147,12 +147,12 @@ trait ConverterTrait {
             }*/
 
             if($datum->vp_office_id){
-                $offices[$datum->office_type_id][$counter]['pId'] = $datum->vp_office_id;
+                $offices[$officeType][$counter]['pId'] = $datum->vp_office_id;
 
-                $offices[$datum->office_type_id][$counter]['acronym'] = $datum->office_name; # used for view only PIs
+                $offices[$officeType][$counter]['acronym'] = $datum->office_name; # used for view only PIs
             }else{
                 if (!$datum->is_group) {
-                    $offices[$datum->office_type_id][$counter]['children'] = true;
+                    $offices[$officeType][$counter]['children'] = true;
                 }
             }
         }
