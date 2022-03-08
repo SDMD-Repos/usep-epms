@@ -89,6 +89,8 @@ export default defineComponent({
           if (response.status) {
             response.accessLists.forEach((accessList) =>{
             selectedRowKeys.value.push(accessList.access_right_id);
+
+           
             })
             updateBtn.value = false ;
           }else{

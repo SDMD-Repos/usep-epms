@@ -140,7 +140,7 @@ class PermissionController extends Controller
             $obj = json_decode($response->body());
             $details = $obj[0];
 
-            $userAccessRights = new UserAccessRights();
+
             $accessLists  = UserAccessRights::where([
                                     ['user_id', $details->UserID],
                                     ])->get();
@@ -152,16 +152,21 @@ class PermissionController extends Controller
 
             foreach($listPermissions as $permission){
                 if(!in_array($permission,$accessAllListsExist)){
+                    $userAccessRights = new UserAccessRights();
                     $userAccessRights->user_id = (string)$details->UserID;
                     $userAccessRights->access_right_id = $permission;
                     $userAccessRights->create_id = $this->login_user->pmaps_id;
                     $userAccessRights->save();
                     array_push($accessAllListsExist,$permission);
+                   
+                   
+
                 }
                 array_push($currentList,$permission);
             }
 
             $removePermissionList= array_diff($accessAllListsExist,$currentList);
+            
             foreach($removePermissionList as $removeList){
                 $accessLists  = UserAccessRights::where([
                     ['user_id', $details->UserID],
@@ -170,6 +175,7 @@ class PermissionController extends Controller
                 foreach($accessLists as $newList){
                     $newList->delete();
                 }
+               
             }
             
             return response()->json("Access rights have been save!", 200);

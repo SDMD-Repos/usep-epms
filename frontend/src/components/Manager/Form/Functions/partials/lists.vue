@@ -6,10 +6,12 @@
         @confirm="onDelete(record.key)"
         ok-text="Yes"
         cancel-text="No"
+        v-if="isDelete || allAccess"
       >
         <template #icon><warning-outlined /></template>
         <a type="primary">Delete</a>
       </a-popconfirm>
+      <span v-else></span>
     </template>
   </a-table>
 </template>
@@ -31,6 +33,8 @@ export default defineComponent({
   },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
+    isDelete : Boolean,
+    allAccess : Boolean,
   },
   setup(props) {
     const store = useStore()
