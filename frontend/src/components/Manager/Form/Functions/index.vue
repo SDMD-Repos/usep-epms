@@ -22,7 +22,7 @@
 
           <div class="col-lg-2">
             <a-form-item ref='percentage' label="Percentage" name="percentage">
-              <a-input-number v-model:value="formState.percentage" :min="1" :max="100" style="width: 100%"/>
+              <a-input-number v-model:value="formState.percentage" :min="1" :max="100" style="width: 100%" :rules="rules.percentage"/>
             </a-form-item>
           </div>
         </div>
@@ -76,18 +76,10 @@ export default defineComponent({
           trigger: 'blur',
         },
       ],
-      percentage: [
-        {
-          type: 'number',
-          message: 'This field must be a number',
-          trigger: 'blur',
-        },
-        {
-          required: true,
-          message: 'This field is required',
-          trigger: 'blur',
-        },
-      ],
+      percentage:{
+        type: 'number',
+        message: 'This field must be a number',
+      },
     }
 
     const normalizer = {
