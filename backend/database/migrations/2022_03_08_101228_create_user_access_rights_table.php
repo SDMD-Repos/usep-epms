@@ -14,8 +14,6 @@ class CreateUserAccessRightsTable extends Migration
     public function up()
     {
         Schema::create('user_access_rights', function (Blueprint $table) {
-            // $table->id();
-            // $table->timestamps();
             $table->integer('id')->autoIncrement();
             $table->string('user_id', 15);
             $table->integer('access_right_id');
