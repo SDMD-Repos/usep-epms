@@ -384,7 +384,7 @@ export default {
         items: items,
         deleted: deleted,
       }
-      const id = payload.id
+  
 
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {

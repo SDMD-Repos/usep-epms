@@ -6,7 +6,8 @@ import external from './external'
 import aapcr from './aapcr'
 import opcrvp from './opcrvp'
 import opcrtemplate from './opcr/template'
-import opcrtemplate from './opcr/template'
+import system from './system'
+
 
 export default createStore({
   modules: {
