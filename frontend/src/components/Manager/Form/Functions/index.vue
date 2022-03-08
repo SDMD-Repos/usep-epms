@@ -27,13 +27,13 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-          <a-button type="link" v-if="previousFunctions.length" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
+          <a-button style="width: 150px;" type="primary" :disabled="!isCreate && !allAccess" class="mr-3" @click="onSubmit">Add</a-button>
+          <a-button type="link" v-if="previousFunctions.length" :disabled="!isCreate && !allAccess" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
         </div>
       </a-form>
     </div>
 
-    <functions-table :year="year" />
+    <functions-table :year="year" :is-delete="isDelete" :allAccess="allAccess" />
 
     <previous-list :visible="isPreviousViewed" :year="year" :list="previousFunctions"
                    @close-modal="changePreviousModal" @save-functions="onMultipleSave"/>
@@ -46,6 +46,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import FunctionsTable from './partials/lists'
 import PreviousList from './partials/previousList'
+import { usePermissionForm } from '@/services/functions/permission/form'
 
 export default defineComponent({
   name: "FunctionsManager",
@@ -103,6 +104,14 @@ export default defineComponent({
       return lists
     })
 
+    const {
+      // DATA
+      isDelete, isCreate, accessLists, allAccess,returns,
+      // METHODS
+    
+    } = usePermissionForm()
+
+   
     // METHODS
     const fetchPreviousFunctions = year => {
       resetForm()
@@ -161,11 +170,13 @@ export default defineComponent({
       rules,
       normalizer,
       isPreviousViewed,
-
       loading,
       years,
       previousFunctions,
-
+      allAccess,
+      isCreate,
+      isDelete,
+  
       fetchPreviousFunctions,
       onSubmit,
       resetForm,
