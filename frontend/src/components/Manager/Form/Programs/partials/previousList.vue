@@ -59,23 +59,35 @@ export default defineComponent({
     }
 
     const addPreviousPrograms = () => {
-      Modal.confirm({
-        title: () => 'Are you sure you want to add this in to the list?',
-        icon: () => createVNode(ExclamationCircleOutlined),
-        content: () => '',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          emit('save-programs', [state.selectedRowKeys,selectedFunction.value])
-          state.selectedRowKeys = []
-        },
-        onCancel() {},
-      });
+      if(selectedFunction.value) {
+        Modal.confirm({
+          title: () => 'Are you sure you want to add this in to the list?',
+          icon: () => createVNode(ExclamationCircleOutlined),
+          content: () => '',
+          okText: 'Yes',
+          cancelText: 'No',
+          onOk() {
+            emit('save-programs', [state.selectedRowKeys,selectedFunction.value])
+            resetModalData()
+          },
+          onCancel() {},
+        });
+      }else{
+        Modal.error({
+          title: () => 'Unable to add program/s in to list',
+          content: () => 'Please select a function',
+        })
+      }
     }
 
     const closeModal = () => {
-      state.selectedRowKeys = []
+      resetModalData()
       emit('close-modal')
+    }
+
+    const resetModalData = () => {
+      state.selectedRowKeys = []
+      selectedFunction.value = null
     }
 
     return {

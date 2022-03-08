@@ -2,7 +2,7 @@
   <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
            @ok="addPreviousPrograms" @cancel="closeModal" width="700px">
 
-    <a-select v-model:value="selectedFunction" placeholder="Select Function" style="width: 200px" :rules="rules.function">
+    <a-select v-model:value="selectedFunction" placeholder="Select Function" style="width: 200px">
       <a-select-option v-for="(y) in functions" :value="y.id" :label="y.name" :key="y.id">
         {{ y.name }}
       </a-select-option>
@@ -45,16 +45,6 @@ export default defineComponent({
       { title: 'Percentage', dataIndex: 'percentage' },
     ]
 
-    const rules = {
-      function: [
-        {
-          required: true,
-          message: 'This field is required',
-        },
-      ],
-
-    }
-
     watch(() => [props.visible] , ([visible]) => {
       isVisible.value = visible
     })
@@ -70,27 +60,38 @@ export default defineComponent({
     }
 
     const addPreviousPrograms = () => {
-      Modal.confirm({
-        title: () => 'Are you sure you want to add this in to the list?',
-        icon: () => createVNode(ExclamationCircleOutlined),
-        content: () => '',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          emit('save-programs', [state.selectedRowKeys,selectedFunction.value])
-          state.selectedRowKeys = []
-        },
-        onCancel() {},
-      });
+      if(selectedFunction.value) {
+        Modal.confirm({
+          title: () => 'Are you sure you want to add this in to the list?',
+          icon: () => createVNode(ExclamationCircleOutlined),
+          content: () => '',
+          okText: 'Yes',
+          cancelText: 'No',
+          onOk() {
+            emit('save-programs', [state.selectedRowKeys,selectedFunction.value])
+            resetModalData()
+          },
+          onCancel() {},
+        });
+      }else{
+        Modal.error({
+          title: () => 'Unable to add program/s in to list',
+          content: () => 'Please select a function',
+        })
+      }
     }
 
     const closeModal = () => {
-      state.selectedRowKeys = []
+      resetModalData()
       emit('close-modal')
     }
 
+    const resetModalData = () => {
+      state.selectedRowKeys = []
+      selectedFunction.value = null
+    }
+
     return {
-      rules,
       columns,
       functions,
       isVisible,
