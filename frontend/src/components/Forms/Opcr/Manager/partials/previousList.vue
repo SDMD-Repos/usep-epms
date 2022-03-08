@@ -2,10 +2,10 @@
   <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
            @ok="addPreviousPrograms" @cancel="closeModal" width="700px">
 
-    <a-select v-model:value="selectedFunction" placeholder="Select Function" style="width: 200px">
-    <a-select-option v-for="(y) in previousFunctions" :value="y.id" :label="y.name" :key="y.id">
-      {{ y.name }}
-    </a-select-option>
+    <a-select v-model:value="selectedFunction" placeholder="Select Function" style="width: 200px" :rules="rules.function">
+      <a-select-option v-for="(y) in functions" :value="y.id" :label="y.name" :key="y.id">
+        {{ y.name }}
+      </a-select-option>
     </a-select>
     <div class="mt-5">
       <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
@@ -33,7 +33,8 @@ export default defineComponent({
     const store = useStore()
     const isVisible = ref(false)
     const selectedFunction = ref(null)
-    const previousFunctions = computed(() => store.getters['formManager/manager'].previousFunctions)
+    const functions = computed(() => store.getters['formManager/manager'].functions)
+
     const state = reactive({
       selectedRowKeys: [],
     })
@@ -44,13 +45,23 @@ export default defineComponent({
       { title: 'Percentage', dataIndex: 'percentage' },
     ]
 
+    const rules = {
+      function: [
+        {
+          required: true,
+          message: 'This field is required',
+        },
+      ],
+
+    }
+
     watch(() => [props.visible] , ([visible]) => {
       isVisible.value = visible
     })
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: props.year, isPrevious: true }})
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: props.year, isPrevious: false }})
     })
 
     // METHODS
@@ -79,8 +90,9 @@ export default defineComponent({
     }
 
     return {
+      rules,
       columns,
-      previousFunctions,
+      functions,
       isVisible,
       ...toRefs(state),
       onSelectChange,

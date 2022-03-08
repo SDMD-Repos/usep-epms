@@ -77,7 +77,7 @@ export default defineComponent({
         },
       ],
       percentage:{
-        type: 'number',
+        required: true,
         message: 'This field must be a number',
       },
     }

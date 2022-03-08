@@ -138,12 +138,12 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year.value, isPrevious: false }})
       fetchAllPrograms(year.value)
     })
 
     // METHODS
     const fetchAllPrograms = async selectedYear => {
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
       await fetchPrograms(selectedYear)
       await fetchOtherPrograms(selectedYear)
     }
