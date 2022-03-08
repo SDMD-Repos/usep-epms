@@ -27,7 +27,6 @@ use App\Signatory;
 use App\SignatoryType;
 use App\SubCategory;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -153,14 +152,7 @@ class SettingController extends Controller
             'subCategories' => $modSubCategories
         ], 200);
     }
-    public function getPrevSubCategories($year)
-    {
-        $subCategories = SubCategory::select('*')->where('year', $year )->get();
-     
-        return response()->json([
-            'categories' => $subCategories
-        ], 200);
-    }
+
     public function createSubCategory(StoreSubCategory $request)
     {
         try {
@@ -242,6 +234,7 @@ class SettingController extends Controller
     public function getPrograms($year)
     {
         $programs = Program::select("*", "id as key")->where('year', $year)->with('category')->get();
+
         return response()->json([
             'programs' => $programs
         ], 200);
@@ -250,6 +243,7 @@ class SettingController extends Controller
     public function getOtherPrograms($year,$form_id)
     {
         $programs = OtherProgram::select("*", "id as key")->where('year', $year)->where('form_id',$form_id)->with('category')->get();
+
         return response()->json([
             'otherPrograms' => $programs
         ], 200);

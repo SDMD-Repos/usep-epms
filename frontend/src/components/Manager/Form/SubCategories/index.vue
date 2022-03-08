@@ -1,6 +1,6 @@
 <template>
   <a-spin :spinning="loading">
-   <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchFunctions">
+   <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="yearOnchange">
     <template v-for="(y, i) in years" :key="i">
       <a-select-option :value="y">
         {{ y }}
@@ -144,25 +144,24 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-       store.commit('formManager/SET_STATE', { previousCategories: [] })
-      fetchFunctions(year.value)
+      store.commit('formManager/SET_STATE', { previousCategories: [] })
+      fetchData(year.value)
     })
 
     const onDelete = key => {
       store.dispatch('formManager/DELETE_SUB_CATEGORY', { payload: { id: key, year: year.value }  })
     }
 
-    const fetchFunctions = year => {
+    const yearOnchange = year => {
       resetForm()
-       checked.value = false;
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
-      fetchSubCategories(year)
+      checked.value = false;
+      fetchData(year)
     }
 
-    const fetchSubCategories = year => {
-        store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
-        store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
-         store.dispatch('formManager/FETCH_PREV_SUB_CATEGORIES', { payload: { year: year -1 , isPrevious: true }})
+    const fetchData = year => {
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: year, isPrevious: false }})
+      store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year, isPrevious: false }})
+      store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload: { year: year - 1 , isPrevious: true }})
     }
 
     const onFunctionsChange = () => {
@@ -222,7 +221,7 @@ export default defineComponent({
 
       isCheck,
       onDelete,
-      fetchFunctions,
+      yearOnchange,
       onFunctionsChange,
       onSubmit,
       resetForm,

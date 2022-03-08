@@ -13,7 +13,6 @@ const mapApiProviders = {
   deleteProgram: manager.deleteProgram,
   deleteOtherProgram: manager.deleteOtherProgram,
   getSubCategories: manager.getSubCategories,
-  getPrevSubCategories: manager.getPrevSubCategories,
   createSubCategory: manager.createSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
   getMeasures: manager.getMeasures,
@@ -138,7 +137,6 @@ export default {
           const { programs } = response
           if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousPrograms: programs })
-
           }else{
             commit('SET_STATE', {
               programs: programs,
@@ -234,7 +232,6 @@ export default {
           const { otherPrograms } = response
           if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousOtherPrograms: otherPrograms })
-
           }else{
             commit('SET_STATE', {
               otherPrograms: otherPrograms,
@@ -279,32 +276,11 @@ export default {
           const { subCategories } = response
           if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousCategories: subCategories })
-
           }else{
             commit('SET_STATE', {
               subCategories: subCategories,
             })
           }
-        }
-        commit('SET_STATE', {
-          loading: false,
-        })
-      })
-    },
-    FETCH_PREV_SUB_CATEGORIES({ commit },{payload}) {
-      const { year } = payload
-
-      commit('SET_STATE', {
-        loading: true,
-      })
-
-      const getPrevSubCategories = mapApiProviders.getPrevSubCategories
-      getPrevSubCategories(year).then(response => {
-        if (response) {
-          const { categories } = response
-            commit('SET_STATE', {
-              categories: categories,
-            })
         }
         commit('SET_STATE', {
           loading: false,
@@ -413,7 +389,7 @@ export default {
         items: items,
         deleted: deleted,
       }
-  
+
 
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {

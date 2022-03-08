@@ -55,7 +55,6 @@ Route::group([
     Route::get('/get-sub-categories/{year}', 'SettingController@getSubCategories');
     Route::post('/create-sub-category', 'SettingController@createSubCategory');
     Route::post('/delete-sub-category/{id}', 'SettingController@deleteSubCategory');
-    Route::get('/get-prev-sub-categories/{year}', 'SettingController@getPrevSubCategories');
     Route::get('/get-all-measures/{year}', 'SettingController@getMeasures');
     Route::post('/create-measure', 'SettingController@createMeasure');
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
@@ -151,7 +150,7 @@ Route::group([
     Route::post('/save-permission', 'Permission\PermissionController@savePermission');
     Route::get('/get-permission-by-user/{id}', 'Permission\PermissionController@fetchPermissionByUser');
     Route::post('/update-permission', 'Permission\PermissionController@updatePermission');
-   
+
 });
 
 Route::group([
