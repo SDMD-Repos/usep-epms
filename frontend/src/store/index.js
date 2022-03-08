@@ -5,7 +5,8 @@ import formManager from './formManager'
 import external from './external'
 import aapcr from './aapcr'
 import opcrvp from './opcrvp'
-import system from './system'
+import opcrtemplate from './opcr/template'
+import opcrtemplate from './opcr/template'
 
 export default createStore({
   modules: {
@@ -15,6 +16,7 @@ export default createStore({
     external,
     aapcr,
     opcrvp,
+    opcrtemplate,
     system,
   },
   state: {

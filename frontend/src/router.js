@@ -73,7 +73,12 @@ const router = createRouter({
           props: true,
           component: () => import('./views/forms/list'),
         },
-
+        {
+          path: '/manager/:formId',
+          name: 'manager.manager',
+          props: true,
+          component: () => import('./views/forms/manager'),
+        },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },

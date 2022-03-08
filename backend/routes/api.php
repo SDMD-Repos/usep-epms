@@ -48,6 +48,10 @@ Route::group([
     Route::post('/create-program', 'SettingController@createProgram');
     Route::post('/delete-program/{id}', 'SettingController@deleteProgram');
 
+    Route::get('/get-other-programs/{year}/{form_id}', 'SettingController@getOtherPrograms');
+    Route::post('/create-other-program', 'SettingController@createOtherProgram');
+    Route::post('/delete-other-program/{id}', 'SettingController@deleteOtherProgram');
+
     Route::get('/get-sub-categories/{year}', 'SettingController@getSubCategories');
     Route::post('/create-sub-category', 'SettingController@createSubCategory');
     Route::post('/delete-sub-category/{id}', 'SettingController@deleteSubCategory');
@@ -126,6 +130,8 @@ Route::group([
         'prefix' => 'ocpcr'
     ], function() {
         Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
+        Route::get('/check-saved-template/{year}', 'Form\OcpcrController@checkSaved');
+        Route::get('/template-list', 'Form\OcpcrController@getAllOpcrTemplates');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
         Route::post('/save', 'Form\VpopcrController@save');
         Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');

@@ -54,6 +54,33 @@ export async function deleteProgram(id) {
     .catch(err => console.log(err))
 }
 
+export async function getOtherPrograms(year,form_id) {
+  return apiClient
+    .get('/settings/get-other-programs/' + year + '/' + form_id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function addNewOtherProgram(data) {
+  return apiClient
+    .post('/settings/create-other-program', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function deleteOtherProgram(id) {
+  return apiClient
+    .post('/settings/delete-other-program/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function getSubCategories(year) {
   return apiClient
     .get('/settings/get-sub-categories/' + year)
@@ -71,6 +98,7 @@ export async function createSubCategory(data) {
     })
     .catch(err => console.log(err))
 }
+
 
 export async function deleteSubCategory(id) {
   return apiClient

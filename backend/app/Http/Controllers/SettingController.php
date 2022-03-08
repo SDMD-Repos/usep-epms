@@ -14,6 +14,7 @@ use App\Http\Requests\StoreFormFieldSetting;
 use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
 use App\Http\Requests\StoreProgram;
+use App\Http\Requests\StoreOtherProgram;
 use App\Http\Requests\StoreSignatory;
 use App\Http\Requests\StoreSubCategory;
 use App\Http\Requests\UpdateGroup;
@@ -21,10 +22,12 @@ use App\Http\Traits\OfficeTrait;
 use App\Measure;
 use App\MeasureItem;
 use App\Program;
+use App\OtherProgram;
 use App\Signatory;
 use App\SignatoryType;
 use App\SubCategory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -236,6 +239,14 @@ class SettingController extends Controller
         ], 200);
     }
 
+    public function getOtherPrograms($year,$form_id)
+    {
+        $programs = OtherProgram::select("*", "id as key")->where('year', $year)->where('form_id',$form_id)->with('category')->get();
+        return response()->json([
+            'otherPrograms' => $programs
+        ], 200);
+    }
+
     public function createProgram(StoreProgram $request)
     {
         try {
@@ -272,6 +283,44 @@ class SettingController extends Controller
         }
     }
 
+    public function createOtherProgram(StoreOtherProgram $request)
+    {
+
+        try {
+            $validated = $request->validated();
+
+            DB::beginTransaction();
+
+            $program = new OtherProgram();
+
+            $program->name = $validated['name'];
+            $program->category_id = $validated['category_id'];
+            $program->form_id = $validated['formId'];
+            $program->percentage = $validated['percentage'];
+            $program->year = $validated['year'];
+            $program->create_id = $this->login_user->pmaps_id;
+            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if (!$program->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Program created successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
     public function deleteProgram($id)
     {
         try {
@@ -279,6 +328,40 @@ class SettingController extends Controller
             $program = Program::find($id);
 
             if($program)
+
+            $program->modify_id = $this->login_user->pmaps_id;
+            $program->updated_at = Carbon::now();
+            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if (!$program->save()) {
+                DB::rollBack();
+            } else {
+                if (!$program->delete()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Program deleted successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function deleteOtherProgram($id)
+    {
+        try {
+
+            $program = OtherProgram::find($id);
 
             $program->modify_id = $this->login_user->pmaps_id;
             $program->updated_at = Carbon::now();

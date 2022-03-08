@@ -108,6 +108,7 @@ export const useDefaultFormData = props => {
 
   switch (props.formId) {
     case 'aapcr':
+    case 'opcrtemplate':
       defaultData.value = defaultAapcrFormData
       break;
     case 'opcrvp':
@@ -181,12 +182,24 @@ export const useDefaultFormData = props => {
         ],
       })
       break;
+     case 'opcrtemplate':
+      rules = reactive({
+        subCategory: [
+          { validator: subCategoryValidator, trigger: 'blur' },
+          { type: 'object' },
+        ],
+        name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
+        target: [{ validator: validateNonHeader, trigger: 'blur'}],
+        measures: [{ validator: validateNonHeader, trigger: 'blur'}],
+      })
+      break;
 
   }
 
   const resetFormAsHeader = () => {
     switch (props.formId) {
       case 'aapcr':
+      case 'opcrtemplate':
         formData.cascadingLevel = null
     }
 
@@ -204,6 +217,7 @@ export const useDefaultFormData = props => {
   const assignFormData = newData => {
     switch (props.formId) {
       case 'aapcr':
+      case 'opcrtemplate':
         formData.cascadingLevel = newData.cascadingLevel
         break;
       case 'opcrvp':
@@ -291,6 +305,7 @@ export const useFormOperations = props => {
   const updateChildren = data => {
     const { updateData, updateId } = data
     const { children } = dataSource.value[updateId]
+
     if (typeof children !== 'undefined' && children.length) {
       children.forEach(i => {
         if(props.formId === 'opcrvp') {
@@ -300,7 +315,6 @@ export const useFormOperations = props => {
         i.subCategory = updateData.value.subCategory
         if(!updateData.value.isHeader) {
           i.targetsBasis = updateData.value.targetsBasis
-
           if(props.formId === 'aapcr') {
             i.cascadingLevel = updateData.value.cascadingLevel
           }

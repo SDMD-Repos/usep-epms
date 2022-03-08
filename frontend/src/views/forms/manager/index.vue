@@ -1,27 +1,18 @@
 <template>
   <div>
     <a-card>
-      <aapcr-form v-if="formId === `aapcr`" :form-id="formId" />
-      <opcr-vp-form v-if="formId === `opcrvp`" :form-id="formId" />
-      <opcr-form v-if="formId === `opcr`" :form-id="formId" />
-      <opcr-template-form v-if="formId === `opcrtemplate`" :form-id="formId" />
+      <opcr-manager v-if="formId === `opcr`" :form-id="formId" />
     </a-card>
   </div>
 </template>
 <script>
 import { defineComponent, ref, watch, onMounted } from "vue"
 import { useRoute } from 'vue-router'
-import AapcrForm from '@/components/Forms/Aapcr/Main'
-import OpcrTemplateForm from "@/components/Forms/OpcrTemplate/Main";
-import OpcrVpForm from '@/components/Forms/Vpopcr/Main'
-import OpcrForm from '@/components/Forms/Opcr/Main'
+import OpcrManager from '@/components/Forms/Opcr/Manager'
 
 export default defineComponent({
   components: {
-    OpcrTemplateForm,
-    AapcrForm,
-    OpcrVpForm,
-    OpcrForm,
+    OpcrManager,
   },
   setup() {
     const formId = ref(null)
