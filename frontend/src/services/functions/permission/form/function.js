@@ -2,7 +2,7 @@ import { computed, ref} from 'vue'
 import { useStore } from 'vuex'
 
 
-export const usePermissionForm = () => {
+export const usePermissionFunction = () => {
 
   const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()

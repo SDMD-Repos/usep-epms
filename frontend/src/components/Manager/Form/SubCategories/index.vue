@@ -75,7 +75,7 @@ import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import SubCategoriesTable from './partials/lists'
-import { usePermissionCategory } from '@/services/functions/permission/subcategories'
+import { usePermissionCategory } from '@/services/functions/permission/form/subcategories'
 export default defineComponent({
   name: "SubCategoriesManager",
   components: {

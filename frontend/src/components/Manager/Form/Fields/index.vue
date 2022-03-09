@@ -17,7 +17,7 @@
 import { defineComponent, ref, computed, onMounted } from "vue"
 import { useStore } from "vuex";
 import FormTable from './partials/formTable'
-import { usePermissionFields } from '@/services/functions/permission/fields'
+import { usePermissionFields } from '@/services/functions/permission/form/fields'
 
 export default defineComponent({
   name: 'FieldsManager',
