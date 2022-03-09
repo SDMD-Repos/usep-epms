@@ -14,7 +14,7 @@
       </div>
     </template>
 
-    <template #operation="{ record }">
+    <template #operation="{ record }" >
       <span v-if="record.id in editableData">
         <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
           <a-button type="primary" shape="round" size="small" >
@@ -24,7 +24,7 @@
         <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
       </span>
       <span v-else>
-        <a type="primary" @click="edit(record.id)">Edit</a>
+        <a type="primary" @click="edit(record.id)" v-if="isCheck || allAccess">Edit</a>
       </span>
     </template>
   </a-table>
@@ -44,7 +44,10 @@ export default defineComponent({
   name: "FieldsFormTable",
   props: {
     year: { type: Number, default: new Date().getFullYear() },
+    isCreate: Boolean,
+    allAccess: Boolean,
   },
+   
   emits: ['handle-save'],
   setup(props, { emit }) {
     const store = useStore()

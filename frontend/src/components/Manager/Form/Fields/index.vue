@@ -9,7 +9,7 @@
     </a-select>
 
     <div class="mt-5">
-      <form-table :year="year" @handle-save="handleSave"/>
+      <form-table :year="year" :isCreate="isCreate" :all-access="allAccess" @handle-save="handleSave"/>
     </div>
   </div>
 </template>
@@ -17,6 +17,7 @@
 import { defineComponent, ref, computed, onMounted } from "vue"
 import { useStore } from "vuex";
 import FormTable from './partials/formTable'
+import { usePermissionFields } from '@/services/functions/permission/fields'
 
 export default defineComponent({
   name: 'FieldsManager',
@@ -37,6 +38,13 @@ export default defineComponent({
       }
       return lists
     })
+
+    const {
+      // DATA
+     isCreate, allAccess,
+      // METHODS
+
+    } = usePermissionFields()
 
     // EVEMTS
     onMounted(() => {
@@ -76,9 +84,9 @@ export default defineComponent({
 
     return {
       year,
-
       years,
-
+      isCreate,
+      allAccess,
       fetchSettings,
       handleSave,
     }
