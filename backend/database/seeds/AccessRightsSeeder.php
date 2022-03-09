@@ -22,32 +22,6 @@ class AccessRightsSeeder extends Seeder
                 'permission_name' => 'Manager',
                 'create_id' => 'admin',
             ],
-
-            [
-                'permission_id' => 'aapcr',
-                'permission_name' => 'APPCR',
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'opcrvp',
-                'permission_name' => 'OPCR(VP)',
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'opcr',
-                'permission_name' => 'OPCR',
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'cpcr',
-                'permission_name' => 'CPCR',
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'ipcr',
-                'permission_name' => 'IPCR',
-                'create_id' => 'admin',
-            ],
         ]);
 
         DB::table('access_rights')->insert([
@@ -93,6 +67,12 @@ class AccessRightsSeeder extends Seeder
             [
                 'permission_id' => 'mf-subcat',
                 'permission_name' => 'Sub Categories',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'mf-fields',
+                'permission_name' => 'Fields',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-form")->first()->id,
                 'create_id' => 'admin',
             ],
