@@ -6,10 +6,12 @@
         @confirm="onDelete(record.key)"
         ok-text="Yes"
         cancel-text="No"
+        v-if="isDelete || allAccess"
       >
         <template #icon><warning-outlined /></template>
         <a type="primary">Delete</a>
       </a-popconfirm>
+      <span v-else></span>
     </template>
   </a-table>
 </template>
@@ -34,6 +36,8 @@ export default defineComponent({
       required: true,
       type: Array,
     },
+    isDelete : Boolean,
+    allAccess: Boolean,
   },
   emits: ['delete'],
   setup(props, { emit } ) {

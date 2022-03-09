@@ -57,8 +57,8 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length" @change="resetForm" >
+          <a-button style="width: 150px;" type="primary" class="mr-3" :disabled="!isCreate && !allAccess"  @click="onSubmit">Add</a-button>
+           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length"  :disabled="!isCreate && !allAccess" @change="resetForm" >
                 Add {{ year - 1}} Sub Categories
             </a-checkbox>
           <a-button type="link" v-if="prevSubCategories.length" @click="changePreviousModal"></a-button>
@@ -66,7 +66,7 @@
       </a-form>
     </div>
 
-    <sub-categories-table :sub-category-list="subCategories" @delete="onDelete"/>
+    <sub-categories-table :sub-category-list="subCategories" :is-delete="isDelete" :all-access="allAccess" @delete="onDelete"/>
   </a-spin>
 </template>
 <script>
@@ -75,7 +75,7 @@ import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import SubCategoriesTable from './partials/lists'
-
+import { usePermissionCategory } from '@/services/functions/permission/subcategories'
 export default defineComponent({
   name: "SubCategoriesManager",
   components: {
@@ -141,7 +141,15 @@ export default defineComponent({
       value: 'id',
     }
 
+    const {
+      // DATA
+      isDelete, isCreate, allAccess,
+      // METHODS
+
+    } = usePermissionCategory()
+
     // EVENTS
+    
     onMounted(() => {
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
@@ -210,7 +218,9 @@ export default defineComponent({
       parentSubs,
       isPreviousViewed,
       prevSubCategories,
-
+      isDelete,
+      isCreate,
+      allAccess,
       checked,
       formRef,
       formState,
