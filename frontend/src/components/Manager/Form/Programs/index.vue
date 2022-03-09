@@ -1,4 +1,5 @@
 <template>
+ <a-spin :spinning="loading">
     <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchData">
       <template v-for="(y, i) in years" :key="i">
         <a-select-option :value="y">
@@ -7,7 +8,6 @@
       </template>
     </a-select>
     <div class="mt-5">
-      <a-spin :spinning="loading">
         <a-form layout="vertical"
                 ref="formRef"
                 :model="formState"
@@ -37,17 +37,16 @@
             </div>
           </div>
           <div class="form-actions mt-0">
-            <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
-            <a-button type="link" v-if="previousPrograms.length" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
+            <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit" :disabled="!isCreate && !allAccess">Add</a-button>
+            <a-button type="link" v-if="previousPrograms.length" :disabled="!isCreate && !allAccess" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
           </div>
         </a-form>
 
-        <programs-table :year="year" />
-
+        <programs-table :year="year" :is-delete="isDelete" :all-access="allAccess" />
         <previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"
                        @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
-      </a-spin>
     </div>
+     </a-spin>
 </template>
 <script>
 import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
@@ -56,6 +55,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
+import { usePermissionProgram } from '@/services/functions/permission/programs'
 
 export default defineComponent({
   name: "ProgramsManager",
@@ -87,6 +87,13 @@ export default defineComponent({
       }
       return lists
     })
+
+    const {
+      // DATA
+      isDelete, isCreate, allAccess,
+      // METHODS
+
+    } = usePermissionProgram()
     const rules = {
       name: [
         {
@@ -188,6 +195,9 @@ export default defineComponent({
       loading,
       years,
       year,
+      isCreate,
+      allAccess,
+      isDelete,
       onSubmit,
       resetForm,
       fetchData,
