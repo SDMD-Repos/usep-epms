@@ -38,7 +38,8 @@ export const usePermissionForm = () => {
               value.permission_id == "mfp-delete" ||
               value.permission_id == "mf-subcat" ||
               value.permission_id == "mfs-create" ||
-              value.permission_id == "mfs-delete"
+              value.permission_id == "mfs-delete" ||
+              value.permission_id == "mf-fields"
             );
     })
 

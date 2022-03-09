@@ -38,7 +38,9 @@ export const usePermissionCategory = () => {
               value.permission_id == "mfp-delete" ||
               value.permission_id == "mf-functions" ||
               value.permission_id == "mff-create" ||
-              value.permission_id == "mff-delete"
+              value.permission_id == "mff-delete" ||
+              value.permission_id == "mf-fields"
+
             );
     })
 
