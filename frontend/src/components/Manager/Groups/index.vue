@@ -2,7 +2,7 @@
   <div>
     <a-table :columns="columns" :data-source="groups" :loading="loading" bordered>
       <template #title>
-        <a-button type="primary" class="mr-3" @click="openModal('create', null)">
+        <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!isCreate && !allAccess">
           <template #icon><PlusOutlined /></template>
           New Group
         </a-button>
@@ -20,10 +20,12 @@
           @confirm="onDelete(record.key)"
           ok-text="Yes"
           cancel-text="No"
+          v-if="isDelete || allAccess"
         >
           <template #icon><warning-outlined /></template>
-          <a type="primary">Delete</a>
+          <a type="primary" >Delete</a>
         </a-popconfirm>
+        <span v-else></span>
       </template>
     </a-table>
     <form-modal ref="groupModal" :visible="isOpenModal"
@@ -36,6 +38,9 @@
                 :supervising-list="vpOfficesList"
                 :validate="validate"
                 :validate-infos="validateInfos"
+                :is-edit="isEdit"
+                :all-access="allAccess"
+                :is-delete="isDelete"
                 @change-action="changeAction"
                 @close-modal="resetModalData"
                 @submit-form="submitForm"/>
@@ -48,6 +53,7 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 import { Form, Modal } from 'ant-design-vue'
 import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { usePermissionGroups } from '@/services/functions/permission/groups/groups'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -116,6 +122,18 @@ export default defineComponent({
         { validator: checkIfEmpty, trigger: 'change' },
       ],
     })
+    const {
+      // DATA
+      isDelete, isCreate, allAccess, isEdit,
+      // METHODS
+
+    } = usePermissionGroups()
+
+
+// alert(allAccess.value)
+// alert(isCreate.value)
+// alert(isEdit.value)
+// alert(isDelete.value)
 
     // EVENTS
     onMounted(() => {
@@ -241,6 +259,10 @@ export default defineComponent({
       modalTitle,
       okText,
       groupModal,
+      isDelete,
+      isEdit,
+      isCreate,
+      allAccess,
 
       useForm,
       validate,

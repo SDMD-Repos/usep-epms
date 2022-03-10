@@ -4,6 +4,7 @@
            :closable="false"
            :mask-closable="false"
            :ok-text="okText"
+           :ok-button-props="{disabled:!allAccess && !isEdit }"
            width="45%"
            @ok="okAction"
            @cancel="onClose">
@@ -184,6 +185,9 @@ export default defineComponent({
       type: Object,
       default: () => { return {} },
     },
+    isEdit: Boolean,
+    allAccess: Boolean,
+    isDelete: Boolean,
   },
   emits: ['change-action', 'close-modal', 'submit-form'],
   setup(props, { emit }) {

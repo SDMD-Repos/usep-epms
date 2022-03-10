@@ -16,7 +16,8 @@ export const usePermissionFields = () => {
     const notInclude = accessLists.value.filter((value)=>{
       return (value.permission_id == "m-group" || 
               value.permission_id == "mg-create" || 
-              value.permission_id == "mg-delete" || 
+              value.permission_id == "mg-edit" || 
+              value.permission_id == "mg-delete" ||
               value.permission_id == "m-measures" || 
               value.permission_id == "mm-create" || 
               value.permission_id == "mm-delete" ||

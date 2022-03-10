@@ -137,6 +137,12 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-group")->first()->id,
             ],
             [
+                'permission_id' => 'mg-edit',
+                'permission_name' => 'edit',
+                'create_id' => 'admin',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-group")->first()->id,
+            ],
+            [
                 'permission_id' => 'mm-create',
                 'permission_name' => 'create',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-measures")->first()->id,
