@@ -11,11 +11,11 @@
     <div class="mt-4">
       <a-table :columns="columns" :data-source="measuresList" :loading="loading" bordered>
         <template #title>
-          <a-button type="primary" class="mr-3" @click="openModal('create', null)">
+          <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!isCreate && !allAccess" >
             <template #icon><PlusOutlined /></template>
             New Measure
           </a-button>
-          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal">Add {{ year - 1}} measures</a-button>
+          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" :disabled="!isCreate && !allAccess">Add {{ year - 1}} measures</a-button>
         </template>
 
         <template #dateCreated="{ record }">
@@ -30,17 +30,20 @@
             @confirm="onDelete(record.key)"
             ok-text="Yes"
             cancel-text="No"
+             v-if="isDelete || allAccess"
           >
             <template #icon><warning-outlined /></template>
             <a type="primary">Delete</a>
           </a-popconfirm>
+          <span v-else></span>
         </template>
       </a-table>
     </div>
 
     <form-modal :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"
                 :form-state="formState" :validate="validate" :validate-infos="validateInfos"
-                @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"/>
+                @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit" 
+                :is-edit="isEdit" :all-access="allAccess" :is-delete="isDelete"/>
 
     <measures-previous-list :visible="isPreviousViewed" :year="year" :list="previousMeasures"
                             @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
@@ -54,7 +57,7 @@ import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-d
 import moment from 'moment'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
-
+import { usePermissionMeasures } from '@/services/functions/permission/measures/measures'
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Date Created', dataIndex: 'created_at', key: 'created_at', slots: { customRender: 'dateCreated' } },
@@ -97,6 +100,13 @@ export default defineComponent({
         { min: 3, message: 'Length should be at least 3 characters', trigger: 'change' },
       ],
     })
+
+    const {
+      // DATA
+      isDelete, isCreate, allAccess, isEdit,
+      // METHODS
+
+    } = usePermissionMeasures()
 
     // COMPUTED
     const mainStore = computed(() => store.getters.mainStore)
@@ -223,6 +233,10 @@ export default defineComponent({
       previousMeasures,
       loading,
       years,
+      isCreate,
+      isDelete,
+      isEdit,
+      allAccess,
 
       validate,
       validateInfos,

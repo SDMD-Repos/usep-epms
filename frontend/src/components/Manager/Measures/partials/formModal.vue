@@ -4,6 +4,7 @@
            :closable="false"
            :mask-closable="false"
            :ok-text="okText"
+           :ok-button-props="{disabled:!allAccess && !isEdit }"
            @ok="okAction"
            @cancel="onClose">
     <a-form :label-col="labelCol"
@@ -87,6 +88,9 @@ export default defineComponent({
       type: Object,
       default: () => { return {} },
     },
+    isCreate: Boolean,
+    isDelete: Boolean,
+    allAccess: Boolean,
   },
   emits: ['close-modal', 'change-action', 'submit-form'],
   setup(props, { emit }) {

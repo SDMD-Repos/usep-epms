@@ -2,29 +2,29 @@ import { computed, ref} from 'vue'
 import { useStore } from 'vuex'
 
 
-export const usePermissionGroups = () => {
+export const usePermissionMeasures = () => {
 
   const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()
-    const groupPermission = accessLists.value.filter((value)=>{
+    const measuresPermission = accessLists.value.filter((value)=>{
       return  ( value.permission_id == "manager" || 
-                value.permission_id == "m-group" );
+                value.permission_id == "m-measures" );
     });
 
-    const gpPermission = accessLists.value.filter((value)=>{
-      return  ( value.permission_id == "m-group" );
+    const mPermission = accessLists.value.filter((value)=>{
+      return  ( value.permission_id == "m-measures" );
     });
 
-    const groupCreatePermission = accessLists.value.filter((value)=>{
-      return  value.permission_id == "mg-create";
+    const measuresCreatePermission = accessLists.value.filter((value)=>{
+      return  value.permission_id == "mm-create";
     });
 
-    const groupDeletePermission = accessLists.value.filter((value)=>{
-      return value.permission_id == "mg-delete";
+    const measuresDeletePermission = accessLists.value.filter((value)=>{
+      return value.permission_id == "mm-delete";
     });
 
-    const groupEditPermission = accessLists.value.filter((value)=>{
-        return value.permission_id == "mg-edit";
+    const measuresEditPermission = accessLists.value.filter((value)=>{
+        return value.permission_id == "mm-edit";
       });
   
 
@@ -33,16 +33,16 @@ export const usePermissionGroups = () => {
               value.permission_id == "mff-create" || 
               value.permission_id == "mff-delete" || 
               value.permission_id == "mff-functions" ||
-              value.permission_id == "m-measures" || 
-              value.permission_id == "mm-create" || 
-              value.permission_id == "mm-delete" ||
-              value.permission_id == "mm-edit" ||
-              // value.permission_id == "m-signatories" ||
-              // value.permission_id == "ms-aapcr" ||
-              // value.permission_id == "ms-opcrvp" ||
-              // value.permission_id == "ms-opcr" ||
-              // value.permission_id == "ms-cpcr" ||
-              // value.permission_id == "ms-ipcr" ||
+              value.permission_id == "m-group" || 
+              value.permission_id == "mg-create" || 
+              value.permission_id == "mg-delete" ||
+              value.permission_id == "mg-edit" ||
+            //   value.permission_id == "m-signatories" ||
+            //   value.permission_id == "ms-aapcr" ||
+            //   value.permission_id == "ms-opcrvp" ||
+            //   value.permission_id == "ms-opcr" ||
+            //   value.permission_id == "ms-cpcr" ||
+            //   value.permission_id == "ms-ipcr" ||
               value.permission_id == "mf-programs" ||
               value.permission_id == "mfp-create" ||
               value.permission_id == "mfp-delete" ||
@@ -58,10 +58,10 @@ export const usePermissionGroups = () => {
     const allAccess = ref(false)
     const isEdit = ref(false)
     
-    if(groupPermission.length > 0 || notInclude.length > 0){
+    if(measuresPermission.length > 0 || notInclude.length > 0){
       allAccess.value = true;
 
-      if(groupPermission.length > 0 ){
+      if(measuresPermission.length > 0 ){
         allAccess.value = true;
         isCreate.value = true;
         isDelete.value = true;
@@ -75,7 +75,7 @@ export const usePermissionGroups = () => {
         isDelete.value = false;
         isEdit.value = false;
       
-        if(gpPermission.length > 0){
+        if(mPermission.length > 0){
           allAccess.value = true;
         }
       }
@@ -83,20 +83,20 @@ export const usePermissionGroups = () => {
     }
    
   
-    if(groupCreatePermission.length > 0 ||  groupDeletePermission.length > 0 || groupEditPermission.length > 0){
+    if(measuresCreatePermission.length > 0 ||  measuresDeletePermission.length > 0 || measuresEditPermission.length > 0){
         allAccess.value = false;
         
-        if(groupCreatePermission.length > 0){
+        if(measuresCreatePermission.length > 0){
             isCreate.value = true;
         }else{
             isCreate.value = false;
         }
-        if(groupDeletePermission.length > 0){
+        if(measuresDeletePermission.length > 0){
             isDelete.value = true;
         }else{
             isDelete.value = false;
         }
-        if(groupEditPermission.length > 0){
+        if(measuresEditPermission.length > 0){
             isEdit.value = true;
         }else{
             isEdit.value = false;

@@ -28,12 +28,13 @@ export const usePermissionProgram = () => {
               value.permission_id == "m-measures" || 
               value.permission_id == "mm-create" || 
               value.permission_id == "mm-delete" ||
-              value.permission_id == "m-signatories" ||
-              value.permission_id == "ms-aapcr" ||
-              value.permission_id == "ms-opcrvp" ||
-              value.permission_id == "ms-opcr" ||
-              value.permission_id == "ms-cpcr" ||
-              value.permission_id == "ms-ipcr" ||
+              value.permission_id == "mm-edit" ||
+              // value.permission_id == "m-signatories" ||
+              // value.permission_id == "ms-aapcr" ||
+              // value.permission_id == "ms-opcrvp" ||
+              // value.permission_id == "ms-opcr" ||
+              // value.permission_id == "ms-cpcr" ||
+              // value.permission_id == "ms-ipcr" ||
               value.permission_id == "mf-functions" ||
               value.permission_id == "mff-create" ||
               value.permission_id == "mff-delete" ||

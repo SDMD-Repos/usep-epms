@@ -21,12 +21,13 @@ export const usePermissionFields = () => {
               value.permission_id == "m-measures" || 
               value.permission_id == "mm-create" || 
               value.permission_id == "mm-delete" ||
-              value.permission_id == "m-signatories" ||
-              value.permission_id == "ms-aapcr" ||
-              value.permission_id == "ms-opcrvp" ||
-              value.permission_id == "ms-opcr" ||
-              value.permission_id == "ms-cpcr" ||
-              value.permission_id == "ms-ipcr" ||
+              value.permission_id == "mm-edit" ||
+              // value.permission_id == "m-signatories" ||
+              // value.permission_id == "ms-aapcr" ||
+              // value.permission_id == "ms-opcrvp" ||
+              // value.permission_id == "ms-opcr" ||
+              // value.permission_id == "ms-cpcr" ||
+              // value.permission_id == "ms-ipcr" ||
               value.permission_id == "mf-programs" ||
               value.permission_id == "mfp-create" ||
               value.permission_id == "mfp-delete" ||
