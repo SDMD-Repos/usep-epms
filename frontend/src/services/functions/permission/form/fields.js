@@ -33,7 +33,22 @@ export const usePermissionFields = () => {
               value.permission_id == "mf-subcat" ||
               value.permission_id == "mfs-create" ||
               value.permission_id == "mfs-delete" ||
-              value.permission_id == "mfs-functions"
+              value.permission_id == "mfs-functions" ||
+              value.permission_id == "ms-aapcr" ||
+              value.permission_id == "msa-create" ||
+              value.permission_id == "msa-delete" ||
+              value.permission_id == "ms-opcrvp" ||
+              value.permission_id == "msovp-create" ||
+              value.permission_id == "msovp-delete" ||
+              value.permission_id == "ms-opcr" ||
+              value.permission_id == "mso-create" ||
+              value.permission_id == "mso-create" ||
+              value.permission_id == "ms-cpcr" ||
+              value.permission_id == "msc-create" ||
+              value.permission_id == "msc-delete" ||
+              value.permission_id == "ms-ipcr" ||
+              value.permission_id == "msi-create" ||
+              value.permission_id == "msi-delete" ||
             );
     })
 
