@@ -1,12 +1,19 @@
 <template>
   <div>
-    <div class="mt-4">
-      <indicator-table :disabled-new="disabledNew" :year="year" :form-id="formId" :item-source="itemSource" :budget-list="budgetList" :main-category="mainCategory"
-                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
-                       @delete-item="deleteItem" @add-budget-list-item="addBudgetListItem"/>
 
-      <opcr-template-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
-                         :targets-basis-list="targetsBasisList" :categories="categories" :current-year="year"
+    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
+      <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
+        {{ y.name }}
+      </a-select-option>
+    </a-select>
+
+    <div class="mt-4">
+      <indicator-table :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
+                       :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
+                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
+                       @delete-item="deleteItem"/>
+
+      <opcr-template-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
                          :validate="validate" :validate-infos="validateInfos"
                          @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
                          @close-drawer="closeDrawer" />
@@ -14,44 +21,43 @@
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, watch, reactive, onMounted, createVNode } from "vue"
+import { defineComponent, ref, watch, reactive, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { formTemplateTableColumns } from "@/services/columns"
+import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import OpcrTemplateFormDrawer from '@/components/Drawer/Forms/OpcrTemplate'
-import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 
 const useForm = Form.useForm
 
 export default defineComponent({
-  name: "AapcrItems",
-  components: {OpcrTemplateFormDrawer, IndicatorTable },
+  name: "OpcrTemplateItems",
+  components: { IndicatorTable, OpcrTemplateFormDrawer },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     functionId: { type: String, default: "" },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
     formId: { type: String, default: "" },
-    targetsBasisList: { type: Array, default: () => { return [] }},
-    budgetList: { type: Array, default: () => { return [] }},
     counter: { type: Number, default: 0 },
   },
   emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
-    'update-source-item', 'add-budget-list-item'],
+    'update-source-item'],
   setup(props, { emit }) {
     const store = useStore()
 
     // DATA
     const mainCategory = ref(undefined)
-    const displayIndicatorList = ref(0)
+    const displayIndicatorList = ref(false)
     const count = ref(0)
-    const dataSource = ref([])
-    const disabledNew = ref(false)
+    const dataSource = computed(()=> { return props.itemSource })
+
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
-    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === props.functionId) })
+    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === parseInt(props.functionId)) })
 
     const {
       drawerConfig,
@@ -60,12 +66,7 @@ export default defineComponent({
     const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(props)
 
     // EVENTS
-    onMounted(() => {
-
-    })
-
-    watch(() => [props.itemSource, props.counter], ([itemSource, counter]) => {
-      dataSource.value = itemSource
+    watch(() => props.counter, counter => {
       count.value = counter
     })
 
@@ -74,7 +75,7 @@ export default defineComponent({
     // METHODS
     const loadPIs = e => {
       if (e !== '' && typeof e !== 'undefined') {
-        displayIndicatorList.value = 1
+        displayIndicatorList.value = true
       }
     }
 
@@ -104,6 +105,7 @@ export default defineComponent({
         id: key,
         type: drawerConfig.value.type,
         subCategory: data.value.subCategory,
+        program: mainCategory.value.key,
         name: data.value.name,
         isHeader: data.value.isHeader,
         target: data.value.target,
@@ -146,16 +148,14 @@ export default defineComponent({
       formData.subCategory = newData.subCategory
       if (!newData.isHeader) {
         formData.measures = newData.measures
-        formData.targetsBasis = newData.targetsBasis
       }
       openDrawer({ action: 'newsub', parentDetails: { ...newData }})
     }
 
     const editItem = data => {
       let editData = null, updateId = null, parentDetails = undefined
-
       if (data.type === 'pi') {
-        editData = dataSource.value.filter(item => data.key === item.key)[0]
+        editData = dataSource.value.filter(item => item.key === data.key)[0]
         updateId = dataSource.value.findIndex(record => record.key === data.key)
       } else {
         let shouldBreak = false
@@ -183,14 +183,6 @@ export default defineComponent({
     }
 
     const updateTableItem = async data => {
-      if (drawerConfig.value.type === 'pi') {
-        if (!data.updateData.isHeader) {
-          const {targetsBasis} = data.updateData
-          if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
-            await emit('add-targets-basis-item', targetsBasis)
-          }
-        }
-      }
 
       const { parentDetails } = drawerConfig.value
       await emit('update-source-item', {
@@ -239,15 +231,13 @@ export default defineComponent({
       await resetFields()
     }
 
-    const addBudgetListItem = data => {
-      emit('add-budget-list-item', data)
-    }
-
     return {
+      formTemplateTableColumns,
       mainCategory,
+      displayIndicatorList,
 
       programsByFunction,
-
+      programs,
       // useDrawerSettings
       drawerConfig,
       openDrawer,
@@ -267,9 +257,6 @@ export default defineComponent({
       editItem,
       updateTableItem,
       deleteItem,
-      addBudgetListItem,
-
-      disabledNew,
     }
   },
 })

@@ -16,7 +16,7 @@ class OpcrTemplateDetailsMeasures extends Migration
         //
         Schema::create('opcr_template_details_measures', function (Blueprint $table) {
             $table->integer("id")->autoIncrement();
-            $table->integer("opcr_template_detail_id");
+            $table->integer("detail_id");
             $table->integer("measure_id");
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
@@ -25,7 +25,7 @@ class OpcrTemplateDetailsMeasures extends Migration
             $table->softDeletes();
             $table->text('history');
 
-            $table->foreign('opcr_template_detail_id')->references('id')->on('opcr_template_details')->onUpdate('cascade');
+            $table->foreign('detail_id')->references('id')->on('opcr_template_details')->onUpdate('cascade');
             $table->foreign('measure_id')->references('id')->on('measures')->onUpdate('cascade');
         });
     }

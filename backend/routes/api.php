@@ -130,7 +130,6 @@ Route::group([
     ], function() {
         Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
         Route::get('/check-saved-template/{year}', 'Form\OcpcrController@checkSaved');
-        Route::get('/template-list', 'Form\OcpcrController@getAllOpcrTemplates');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
         Route::post('/save', 'Form\VpopcrController@save');
         Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
@@ -140,6 +139,20 @@ Route::group([
         Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
         Route::post('/update/{id}', 'Form\VpopcrController@update');
     });
+
+    Route::group([
+        'prefix' => 'opcr'
+    ], function() {
+
+        //GET
+        Route::get('/check-saved-template/{year}', 'Form\OpcrController@checkSavedTemplate');
+        Route::get('/view-template/{id}', 'Form\OpcrController@viewTemplate');
+        Route::get('/template-list', 'Form\OpcrController@getAllOpcrTemplate');
+
+        //POST
+        Route::post('/save-template', 'Form\OpcrController@saveTemplate');
+    });
+
 });
 
 Route::group([

@@ -127,7 +127,7 @@ export default defineComponent({
     // COMPUTED
     const subCategories = computed(() => {
       const subs = store.getters['formManager/subCategories']
-      return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
+      return subs.filter(i => { return i.category_id === parseInt(props.drawerId) && i.parent_id === null})
     })
 
     const measuresList  = computed(() => store.getters['formManager/manager'].measures)

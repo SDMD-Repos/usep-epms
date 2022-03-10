@@ -26,4 +26,13 @@ class FormField extends Model
     {
         return $this->hasMany('App\AapcrDetail', 'office_type_id');
     }
+
+    /**
+     * Get the aapcr detail for the form field.
+     */
+
+    public function opcrTemplateDetail()
+    {
+        return $this->hasMany('App\OpcrTemplateDetail', 'office_type_id');
+    }
 }
