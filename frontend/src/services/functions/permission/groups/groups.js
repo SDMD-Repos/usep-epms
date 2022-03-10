@@ -65,7 +65,7 @@ export const usePermissionGroups = () => {
         isCreate.value = true;
         isDelete.value = true;
         isEdit.value = true;
-        alert("zz")
+      
       }
 
       if(notInclude.length > 0){
@@ -73,19 +73,18 @@ export const usePermissionGroups = () => {
         isCreate.value = false;
         isDelete.value = false;
         isEdit.value = false;
-        alert("xx")
+      
         if(gpPermission.length > 0){
           allAccess.value = true;
         }
       }
-     
-      alert("zzz")
+    
     }
    
   
     if(groupCreatePermission.length > 0 ||  groupDeletePermission.length > 0 || groupEditPermission.length > 0){
         allAccess.value = false;
-        alert("132")
+        
         if(groupCreatePermission.length > 0){
             isCreate.value = true;
         }else{
@@ -98,9 +97,7 @@ export const usePermissionGroups = () => {
         }
         if(groupEditPermission.length > 0){
             isEdit.value = true;
-            alert("55")
         }else{
-          alert("5")
             isEdit.value = false;
         }
     }
