@@ -55,7 +55,7 @@ export const usePermissionProgram = () => {
               value.permission_id == "msc-delete" ||
               value.permission_id == "ms-ipcr" ||
               value.permission_id == "msi-create" ||
-              value.permission_id == "msi-delete" ||
+              value.permission_id == "msi-delete"
             );
     })
 
