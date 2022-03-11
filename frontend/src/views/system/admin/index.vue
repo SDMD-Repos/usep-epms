@@ -1,12 +1,10 @@
 <template>
- <!-- <a-card style="width: 100%">
-   <SystemAdmin />
-   </a-card> -->
+ <a-card style="width: 100%">
    <a-tabs v-model:activeKey="activeKey">
     <a-tab-pane key="1" tab="Manager"><system-admin v-if="activeKey === '1'"/></a-tab-pane>
     <a-tab-pane key="2" tab="Forms"><form-admin v-if="activeKey === '2'"/></a-tab-pane>
-    
-  </a-tabs>
+  </a-tabs> 
+  </a-card>
 </template>
 
 <script>

@@ -1,9 +1,11 @@
 <template>
-   <template>
-    <a-form-item label="Activity name" v-bind="validateInfos.name">
-      <a-input v-model:value="modelRef.name" />
+<a-form layout="vertical"
+              ref="formRef"
+             >
+    <a-form-item label="Activity name">
+      <a-input />
     </a-form-item>
-   </template>    
+  </a-form>
 </template>
 
 

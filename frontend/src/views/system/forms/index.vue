@@ -17,7 +17,7 @@
       <p>IPCR</p>
     </a-collapse-panel>
   </a-collapse>
-    
+
 </template>
 
 
