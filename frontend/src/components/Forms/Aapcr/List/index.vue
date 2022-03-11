@@ -2,16 +2,18 @@
   <div>
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-uploaded-list="viewUploadedList" />
 
     <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
       :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
-      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload" />
+      @add-to-list="addUploadItem" @remove-file="removeFile" @cancel-upload="handleCancelUpload" />
 
     <uploaded-list-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
       @close-list-modal="closeListModal" @view-file="viewPdf" @delete-file="openUploadOnDelete" />
+
+    <unpublish-remarks-modal :is-unpublish="isUnpublish" @unpublish="unpublish" />
   </div>
 </template>
 <script>
@@ -27,12 +29,15 @@ import { updateFile, fetchPdfData, viewUploadedFile } from '@/services/api/mainF
 import FormListTable from '@/components/Tables/Forms/List'
 import UploadPublishModal from '@/components/Modals/UploadPublish'
 import UploadedListModal from '@/components/Modals/UploadedList'
+import UnpublishRemarksModal from '@/components/Modals/Remarks'
 
 export default defineComponent({
+  name: "AapcrList",
   components: {
     FormListTable,
     UploadPublishModal,
     UploadedListModal,
+    UnpublishRemarksModal,
   },
   props: {
     formId: { type: String, default: '' },
@@ -45,6 +50,8 @@ export default defineComponent({
 
     // DATA
     const documentName = ref(null)
+    const isUnpublish = ref(false)
+    const unpublishedId = ref(null)
 
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
@@ -54,7 +61,7 @@ export default defineComponent({
       // DATA
       isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
       // METHODS
-      unpublish, addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
+      addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
     } = useUploadFile()
 
     const { isUploadedViewed, viewedForm,
@@ -82,7 +89,24 @@ export default defineComponent({
       store.dispatch('aapcr/PUBLISH', { payload: payload })
     }
 
-    const uploadFile = async () => {
+    const openUnpublishRemarks = id => {
+      isUnpublish.value = !isUnpublish.value
+      unpublishedId.value = id
+    }
+
+    const unpublish = remarks => {
+      const data = {
+        id: unpublishedId.value,
+        remarks: remarks.value,
+      }
+
+      store.dispatch('aapcr/UNPUBLISH', { payload: data }).then(() => {
+        isUnpublish.value = !isUnpublish.value
+        unpublishedId.value = null
+      })
+    }
+
+    /*const uploadFile = async () => {
       const formData = new FormData()
       fileList.value.forEach(file => {
         formData.append('files[]', file)
@@ -111,7 +135,7 @@ export default defineComponent({
           }
         })
       }
-    }
+    }*/
 
     const viewPdf = data => {
       let renderer = null
@@ -165,6 +189,7 @@ export default defineComponent({
       moment,
 
       documentName,
+      isUnpublish,
 
       columns: listTableColumns,
       list,
@@ -182,12 +207,13 @@ export default defineComponent({
 
       updateForm,
       publish,
+      openUnpublishRemarks,
+      unpublish,
       viewPdf,
-      uploadFile,
+      // uploadFile,
       handleCancelUpload,
       closeListModal,
 
-      unpublish,
       addUploadItem,
       removeFile,
       cancelUpload,

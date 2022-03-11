@@ -9,15 +9,20 @@
     </template>
 
     <template #status="{ record }">
-      <div v-if="record.is_active" class="font-size-12 badge badge-success" :style="{cursor: 'pointer'}" @click="deactivate(record.id)">
-        <a-tooltip>
-          <template #title><span>Click to deactivate</span></template>
-          Active
-        </a-tooltip>
-      </div>
-      <span v-else class="font-size-12 badge badge-primary">
+      <div>
+        <span v-if="record.is_active" class="font-size-12 badge badge-success mr-2" :style="{cursor: 'pointer'}" @click="deactivate(record.id)">
+          <a-tooltip>
+            <template #title><span>Click to deactivate</span></template>
+            Active
+          </a-tooltip>
+        </span>
+        <span v-else class="font-size-12 badge badge-primary">
           Inactive
         </span>
+        <span v-if="record.status.filter(i => i.status === 'pending').length" class="font-size-12 badge badge-warning">
+          Pending unpublish request
+        </span>
+      </div>
     </template>
 
     <template #operation="{ record }">
@@ -39,10 +44,10 @@
           <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
         </a-tooltip>
       </template>
-      <template v-if="record.published_date && record.is_active">
+      <template v-if="record.published_date && record.is_active && (!record.status.filter(i => i.status === 'pending').length)">
         <a-divider type="vertical" />
         <a-tooltip>
-          <template #title><span>Unpublish</span></template>
+          <template #title><span>Request to unpublish</span></template>
           <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record.id)" />
         </a-tooltip>
       </template>

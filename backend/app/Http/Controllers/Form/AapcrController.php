@@ -9,47 +9,25 @@ use App\AapcrDetailOffice;
 use App\AapcrFile;
 use App\AapcrProgramBudget;
 use App\FormField;
+use App\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
+use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateAapcr;
 use App\Http\Requests\UploadPdfFile;
-use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
+use App\Http\Traits\PdfTrait;
 use App\Program;
 use App\SubCategory;
-use App\VpOpcrDetailOffice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
 class AapcrController extends Controller
 {
-    use ConverterTrait, FileTrait, FormTrait;
-
-//    private $login_user;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /*public function __construct()
-    {
-
-        $this->middleware(function ($request, $next) {
-            $this->login_user = Auth::user();
-
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
-            return $next($request);
-        });
-
-    }*/
+    use PdfTrait, FileTrait, FormTrait;
 
     public function checkSaved($year)
     {
@@ -65,7 +43,7 @@ class AapcrController extends Controller
 
     public function getAllAapcrs()
     {
-        $aapcrList = Aapcr::select("*", "id as key")->with('files')->orderBy('created_at', 'ASC')->get();
+        $aapcrList = Aapcr::select("*", "id as key")->with('files', 'status')->orderBy('created_at', 'ASC')->get();
 
         return response()->json([
             'aapcrList' => $aapcrList
@@ -229,7 +207,7 @@ class AapcrController extends Controller
         }
     }
 
-    public function unpublish(UploadPdfFile $request)
+    /*public function unpublish(UploadPdfFile $request)
     {
         try {
             DB::beginTransaction();
@@ -258,6 +236,48 @@ class AapcrController extends Controller
 
             return response()->json('AAPCR was unpublished successfully', 200);
         } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }*/
+
+    public function unpublish(UnpublishForm $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            $remarks = $validated['remarks'];
+            $id = $validated['id'];
+
+            DB::beginTransaction();
+
+            $isUploaded = $this->viewAapcrPdf($id, 1);
+
+            if($isUploaded) {
+                $unpublished = new FormUnpublishStatus();
+
+                $unpublished->form_type = 'aapcr';
+                $unpublished->form_id = $id;
+                $unpublished->remarks = $remarks;
+                $unpublished->status = 'pending';
+                $unpublished->requested_date = Carbon::now();
+                $unpublished->create_id = $this->login_user->pmaps_id;
+                $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                if(!$unpublished->save()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json('AAPCR was unpublished successfully', 200);
+        }catch(\Exception $e){
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
