@@ -4,7 +4,7 @@ import * as opcrTemplateForm from '@/services/api/mainForms/opcr/template'
 
 const mapApiProviders = {
   save: opcrTemplateForm.save,
-  getList: opcrTemplateForm.fetchVpOpcrs,
+  getList: opcrTemplateForm.fetchOpcrTemplates,
   publish: opcrTemplateForm.publish,
   unpublish: opcrTemplateForm.unpublish,
   deactivate: opcrTemplateForm.deactivate,
@@ -144,7 +144,7 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const id = payload.vpOpcrId
+      const id = payload.opcrTemplateId
       const update = mapApiProviders.update
       update(id, payload).then(response => {
         if (response) {

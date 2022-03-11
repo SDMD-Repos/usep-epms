@@ -52,10 +52,10 @@ export default defineComponent({
   components: { IndicatorComponent },
   props: {
     formId: { type: String, default: '' },
-    opcrTempleId: { type: Number, default: 0 },
+    opcrTemplateId: { type: Number, default: 0 },
   },
   setup(props) {
-    const PAGE_TITLE = "AAPCR Form"
+    const PAGE_TITLE = "OPCR Template Form"
 
     const store = useStore()
     const router = useRouter()
@@ -63,7 +63,7 @@ export default defineComponent({
 
     // DATA
     const activeKey = ref('0')
-    const opcrTempleId = ref(null)
+    const opcrTemplateId = ref(null)
 
     const isCheckingForm = ref(false)
 
@@ -77,7 +77,7 @@ export default defineComponent({
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
-      return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
+      return store.getters['formManager/manager'].loading || store.getters['opcrtemplate/form'].loading
     })
 
     const spinningTip = computed(() => {
@@ -96,9 +96,9 @@ export default defineComponent({
       store.commit('opcrtemplate/SET_STATE', { dataSource: [] })
       resetFormFields()
 
-      opcrTempleId.value = typeof route.params.opcrTempleId !== 'undefined' ? route.params.opcrTempleId : null
+      opcrTemplateId.value = typeof route.params.opcrTemplateId !== 'undefined' ? route.params.opcrTemplateId : null
 
-      if(opcrTempleId.value) {
+      if(opcrTemplateId.value) {
         getFormDetails()
       } else {
         checkFormAvailability()
@@ -117,8 +117,8 @@ export default defineComponent({
             isCheckingForm.value = false
             if(hasSaved) {
               Modal.error({
-                title: () => 'Unable to create an AAPCR for the year ' + year.value,
-                content: () => 'Please check the AAPCR list or select a different year to create a new AAPCR',
+                title: () => 'Unable to create an OPCR Template for the year ' + year.value,
+                content: () => 'Please check the OPCR Template list or select a different year to create a new OPCR Template',
               })
               if (editMode.value) {
                 year.value = cachedYear.value
@@ -137,6 +137,7 @@ export default defineComponent({
     }
 
     const initializeFormFields = async () => {
+
       await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
@@ -160,10 +161,9 @@ export default defineComponent({
       store.commit('opcrtemplate/SET_STATE', {
         loading: true,
       })
-      fetchFormDetails(opcrTempleId.value).then(response => {
+      fetchFormDetails(opcrTemplateId.value).then(response => {
         if(response) {
           allowEdit.value = true
-          initializeFormFields()
           store.commit('opcrtemplate/SET_STATE', {
             dataSource: response.dataSource,
           })
@@ -173,6 +173,7 @@ export default defineComponent({
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = true
+          initializeFormFields()
         }
         store.commit('opcrtemplate/SET_STATE', {
           loading: false,
@@ -225,7 +226,7 @@ export default defineComponent({
       }else {
         details.isFinalized = isFinal || isFinalized.value
         details.deletedIds = deletedItems.value
-        details.opcrTempleId = opcrTempleId.value
+        details.opcrTemplateId = opcrTemplateId.value
         store.dispatch('opcrtemplate/UPDATE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })

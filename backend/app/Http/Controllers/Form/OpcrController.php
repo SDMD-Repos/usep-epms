@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Form;
 
+use App\Aapcr;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Traits\OfficeTrait;
@@ -68,7 +69,6 @@ class OpcrController extends Controller
 
         # Loop through OPCRTemplate details
         foreach($opcrTemplate->detailParents as $detail) {
-            $offices = $this->splitPIOffices($detail->offices);
 
             $subs = [];
 
@@ -220,6 +220,24 @@ class OpcrController extends Controller
                 }
             }
         }
+    }
+
+    public function deactivateTemplate(Request $request)
+    {
+        $id = $request->id;
+
+        $now = Carbon::now();
+
+        $opcrTemplate = OpcrTemplate::find($id);
+
+        $opcrTemplate->is_active = 0;
+        $opcrTemplate->updated_at = $now;
+        $opcrTemplate->modify_id = $this->login_user->pmaps_id;
+        $opcrTemplate->history = $opcrTemplate->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+
+        $opcrTemplate->save();
+
+        return response()->json("Successfully deactivated", 200);
     }
 
 }

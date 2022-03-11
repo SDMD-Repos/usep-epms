@@ -9,7 +9,7 @@ export function checkSavedForm(year) {
     .catch(err => console.log(err))
 }
 
-export function fetchOpcrTemplate() {
+export function fetchOpcrTemplates() {
   return apiClient
     .get('/forms/opcr/template-list')
     .then(response => {
@@ -38,9 +38,17 @@ export function fetchFormDetails(id) {
 
 export function update(id, data) {
   return apiClient
-    .post('/forms/aapcr/update-template/' + id, data)
+    .post('/forms/opcr/update-template/' + id, data)
     .then(response => {
       return response.data
     })
     .catch(err => console.log(err))
+}
+
+export function deactivate(data) {
+  return apiClient
+    .post('/forms/opcr/deactivate-template', data)
+    .then(response => {
+      return response.data
+    })
 }

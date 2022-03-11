@@ -151,6 +151,7 @@ Route::group([
 
         //POST
         Route::post('/save-template', 'Form\OpcrController@saveTemplate');
+        Route::post('/deactivate-template', 'Form\OpcrController@deactivateTemplate');
     });
 
 });
