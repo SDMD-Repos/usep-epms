@@ -52,3 +52,13 @@ export function deactivate(data) {
       return response.data
     })
 }
+
+export function publish(data) {
+  return apiClient
+    .post('/forms/opcr/publish-template', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
