@@ -166,6 +166,12 @@ export const getMenuData = [
     icon: 'fe fe-lock',
     url: '/system/admin/permisson',
   },
+  {
+    title: 'Requests',
+    key: 'requestManager',
+    icon: 'fe fe-archive',
+    url: '/system/admin/requests',
+  },
 
   // VB:REPLACE-END:MENU-CONFIG
 ]

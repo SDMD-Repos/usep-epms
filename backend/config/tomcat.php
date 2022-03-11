@@ -17,5 +17,5 @@ return [
     'tomcat_tmp' => env('TOMCAT_TMP'),
     'tomcat_cache' => env('TOMCAT_CACHE'),
     'tomcat_java' => env('TOMCAT_JAVA'),
-    'file_backend_storage' => env('FILE_BACKEND_STORAGE'),
+    'file_backend_storage' => public_path() . env('FILE_BACKEND_STORAGE'),
 ];

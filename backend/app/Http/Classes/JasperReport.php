@@ -29,7 +29,7 @@ class Jasperreport
     }
 
 
-    public function showReport($template_name, $parameters, $tableData = array(), $repFormat = 'pdf', $fileName = '')
+    public function showReport($template_name, $parameters, $tableData = array(), $repFormat = 'pdf', $fileName = '', $path='')
     {
 
         $x = $this->checkJavaExtension();
@@ -95,7 +95,12 @@ class Jasperreport
 
         if (strtoupper($repFormat) == 'PDF') {
             $fileName = preg_replace('/\s+/', '_', $fileName);
-            $outputPath  = config('tomcat.file_backend_storage') . $fileName . ".pdf";
+
+            if(!$path) {
+                $outputPath  = config('tomcat.file_backend_storage') . $fileName . ".pdf";
+            } else {
+                $outputPath = $path . "/" . $fileName . ".pdf";
+            }
 
             /*header("Content-Type: application/pdf; charset=utf-8");
             header("Content-Disposition: filename=".$fileName);*/
