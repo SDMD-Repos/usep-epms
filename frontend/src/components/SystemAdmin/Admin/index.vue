@@ -1,19 +1,27 @@
 <template>
     <div>
       <a-spin :spinning="formLoading">
-        <a-tree-select
+        <a-row type="flex">
+          <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Office/College:</b></a-col>
+          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
+            <a-tree-select
               v-model:value="officeId"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="offices"
-              placeholder="Select Office"
+              placeholder="Select Office/College"
               tree-node-filter-prop="title"
               show-search
               allow-clear
               label-in-value
-              @change="getPersonnelList($event, index)"
+              @change="getPersonnelList"
             />
-        <a-tree-select
+          </a-col>
+        </a-row>
+        <a-row type="flex" class="mt-3">
+          <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Personnel: </b></a-col>
+          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
+            <a-tree-select
               v-model:value="personnelId"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -23,21 +31,30 @@
               show-search
               allow-clear
               label-in-value
-              @change="getAccessList($event, index)"
+              @change="getAccessList"
             />
-        <a-table  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data" :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" />
+          </a-col>
+        </a-row>
+
+        <div class="mt-4">
+          <a-table  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
+                    :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" />
+        </div>
+
+        <div class="mt-4"></div>
+
+        <a-row type="flex" justify="center" align="middle">
+          <a-button v-if="updateBtn" type="primary" @click="onSave" >Save</a-button>
+          <a-button v-else type="primary" @click="onUpdate" >Update</a-button>
+        </a-row>
       </a-spin>
-    <a-button v-if="updateBtn" type="primary" @click="onSave" >Save</a-button>
-    <a-button v-else type="primary" @click="onUpdate" >Update</a-button>
     </div>
-    
 </template>
 <script>
-import { computed, defineComponent, onMounted, ref  } from 'vue';
+import { defineComponent, onMounted, ref, computed  } from 'vue';
 import { useStore } from 'vuex'
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
-import { stubFalse } from 'lodash';
 
 const columns = [
   {
@@ -45,15 +62,13 @@ const columns = [
     dataIndex: 'permission_name',
     key: 'permission_name',
   },
-  
 ];
- 
+
 export default defineComponent({
   name:"AccessRightsTable",
   setup() {
     const store = useStore()
-    const list = computed(() => store.getters['system/permission'].list)
-    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+
     const officeId = ref(undefined)
     const personnelId = ref(undefined)
     const memberList = ref([])
@@ -62,10 +77,28 @@ export default defineComponent({
     const updateBtn = ref(true)
 
     let formLoading = ref(false)
+
+    const list = computed(() => store.getters['system/permission'].list)
+    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+
+    onMounted(() => {
+      let params = {
+        selectable: {
+          allColleges: false,
+          mains: true,
+        },
+        isAcronym: false,
+      }
+      params = encodeURIComponent(JSON.stringify(params))
+      store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
+      store.dispatch('system/FETCH_PERMISSION')
+    })
+
     const onSelectChange = selected => {
       selectedRowKeys.value = selected;
     };
-    const getPersonnelList = (officeId, index) => {
+
+    const getPersonnelList = officeId => {
       memberList.value = []
       if (officeId) {
         formLoading.value = true
@@ -80,17 +113,15 @@ export default defineComponent({
       }
     }
 
-     const getAccessList = (personnelId, index) => {
-       accessList.value = []
+    const getAccessList = personnelId => {
+      accessList.value = []
       if (personnelId) {
         formLoading.value = true
         const id = personnelId.value
         getAccessByUser(id).then(response => {
           if (response.status) {
             response.accessLists.forEach((accessList) =>{
-            selectedRowKeys.value.push(accessList.access_right_id);
-
-           
+              selectedRowKeys.value.push(accessList.access_right_id);
             })
             updateBtn.value = false ;
           }else{
@@ -102,49 +133,37 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => {
-       let params = {
-        selectable: {
-          allColleges: false,
-          mains: true,
-        },
-        isAcronym: false,
-      }
-      params = encodeURIComponent(JSON.stringify(params))
-      store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
-      store.dispatch('system/FETCH_PERMISSION')
-    })
-
     const onSave = () => {
-         let params = {
-                  personnelId: personnelId.value.value,
-                  listPermissions : selectedRowKeys.value,
-         }
-        store.dispatch('system/SAVE_PERMISSION',{ payload: params })
+       let params = {
+         personnelId: personnelId.value.value,
+         listPermissions : selectedRowKeys.value,
+       }
+      store.dispatch('system/SAVE_PERMISSION',{ payload: params })
     }
     const onUpdate = () => {
-         let params = {
-                  personnelId: personnelId.value.value,
-                  listPermissions : selectedRowKeys.value,
-         }
-        store.dispatch('system/UPDATE_PERMISSION',{ payload: params })
+      let params = {
+        personnelId: personnelId.value.value,
+        listPermissions : selectedRowKeys.value,
+      }
+      store.dispatch('system/UPDATE_PERMISSION',{ payload: params })
     }
 
     return {
       data: list,
       columns,
       offices,
-      getPersonnelList,
       officeId,
       personnelId,
       memberList,
       selectedRowKeys,
-      onSelectChange,
       formLoading,
-      onSave,
-      getAccessList,
       accessList,
       updateBtn,
+
+      getPersonnelList,
+      onSelectChange,
+      onSave,
+      getAccessList,
       onUpdate,
     };
   },

@@ -22,6 +22,16 @@ class AccessRightsSeeder extends Seeder
                 'permission_name' => 'Manager',
                 'create_id' => 'admin',
             ],
+            [
+                'permission_id' => 'adminPermission',
+                'permission_name' => 'Access Permission',
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'adminRequests',
+                'permission_name' => 'Requests',
+                'create_id' => 'admin',
+            ],
         ]);
 
         DB::table('access_rights')->insert([
@@ -49,6 +59,22 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
                 'create_id' => 'admin',
             ],
+        ]);
+
+        // Requests
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'r-main-forms',
+                'permission_name' => 'Main Forms',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'r-ipcr',
+                'permission_name' => 'IPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
+                'create_id' => 'admin',
+            ]
         ]);
 
         DB::table('access_rights')->insert([

@@ -146,10 +146,12 @@ Route::group([
     'prefix' => 'system',
     'middleware' => 'auth:api'
 ], function() {
-    Route::get('/permission', 'Permission\PermissionController@detailsPermission');
-    Route::post('/save-permission', 'Permission\PermissionController@savePermission');
-    Route::get('/get-permission-by-user/{id}', 'Permission\PermissionController@fetchPermissionByUser');
-    Route::post('/update-permission', 'Permission\PermissionController@updatePermission');
+
+    # Access Permission
+    Route::get('/permission', 'SystemAdmin\PermissionController@detailsPermission');
+    Route::post('/save-permission', 'SystemAdmin\PermissionController@savePermission');
+    Route::get('/get-permission-by-user/{id}', 'SystemAdmin\PermissionController@fetchPermissionByUser');
+    Route::post('/update-permission', 'SystemAdmin\PermissionController@updatePermission');
 
 });
 
