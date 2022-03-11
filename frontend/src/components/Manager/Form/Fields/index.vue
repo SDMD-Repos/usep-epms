@@ -9,7 +9,7 @@
     </a-select>
 
     <div class="mt-5">
-      <form-table :year="year" :isCreate="isCreate" :all-access="allAccess" @handle-save="handleSave"/>
+      <form-table :year="year" :is-create="isCreate" :all-access="allAccess" @handle-save="handleSave"/>
     </div>
   </div>
 </template>

@@ -90,6 +90,7 @@ export default defineComponent({
     },
     isCreate: Boolean,
     isDelete: Boolean,
+    isEdit: Boolean,
     allAccess: Boolean,
   },
   emits: ['close-modal', 'change-action', 'submit-form'],

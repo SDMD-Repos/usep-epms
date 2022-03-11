@@ -14,18 +14,19 @@
 
       <template #operation="{ record }">
         <a @click="openModal('view', record)">View</a>
-        <a-divider type="vertical" />
-        <a-popconfirm
-          title="Are you sure you want to delete this?"
-          @confirm="onDelete(record.key)"
-          ok-text="Yes"
-          cancel-text="No"
-          v-if="isDelete || allAccess"
-        >
-          <template #icon><warning-outlined /></template>
-          <a type="primary" >Delete</a>
-        </a-popconfirm>
-        <span v-else></span>
+        <div v-if="isDelete || allAccess">
+          <a-divider type="vertical" />
+          <a-popconfirm
+            title="Are you sure you want to delete this?"
+            @confirm="onDelete(record.key)"
+            ok-text="Yes"
+            cancel-text="No"
+
+          >
+            <template #icon><warning-outlined /></template>
+            <a type="primary" >Delete</a>
+          </a-popconfirm>
+        </div>
       </template>
     </a-table>
     <form-modal ref="groupModal" :visible="isOpenModal"
