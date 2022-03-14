@@ -12,11 +12,11 @@ export const usePermissionGroups = () => {
     });
 
     const gpPermission = accessLists.value.filter((value)=>{
-      return  ( value.permission_id == "m-group" );
+      return value.permission_id == "m-group";
     });
 
     const groupCreatePermission = accessLists.value.filter((value)=>{
-      return  value.permission_id == "mg-create";
+      return value.permission_id == "mg-create";
     });
 
     const groupDeletePermission = accessLists.value.filter((value)=>{
@@ -27,7 +27,6 @@ export const usePermissionGroups = () => {
         return value.permission_id == "mg-edit";
       });
   
-
     const notInclude = accessLists.value.filter((value)=>{
       return (value.permission_id == "m-form" || 
               value.permission_id == "mff-create" || 
@@ -60,13 +59,12 @@ export const usePermissionGroups = () => {
     
     if(groupPermission.length > 0 || notInclude.length > 0){
       allAccess.value = true;
-
+       
       if(groupPermission.length > 0 ){
         allAccess.value = true;
         isCreate.value = true;
         isDelete.value = true;
         isEdit.value = true;
-      
       }
 
       if(notInclude.length > 0){
@@ -74,18 +72,16 @@ export const usePermissionGroups = () => {
         isCreate.value = false;
         isDelete.value = false;
         isEdit.value = false;
-      
+       
         if(gpPermission.length > 0){
           allAccess.value = true;
         }
       }
-    
     }
    
-  
     if(groupCreatePermission.length > 0 ||  groupDeletePermission.length > 0 || groupEditPermission.length > 0){
         allAccess.value = false;
-        
+       
         if(groupCreatePermission.length > 0){
             isCreate.value = true;
         }else{

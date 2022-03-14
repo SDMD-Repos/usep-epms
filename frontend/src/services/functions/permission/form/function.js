@@ -10,6 +10,10 @@ export const usePermissionFunction = () => {
       return  (value.permission_id == "manager" || 
               value.permission_id == "m-form" || 
               value.permission_id == "mf-functions");
+    })
+
+    const funcPermission = accessLists.value.filter((value)=>{
+      return value.permission_id == "mf-functions";
     });
 
     const formCreatePermission = accessLists.value.filter((value)=>{
@@ -59,33 +63,30 @@ export const usePermissionFunction = () => {
               value.permission_id == "msi-delete" 
             );
     })
-
-    const funcPermission = accessLists.value.filter((value)=>{
-      return  value.permission_id == "m-form" || 
-              value.permission_id == "mf-functions";
-    });
     
-    const isCreate = ref(true)
-    const isDelete = ref(true)
-    const allAccess = ref(true)
+    const isCreate = ref(false)
+    const isDelete = ref(false)
+    const allAccess = ref(false)
     
-    if(formPermission.length > 0 || notInclude.length > 0){
-      allAccess.value = true
-      if(notInclude.length > 0 && funcPermission.length > 0 ){
+    if(formPermission.length > 0 || funcPermission.length > 0){
         allAccess.value = true;
-        isCreate.value = false;
-        isDelete.value = false;
-       
-      }
-
-      if(notInclude.length > 0 && formPermission.length > 0 ){
-        allAccess.value = false;
-        isCreate.value = false;
-        isDelete.value = false;  
-        if(funcPermission.length > 0){
-          allAccess.value = true; 
+        isCreate.value = true;
+        isDelete.value = true;
+        if((formPermission.length > 0 && funcPermission.length > 0) && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
         }
-      }
+        if(formPermission.length > 0 && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
+        }
+        if(funcPermission.length > 0 ){
+          allAccess.value = true;
+          isCreate.value = true;
+          isDelete.value = true;
+        }
     }
    
     if(formDeletePermission.length > 0){
@@ -107,8 +108,7 @@ export const usePermissionFunction = () => {
     
     }
 
-    // alert(isCreate)
-    // alert(allAccess)
+    
   return {
     isDelete,
     isCreate,

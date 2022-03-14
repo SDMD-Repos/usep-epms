@@ -12,6 +12,10 @@ export const usePermissionCategory = () => {
               value.permission_id == "mf-subcat");
     });
 
+    const catPermission = accessLists.value.filter((value)=>{
+      return value.permission_id == "mf-subcat";
+    });
+
     const categoryCreatePermission = accessLists.value.filter((value)=>{
       return  value.permission_id == "mfs-create";
     });
@@ -61,31 +65,31 @@ export const usePermissionCategory = () => {
             );
     })
 
-    const catPermission = accessLists.value.filter((value)=>{
-      return  value.permission_id == "m-form" || 
-              value.permission_id == "mf-subcat";
-    });
+  
     
-    const isCreate = ref(true)
-    const isDelete = ref(true)
-    const allAccess = ref(true)
+    const isCreate = ref(false)
+    const isDelete = ref(false)
+    const allAccess = ref(false)
     
-    if(categoryPermission.length > 0 || notInclude.length > 0){
-      allAccess.value = true
-      if(notInclude.length > 0 && catPermission.length > 0 ){
+    if(categoryPermission.length > 0 || catPermission.length > 0){
         allAccess.value = true;
-        isCreate.value = false;
-        isDelete.value = false;
-      }
-
-      if(notInclude.length > 0 && categoryPermission.length > 0 ){
-        allAccess.value = false;
-        isCreate.value = false;
-        isDelete.value = false;  
-        if(catPermission.length > 0){
-          allAccess.value = true; 
+        isCreate.value = true;
+        isDelete.value = true;
+        if((categoryPermission.length > 0 && catPermission.length > 0) && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
         }
-      }
+        if(categoryPermission.length > 0 && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
+        }
+        if(catPermission.length > 0 ){
+          allAccess.value = true;
+          isCreate.value = true;
+          isDelete.value = true;
+        }
     }
    
     if(categoryDeletePermission.length > 0){
