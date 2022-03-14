@@ -1,6 +1,6 @@
 <template>
     <div>
-      <a-spin :spinning="formLoading">
+      <a-spin :spinning="loading">
         <a-row type="flex">
           <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Office/College:</b></a-col>
           <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
@@ -36,13 +36,12 @@
           </a-col>
         </a-row>
 
-        <div class="mt-4">
-          <a-table  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
-                    :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" />
+        <div class="mt-4" v-if="data.length">
+          <a-table  class="ant-table-striped" :row-class-name="(record, index) => (index % 2 === 1 ? 'table-striped' : null)" :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
+                    :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false" />
         </div>
 
         <div class="mt-4"></div>
-
         <a-row type="flex" justify="center" align="middle">
           <a-button v-if="updateBtn" type="primary" @click="onSave" >Save</a-button>
           <a-button v-else type="primary" @click="onUpdate" >Update</a-button>
@@ -58,7 +57,7 @@ import { getAccessByUser } from '@/services/api/system/permission';
 
 const columns = [
   {
-    title: 'name',
+    title: 'Access Permission',
     dataIndex: 'permission_name',
     key: 'permission_name',
   },
@@ -79,6 +78,7 @@ export default defineComponent({
     let formLoading = ref(false)
 
     const list = computed(() => store.getters['system/permission'].list)
+    const loading = computed(() => store.getters['system/permission'].loading)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
 
     onMounted(() => {
@@ -159,7 +159,7 @@ export default defineComponent({
       formLoading,
       accessList,
       updateBtn,
-
+      loading,
       getPersonnelList,
       onSelectChange,
       onSave,
@@ -169,3 +169,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.ant-table-striped :deep(.table-striped) td {
+  background-color: #fafafa;
+}
+</style>
