@@ -58,8 +58,8 @@ export const usePermissionFields = () => {
               value.permission_id == "mf-fields";
     });
     
-    const isCreate = ref(true)
-    const allAccess = ref(true)
+    const isCreate = ref(false)
+    const allAccess = ref(false)
     
     if(formPermission.length > 0 || notInclude.length > 0){
       allAccess.value = true

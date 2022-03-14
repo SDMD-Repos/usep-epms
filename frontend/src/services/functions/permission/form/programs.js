@@ -6,10 +6,14 @@ export const usePermissionProgram = () => {
 
   const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()
-    const programPermission = accessLists.value.filter((value)=>{
+    const programPermission = accessLists.value.filter((value)=>{ // parent
       return  (value.permission_id == "manager" || 
               value.permission_id == "m-form" || 
               value.permission_id == "mf-programs");
+    });
+
+    const progPermission = accessLists.value.filter((value)=>{ //sub-parent
+      return value.permission_id == "mf-programs";
     });
 
     const programCreatePermission = accessLists.value.filter((value)=>{
@@ -20,7 +24,7 @@ export const usePermissionProgram = () => {
       return value.permission_id == "mfp-delete";
     });
 
-    const notInclude = accessLists.value.filter((value)=>{
+    const notInclude = accessLists.value.filter((value)=>{ // not include
       return (value.permission_id == "m-group" || 
               value.permission_id == "mg-create" || 
               value.permission_id == "mg-delete" || 
@@ -60,41 +64,35 @@ export const usePermissionProgram = () => {
             );
     })
 
-    console.log(notInclude)
-
-    const progPermission = accessLists.value.filter((value)=>{
-      return  value.permission_id == "m-form" || 
-              value.permission_id == "mf-programs";
-    });
-    
-    const isCreate = ref(true)
-    const isDelete = ref(true)
-    const allAccess = ref(true)
-    
-    if(programPermission.length > 0 || notInclude.length > 0){
-      allAccess.value = true
-      if(notInclude.length > 0 && progPermission.length > 0 ){
+    const isCreate = ref(false)
+    const isDelete = ref(false)
+    const allAccess = ref(false)
+   
+    if(programPermission.length > 0 || progPermission.length > 0){
         allAccess.value = true;
-        isCreate.value = false;
-        isDelete.value = false;
-       
-      }
-
-      if(notInclude.length > 0 && programPermission.length > 0 ){
-        allAccess.value = false;
-        isCreate.value = false;
-        isDelete.value = false;  
-        if(progPermission.length > 0){
-          allAccess.value = true; 
+        isCreate.value = true;
+        isDelete.value = true;
+        if((programPermission.length > 0 && progPermission.length > 0) && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
         }
-      }
+        if(programPermission.length > 0 && notInclude.length > 0){
+          allAccess.value = false;
+          isCreate.value = false;
+          isDelete.value = false;
+        }
+        if(progPermission.length > 0 ){
+          allAccess.value = true;
+          isCreate.value = true;
+          isDelete.value = true;
+        }
     }
    
     if(programDeletePermission.length > 0){
       isCreate.value = false;
       isDelete.value = true;
       allAccess.value = false; 
-     
     }
 
     if(programCreatePermission.length > 0){
@@ -106,11 +104,8 @@ export const usePermissionProgram = () => {
     if(programCreatePermission.length > 0 && programDeletePermission.length > 0){
       isCreate.value = true;
       isDelete.value = true; 
-    
     }
 
-    // alert(isCreate)
-    // alert(allAccess)
   return {
     isDelete,
     isCreate,
