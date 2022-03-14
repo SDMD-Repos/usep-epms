@@ -57,7 +57,7 @@
         </ul>
       </template>
 
-      <template #budget="{ record }">
+      <template #budget="{ record }" v-if="formId !== `opcrtemplate`">
         {{ $filters.numbersWithCommasDecimal(record.budget) }}
       </template>
 
@@ -67,7 +67,7 @@
         </div>
       </template>
 
-      <template #implementing="{ record }">
+      <template #implementing="{ record }" v-if="formId !== `opcrtemplate`">
         <ul class="form-ul-list">
           <li v-for="office in record.implementing" :key="office.key">
             {{ office.label }}
@@ -75,7 +75,7 @@
         </ul>
       </template>
 
-      <template #supporting="{ record }">
+      <template #supporting="{ record }" v-if="formId !== `opcrtemplate`">
         <ul class="form-ul-list">
           <li v-for="office in record.supporting" :key="office.key">
             {{ office.label }}
@@ -131,6 +131,7 @@ export default defineComponent({
     //COMPUTED
     switch (props.formId) {
       case 'aapcr':
+      case 'opcrtemplate':
         filteredSource = computed(()=> {
           return props.itemSource.filter(i => i.program === props.mainCategory.key)
         })
@@ -143,11 +144,6 @@ export default defineComponent({
           })
           return source
         })
-        break;
-	case 'opcrtemplate':
-             filteredSource = computed(()=> {
-               return props.itemSource.filter(i => i.category === props.functionId)
-             })
         break;
     }
 

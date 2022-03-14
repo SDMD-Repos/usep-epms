@@ -1,20 +1,25 @@
 <template>
   <div>
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
-      <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
-        <template v-for="(y, i) in years" :key="i">
-          <a-select-option :value="y"> {{ y }} </a-select-option>
-        </template>
-      </a-select>
+      <a-row type="flex">
+        <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
+        <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
+            <template v-for="(y, i) in years" :key="i">
+              <a-select-option :value="y"> {{ y }} </a-select-option>
+            </template>
+          </a-select>
+        </a-col>
+      </a-row>
 
       <div class="mt-4">
         <a-collapse v-model:activeKey="activeKey" accordion>
           <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
-            <indicator-component
-              :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
-              :categories="categories" :year="year" :counter="counter"
-              @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
-              @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
+            <indicator-component v-if="allowEdit"
+                                 :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
+                                 :categories="categories" :year="year" :counter="counter"
+                                 @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
+                                 @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
           </a-collapse-panel>
         </a-collapse>
       </div>
@@ -38,16 +43,16 @@ import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import IndicatorComponent from './partials/items'
 import { useFormOperations } from '@/services/functions/indicator'
 import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/opcr/template'
+import IndicatorComponent from './partials/items'
 
 export default defineComponent({
-  name: "OPCRTemplateForm",
+  name: "OpcrTemplateForm",
   components: { IndicatorComponent },
   props: {
     formId: { type: String, default: '' },
-    aapcrId: { type: Number, default: 0 },
+    opcrTemplateId: { type: Number, default: 0 },
   },
   setup(props) {
     const PAGE_TITLE = "OPCR Template Form"
@@ -57,37 +62,22 @@ export default defineComponent({
     const route = useRoute()
 
     // DATA
-    const year = ref(new Date().getFullYear())
-    const cachedYear = ref(null)
     const activeKey = ref('0')
-    const editMode = ref(false)
-    const isFinalized = ref(false)
-    const allowEdit = ref(false)
-    const aapcrId = ref(null)
+    const opcrTemplateId = ref(null)
 
     const isCheckingForm = ref(false)
 
     const {
       // DATA
-      dataSource, targetsBasisList, counter, deletedItems,
+      dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
     } = useFormOperations(props)
 
     // COMPUTED
-    const years = computed(() => {
-      const now = new Date().getFullYear()
-      const min = 10
-      const lists = []
-      for (let i = now; i >= (now - min); i--) {
-        lists.push(i)
-      }
-      return lists
-    })
-
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
-      return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
+      return store.getters['formManager/manager'].loading || store.getters['opcrtemplate/form'].loading
     })
 
     const spinningTip = computed(() => {
@@ -103,8 +93,12 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
-      if(aapcrId.value) {
+      store.commit('opcrtemplate/SET_STATE', { dataSource: [] })
+      resetFormFields()
+
+      opcrTemplateId.value = typeof route.params.opcrTemplateId !== 'undefined' ? route.params.opcrTemplateId : null
+
+      if(opcrTemplateId.value) {
         getFormDetails()
       } else {
         checkFormAvailability()
@@ -113,6 +107,8 @@ export default defineComponent({
 
     // METHODS
     const checkFormAvailability = () => {
+      resetFormFields()
+
       if(year.value !== cachedYear.value) {
         isCheckingForm.value = true
         checkSavedForm(year.value).then(response => {
@@ -141,30 +137,45 @@ export default defineComponent({
     }
 
     const initializeFormFields = async () => {
-      await store.dispatch('formManager/FETCH_FUNCTIONS')
-      await store.dispatch('formManager/FETCH_SUB_CATEGORIES')
-      await store.dispatch('formManager/FETCH_MEASURES')
+
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
-      await store.dispatch('formManager/FETCH_PROGRAMS')
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+    }
+
+    const resetFormFields = () => {
+      store.commit('formManager/SET_STATE', {
+        functions: [],
+        subCategories: [],
+        measures: [],
+        cascadingLevels: [],
+        programs: [],
+        formFields: [],
+      })
     }
 
     const getFormDetails = () => {
-      store.commit('opcr/template/SET_STATE', {
+      store.commit('opcrtemplate/SET_STATE', {
         loading: true,
       })
-      fetchFormDetails(aapcrId.value).then(response => {
+      fetchFormDetails(opcrTemplateId.value).then(response => {
         if(response) {
           allowEdit.value = true
-          initializeFormFields()
+          store.commit('opcrtemplate/SET_STATE', {
+            dataSource: response.dataSource,
+          })
 
           year.value = response.year
           cachedYear.value = response.year
-          dataSource.value = response.dataSource
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = true
+          initializeFormFields()
         }
-        store.commit('opcr/template/SET_STATE', {
+        store.commit('opcrtemplate/SET_STATE', {
           loading: false,
         })
       })
@@ -208,15 +219,15 @@ export default defineComponent({
       }
       if (!editMode.value) {
         details.isFinalized = isFinal
-        store.dispatch('opcr/template/SAVE', { payload: details })
+        store.dispatch('opcrtemplate/SAVE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })
       }else {
         details.isFinalized = isFinal || isFinalized.value
         details.deletedIds = deletedItems.value
-        details.aapcrId = aapcrId.value
-        store.dispatch('opcr/template/UPDATE', { payload: details })
+        details.opcrTemplateId = opcrTemplateId.value
+        store.dispatch('opcrtemplate/UPDATE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })

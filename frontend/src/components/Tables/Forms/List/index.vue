@@ -33,7 +33,7 @@
         </a-tooltip>
         <a-divider type="vertical" />
       </template>
-      <a-tooltip>
+      <a-tooltip v-if="form !== 'opcrtemplate'">
         <template #title><span>View PDF</span></template>
         <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
       </a-tooltip>
@@ -51,7 +51,7 @@
           <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record.id)" />
         </a-tooltip>
       </template>
-      <template v-if="record.files.length">
+      <template v-if="record.files && record.files.length">
         <a-divider type="vertical" />
         <a-tooltip>
           <template #title><span>View Archived</span></template>

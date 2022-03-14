@@ -19,4 +19,22 @@ class OpcrTemplate extends Model
     {
         return $this->hasMany('App\OpcrTemplateDetails');
     }
+
+    /**
+     * Get the details for the opcr template with null parent_pi_id.
+     */
+
+    public function detailParents()
+    {
+        return $this->details()->whereNull('parent_id');
+    }
+
+    public function detailsOrdered()
+    {
+        return $this->details()
+            ->orderBy('category_id', 'ASC')
+            ->orderBy('program_id', 'ASC')
+            ->orderBy('sub_category_id', 'ASC');
+    }
+
 }

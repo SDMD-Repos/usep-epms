@@ -121,6 +121,70 @@ export const formTableColumns = [
   },
 ]
 
+export const formTemplateTableColumns = [
+  {
+    title: 'Sub Category',
+    key: 'subCategory',
+    dataIndex: 'subCategory',
+    className: 'column-sub-category',
+    width: 280,
+    slots: { customRender: 'subCategory' },
+  },
+  {
+    title: 'Performance Indicator',
+    key: 'name',
+    dataIndex: 'name',
+    className: 'column-pi-name',
+    width: 450,
+  },
+  {
+    title: 'is Header PI?',
+    key: 'isHeader',
+    dataIndex: 'isHeader',
+    className: 'column-is-header',
+    width: 100,
+    slots: { customRender: 'isHeader' },
+  },
+  {
+    title: 'Success Indicators',
+    className: 'column-success-indicator',
+    width: 400,
+    children: [
+      {
+        title: 'Target (per Fiscal Year)',
+        className: 'column-target',
+        children: [
+          {
+            key: 'target',
+            dataIndex: 'target',
+            className: 'column-target-year',
+            width: 225,
+            slots: {
+              title: 'targetYearColumn',
+            },
+          },
+        ],
+      },
+      {
+        title: 'Measures',
+        key: 'measures',
+        dataIndex: 'measures',
+        className: 'column-measures',
+        width: 145,
+        slots: { customRender: 'measures' },
+      },
+    ],
+  },
+  {
+    title: 'Actions',
+    key: 'operation',
+    fixed: 'right',
+    className: 'column-action',
+    width: 100,
+    slots: { customRender: 'action' },
+  },
+]
+
 export const listTableColumns = [
   {
     title: 'Year',

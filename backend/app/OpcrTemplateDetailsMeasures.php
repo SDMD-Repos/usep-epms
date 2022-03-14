@@ -9,4 +9,14 @@ class OpcrTemplateDetailsMeasures extends Model
 {
     //
     use SoftDeletes;
+
+    /**
+     * Get the measure of the detail.
+     */
+
+    public function measure()
+    {
+        return $this->belongsTo('App\Measure');
+    }
+
 }

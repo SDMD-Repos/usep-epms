@@ -102,14 +102,24 @@ const defaultOpcrVpFormData = {
   remarks: '',
 }
 
+const defaultOpcrTemplateData = {
+  subCategory: null,
+  name: '',
+  isHeader: false,
+  target: '',
+  measures: [],
+}
+
 export const useDefaultFormData = props => {
   const defaultData = ref({})
   let rules
 
   switch (props.formId) {
     case 'aapcr':
-    case 'opcrtemplate':
       defaultData.value = defaultAapcrFormData
+      break
+    case 'opcrtemplate':
+      defaultData.value = defaultOpcrTemplateData
       break;
     case 'opcrvp':
       defaultData.value = defaultOpcrVpFormData
@@ -183,58 +193,63 @@ export const useDefaultFormData = props => {
       })
       break;
      case 'opcrtemplate':
-      rules = reactive({
-        subCategory: [
-          { validator: subCategoryValidator, trigger: 'blur' },
-          { type: 'object' },
-        ],
-        name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
-        target: [{ validator: validateNonHeader, trigger: 'blur'}],
-        measures: [{ validator: validateNonHeader, trigger: 'blur'}],
-      })
+       rules = reactive({
+         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
+         target: [{ validator: validateNonHeader, trigger: 'blur'}],
+         measures: [{ validator: validateNonHeader, trigger: 'blur'}],
+       })
       break;
 
   }
 
   const resetFormAsHeader = () => {
-    switch (props.formId) {
-      case 'aapcr':
-      case 'opcrtemplate':
-        formData.cascadingLevel = null
-    }
-
     formData.target = ''
     formData.measures = []
-    formData.budget = null
-    formData.targetsBasis = ''
-    formData.implementing = []
-    formData.supporting = []
-    formData.options.implementing = []
-    formData.options.supporting = []
-    formData.remarks = ''
+    switch (props.formId) {
+      case 'aapcr':
+        formData.budget = null
+        formData.targetsBasis = ''
+        formData.implementing = []
+        formData.supporting = []
+        formData.options.implementing = []
+        formData.options.supporting = []
+        formData.remarks = ''
+        break
+      case 'opcrtemplate':
+    }
+
+
+
   }
 
   const assignFormData = newData => {
-    switch (props.formId) {
-      case 'aapcr':
-      case 'opcrtemplate':
-        formData.cascadingLevel = newData.cascadingLevel
-        break;
-      case 'opcrvp':
-        formData.program = newData.program
-        break;
-    }
 
     formData.subCategory = newData.subCategory
     formData.name = newData.name
     formData.isHeader = newData.isHeader
     formData.target = newData.target
     formData.measures = newData.measures
-    formData.budget = newData.budget
-    formData.targetsBasis = newData.targetsBasis
-    formData.implementing = newData.implementing
-    formData.supporting = newData.supporting
-    formData.remarks = newData.remarks
+
+    switch (props.formId) {
+      case 'aapcr':
+        formData.budget = newData.budget
+        formData.targetsBasis = newData.targetsBasis
+        formData.implementing = newData.implementing
+        formData.supporting = newData.supporting
+        formData.remarks = newData.remarks
+        break
+      case 'opcrtemplate':
+        break
+      case 'opcrvp':
+        formData.budget = newData.budget
+        formData.targetsBasis = newData.targetsBasis
+        formData.implementing = newData.implementing
+        formData.supporting = newData.supporting
+        formData.remarks = newData.remarks
+        formData.program = newData.program
+        break
+    }
+
   }
 
   return {

@@ -97,14 +97,14 @@ export const getMenuData = [
         key: 'opcrTemplate',
         children: [
           {
-            title: 'Form 1',
-            key: 'opcrTemplateForm_1',
+            title: 'Form',
+            key: 'opcrTemplateForm',
             url: '/form/opcrtemplate',
             level: 3,
           },
           {
-            title: 'List 1',
-            key: 'opcrTemplateList_1',
+            title: 'List',
+            key: 'opcrTemplateList',
             url: '/list/opcrtemplate',
             level: 3,
           },
