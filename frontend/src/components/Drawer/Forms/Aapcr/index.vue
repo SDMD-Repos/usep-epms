@@ -225,7 +225,7 @@ export default defineComponent({
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
-    drawerId: { type: String, default: "" },
+    drawerId: { type: Number, default: null },
     targetsBasisList: { type: Array, default: () => { return [] }},
     categories: { type: Array, default: () => { return [] }},
     currentYear: { type: Number, default: new Date().getFullYear() },
@@ -247,7 +247,7 @@ export default defineComponent({
     // COMPUTED
     const subCategories = computed(() => {
       const subs = store.getters['formManager/subCategories']
-      return subs.filter(i => { return i.category_id === parseInt(props.drawerId) && i.parent_id === null})
+      return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
     const measuresList  = computed(() => store.getters['formManager/manager'].measures)

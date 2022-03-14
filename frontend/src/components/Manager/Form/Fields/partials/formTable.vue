@@ -5,7 +5,7 @@
         <span v-if="record.id in editableData">
           <a-select v-model:value="editableData[record.id]['settings']" placeholder="Select"
                     label-in-value style="width: 400px">
-            <a-select-option v-for="data in functions" :value="data.id" :key="data.id" :label="data.name">
+            <a-select-option v-for="data in functions" :value="data.id.toString()" :key="data.id" :label="data.name">
               {{ data.name }}
             </a-select-option>
           </a-select>
@@ -24,7 +24,7 @@
         <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
       </span>
       <span v-else>
-        <a type="primary" @click="edit(record.id)" v-if="isCheck || allAccess">Edit</a>
+        <a type="primary" @click="edit(record.id)" v-if="isCreate || allAccess">Edit</a>
       </span>
     </template>
   </a-table>
@@ -47,7 +47,6 @@ export default defineComponent({
     isCreate: Boolean,
     allAccess: Boolean,
   },
-   
   emits: ['handle-save'],
   setup(props, { emit }) {
     const store = useStore()
@@ -62,7 +61,7 @@ export default defineComponent({
       return fields.map(v => {
         let name = "Not Set"
         if(v.settings) {
-          const filtered = functions.value.filter(i => v.settings.setting === i.id)
+          const filtered = functions.value.filter(i => parseInt(v.settings.setting) === i.id)
           name = filtered.length > 0 ? filtered[0]['name'] : ''
         }
         return {...v, settingLabel: name}
@@ -75,7 +74,7 @@ export default defineComponent({
     const edit = key => {
       const settings = cloneDeep(formFields.value.filter(item => key === item.id)[0]['settings'])
       if(settings) {
-        const details = functions.value.filter(item => item.id === settings.setting)[0]
+        const details = functions.value.filter(item => item.id === parseInt(settings.setting))[0]
         editableData[key] = {
           settings: {
             key: details.key,
@@ -94,8 +93,6 @@ export default defineComponent({
       data.settings = editableData[data.id]
       await emit('handle-save', data)
       await cancel(data.id)
-      /*Object.assign(formFields.value.filter(item => id === item.id)[0], editableData[id])
-      delete editableData[id]*/
     }
 
     const cancel = key => {

@@ -37,7 +37,7 @@ export default defineComponent({
   components: { IndicatorTable, AapcrFormDrawer },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
-    functionId: { type: String, default: "" },
+    functionId: { type: Number, default: null },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
     formId: { type: String, default: "" },
@@ -59,7 +59,7 @@ export default defineComponent({
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
 
-    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === parseInt(props.functionId)) })
+    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === props.functionId) })
 
     const {
       drawerConfig,
