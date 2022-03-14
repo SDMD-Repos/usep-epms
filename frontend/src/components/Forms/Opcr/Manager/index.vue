@@ -22,7 +22,7 @@
             <a-form-item ref="category_id" label="Functions" name="category_id">
               <a-select v-model:value="formState.category_id" >
                 <a-select-option v-for="func in functions"
-                                 :value="func.id"
+                                 :value="func.id.toString()"
                                  :key="func.id"
                                  :label="func.name">
                   {{ func.name }}

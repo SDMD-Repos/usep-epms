@@ -64,7 +64,7 @@ export default defineComponent({
     // DATA
     const activeKey = ref('0')
     const opcrTemplateId = ref(null)
-
+    const formId = 'opcr'
     const isCheckingForm = ref(false)
 
     const {
@@ -143,6 +143,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: formId }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
     }
 

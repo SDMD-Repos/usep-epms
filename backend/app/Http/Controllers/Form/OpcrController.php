@@ -427,5 +427,26 @@ class OpcrController extends Controller
         }
     }
 
+    public function unpublishTemplate(Request $request)
+    {
+        try {
+            $id = $request['id'];
+            $opcrTemplate = OpcrTemplate::find($id);
+
+            $opcrTemplate->published_date = null;
+            $opcrTemplate->history = $opcrTemplate->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $opcrTemplate->save();
+
+            return response()->json('OCPR Template was unpublished successfully', 200);
+        }catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
 
 }
