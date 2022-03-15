@@ -56,8 +56,13 @@ export default defineComponent({
 
     // COMPUTED
     const programs = computed(() => store.getters['formManager/manager'].programs)
-
-    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === parseInt(props.functionId)) })
+    const otherPrograms = computed(() => store.getters['formManager/manager'].otherPrograms)
+    const allPrograms = computed(() => {
+      const programData = programs.value && typeof programs.value != 'undefined' ? programs.value : []
+      const otherProgramData = otherPrograms.value && typeof otherPrograms.value != 'undefined' ? otherPrograms.value : []
+      return programData.concat(otherProgramData)
+    })
+    const programsByFunction = computed( () => { return allPrograms.value.filter(i => i.category_id === parseInt(props.functionId)) })
 
     const {
       drawerConfig,

@@ -62,3 +62,13 @@ export function publish(data) {
     .catch(err => console.log(err))
 }
 
+export function unpublish(data) {
+  return apiClient
+    .post('/forms/opcr/unpublish-template', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+

@@ -154,6 +154,8 @@ Route::group([
         Route::post('/publish-template', 'Form\OpcrController@publishTemplate');
         Route::post('/deactivate-template', 'Form\OpcrController@deactivateTemplate');
         Route::post('/update-template/{id}', 'Form\OpcrController@updateTemplate');
+        Route::post('/unpublish-template', 'Form\OpcrController@unpublishTemplate');
+
     });
 
 });

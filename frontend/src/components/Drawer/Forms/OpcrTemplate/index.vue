@@ -65,7 +65,7 @@
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
                     style="width: 100%" label-in-value allow-clear
                     @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
-            <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
+            <a-select-option v-for="measure in measuresList" :value="measure.id.toString()" :key="measure.id">
               {{ measure.name }}
             </a-select-option>
           </a-select>

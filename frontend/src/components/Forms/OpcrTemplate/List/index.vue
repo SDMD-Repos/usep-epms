@@ -2,7 +2,7 @@
   <div>
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @unpublish="unpublish"/>
+      @update-form="updateForm" @publish="publish" @unpublish="unpublish" @unpublish-template="unpublishTemplate"/>
 
   </div>
 </template>
@@ -60,6 +60,11 @@ export default defineComponent({
       store.dispatch('opcrtemplate/PUBLISH', { payload: payload })
     }
 
+    const unpublishTemplate = data => {
+      const id = data
+      store.dispatch('opcrtemplate/UNPUBLISH', { payload: {id: id} })
+    }
+
     return {
       moment,
 
@@ -70,6 +75,7 @@ export default defineComponent({
       loading,
 
       unpublish,
+      unpublishTemplate,
 
       updateForm,
       publish,

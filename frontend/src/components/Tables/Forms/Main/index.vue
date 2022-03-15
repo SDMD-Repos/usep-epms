@@ -30,7 +30,7 @@
         </a-row>
       </template>
 
-      <template #subCategory="{ record }" v-if="formId === `aapcr`">
+      <template #subCategory="{ record }" v-if="allowedColumns.subCategory">
         {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
       </template>
 
@@ -127,6 +127,13 @@ export default defineComponent({
     // DATA
     const categoryBudget = ref(null)
     let filteredSource
+    let allowedColumns = {}
+
+    const setAllowedColumns = (data) => {
+      data.forEach(function (value){
+        allowedColumns[value] = true
+      })
+    }
 
     //COMPUTED
     switch (props.formId) {
@@ -135,6 +142,7 @@ export default defineComponent({
         filteredSource = computed(()=> {
           return props.itemSource.filter(i => i.program === props.mainCategory.key)
         })
+        setAllowedColumns(['subCategory'])
         break;
       case 'opcrvp':
         filteredSource = computed(()=> {
@@ -170,7 +178,7 @@ export default defineComponent({
 
     const allowedAction = data => {
       let allow = false
-      if (props.formId === 'aapcr' || (props.formId === 'opcrvp' && !data.isCascaded)) {
+      if (props.formId === 'aapcr' || (props.formId === 'opcrvp' && !data.isCascaded) || props.formId === 'opcrtemplate') {
         allow = true
       }
       return allow
@@ -205,6 +213,7 @@ export default defineComponent({
       handleDelete,
       allowedAction,
       saveProgramBudget,
+      allowedColumns,
     }
   },
 })
