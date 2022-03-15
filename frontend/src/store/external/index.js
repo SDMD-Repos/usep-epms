@@ -7,6 +7,7 @@ const mapApiProviders = {
   getAllPositions: hris.getAllPositions,
   getPersonnelOffices: hris.getPersonnelOffices,
   getOfficesAccountable: hris.getOfficesAccountable,
+  getVpOfficeWithChildren: hris.getVpOfficeWithChildren,
 }
 
 export default {
@@ -15,6 +16,7 @@ export default {
     vpOffices: [],
     mainOffices: [],
     mainOfficesChildren: [],
+    vpOfficeChildren: [],
     personnel: [],
     positionList: [],
     personnelOffices: [],
@@ -57,6 +59,23 @@ export default {
           const { mainOffices } = response
           commit('SET_STATE', {
             mainOfficesChildren: mainOffices,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_VP_OFFICES_CHILDREN({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const getVpOfficeWithChildren = mapApiProviders.getVpOfficeWithChildren
+      getVpOfficeWithChildren().then(response => {
+        if (response) {
+          const { vpOffices } = response
+          commit('SET_STATE', {
+            vpOfficeChildren: vpOffices,
           })
         }
         commit('SET_STATE', {
