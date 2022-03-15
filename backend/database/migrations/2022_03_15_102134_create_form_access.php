@@ -17,7 +17,7 @@ class CreateFormAccess extends Migration
             $table->integer('id')->autoIncrement();
             $table->string('form_id', 15);
             $table->string('pmaps_id');
-            $table->string('staff_id');
+            $table->string('staff_id')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('modify_at')->nullable();
