@@ -24,7 +24,7 @@
 
         <template #operation="{ record }">
           <a @click="openModal('view', record)">View</a>
-          <div v-if="isDelete || allAccess">
+          <span v-if="isDelete || allAccess">
             <a-divider type="vertical" />
             <a-popconfirm
               title="Are you sure you want to delete this?"
@@ -35,7 +35,7 @@
               <template #icon><warning-outlined /></template>
               <a type="primary">Delete</a>
             </a-popconfirm>
-          </div>
+          </span>
         </template>
       </a-table>
     </div>

@@ -30,7 +30,10 @@ export default defineComponent({
         FormAdmin,
     },
     setup() {
-        
+      const activeKey = ref(['1']);
+      return {
+      activeKey,
+        }
     },
 })
 </script>
