@@ -245,29 +245,29 @@ class AccessRightsSeeder extends Seeder
             'create_id' => 'admin',
         ]
     ]);
-    
+
         DB::table('access_rights')->insert([
             [
                 'permission_id' => 'apf-aapcr',
-                'permission_name' => 'AAPCR',
+                'permission_name' => 'Set assigned office head to AAPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'apf-opcrvr',
-                'permission_name' => 'OPCR (VP)',
+                'permission_name' => 'Set assigned office head to each OPCR (VP)',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'apf-opcr',
-                'permission_name' => 'OPCR',
+                'permission_name' => 'Set assigned office head to each OPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'apf-cpcr',
-                'permission_name' => 'CPCR',
+                'permission_name' => 'Set assigned office head to each CPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
                 'create_id' => 'admin',
             ],
