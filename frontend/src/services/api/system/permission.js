@@ -35,3 +35,12 @@ export function getAllPermissionList(year) {
       })
       .catch(err => console.log(err))
   }
+
+  export function saveAapcrHead(data) {
+    return apiClient
+      .post('/system/save-aapcr-head',data)
+      .then(response => {
+        return response.data
+      })
+      .catch(err => console.log(err))
+  }

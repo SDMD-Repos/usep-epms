@@ -10,6 +10,8 @@ use App\UserAccessRights;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
+use App\FormAccess;
+use App\Http\Requests\StoreFormAccess;
 
 
 class PermissionController extends Controller
@@ -174,4 +176,29 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
+
+    function saveAapcrHead(StoreFormAccess $request){
+
+        try {
+            $validated = $request->validated();
+            $pmaps_id = $validated['pmaps_id']['value'];
+            $form_id = $validated['form_id'];
+            //code...
+            $user = FormAccess::updateOrCreate(
+                ['form_id' => $form_id],
+                [
+                    'form_id' => $form_id,
+                    'pmaps_id' => $pmaps_id,
+                    'create_id'=> $this->login_user->pmaps_id,
+                    
+                ]
+            );
+
+            return response()->json("Office headd has been assigned!", 200);
+        } catch (\Exception $e) {
+            return response()->json($e->getMessage());
+        }
+    }
+
+    
 }
