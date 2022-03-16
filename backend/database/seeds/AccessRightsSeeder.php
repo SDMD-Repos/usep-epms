@@ -22,16 +22,7 @@ class AccessRightsSeeder extends Seeder
                 'permission_name' => 'Manager',
                 'create_id' => 'admin',
             ],
-            [
-                'permission_id' => 'adminPermission',
-                'permission_name' => 'Access Permission',
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'adminRequests',
-                'permission_name' => 'Requests',
-                'create_id' => 'admin',
-            ],
+           
         ]);
 
         DB::table('access_rights')->insert([
@@ -61,21 +52,7 @@ class AccessRightsSeeder extends Seeder
             ],
         ]);
 
-        // Requests
-        DB::table('access_rights')->insert([
-            [
-                'permission_id' => 'r-main-forms',
-                'permission_name' => 'Main Forms',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
-                'create_id' => 'admin',
-            ],
-            [
-                'permission_id' => 'r-ipcr',
-                'permission_name' => 'IPCR',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
-                'create_id' => 'admin',
-            ]
-        ]);
+      
 
         DB::table('access_rights')->insert([
             [
@@ -218,6 +195,86 @@ class AccessRightsSeeder extends Seeder
             ],
 
         ]);
+
+      
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'adminPermission',
+                'permission_name' => 'Access Permission',
+                'create_id' => 'admin',
+            ],
+        ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'adminRequests',
+                'permission_name' => 'Requests',
+                'create_id' => 'admin',
+            ],
+        ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'ap-manager',
+                'permission_name' => 'Manager',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminPermission")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'ap-form',
+                'permission_name' => 'Form',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminPermission")->first()->id,
+                'create_id' => 'admin',
+            ],
+
+        ]);
+
+        // Requests
+        DB::table('access_rights')->insert([
+        [
+            'permission_id' => 'r-main-forms',
+            'permission_name' => 'Main Forms',
+            'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
+            'create_id' => 'admin',
+        ],
+        [
+            'permission_id' => 'r-ipcr',
+            'permission_name' => 'IPCR',
+            'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminRequests")->first()->id,
+            'create_id' => 'admin',
+        ]
+    ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'apf-aapcr',
+                'permission_name' => 'Set assigned office head to AAPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'apf-opcrvr',
+                'permission_name' => 'Set assigned office head to each OPCR (VP)',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'apf-opcr',
+                'permission_name' => 'Set assigned office head to each OPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'apf-cpcr',
+                'permission_name' => 'Set assigned office head to each CPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
+                'create_id' => 'admin',
+            ],
+           
+
+        ]);
+
 
         // DB::table('access_rights')->insert([
         //     [
