@@ -6,6 +6,7 @@ const mapApiProviders = {
     getAllPermissionList: system.getAllPermissionList,
     savePermissionList: system.savePermissionList,
     updatePermissionList: system.updatePermissionList,
+    saveAapcrHead: system.saveAapcrHead,
   }
 
 export default {
@@ -73,9 +74,24 @@ export default {
               })
             })
           },
-
-
-
+         SAVE_AAPCR_HEAD({ commit }, { payload }) {
+            commit('SET_STATE', {
+              loading: true,
+            })
+            const saveAapcrHead = mapApiProviders.saveAapcrHead
+            console.log(payload)
+            saveAapcrHead(payload).then(response => {
+              if (response) {
+                  notification.success({
+                  message: 'Success',
+                  description: 'AAPCR Head has been assigned.',
+                })
+              }
+              commit('SET_STATE', {
+                loading: false,
+              })
+            })
+        },
     },
     getters: {
       permission: state => state,

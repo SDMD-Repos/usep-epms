@@ -170,7 +170,7 @@ Route::group([
     Route::post('/save-permission', 'SystemAdmin\PermissionController@savePermission');
     Route::get('/get-permission-by-user/{id}', 'SystemAdmin\PermissionController@fetchPermissionByUser');
     Route::post('/update-permission', 'SystemAdmin\PermissionController@updatePermission');
-
+    Route::post('/save-aapcr-head','SystemAdmin\PermissionController@saveAapcrHead');
 });
 
 Route::group([
