@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\SystemAdmin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\AccessRight;
 use App\User;
 use App\UserAccessRights;
 use App\Http\Traits\OfficeTrait;
+use App\Http\Traits\PermissionTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
 use App\FormAccess;
@@ -16,7 +18,9 @@ use App\Http\Requests\StoreFormAccess;
 
 class PermissionController extends Controller
 {
-    use OfficeTrait,FormTrait;
+    use OfficeTrait,FormTrait,PermissionTrait;
+
+    private $userAccessRights;
 
     function detailsPermission()
     {
@@ -190,7 +194,7 @@ class PermissionController extends Controller
                     'form_id' => $form_id,
                     'pmaps_id' => $pmaps_id,
                     'create_id'=> $this->login_user->pmaps_id,
-                    
+
                 ]
             );
 
@@ -200,5 +204,28 @@ class PermissionController extends Controller
         }
     }
 
-    
+    public function checkAccessByPermissions(Request $request)
+    {
+        $this->fetchPermissions();
+        $this->fetchUserAccessRights();
+
+        $module = [19];
+        foreach ($module as $key => $value) {
+            $cPermission = $this->fetchAllChildrenPermission($value);
+            if ($this->hasUserAccess($value) && !$this->isAllowAccess($value,$cPermission)) {
+                return response()->json(true, 200);
+            }else{
+                $parent = $this->getParentPermission($value);
+                do {
+                    $pPermission = $this->fetchAllChildrenPermission($parent);
+                    if ($this->hasUserAccess($parent) && !$this->isAllowAccess($parent,$pPermission,$value)){
+                        return response()->json(true, 200);
+                    }
+                } while ($parent = $this->getParentPermission($parent));
+            }
+        }
+        return response()->json(false, 200);
+    }
+
+
 }
