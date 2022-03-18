@@ -27,6 +27,8 @@ class StoreFormAccess extends FormRequest
             //
             'pmaps_id' => 'required',
             'form_id' => 'required|string',
+            'office_id'=>'required',
+           
         ];
     }
 }

@@ -6,7 +6,9 @@ const mapApiProviders = {
     getAllPermissionList: system.getAllPermissionList,
     savePermissionList: system.savePermissionList,
     updatePermissionList: system.updatePermissionList,
-    saveAapcrHead: system.saveAapcrHead,
+    saveOfficeHead: system.saveOfficeHead,
+    fetchOfficeHead: system.fetchOfficeHead,
+    saveOfficeStaff: system.saveOfficeStaff,
   }
 
 export default {
@@ -14,6 +16,7 @@ export default {
     state: {
       loading: false,
       list: [],
+      officeHeadDetails: [],
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -78,9 +81,8 @@ export default {
             commit('SET_STATE', {
               loading: true,
             })
-            const saveAapcrHead = mapApiProviders.saveAapcrHead
-            console.log(payload)
-            saveAapcrHead(payload).then(response => {
+            const saveOfficeHead = mapApiProviders.saveOfficeHead
+            saveOfficeHead(payload).then(response => {
               if (response) {
                   notification.success({
                   message: 'Success',
@@ -92,6 +94,46 @@ export default {
               })
             })
         },
+        FEATCH_AAPCR_HEAD({ commit }, { payload }) {
+          commit('SET_STATE', {
+            loading: true,
+          })
+          const fetchOfficeHead = mapApiProviders.fetchOfficeHead
+          fetchOfficeHead(payload.form_id).then(response => {
+            if (response) {
+              commit('SET_STATE', {
+                officeHeadDetails : {
+                            pmaps_id: response.officeHeadDetails.pmaps_id,
+                            pmaps_name: response.officeHeadDetails.pmaps_name,
+                            office_id: response.officeHeadDetails.office_id,
+                            office_name: response.officeHeadDetails.office_name,
+                            staff_id: response.officeHeadDetails.staff_id,
+                            staff_name: response.officeHeadDetails.staff_name,
+                },
+              })
+            }
+            commit('SET_STATE', {
+              loading: false,
+            })
+          })
+      },
+      SAVE_AAPCR_STAFF({ commit }, { payload }) {
+        commit('SET_STATE', {
+          loading: true,
+        })
+        const saveOfficeStaff = mapApiProviders.saveOfficeStaff
+        saveOfficeStaff(payload).then(response => {
+          if (response) {
+              notification.success({
+              message: 'Success',
+              description: 'AAPCR Head has been assigned.',
+            })
+          }
+          commit('SET_STATE', {
+            loading: false,
+          })
+        })
+    },
     },
     getters: {
       permission: state => state,

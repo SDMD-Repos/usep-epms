@@ -16,9 +16,12 @@ class CreateFormAccess extends Migration
         Schema::create('form_access', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->string('form_id', 15);
-            $table->string('pmaps_id');
-            $table->string('office_id', 15);
+            $table->string('pmaps_id')->nullable();
+            $table->string('pmaps_name');
+            $table->string('office_id', 15)->nullable();
+            $table->string('office_name')->nullable();
             $table->string('staff_id')->nullable();
+            $table->string('staff_name')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();

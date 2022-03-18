@@ -130,12 +130,6 @@ export default defineComponent({
 
     } = usePermissionGroups()
 
-
-// alert(allAccess.value)
-// alert(isCreate.value)
-// alert(isEdit.value)
-// alert(isDelete.value)
-
     // EVENTS
     onMounted(() => {
       store.dispatch('formManager/FETCH_GROUPS')

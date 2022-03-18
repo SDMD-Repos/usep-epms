@@ -93,7 +93,6 @@ export const usePermissionFunction = () => {
       isCreate.value = false;
       isDelete.value = true;
       allAccess.value = false; 
-     
     }
 
     if(formCreatePermission.length > 0){
