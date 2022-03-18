@@ -36,11 +36,31 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
-  export function saveAapcrHead(data) {
+  export function saveOfficeHead(data) {
     return apiClient
-      .post('/system/save-aapcr-head',data)
+      .post('/system/save-office-head',data)
       .then(response => {
         return response.data
       })
       .catch(err => console.log(err))
   }
+
+  export function fetchOfficeHead(data) {
+    return apiClient
+      .get('/system/fetch-office-head/'+data)
+      .then(response => {
+        return response.data
+      })
+      .catch(err => console.log(err))
+  }
+
+  export function saveOfficeStaff(data) {
+    return apiClient
+      .post('/system/save-office-staff',data)
+      .then(response => {
+        return response.data
+      })
+      .catch(err => console.log(err))
+  }
+
+  
