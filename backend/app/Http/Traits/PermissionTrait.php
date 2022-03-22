@@ -56,4 +56,11 @@ trait PermissionTrait {
         return false;
     }
 
+    private function getIdByPermissionId($permission_id){
+        foreach ($this->permissions as $key => $value){
+            if ($permission_id == $value->permission_id) return $value->id;
+        }
+        return false;
+    }
+
 }

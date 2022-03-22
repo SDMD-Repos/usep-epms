@@ -46,9 +46,9 @@ export default defineComponent({
 
       onMounted(() => {
         const opcrFormPermissions = [
-          21, //ACCESS PERMISSION
-          24, //FORM
-          29, //Set assigned office head to each OPCR (VP)
+          "adminPermission", //ACCESS PERMISSION
+          "ap-form", //FORM
+          "apf-opcr", //Set assigned office head to each OPCR
         ]
         store.dispatch('system/CHECK_OPCR_FORM_PERMISSION', { payload: opcrFormPermissions })
       })
