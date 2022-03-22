@@ -8,7 +8,7 @@
       <p>OPCR (VPs)</p>
     </a-collapse-panel>
     <a-collapse-panel key="3" header="OPCR">
-      <p>OPCR</p>
+      <form-admin-opcr/>
     </a-collapse-panel>
     <a-collapse-panel key="4" header="CPCR">
       <p>CPCR</p>
@@ -25,10 +25,12 @@
 import { computed, defineComponent, onMounted, ref  } from 'vue';
 import FormAdmin from '@/components/SystemAdmin/Forms/aapcr'
 import { usePermissionAccessRights } from '@/services/functions/permission/accessrights/forms'
+import FormAdminOpcr from '@/components/SystemAdmin/Forms/opcr'
 export default defineComponent({
     name:"FormAdminTable",
     components: {
         FormAdmin,
+        FormAdminOpcr,
     },
     setup() {
       const activeKey = ref([]);

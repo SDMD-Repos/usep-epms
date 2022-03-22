@@ -173,8 +173,8 @@ Route::group([
     Route::post('/save-office-head','SystemAdmin\PermissionController@saveOfficeHead');
     Route::get('/fetch-office-head/{form_id}','SystemAdmin\PermissionController@fetchOfficeHead');
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
-    
-   
+    Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
+
 });
 
 Route::group([
@@ -182,9 +182,12 @@ Route::group([
     'middleware' => 'auth:api'
 ], function() {
     Route::get('/get-main-offices-children/{nodeStatus}', 'SettingController@getMainOfficesWithChildren');
+    Route::get('/get-vp-offices-children', 'SettingController@getVpOfficeWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
     Route::get('/get-offices-accountable/{nodeStatus}', 'SettingController@getOfficesAccountable');
+
+    Route::get('/get-form-access-by-office/{id}', 'SystemAdmin\PermissionController@getFormAccessByOffice');
 });

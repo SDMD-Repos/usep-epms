@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\SystemAdmin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\AccessRight;
 use App\User;
 use App\UserAccessRights;
 use App\Http\Traits\OfficeTrait;
+use App\Http\Traits\PermissionTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
 use App\FormAccess;
@@ -16,7 +18,9 @@ use Carbon\Carbon;
 
 class PermissionController extends Controller
 {
-    use OfficeTrait,FormTrait;
+    use OfficeTrait,FormTrait,PermissionTrait;
+
+    private $userAccessRights;
 
     function detailsPermission()
     {
@@ -186,9 +190,9 @@ class PermissionController extends Controller
             $office_name = $validated['office_id']['label'];
             $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
-        
+            $condition = ['form_id' => $form_id];
             $user = FormAccess::updateOrCreate(
-                ['form_id' => $form_id],
+                $condition,
                 [
                     'form_id' => $form_id,
                     'pmaps_id' => $pmaps_id,
@@ -196,7 +200,7 @@ class PermissionController extends Controller
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
                     'create_id'=> $this->login_user->pmaps_id,
-                   
+
                 ]
             );
             
@@ -207,6 +211,28 @@ class PermissionController extends Controller
         }
     }
 
+    public function checkAccessByPermissions(Request $request)
+    {
+        $this->fetchPermissions();
+        $this->fetchUserAccessRights();
+
+        $module = [19];
+        foreach ($module as $key => $value) {
+            $cPermission = $this->fetchAllChildrenPermission($value);
+            if ($this->hasUserAccess($value) && !$this->isAllowAccess($value,$cPermission)) {
+                return response()->json(true, 200);
+            }else{
+                $parent = $this->getParentPermission($value);
+                do {
+                    $pPermission = $this->fetchAllChildrenPermission($parent);
+                    if ($this->hasUserAccess($parent) && !$this->isAllowAccess($parent,$pPermission,$value)){
+                        return response()->json(true, 200);
+                    }
+                } while ($parent = $this->getParentPermission($parent));
+            }
+        }
+        return response()->json(false, 200);
+    }
     function fetchOfficeHead($form_id){
 
         try{
@@ -214,7 +240,7 @@ class PermissionController extends Controller
 
             return response()->json([
                 'officeHeadDetails' => $officeHeadDetails,
-              
+
             ], 200);
         }catch(\Exception $e){
             return response()->json($e->getMessage());
@@ -227,28 +253,39 @@ class PermissionController extends Controller
             $validated = $request->validated();
             $pmaps_id = $validated['pmaps_id']['value'];
             $pmaps_name = $validated['pmaps_id']['label'];
+            $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
 
+            $condition = ['form_id' => $form_id];
+
             $user = FormAccess::updateOrCreate(
-                ['form_id' => $form_id],
+                $condition,
                 [
                     'form_id' => $form_id,
                     'staff_id' => $pmaps_id,
                     'staff_name' => $pmaps_name,
                     'create_id'=> $this->login_user->pmaps_id,
-                   
+
                 ]
             );
 
-            return response()->json("Office head has been assigned!", 200);
+            return response()->json("Office Staff has been assigned!", 200);
         } catch (\Exception $e) {
             return response()->json($e->getMessage());
         }
     }
 
+    function getFormAccessByOffice($office_id){
 
-    
-    
+        try{
+            $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
+            return response()->json([
+                'formAccessDetails' => $formAccessDetails,
 
-    
+            ], 200);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+
 }

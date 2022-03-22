@@ -21,7 +21,7 @@
                     <span v-else>{{officeDetails.office_name}}</span>
                   </a-col>
                 </a-row>
-               
+
                 <a-row type="flex" class="mt-3">
                   <a-col :sm="{ span: 3 }" :md="{ span: 2 }" :lg="{ span:2 }"><b>Office Head: </b></a-col>
                   <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }" >
@@ -39,9 +39,9 @@
                       />
                      <span v-else>{{officeDetails.pmaps_name}}</span>
                   </a-col>
-                  
+
                 </a-row>
-             
+
                  <a-row type="flex" justify="center" class="mt-3">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
                    <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" :disabled="!isCreate && !allAccess"> Save</a-button>
@@ -97,25 +97,25 @@ export default defineComponent({
     //   return typeof officeDetails.value.office_id !== 'undefined'? getStaffList(officeDetails.value.office_id) : []
     // })
     const officeId = ref(undefined)
-   
+
     const editBtn = ref(false)
     const editBtnStaff = ref(false)
- 
+
     const memberList = ref([])
     const memberListStaff = ref([])
     const personnelId = ref(undefined)
     const staffId = ref(undefined)
-    
+
     let formLoading = ref(false)
-  
+
 
 //  parseInt(officeHeadOfficeId.value) === item.value
      onMounted(() => {
       store.dispatch('system/FEATCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
-     
-  
+
+
     })
-  
+
     const getPersonnelList = officeId => {
       memberList.value = []
       if (officeId) {
@@ -130,7 +130,7 @@ export default defineComponent({
         })
       }
     }
-   
+
     const getStaffList =  staffOfficeId => {
        memberListStaff.value = []
       if (staffOfficeId) {
@@ -152,7 +152,7 @@ export default defineComponent({
        office_id: officeId.value,
       }
       if(personnelId.value){
-            store.dispatch('system/SAVE_AAPCR_HEAD',{ payload: params });
+            store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
             editBtn.value = false;
       }else{
         Modal.error({
@@ -160,8 +160,8 @@ export default defineComponent({
           content: () => 'Please select a Office Head',
         })
       }
-     
-     
+
+
     }
 
     const onSaveStaff = () =>{
@@ -172,7 +172,7 @@ export default defineComponent({
       }
 
       if(staffId.value){
-            store.dispatch('system/SAVE_AAPCR_STAFF',{ payload: params });
+            store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
             editBtn.value = false;
       }else{
         Modal.error({

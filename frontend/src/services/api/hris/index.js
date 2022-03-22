@@ -18,6 +18,15 @@ export async function getMainOfficesWithChildren(data) {
     .catch(err => console.log(err))
 }
 
+export async function getVpOfficeWithChildren() {
+  return apiClient
+    .get('/hris/get-vp-offices-children')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function getPersonnelByOffice(id) {
   return apiClient
     .get('/hris/get-personnel-by-office/' + id)
@@ -26,6 +35,16 @@ export async function getPersonnelByOffice(id) {
     })
     .catch(err => console.log(err))
 }
+
+export async function getFormAccessByOffice(id) {
+  return apiClient
+    .get('/hris/get-form-access-by-office/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 
 export async function getPersonnelOffices(formId) {
   return apiClient

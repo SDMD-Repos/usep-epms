@@ -80,6 +80,7 @@ export default defineComponent({
     const list = computed(() => store.getters['system/permission'].list)
     const loading = computed(() => store.getters['system/permission'].loading)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const vpOffices = computed(() => store.getters['external/external'].getVpOfficeChildren)
 
     onMounted(() => {
       let params = {
@@ -91,6 +92,7 @@ export default defineComponent({
       }
       params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
+      store.dispatch('external/FETCH_VP_OFFICES_CHILDREN')
       store.dispatch('system/FETCH_PERMISSION')
     })
 
@@ -152,6 +154,7 @@ export default defineComponent({
       data: list,
       columns,
       offices,
+      vpOffices,
       officeId,
       personnelId,
       memberList,

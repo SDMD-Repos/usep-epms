@@ -77,16 +77,17 @@ export default {
               })
             })
           },
-         SAVE_AAPCR_HEAD({ commit }, { payload }) {
+         SAVE_FORM_HEAD({ commit }, { payload }) {
             commit('SET_STATE', {
               loading: true,
             })
+            const { form_id } = payload
             const saveOfficeHead = mapApiProviders.saveOfficeHead
             saveOfficeHead(payload).then(response => {
               if (response) {
                   notification.success({
                   message: 'Success',
-                  description: 'AAPCR Head has been assigned.',
+                  description: form_id.toUpperCase() + ' Head has been assigned.',
                 })
               }
               commit('SET_STATE', {
@@ -117,16 +118,17 @@ export default {
             })
           })
       },
-      SAVE_AAPCR_STAFF({ commit }, { payload }) {
+      SAVE_FORM_STAFF({ commit }, { payload }) {
         commit('SET_STATE', {
           loading: true,
         })
+        const { form_id } = payload
         const saveOfficeStaff = mapApiProviders.saveOfficeStaff
         saveOfficeStaff(payload).then(response => {
           if (response) {
               notification.success({
               message: 'Success',
-              description: 'AAPCR Head has been assigned.',
+              description: form_id.toUpperCase() + ' Staff has been assigned.',
             })
           }
           commit('SET_STATE', {

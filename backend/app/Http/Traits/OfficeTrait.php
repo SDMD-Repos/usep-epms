@@ -374,4 +374,26 @@ trait OfficeTrait {
         return $vpOfficeId;
     }
 
+    public function getVpOfficeWithChildren(){
+
+        $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
+            'token' => config('services.hris.data')
+        ]);
+
+        $vpOffices = json_decode($response->body());
+
+        if ($vpOffices){
+            foreach ($vpOffices as $key => $value){
+                $isUpdate = 1;
+                $vpOffices[$key]->value = $value->id;
+                $vpOffices[$key]->title = $value->Department;
+                $vpOffices[$key]->selectable = false;
+                $vpOffices[$key]->children = $this->getChildOffices($vpOffices[$key]->value, $isUpdate);
+            }
+        }
+        return response()->json([
+            'vpOffices' => $vpOffices
+        ], 200);
+    }
+
 }

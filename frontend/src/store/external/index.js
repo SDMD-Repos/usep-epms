@@ -7,6 +7,8 @@ const mapApiProviders = {
   getAllPositions: hris.getAllPositions,
   getPersonnelOffices: hris.getPersonnelOffices,
   getOfficesAccountable: hris.getOfficesAccountable,
+  getVpOfficeWithChildren: hris.getVpOfficeWithChildren,
+  getFormAccessByOffice: hris.getFormAccessByOffice,
 }
 
 export default {
@@ -15,6 +17,7 @@ export default {
     vpOffices: [],
     mainOffices: [],
     mainOfficesChildren: [],
+    vpOfficeChildren: [],
     personnel: [],
     positionList: [],
     personnelOffices: [],
@@ -64,6 +67,23 @@ export default {
         })
       })
     },
+    FETCH_VP_OFFICES_CHILDREN({ commit }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const getVpOfficeWithChildren = mapApiProviders.getVpOfficeWithChildren
+      getVpOfficeWithChildren().then(response => {
+        if (response) {
+          const { vpOffices } = response
+          commit('SET_STATE', {
+            vpOfficeChildren: vpOffices,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
     FETCH_MAIN_OFFICES_ONLY({ commit }) {
       commit('SET_STATE', {
         loading: true,
@@ -93,6 +113,25 @@ export default {
           const { personnel } = response
           commit('SET_STATE', {
             personnel: personnel,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    GET_OFFICE_DETAILS({ commit }, { payload }) {
+      const id = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getFormAccessByOffice = mapApiProviders.getFormAccessByOffice
+      getFormAccessByOffice(id).then(response => {
+        if (response) {
+          const { formAccessDetails } = response
+          commit('SET_STATE', {
+            formAccessDetails: formAccessDetails,
           })
         }
         commit('SET_STATE', {
