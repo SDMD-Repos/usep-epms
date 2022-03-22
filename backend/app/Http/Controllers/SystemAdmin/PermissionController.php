@@ -223,22 +223,22 @@ class PermissionController extends Controller
         $this->fetchPermissions();
         $this->fetchUserAccessRights();
 
-        $module = [19];
-        foreach ($module as $key => $value) {
-            $cPermission = $this->fetchAllChildrenPermission($value);
-            if ($this->hasUserAccess($value) && !$this->isAllowAccess($value,$cPermission)) {
-                return response()->json(true, 200);
-            }else{
-                $parent = $this->getParentPermission($value);
-                do {
-                    $pPermission = $this->fetchAllChildrenPermission($parent);
-                    if ($this->hasUserAccess($parent) && !$this->isAllowAccess($parent,$pPermission,$value)){
-                        return response()->json(true, 200);
-                    }
-                } while ($parent = $this->getParentPermission($parent));
+        if (!!$request->input())
+            foreach ($request->input() as $key => $value) {
+                $cPermission = $this->fetchAllChildrenPermission($value);
+                if ($this->hasUserAccess($value) && !$this->isAllowAccess($value,$cPermission)) {
+                    return response()->json(['permissions' => true], 200);
+                }else{
+                    $parent = $this->getParentPermission($value);
+                    do {
+                        $pPermission = $this->fetchAllChildrenPermission($parent);
+                        if ($this->hasUserAccess($parent) && !$this->isAllowAccess($parent,$pPermission,$value)){
+                            return response()->json(['permissions' => true], 200);
+                        }
+                    } while ($parent = $this->getParentPermission($parent));
+                }
             }
-        }
-        return response()->json(false, 200);
+        return response()->json(['permissions' => false], 200);
     }
 
     function fetchOfficeHead($form_id){

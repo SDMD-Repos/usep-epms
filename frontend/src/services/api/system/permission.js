@@ -63,4 +63,14 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
-  
+  export function checkAccessPermission(data) {
+    return apiClient
+      .post('/system/check-access',data)
+      .then(response => {
+        return response.data
+      })
+      .catch(err => console.log(err))
+  }
+
+
+

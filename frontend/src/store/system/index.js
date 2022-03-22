@@ -9,12 +9,14 @@ const mapApiProviders = {
     saveOfficeHead: system.saveOfficeHead,
     fetchOfficeHead: system.fetchOfficeHead,
     saveOfficeStaff: system.saveOfficeStaff,
+    checkAccessPermission: system.checkAccessPermission,
   }
 
 export default {
     namespaced: true,
     state: {
       loading: false,
+      opcrFormPermission: false,
       list: [],
       officeHeadDetails: [],
     },
@@ -70,6 +72,23 @@ export default {
                   notification.success({
                   message: 'Success',
                   description: 'Access Rights was saved successfully',
+                })
+              }
+              commit('SET_STATE', {
+                loading: false,
+              })
+            })
+          },
+          CHECK_OPCR_FORM_PERMISSION({ commit }, { payload }) {
+            commit('SET_STATE', {
+              loading: true,
+            })
+            const checkAccessPermission = mapApiProviders.checkAccessPermission
+            checkAccessPermission(payload).then(response => {
+              if (response) {
+                const { permissions } = response
+                commit('SET_STATE', {
+                  opcrFormPermission: permissions,
                 })
               }
               commit('SET_STATE', {

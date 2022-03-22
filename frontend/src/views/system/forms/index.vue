@@ -7,7 +7,7 @@
     <a-collapse-panel key="2" header="OPCR (VPs)" >
       <p>OPCR (VPs)</p>
     </a-collapse-panel>
-    <a-collapse-panel key="3" header="OPCR">
+    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission">
       <form-admin-opcr/>
     </a-collapse-panel>
     <a-collapse-panel key="4" header="CPCR">
@@ -23,6 +23,7 @@
 
 <script>
 import { computed, defineComponent, onMounted, ref  } from 'vue';
+import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/Forms/aapcr'
 import { usePermissionAccessRights } from '@/services/functions/permission/accessrights/forms'
 import FormAdminOpcr from '@/components/SystemAdmin/Forms/opcr'
@@ -33,20 +34,32 @@ export default defineComponent({
         FormAdminOpcr,
     },
     setup() {
+      const store = useStore()
       const activeKey = ref([]);
-
-    const {
+      const opcrFormPermission = computed(() => store.getters['system/permission'].opcrFormPermission)
+      const {
           // DATA
         isCreate, allAccess,
           // METHODS
 
-        } = usePermissionAccessRights()
+      } = usePermissionAccessRights()
+
+      onMounted(() => {
+        const opcrFormPermissions = [
+          21, //ACCESS PERMISSION
+          24, //FORM
+          29, //Set assigned office head to each OPCR (VP)
+        ]
+        store.dispatch('system/CHECK_OPCR_FORM_PERMISSION', { payload: opcrFormPermissions })
+      })
 
       return {
-      activeKey,
-      allAccess,
-      isCreate,
-        }
+        activeKey,
+        allAccess,
+        isCreate,
+        opcrFormPermission,
+      }
+
     },
 })
 </script>
