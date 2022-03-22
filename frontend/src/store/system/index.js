@@ -104,6 +104,7 @@ export default {
             const saveOfficeHead = mapApiProviders.saveOfficeHead
             saveOfficeHead(payload).then(response => {
               if (response) {
+                dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
                   notification.success({
                   message: 'Success',
                   description: form_id.toUpperCase() + ' Head has been assigned.',
@@ -114,7 +115,7 @@ export default {
               })
             })
         },
-        FEATCH_AAPCR_HEAD({ commit }, { payload }) {
+        FETCH_AAPCR_HEAD({ commit }, { payload }) {
           commit('SET_STATE', {
             loading: true,
           })
@@ -137,7 +138,7 @@ export default {
             })
           })
       },
-      SAVE_FORM_STAFF({ commit }, { payload }) {
+      SAVE_FORM_STAFF({ commit, dispatch }, { payload }) {
         commit('SET_STATE', {
           loading: true,
         })
@@ -145,6 +146,7 @@ export default {
         const saveOfficeStaff = mapApiProviders.saveOfficeStaff
         saveOfficeStaff(payload).then(response => {
           if (response) {
+            dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
               notification.success({
               message: 'Success',
               description: form_id.toUpperCase() + ' Staff has been assigned.',

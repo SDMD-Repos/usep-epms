@@ -111,7 +111,7 @@ export default defineComponent({
 
 //  parseInt(officeHeadOfficeId.value) === item.value
      onMounted(() => {
-      store.dispatch('system/FEATCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
+      store.dispatch('system/FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
 
 
     })
@@ -168,12 +168,12 @@ export default defineComponent({
       let params = {
        pmaps_id: staffId.value,
        form_id: 'aapcr',
-       office_id: officeDetails.value.office_id,
+       office_id: staffId.value,
       }
 
       if(staffId.value){
             store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
-            editBtn.value = false;
+            editBtnStaff.value = false;
       }else{
         Modal.error({
           title: () => 'Unable to proceed',
