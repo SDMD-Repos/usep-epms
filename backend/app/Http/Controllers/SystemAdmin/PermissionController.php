@@ -119,7 +119,7 @@ class PermissionController extends Controller
     function updatePermission(StoreUserPermission $request)
     {
         try{
-            $personnelId = (int)$request->personnelId;
+            $personnelId = $request->personnelId;
 
             $listPermissions = $request->listPermissions;
 
