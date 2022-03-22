@@ -22,6 +22,8 @@ class PermissionController extends Controller
 
     private $userAccessRights;
 
+    private $opcrFormId = 'opcr';
+
     function detailsPermission()
     {
         $accessPermission = AccessRight::orderBy('id', 'ASC')->get();
@@ -37,7 +39,7 @@ class PermissionController extends Controller
     {
         try{
             $personnelId = $request->personnelId;
-            
+
             $listPermissions = $request->listPermissions;
 
             $user = User::find($personnelId);
@@ -49,7 +51,7 @@ class PermissionController extends Controller
 
             $obj = json_decode($response->body());
             $details = $obj[0];
-            
+
             if(!$user){
                 if (isset($obj[0]->PmapsID)) {
                     $user = User::updateOrCreate(
@@ -69,7 +71,7 @@ class PermissionController extends Controller
             }
 
             $accessLists  = UserAccessRights::where('user_id', $details->UserID)->get();
-         
+
             $accessAllLists = [];
 
             foreach ($accessLists as $list){
@@ -84,7 +86,7 @@ class PermissionController extends Controller
                                 ['user_id', $details->UserID],
                                 ['access_right_id', $permission],
                             ])->get();
-                       
+
                 if(!count($accessList)){
                     $userAccessRights->user_id = (string)$details->UserID;
                     $userAccessRights->access_right_id = $permission;
@@ -136,7 +138,7 @@ class PermissionController extends Controller
             $details = $obj[0];
 
             $accessLists  = UserAccessRights::where('user_id', $details->UserID)->get();
-            
+
             $accessAllListsExist = [];
 
             $currentList = [];
@@ -191,6 +193,11 @@ class PermissionController extends Controller
             $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
             $condition = ['form_id' => $form_id];
+
+            if ($this->opcrFormId === $form_id){
+                $condition['office_id'] = $office_id;
+            }
+
             $user = FormAccess::updateOrCreate(
                 $condition,
                 [
@@ -203,7 +210,7 @@ class PermissionController extends Controller
 
                 ]
             );
-            
+
 
             return response()->json("Office head has been assigned!", 200);
         } catch (\Exception $e) {
@@ -233,6 +240,7 @@ class PermissionController extends Controller
         }
         return response()->json(false, 200);
     }
+
     function fetchOfficeHead($form_id){
 
         try{
@@ -255,8 +263,11 @@ class PermissionController extends Controller
             $pmaps_name = $validated['pmaps_id']['label'];
             $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
-
             $condition = ['form_id' => $form_id];
+
+            if ($this->opcrFormId === $form_id){
+                $condition['office_id'] = $office_id;
+            }
 
             $user = FormAccess::updateOrCreate(
                 $condition,

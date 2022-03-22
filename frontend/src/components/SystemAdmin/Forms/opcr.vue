@@ -33,7 +33,7 @@
           label-in-value
           v-if="editBtnHead"
         />
-        <span v-else>sdfsdf</span>
+        <span v-else>{{ typeof headId === 'object'  ? headId.label : "" }}</span>
       </a-col>
     </a-row>
     <div class="mt-4"></div>
@@ -56,7 +56,7 @@
           label-in-value
           v-if="editBtnStaff"
         />
-        <span v-else>sdfsdf</span>
+        <span v-else>{{ typeof staffId === 'object' ? staffId.label : "" }}</span>
       </a-col>
     </a-row>
     <div class="mt-4"></div>
@@ -94,13 +94,14 @@ export default defineComponent({
       store.dispatch('external/GET_OFFICE_DETAILS', { payload: id })
       store.dispatch('external/FETCH_PERSONNEL_BY_OFFICE', { payload: id })
 
-      headId.value = formAccessDetails.value.office_id
-      staffId.value = formAccessDetails.value.staff_id
+      headId.value = { label: computed(() => formAccessDetails.value ? formAccessDetails.value.pmaps_name : ""), value: computed(() => formAccessDetails.value ? formAccessDetails.value.pmaps_id : "")}
+      staffId.value = { label: computed(() => formAccessDetails.value ? formAccessDetails.value.staff_name : ""), value: computed(() => formAccessDetails.value ? formAccessDetails.value.staff_id : "")}
     }
 
     const validateFields = (fields) => {
       return Object.values(fields).every(value => {
         if(Array.isArray(value)) return value.length > 0
+        if (typeof value === 'object') return !!value.value
         return !!value
       })
     }
@@ -111,14 +112,14 @@ export default defineComponent({
         form_id: form_id.value,
         office_id: officeId.value,
       }
-      if(validateFields(headParams))
-        store.dispatch('system/SAVE_FORM_HEAD',{ payload: headParams });
-      else{
+      if(validateFields(headParams)){
+        store.dispatch('system/SAVE_FORM_HEAD',{ payload: headParams })
+        editBtnHead.value = false
+      }else
         Modal.error({
           title: () => 'Unable to proceed',
           content: () => 'Please select a Office Head',
         })
-      }
     }
 
     const onSaveStaff = () => {
@@ -127,14 +128,14 @@ export default defineComponent({
         form_id: form_id.value,
         office_id: officeId.value,
       }
-      if(validateFields(staffParams))
-        store.dispatch('system/SAVE_FORM_STAFF',{ payload: staffParams });
-      else{
+      if(validateFields(staffParams)){
+        store.dispatch('system/SAVE_FORM_STAFF',{ payload: staffParams })
+        editBtnStaff.value = false
+      }else
         Modal.error({
           title: () => 'Unable to proceed',
           content: () => 'Please select a Office Staff',
         })
-      }
     }
 
     const onEditHead = () =>{
