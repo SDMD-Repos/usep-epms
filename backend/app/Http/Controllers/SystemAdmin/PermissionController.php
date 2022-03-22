@@ -32,8 +32,8 @@ class PermissionController extends Controller
     function savePermission(StoreUserPermission $request)
     {
         try{
-            $personnelId = (int)$request->personnelId;
-
+            $personnelId = $request->personnelId;
+            
             $listPermissions = $request->listPermissions;
 
             $user = User::find($personnelId);
@@ -45,7 +45,7 @@ class PermissionController extends Controller
 
             $obj = json_decode($response->body());
             $details = $obj[0];
-
+            
             if(!$user){
                 if (isset($obj[0]->PmapsID)) {
                     $user = User::updateOrCreate(
@@ -65,7 +65,7 @@ class PermissionController extends Controller
             }
 
             $accessLists  = UserAccessRights::where('user_id', $details->UserID)->get();
-
+         
             $accessAllLists = [];
 
             foreach ($accessLists as $list){
@@ -80,7 +80,7 @@ class PermissionController extends Controller
                                 ['user_id', $details->UserID],
                                 ['access_right_id', $permission],
                             ])->get();
-
+                       
                 if(!count($accessList)){
                     $userAccessRights->user_id = (string)$details->UserID;
                     $userAccessRights->access_right_id = $permission;
@@ -132,7 +132,7 @@ class PermissionController extends Controller
             $details = $obj[0];
 
             $accessLists  = UserAccessRights::where('user_id', $details->UserID)->get();
-
+            
             $accessAllListsExist = [];
 
             $currentList = [];
@@ -199,6 +199,7 @@ class PermissionController extends Controller
                    
                 ]
             );
+            
 
             return response()->json("Office head has been assigned!", 200);
         } catch (\Exception $e) {
