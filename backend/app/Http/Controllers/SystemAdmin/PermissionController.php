@@ -190,9 +190,9 @@ class PermissionController extends Controller
             $office_name = $validated['office_id']['label'];
             $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
-        
+            $condition = ['form_id' => $form_id];
             $user = FormAccess::updateOrCreate(
-                ['form_id' => $form_id],
+                $condition,
                 [
                     'form_id' => $form_id,
                     'pmaps_id' => $pmaps_id,
@@ -200,7 +200,7 @@ class PermissionController extends Controller
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
                     'create_id'=> $this->login_user->pmaps_id,
-                    
+
                 ]
             );
 
@@ -239,7 +239,7 @@ class PermissionController extends Controller
 
             return response()->json([
                 'officeHeadDetails' => $officeHeadDetails,
-              
+
             ], 200);
         }catch(\Exception $e){
             return response()->json($e->getMessage());
@@ -252,22 +252,39 @@ class PermissionController extends Controller
             $validated = $request->validated();
             $pmaps_id = $validated['pmaps_id']['value'];
             $pmaps_name = $validated['pmaps_id']['label'];
+            $office_id = $validated['office_id']['value'];
             $form_id = $validated['form_id'];
 
+            $condition = ['form_id' => $form_id];
+
             $user = FormAccess::updateOrCreate(
-                ['form_id' => $form_id],
+                $condition,
                 [
                     'form_id' => $form_id,
                     'staff_id' => $pmaps_id,
                     'staff_name' => $pmaps_name,
                     'create_id'=> $this->login_user->pmaps_id,
-                   
+
                 ]
             );
 
-            return response()->json("Office head has been assigned!", 200);
+            return response()->json("Office Staff has been assigned!", 200);
         } catch (\Exception $e) {
             return response()->json($e->getMessage());
         }
     }
+
+    function getFormAccessByOffice($office_id){
+
+        try{
+            $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
+            return response()->json([
+                'formAccessDetails' => $formAccessDetails,
+
+            ], 200);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+
 }

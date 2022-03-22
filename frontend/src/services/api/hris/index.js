@@ -36,6 +36,16 @@ export async function getPersonnelByOffice(id) {
     .catch(err => console.log(err))
 }
 
+export async function getFormAccessByOffice(id) {
+  return apiClient
+    .get('/hris/get-form-access-by-office/' + id)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+
 export async function getPersonnelOffices(formId) {
   return apiClient
     .get('/hris/get-user-offices/' + formId)
