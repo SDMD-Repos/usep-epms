@@ -24,7 +24,7 @@
         <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
       </span>
       <span v-else>
-        <a type="primary" @click="edit(record.id)" v-if="isCreate || allAccess">Edit</a>
+        <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
       </span>
     </template>
   </a-table>

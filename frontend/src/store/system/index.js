@@ -19,6 +19,13 @@ export default {
       opcrFormPermission: false,
       list: [],
       officeHeadDetails: [],
+      createFormPermission: false,
+      deleteFormPermission: false,
+      createProgramPermission: false,
+      deleteProgramPermission: false,
+      createSubCatPermission: false,
+      deleteSubCatPermission: false,
+      createFieldPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -157,7 +164,127 @@ export default {
           })
         })
     },
+    CHECK_CREATE_FORM_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createFormPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
     },
+    CHECK_DELETE_FORM_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            deleteFormPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_PROGRAM_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createProgramPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_DELETE_PROGRAM_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            deleteProgramPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_SUBCAT_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createSubCatPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_DELETE_SUBCAT_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            deleteSubCatPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_FIELD_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createFieldPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    },
+    
     getters: {
       permission: state => state,
     },

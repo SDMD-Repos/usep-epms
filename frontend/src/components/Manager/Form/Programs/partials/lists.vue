@@ -6,7 +6,7 @@
         @confirm="onDelete(record.key)"
         ok-text="Yes"
         cancel-text="No"
-         v-if="isDelete || allAccess"
+        v-if="isDelete"
       >
         <template #icon><warning-outlined /></template>
         <a type="primary">Delete</a>

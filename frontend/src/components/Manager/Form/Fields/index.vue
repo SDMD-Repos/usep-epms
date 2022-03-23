@@ -9,7 +9,7 @@
     </a-select>
 
     <div class="mt-5">
-      <form-table :year="year" :is-create="isCreate" :all-access="allAccess" @handle-save="handleSave"/>
+      <form-table :year="year" :is-create="createFieldPermission"  @handle-save="handleSave"/>
     </div>
   </div>
 </template>
@@ -17,7 +17,7 @@
 import { defineComponent, ref, computed, onMounted } from "vue"
 import { useStore } from "vuex";
 import FormTable from './partials/formTable'
-import { usePermissionFields } from '@/services/functions/permission/form/fields'
+
 
 export default defineComponent({
   name: 'FieldsManager',
@@ -38,17 +38,19 @@ export default defineComponent({
       }
       return lists
     })
+    const createFieldPermission = computed(() => store.getters['system/permission'].createFieldPermission)
 
-    const {
-      // DATA
-     isCreate, allAccess,
-      // METHODS
-
-    } = usePermissionFields()
 
     // EVEMTS
     onMounted(() => {
       fetchSettings(year.value)
+
+       const fieldPermissions = [
+        "manager",
+        "m-form", 
+        "mf-fields", 
+      ]
+      store.dispatch('system/CHECK_CREATE_FIELD_PERMISSION', { payload: fieldPermissions })
     })
 
     //METHODS
@@ -85,8 +87,7 @@ export default defineComponent({
     return {
       year,
       years,
-      isCreate,
-      allAccess,
+      createFieldPermission,
       fetchSettings,
       handleSave,
     }

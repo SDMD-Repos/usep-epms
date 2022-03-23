@@ -27,26 +27,26 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" :disabled="!isCreate && !allAccess" class="mr-3" @click="onSubmit">Add</a-button>
-          <a-button type="link" v-if="previousFunctions.length" :disabled="!isCreate && !allAccess" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
+          <a-button style="width: 150px;" type="primary" :disabled="!funcCreatePermission" class="mr-3" @click="onSubmit">Add</a-button>
+          <a-button type="link" v-if="previousFunctions.length" :disabled="!funcCreatePermission" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
         </div>
       </a-form>
     </div>
 
-    <functions-table :year="year" :is-delete="isDelete" :all-access="allAccess" />
+    <functions-table :year="year" :is-delete="funcDeletePermission"  />
 
     <previous-list :visible="isPreviousViewed" :year="year" :list="previousFunctions"
                    @close-modal="changePreviousModal" @save-functions="onMultipleSave"/>
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode } from 'vue'
+import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import FunctionsTable from './partials/lists'
 import PreviousList from './partials/previousList'
-import { usePermissionFunction } from '@/services/functions/permission/form/function'
+
 
 export default defineComponent({
   name: "FunctionsManager",
@@ -90,7 +90,9 @@ export default defineComponent({
     // COMPUTED
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousFunctions = computed(() => store.getters['formManager/manager'].previousFunctions)
-
+    const funcCreatePermission = computed(() => store.getters['system/permission'].createFormPermission)
+    const funcDeletePermission = computed(() => store.getters['system/permission'].deleteFormPermission)
+    
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -101,12 +103,25 @@ export default defineComponent({
       return lists
     })
 
-    const {
-      // DATA
-      isDelete, isCreate, allAccess,
-      // METHODS
+    
+    onMounted(() => {
+      const formCreatePermissions = [
+        "manager",
+        "m-form", 
+        "mf-functions", //Set assigned office head to each OPCR
+        "mff-create",
+      ];
+      store.dispatch('system/CHECK_CREATE_FORM_PERMISSION', { payload: formCreatePermissions })
 
-    } = usePermissionFunction()
+      const formDeletePermissions = [
+        "manager",
+        "m-form", 
+        "mf-functions", //Set assigned office head to each OPCR
+        "mff-delete",
+      ]
+
+      store.dispatch('system/CHECK_DELETE_FORM_PERMISSION', { payload: formDeletePermissions })
+    })
 
 
     // METHODS
@@ -170,10 +185,8 @@ export default defineComponent({
       loading,
       years,
       previousFunctions,
-      allAccess,
-      isCreate,
-      isDelete,
-
+      funcCreatePermission,
+      funcDeletePermission,
       fetchPreviousFunctions,
       onSubmit,
       resetForm,
