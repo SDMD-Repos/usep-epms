@@ -41,10 +41,13 @@ trait PermissionTrait {
         return false;
     }
 
-    private function isAllowAccess($needle,$haystack,$exclude = false){
-        foreach ($haystack as $key => $value){
-            if ($exclude == $value) continue;
-            if ($needle === $value) return true;
+    private function hasChildrenPermission($permissions){
+        foreach ($this->userAccessRights as $accessKey => $accessValue){
+            foreach ($permissions as $permissionKey => $permissionValue){
+                if ($accessValue->access_right_id == $permissionValue){
+                    return true;
+                }
+            }
         }
         return false;
     }

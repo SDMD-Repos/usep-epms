@@ -227,13 +227,14 @@ class PermissionController extends Controller
             foreach ($request->input() as $key => $value) {
                 $module = $this->getIdByPermissionId($value);
                 $cPermission = $this->fetchAllChildrenPermission($module);
-                if ($this->hasUserAccess($module) && !$this->isAllowAccess($module,$cPermission)) {
+                if ($this->hasUserAccess($module) && !$this->hasChildrenPermission($cPermission)) {
                     return response()->json(['permissions' => true], 200);
                 }else{
                     $parent = $this->getParentPermission($module);
                     do {
                         $pPermission = $this->fetchAllChildrenPermission($parent);
-                        if ($this->hasUserAccess($parent) && !$this->isAllowAccess($parent,$pPermission,$module)){
+                        if ($this->hasUserAccess($parent) && !$this->hasChildrenPermission($pPermission)){
+
                             return response()->json(['permissions' => true], 200);
                         }
                     } while ($parent = $this->getParentPermission($parent));

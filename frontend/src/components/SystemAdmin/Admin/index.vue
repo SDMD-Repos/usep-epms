@@ -137,7 +137,7 @@ export default defineComponent({
 
     const onSave = () => {
        let params = {
-         personnelId: personnelId.value.value,
+         personnelId: personnelId.value,
          listPermissions : selectedRowKeys.value,
        }
       store.dispatch('system/SAVE_PERMISSION',{ payload: params })
