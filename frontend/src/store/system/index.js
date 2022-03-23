@@ -29,6 +29,9 @@ export default {
       createGroupPermission: false,
       editGroupPermission: false,
       deleteGroupPermission: false,
+      createMeasuresPermission: false,
+      editMeasuresPermission: false,
+      deleteMeasuresPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -330,6 +333,57 @@ export default {
           const { permissions } = response
           commit('SET_STATE', {
             deleteGroupPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_MEASURES_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createMeasuresPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_EDIT_MEASURES_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            editMeasuresPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_DELETE_MEASURES_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            deleteMeasuresPermission: permissions,
           })
         }
         commit('SET_STATE', {

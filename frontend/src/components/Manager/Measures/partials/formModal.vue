@@ -4,7 +4,7 @@
            :closable="false"
            :mask-closable="false"
            :ok-text="okText"
-           :ok-button-props="{disabled:!allAccess && !isEdit }"
+           :ok-button-props="{disabled: !isEdit && !isCreate}"
            @ok="okAction"
            @cancel="onClose">
     <a-form :label-col="labelCol"
