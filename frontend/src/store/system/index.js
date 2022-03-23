@@ -26,6 +26,9 @@ export default {
       createSubCatPermission: false,
       deleteSubCatPermission: false,
       createFieldPermission: false,
+      createGroupPermission: false,
+      editGroupPermission: false,
+      deleteGroupPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -276,6 +279,57 @@ export default {
           const { permissions } = response
           commit('SET_STATE', {
             createFieldPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_GROUP_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createGroupPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_EDIT_GROUP_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            editGroupPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_DELETE_GROUP_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            deleteGroupPermission: permissions,
           })
         }
         commit('SET_STATE', {

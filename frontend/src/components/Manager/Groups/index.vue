@@ -2,7 +2,7 @@
   <div>
     <a-table :columns="columns" :data-source="groups" :loading="loading" bordered>
       <template #title>
-        <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!isCreate && !allAccess">
+        <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!createGroupPermission">
           <template #icon><PlusOutlined /></template>
           New Group
         </a-button>
@@ -14,7 +14,7 @@
 
       <template #operation="{ record }">
         <a @click="openModal('view', record)">View</a>
-        <span v-if="isDelete || allAccess">
+        <span v-if="deleteGroupPermission">
           <a-divider type="vertical" />
           <a-popconfirm
             title="Are you sure you want to delete this?"
@@ -39,9 +39,8 @@
                 :supervising-list="vpOfficesList"
                 :validate="validate"
                 :validate-infos="validateInfos"
-                :is-edit="isEdit"
-                :all-access="allAccess"
-                :is-delete="isDelete"
+                :is-edit="editGroupPermission"
+                :is-delete="deleteGroupPermission"
                 @change-action="changeAction"
                 @close-modal="resetModalData"
                 @submit-form="submitForm"/>
@@ -54,7 +53,6 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 import { Form, Modal } from 'ant-design-vue'
 import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import { usePermissionGroups } from '@/services/functions/permission/groups/groups'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -79,6 +77,9 @@ export default defineComponent({
     const groups = computed(() => store.getters['formManager/manager'].groups)
     const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const createGroupPermission = computed(() => store.getters['system/permission'].createGroupPermission)
+    const editGroupPermission = computed(() => store.getters['system/permission'].editGroupPermission)
+    const deleteGroupPermission = computed(() => store.getters['system/permission'].deleteGroupPermission)
 
     // DATA
     const isOpenModal = ref(false)
@@ -123,13 +124,7 @@ export default defineComponent({
         { validator: checkIfEmpty, trigger: 'change' },
       ],
     })
-    const {
-      // DATA
-      isDelete, isCreate, allAccess, isEdit,
-      // METHODS
-
-    } = usePermissionGroups()
-
+   
     // EVENTS
     onMounted(() => {
       store.dispatch('formManager/FETCH_GROUPS')
@@ -143,7 +138,31 @@ export default defineComponent({
       params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
+
+      const groupCreatePermissions = [
+        "manager",
+        "m-group", 
+        "mg-create",
+      ]
+      store.dispatch('system/CHECK_CREATE_GROUP_PERMISSION', { payload: groupCreatePermissions })
+
+      const groupeEditPermissions = [
+        "manager",
+        "m-group", 
+        "mg-edit",
+      ]
+      store.dispatch('system/CHECK_EDIT_GROUP_PERMISSION', { payload: groupeEditPermissions })
+
+      const groupeDeletePermissions = [
+        "manager",
+        "m-group", 
+        "mg-delete",
+      ]
+      store.dispatch('system/CHECK_DELETE_GROUP_PERMISSION', { payload: groupeDeletePermissions })
     })
+
+   
+  
 
     // METHODS
     const openModal = (event, record) => {
@@ -254,10 +273,9 @@ export default defineComponent({
       modalTitle,
       okText,
       groupModal,
-      isDelete,
-      isEdit,
-      isCreate,
-      allAccess,
+      createGroupPermission,
+      deleteGroupPermission,
+      editGroupPermission,
 
       useForm,
       validate,
