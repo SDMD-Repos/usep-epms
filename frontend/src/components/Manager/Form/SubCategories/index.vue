@@ -57,8 +57,8 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" class="mr-3" :disabled="!isCreate && !allAccess"  @click="onSubmit">Add</a-button>
-           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length"  :disabled="!isCreate && !allAccess" @change="resetForm" >
+          <a-button style="width: 150px;" type="primary" class="mr-3" :disabled="!createSubCatPermission"  @click="onSubmit">Add</a-button>
+           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length"  :disabled="!createSubCatPermission" @change="resetForm" >
                 Add {{ year - 1}} Sub Categories
             </a-checkbox>
           <a-button type="link" v-if="prevSubCategories.length" @click="changePreviousModal"></a-button>
@@ -66,7 +66,7 @@
       </a-form>
     </div>
 
-    <sub-categories-table :sub-category-list="subCategories" :is-delete="isDelete" :all-access="allAccess" @delete="onDelete"/>
+    <sub-categories-table :sub-category-list="subCategories" :is-delete="deleteSubCatPermission" :all-access="allAccess" @delete="onDelete"/>
   </a-spin>
 </template>
 <script>
@@ -75,7 +75,7 @@ import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import SubCategoriesTable from './partials/lists'
-import { usePermissionCategory } from '@/services/functions/permission/form/subcategories'
+
 export default defineComponent({
   name: "SubCategoriesManager",
   components: {
@@ -90,6 +90,8 @@ export default defineComponent({
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const prevSubCategories = computed(() => store.getters['formManager/manager'].prevSubCategories)
+    const createSubCatPermission = computed(() => store.getters['system/permission'].createSubCatPermission)
+    const deleteSubCatPermission = computed(() => store.getters['system/permission'].deleteSubCatPermission)
 
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
@@ -141,18 +143,28 @@ export default defineComponent({
       value: 'id',
     }
 
-    const {
-      // DATA
-      isDelete, isCreate, allAccess,
-      // METHODS
-
-    } = usePermissionCategory()
+   
 
     // EVENTS
 
     onMounted(() => {
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
+
+      const subCatCreatePermissions = [
+        "manager",
+        "m-form", 
+        "mf-subcat", 
+        "mfs-create",
+      ]
+      store.dispatch('system/CHECK_CREATE_SUBCAT_PERMISSION', { payload: subCatCreatePermissions })
+      const subCatDeletePermissions = [
+        "manager",
+        "m-form", 
+        "mf-subcat", 
+        "mfs-delete",
+      ]
+      store.dispatch('system/CHECK_DELETE_SUBCAT_PERMISSION', { payload: subCatDeletePermissions })
     })
 
     const onDelete = key => {
@@ -218,9 +230,8 @@ export default defineComponent({
       parentSubs,
       isPreviousViewed,
       prevSubCategories,
-      isDelete,
-      isCreate,
-      allAccess,
+      createSubCatPermission,
+      deleteSubCatPermission,
       checked,
       formRef,
       formState,

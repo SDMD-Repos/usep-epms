@@ -11,11 +11,11 @@
     <div class="mt-4">
       <a-table :columns="columns" :data-source="measuresList" :loading="loading" bordered>
         <template #title>
-          <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!isCreate && !allAccess" >
+          <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!createMeasuresPermission" >
             <template #icon><PlusOutlined /></template>
             New Measure
           </a-button>
-          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" :disabled="!isCreate && !allAccess">Add {{ year - 1}} measures</a-button>
+          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" :disabled="!createMeasuresPermission">Add {{ year - 1}} measures</a-button>
         </template>
 
         <template #dateCreated="{ record }">
@@ -24,7 +24,7 @@
 
         <template #operation="{ record }">
           <a @click="openModal('view', record)">View</a>
-          <span v-if="isDelete || allAccess">
+          <span v-if="deleteMeasuresPermission">
             <a-divider type="vertical" />
             <a-popconfirm
               title="Are you sure you want to delete this?"
@@ -43,7 +43,7 @@
     <form-modal :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"
                 :form-state="formState" :validate="validate" :validate-infos="validateInfos"
                 @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"
-                :is-edit="isEdit" :all-access="allAccess" :is-delete="isDelete"/>
+                :is-edit="editMeasuresPermission" :is-create="createMeasuresPermission" :is-delete="deleteMeasuresPermission"/>
 
     <measures-previous-list :visible="isPreviousViewed" :year="year" :list="previousMeasures"
                             @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
@@ -57,7 +57,7 @@ import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-d
 import moment from 'moment'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
-import { usePermissionMeasures } from '@/services/functions/permission/measures/measures'
+
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Date Created', dataIndex: 'created_at', key: 'created_at', slots: { customRender: 'dateCreated' } },
@@ -101,19 +101,15 @@ export default defineComponent({
       ],
     })
 
-    const {
-      // DATA
-      isDelete, isCreate, allAccess, isEdit,
-      // METHODS
-
-    } = usePermissionMeasures()
-
     // COMPUTED
     const mainStore = computed(() => store.getters.mainStore)
     const measuresList = computed(() => store.getters['formManager/manager'].measures)
     const previousMeasures = computed(() => store.getters['formManager/manager'].previousMeasures)
     const loading = computed(() => store.getters['formManager/manager'].loading)
-
+    const createMeasuresPermission = computed(() => store.getters['system/permission'].createMeasuresPermission)
+    const editMeasuresPermission = computed(() => store.getters['system/permission'].editMeasuresPermission)
+    const deleteMeasuresPermission = computed(() => store.getters['system/permission'].deleteMeasuresPermission)
+    
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -127,6 +123,28 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       fetchMeasures(year.value)
+
+      const measuresCreatePermissions = [
+      "manager",
+      "m-measures", 
+      "mm-create",
+      ]
+      store.dispatch('system/CHECK_CREATE_MEASURES_PERMISSION', { payload: measuresCreatePermissions })
+
+      const measuresEditPermissions = [
+      "manager",
+      "m-measures", 
+      "mm-edit",
+      ]
+      store.dispatch('system/CHECK_EDIT_MEASURES_PERMISSION', { payload: measuresEditPermissions })
+
+      const measuresDeletePermissions = [
+      "manager",
+      "m-measures", 
+      "mm-delete",
+      ]
+      store.dispatch('system/CHECK_DELETE_MEASURES_PERMISSION', { payload: measuresDeletePermissions })
+
     })
 
     // METHODS
@@ -233,10 +251,9 @@ export default defineComponent({
       previousMeasures,
       loading,
       years,
-      isCreate,
-      isDelete,
-      isEdit,
-      allAccess,
+      createMeasuresPermission,
+      editMeasuresPermission,
+      deleteMeasuresPermission,
 
       validate,
       validateInfos,
