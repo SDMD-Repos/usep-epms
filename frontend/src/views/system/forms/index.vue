@@ -1,7 +1,7 @@
 <template>
 
  <a-collapse v-model:activeKey="activeKey">
-    <a-collapse-panel key="1" header="AAPCR" :disabled="!isCreate && !allAccess">
+    <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
          <form-admin/>
     </a-collapse-panel>
     <a-collapse-panel key="2" header="OPCR (VPs)" >
@@ -25,7 +25,7 @@
 import { computed, defineComponent, onMounted, ref  } from 'vue';
 import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/Forms/aapcr'
-import { usePermissionAccessRights } from '@/services/functions/permission/accessrights/forms'
+
 import FormAdminOpcr from '@/components/SystemAdmin/Forms/opcr'
 export default defineComponent({
     name:"FormAdminTable",
@@ -37,13 +37,8 @@ export default defineComponent({
       const store = useStore()
       const activeKey = ref([]);
       const opcrFormPermission = computed(() => store.getters['system/permission'].opcrFormPermission)
-      const {
-          // DATA
-        isCreate, allAccess,
-          // METHODS
-
-      } = usePermissionAccessRights()
-
+      const aapcrFormPermission = computed(() => store.getters['system/permission'].aapcrFormPermission)
+      const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
       onMounted(() => {
         const opcrFormPermissions = [
           "adminPermission", //ACCESS PERMISSION
@@ -51,13 +46,28 @@ export default defineComponent({
           "apf-opcr", //Set assigned office head to each OPCR
         ]
         store.dispatch('system/CHECK_OPCR_FORM_PERMISSION', { payload: opcrFormPermissions })
+
+        const aapcrFormPermissions = [
+          "adminPermission", //ACCESS PERMISSION
+          "ap-form", //FORM
+          "apf-aapcr", //Set assigned office head to each OPCR
+        ]
+        store.dispatch('system/CHECK_AAPCR_FORM_PERMISSION', { payload: aapcrFormPermissions })
+        store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id:'aapcr',
+                                                                     },
+                                                            })
+    
+        
       })
 
       return {
         activeKey,
-        allAccess,
-        isCreate,
         opcrFormPermission,
+        aapcrFormPermission,
+        aapcrHeadPermission,
       }
 
     },

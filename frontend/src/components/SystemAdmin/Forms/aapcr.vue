@@ -42,13 +42,13 @@
 
                 </a-row>
 
-                 <a-row type="flex" justify="center" class="mt-3">
+                 <a-row type="flex" justify="center" class="mt-3" v-if="createAapcrPermission">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" :disabled="!isCreate && !allAccess"> Save</a-button>
-                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEdit" :disabled="!isCreate && !allAccess" v-else>Edit</a-button>
+                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" > Save</a-button>
+                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEdit"  v-else>Edit</a-button>
                    </a-col>
               </a-row>
-                <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
+                <a-divider />
                 <a-row type="flex" class="mt-3">
                   <a-col :sm="{ span: 3 }" :md="{ span: 2 }" :lg="{ span:2 }"><b>Staff Head: </b></a-col>
                   <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }" >
@@ -64,13 +64,13 @@
                         label-in-value
                         v-if="editBtnStaff"
                       />
-                      <span v-else>{{officeDetails.staff_name}}</span>
+                      <span v-else>{{officeDetails.staff_name || "Not Set"}}</span>
                   </a-col>
                 </a-row>
-                 <a-row type="flex" justify="center" class="mt-3">
+                 <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
                      <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
-                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEditStaff" v-else >Edit</a-button>
+                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
                    </a-col>
               </a-row>
                 <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
@@ -84,7 +84,7 @@ import { computed, defineComponent, onMounted, ref , watch} from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import { getPersonnelByOffice } from '@/services/api/hris';
-import { usePermissionAccessRights } from '@/services/functions/permission/accessrights/forms'
+
 export default defineComponent({
   name: 'AapcrTab',
   components: {},
@@ -93,6 +93,10 @@ export default defineComponent({
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const loading = computed(() => store.getters['external/external'].loading)
     const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetails)
+    const createAapcrPermission = computed(() => store.getters['system/permission'].createAapcrPermission)
+    const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
+
+  
     // const subOffice = computed(()=>{
     //   return typeof officeDetails.value.office_id !== 'undefined'? getStaffList(officeDetails.value.office_id) : []
     // })
@@ -113,8 +117,23 @@ export default defineComponent({
      onMounted(() => {
       store.dispatch('system/FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
 
+     const aapcrCreatePermissions = [
+        "adminPermission",
+        "ap-form", 
+        "apf-aapcr",
+      ]
+      // console.log(store.state.user.id)
 
+      store.dispatch('system/CHECK_CREATE_AAPCR_PERMISSION', { payload: aapcrCreatePermissions })
+       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id:'aapcr',
+                                                                     },
+                                                            })
+    
     })
+    
 
     const getPersonnelList = officeId => {
       memberList.value = []
@@ -189,12 +208,7 @@ export default defineComponent({
       editBtnStaff.value = true;
     }
 
-    const {
-      // DATA
-    isCreate, allAccess,
-      // METHODS
-
-    } = usePermissionAccessRights()
+    
 
     return {
       offices,
@@ -215,9 +229,11 @@ export default defineComponent({
       editBtnStaff,
       onEdit,
       onEditStaff,
-      isCreate,
-      allAccess,
-     getStaffList,
+      // isCreate,
+      // allAccess,
+      createAapcrPermission,
+      aapcrHeadPermission,
+      getStaffList,
       staffId,
     }
   },

@@ -206,6 +206,8 @@ class PermissionController extends Controller
                     'pmaps_name' => $pmaps_name,
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
+                    'staff_id' => '',
+                    'staff_name' => '',
                     'create_id'=> $this->login_user->pmaps_id,
 
                 ]
@@ -302,5 +304,23 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
+    function checkFormHead($pmaps_id,$form_id){
 
+        try{
+            $permission = false;
+            // $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
+            $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
+           
+            if(count($formAccessDetails)){
+              $permission = true;
+            }
+            return response()->json([
+                'permission' => $permission,
+
+            ], 200);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+   
 }

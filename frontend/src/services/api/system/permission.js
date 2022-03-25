@@ -72,5 +72,15 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
+  export function checkFormHeadPermission(pmaps_id,form_id) {
+    return apiClient
+      .get('/system/check-form-head/'+pmaps_id+'/'+form_id)
+      .then(response => {
+        return response.data
+      })
+      .catch(err => console.log(err))
+  }
 
 
+
+  

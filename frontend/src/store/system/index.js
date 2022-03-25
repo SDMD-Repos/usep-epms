@@ -10,6 +10,7 @@ const mapApiProviders = {
     fetchOfficeHead: system.fetchOfficeHead,
     saveOfficeStaff: system.saveOfficeStaff,
     checkAccessPermission: system.checkAccessPermission,
+    checkFormHeadPermission: system.checkFormHeadPermission,
   }
 
 export default {
@@ -32,6 +33,9 @@ export default {
       createMeasuresPermission: false,
       editMeasuresPermission: false,
       deleteMeasuresPermission: false,
+      createAapcrPermission: false,
+      aapcrHeadPermission: false,
+      aapcrFormPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -109,25 +113,7 @@ export default {
               })
             })
           },
-         SAVE_FORM_HEAD({ commit }, { payload }) {
-            commit('SET_STATE', {
-              loading: true,
-            })
-            const { form_id } = payload
-            const saveOfficeHead = mapApiProviders.saveOfficeHead
-            saveOfficeHead(payload).then(response => {
-              if (response) {
-                dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
-                  notification.success({
-                  message: 'Success',
-                  description: form_id.toUpperCase() + ' Head has been assigned.',
-                })
-              }
-              commit('SET_STATE', {
-                loading: false,
-              })
-            })
-        },
+        
         FETCH_AAPCR_HEAD({ commit }, { payload }) {
           commit('SET_STATE', {
             loading: true,
@@ -135,6 +121,7 @@ export default {
           const fetchOfficeHead = mapApiProviders.fetchOfficeHead
           fetchOfficeHead(payload.form_id).then(response => {
             if (response) {
+              
               commit('SET_STATE', {
                 officeHeadDetails : {
                             pmaps_id: response.officeHeadDetails.pmaps_id,
@@ -151,6 +138,25 @@ export default {
             })
           })
       },
+      SAVE_FORM_HEAD({ commit,dispatch  }, { payload }) {
+        commit('SET_STATE', {
+          loading: true,
+        })
+        const { form_id } = payload
+        const saveOfficeHead = mapApiProviders.saveOfficeHead
+        saveOfficeHead(payload).then(response => {
+          if (response) {
+            dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
+              notification.success({
+              message: 'Success',
+              description: form_id.toUpperCase() + ' Head has been assigned.',
+            })
+          }
+          commit('SET_STATE', {
+            loading: false,
+          })
+        })
+    },
       SAVE_FORM_STAFF({ commit, dispatch }, { payload }) {
         commit('SET_STATE', {
           loading: true,
@@ -384,6 +390,59 @@ export default {
           const { permissions } = response
           commit('SET_STATE', {
             deleteMeasuresPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_CREATE_AAPCR_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            createAapcrPermission: permissions,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_APCR_HEAD_PERMISSION({ commit }, { payload }) {
+      const { pmaps_id,form_id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
+      checkFormHeadPermission(pmaps_id,form_id).then(response => {
+        if (response) {
+          const { permission } = response
+          console.log(permission)
+          commit('SET_STATE', {
+            aapcrHeadPermission: permission,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CHECK_AAPCR_FORM_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkAccessPermission = mapApiProviders.checkAccessPermission
+      checkAccessPermission(payload).then(response => {
+        if (response) {
+          const { permissions } = response
+          commit('SET_STATE', {
+            aapcrFormPermission: permissions,
           })
         }
         commit('SET_STATE', {
