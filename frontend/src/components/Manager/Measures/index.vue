@@ -129,21 +129,25 @@ export default defineComponent({
       "m-measures", 
       "mm-create",
       ]
-      store.dispatch('system/CHECK_CREATE_MEASURES_PERMISSION', { payload: measuresCreatePermissions })
+      // store.dispatch('system/CHECK_CREATE_MEASURES_PERMISSION', { payload: measuresCreatePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: measuresCreatePermissions, name:'createMeasuresPermission'} })
 
       const measuresEditPermissions = [
       "manager",
       "m-measures", 
       "mm-edit",
       ]
-      store.dispatch('system/CHECK_EDIT_MEASURES_PERMISSION', { payload: measuresEditPermissions })
+      // store.dispatch('system/CHECK_EDIT_MEASURES_PERMISSION', { payload: measuresEditPermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: measuresEditPermissions, name:'editMeasuresPermission'} })
 
       const measuresDeletePermissions = [
       "manager",
       "m-measures", 
       "mm-delete",
       ]
-      store.dispatch('system/CHECK_DELETE_MEASURES_PERMISSION', { payload: measuresDeletePermissions })
+      // store.dispatch('system/CHECK_DELETE_MEASURES_PERMISSION', { payload: measuresDeletePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: measuresDeletePermissions, name:'deleteMeasuresPermission'} })
+
 
     })
 

@@ -111,7 +111,8 @@ export default defineComponent({
         "mf-functions", //Set assigned office head to each OPCR
         "mff-create",
       ];
-      store.dispatch('system/CHECK_CREATE_FORM_PERMISSION', { payload: formCreatePermissions })
+      // store.dispatch('system/CHECK_CREATE_FORM_PERMISSION', { payload: formCreatePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: formCreatePermissions, name:'createFormPermission'} })
 
       const formDeletePermissions = [
         "manager",
@@ -119,8 +120,9 @@ export default defineComponent({
         "mf-functions", //Set assigned office head to each OPCR
         "mff-delete",
       ]
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: formDeletePermissions, name:'deleteFormPermission'} })
 
-      store.dispatch('system/CHECK_DELETE_FORM_PERMISSION', { payload: formDeletePermissions })
+      // store.dispatch('system/CHECK_DELETE_FORM_PERMISSION', { payload: formDeletePermissions })
     })
 
 

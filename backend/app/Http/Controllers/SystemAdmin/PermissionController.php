@@ -230,21 +230,21 @@ class PermissionController extends Controller
                 $module = $this->getIdByPermissionId($value);
                 $cPermission = $this->fetchAllChildrenPermission($module);
                 if ($this->hasUserAccess($module) && !$this->hasChildrenPermission($cPermission)) {
-                    return response()->json(['permissions' => true], 200);
+                    return response()->json(['hasPermission' => true], 200);
                 }else{
                     $parent = $this->getParentPermission($module);
                     do {
                         $pPermission = $this->fetchAllChildrenPermission($parent);
                         if ($this->hasUserAccess($parent) && !$this->hasChildrenPermission($pPermission)){
 
-                            return response()->json(['permissions' => true], 200);
+                            return response()->json(['hasPermission' => true], 200);
                         }
                     } while ($parent = $this->getParentPermission($parent));
                 }
             }
         }
 
-        return response()->json(['permissions' => false], 200);
+        return response()->json(['hasPermission' => false], 200);
     }
 
     function fetchOfficeHead($form_id){

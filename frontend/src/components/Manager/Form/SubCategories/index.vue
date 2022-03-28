@@ -157,14 +157,17 @@ export default defineComponent({
         "mf-subcat", 
         "mfs-create",
       ]
-      store.dispatch('system/CHECK_CREATE_SUBCAT_PERMISSION', { payload: subCatCreatePermissions })
+      // store.dispatch('system/CHECK_CREATE_SUBCAT_PERMISSION', { payload: subCatCreatePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: subCatCreatePermissions, name:'createSubCatPermission'} })
+
       const subCatDeletePermissions = [
         "manager",
         "m-form", 
         "mf-subcat", 
         "mfs-delete",
       ]
-      store.dispatch('system/CHECK_DELETE_SUBCAT_PERMISSION', { payload: subCatDeletePermissions })
+      // store.dispatch('system/CHECK_DELETE_SUBCAT_PERMISSION', { payload: subCatDeletePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: subCatDeletePermissions, name:'deleteSubCatPermission'} })
     })
 
     const onDelete = key => {

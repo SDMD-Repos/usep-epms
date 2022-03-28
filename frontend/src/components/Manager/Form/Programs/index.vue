@@ -122,20 +122,23 @@ export default defineComponent({
       store.commit('formManager/SET_STATE', { previousPrograms: [] })
       fetchData(year.value)
 
-      const formCreatePermissions = [
+      const programCreatePermissions = [
         "manager",
         "m-form", 
         "mf-programs", 
         "mfp-create",
       ]
-      store.dispatch('system/CHECK_CREATE_PROGRAM_PERMISSION', { payload: formCreatePermissions })
-      const formDeletePermissions = [
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
+      // store.dispatch('system/CHECK_CREATE_PROGRAM_PERMISSION', { payload: formCreatePermissions })
+      const programDeletePermissions = [
         "manager",
         "m-form", 
         "mf-programs", 
         "mfp-delete",
       ]
-      store.dispatch('system/CHECK_DELETE_PROGRAM_PERMISSION', { payload: formDeletePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
+
+      // store.dispatch('system/CHECK_DELETE_PROGRAM_PERMISSION', { payload: programDeletePermissions })
     })
 
     // METHODS

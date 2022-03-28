@@ -144,21 +144,25 @@ export default defineComponent({
         "m-group", 
         "mg-create",
       ]
-      store.dispatch('system/CHECK_CREATE_GROUP_PERMISSION', { payload: groupCreatePermissions })
+      // store.dispatch('system/CHECK_CREATE_GROUP_PERMISSION', { payload: groupCreatePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: groupCreatePermissions, name:'createGroupPermission'} })
 
       const groupeEditPermissions = [
         "manager",
         "m-group", 
         "mg-edit",
       ]
-      store.dispatch('system/CHECK_EDIT_GROUP_PERMISSION', { payload: groupeEditPermissions })
+      // store.dispatch('system/CHECK_EDIT_GROUP_PERMISSION', { payload: groupeEditPermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: groupeEditPermissions, name:'editGroupPermission'} })
 
       const groupeDeletePermissions = [
         "manager",
         "m-group", 
         "mg-delete",
       ]
-      store.dispatch('system/CHECK_DELETE_GROUP_PERMISSION', { payload: groupeDeletePermissions })
+      // store.dispatch('system/CHECK_DELETE_GROUP_PERMISSION', { payload: groupeDeletePermissions })
+      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: groupeDeletePermissions, name:'deleteGroupPermission'} })
+
     })
 
    
