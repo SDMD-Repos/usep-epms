@@ -125,7 +125,7 @@ export default defineComponent({
       // console.log(store.state.user.id)
 
       store.dispatch('system/CHECK_CREATE_AAPCR_PERMISSION', { payload: aapcrCreatePermissions })
-       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
+      store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
                                                                     form_id:'aapcr',

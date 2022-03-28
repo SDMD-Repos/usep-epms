@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="hasAapcrAccess || aapcrPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-uploaded-list="viewUploadedList" />
@@ -15,6 +15,7 @@
 
     <unpublish-remarks-modal :is-unpublish="isUnpublish" @unpublish="unpublish" />
   </div>
+   <div v-else><span>No Access Rights.</span></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue"
@@ -56,7 +57,9 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
-
+    const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
+    const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
+    
     const {
       // DATA
       isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
@@ -71,6 +74,18 @@ export default defineComponent({
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('aapcr/FETCH_LIST')
+      store.dispatch('aapcr/CHECK_APCR_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id:'aapcr',
+                                                                     },
+                                                            })
+      const aapcrPermissions = [
+        "form",
+        "f-aapcr", 
+      ]
+     
+       store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrPermissions, name:'aapcrPermission'} })
     })
 
     // METHODS
@@ -194,13 +209,15 @@ export default defineComponent({
       columns: listTableColumns,
       list,
       loading,
-
+      
       isUploadOpen,
       cachedId,
       okPublishText,
       noteInModal,
       fileList,
       isConfirmDeleteFile,
+      hasAapcrAccess,
+      aapcrPermission,
 
       isUploadedViewed,
       viewedForm,

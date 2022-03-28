@@ -51,7 +51,7 @@ export default defineComponent({
         "mf-fields", 
       ]
       // store.dispatch('system/CHECK_CREATE_FIELD_PERMISSION', { payload: fieldPermissions })
-       store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: fieldPermissions, name:'createFieldPermission'} })
+       store.dispatch('system/CHECK_PERMISSION', { payload: {permission: fieldPermissions, name:'createFieldPermission'} })
 
     })
 

@@ -88,30 +88,30 @@ class AccessRightsSeeder extends Seeder
         //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
         //         'create_id' => 'admin',
         //     ],
-        //     [
-        //         'permission_id' => 'ms-opcrvp',
-        //         'permission_name' => 'OPCR (VPs) Signatory',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'ms-opcr',
-        //         'permission_name' => 'OPCR Signatory',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'ms-cpcr',
-        //         'permission_name' => 'CPCR Signatory',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'ms-ipcr',
-        //         'permission_name' => 'IPCR Signatory',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
+            // [
+            //     'permission_id' => 'ms-opcrvp',
+            //     'permission_name' => 'OPCR (VPs) Signatory',
+            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+            //     'create_id' => 'admin',
+            // ],
+            // [
+            //     'permission_id' => 'ms-opcr',
+            //     'permission_name' => 'OPCR Signatory',
+            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+            //     'create_id' => 'admin',
+            // ],
+            // [
+            //     'permission_id' => 'ms-cpcr',
+            //     'permission_name' => 'CPCR Signatory',
+            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+            //     'create_id' => 'admin',
+            // ],
+            // [
+            //     'permission_id' => 'ms-ipcr',
+            //     'permission_name' => 'IPCR Signatory',
+            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
+            //     'create_id' => 'admin',
+            // ],
         // ]);
 
         DB::table('access_rights')->insert([
@@ -205,6 +205,48 @@ class AccessRightsSeeder extends Seeder
                 'create_id' => 'admin',
             ],
         ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'form',
+                'permission_name' => 'Forms',
+                'create_id' => 'admin',
+            ],
+        ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'f-aapcr',
+                'permission_name' => 'Access Forms and Lists in AAPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'f-opcrvp',
+                'permission_name' => 'Access Forms and Lists in OPCR (VP)',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'f-opcr',
+                'permission_name' => 'Access Forms and Lists in OPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'f-cpcr',
+                'permission_name' => 'Access Forms and Lists in CPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'f-ipcr',
+                'permission_name' => 'Access Forms and Lists in IPCR',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+        ]);
+
 
         DB::table('access_rights')->insert([
             [

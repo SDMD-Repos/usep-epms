@@ -1,6 +1,7 @@
 import { notification } from 'ant-design-vue'
 
 import * as aapcrForm from '@/services/api/mainForms/aapcr'
+import * as system from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: aapcrForm.save,
@@ -9,6 +10,7 @@ const mapApiProviders = {
   unpublish: aapcrForm.unpublish,
   deactivate: aapcrForm.deactivate,
   update: aapcrForm.update,
+  permission: system.checkAllowAapcrForm,
 }
 
 export default {
@@ -19,6 +21,7 @@ export default {
     fileUrl: null,
     documentName: null,
     dataSource: [],
+    hasAapcrAccess: false,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -194,6 +197,25 @@ export default {
       commit('DELETE_STATE_ITEM', {
         type: 'dataSource',
         key: payload.key,
+      })
+    },
+    CHECK_APCR_PERMISSION({ commit }, { payload }) {
+      const { pmaps_id,form_id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const permission = mapApiProviders.permission
+      permission(pmaps_id,form_id).then(response => {
+        if (response) {
+          const { permission } = response
+
+          commit('SET_STATE', {
+            hasAapcrAccess: permission,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
       })
     },
   },

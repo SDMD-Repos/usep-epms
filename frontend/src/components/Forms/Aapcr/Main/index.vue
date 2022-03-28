@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="hasAapcrAccess || aapcrPermission">
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -40,6 +40,7 @@
       </div>
     </a-spin>
   </div>
+  <div v-else><span>No Access Rights.</span></div>
 </template>
 <script>
 import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
@@ -84,6 +85,10 @@ export default defineComponent({
 
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
+    const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
+    const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
+
+    console.log(hasAapcrAccess)
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
     })
@@ -111,6 +116,19 @@ export default defineComponent({
       } else {
         checkFormAvailability()
       }
+      store.dispatch('aapcr/CHECK_APCR_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id:'aapcr',
+                                                                     },
+                                                            })
+
+      const aapcrPermissions = [
+        "form",
+        "f-aapcr", 
+      ]
+     
+       store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrPermissions, name:'aapcrPermission'} })
     })
 
     // METHODS
@@ -262,6 +280,8 @@ export default defineComponent({
       isFinalized,
       allowEdit,
       isCheckingForm,
+      hasAapcrAccess,
+      aapcrPermission,
 
       years,
       categories,

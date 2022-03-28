@@ -128,7 +128,7 @@ export default defineComponent({
         "mf-programs", 
         "mfp-create",
       ]
-      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
       // store.dispatch('system/CHECK_CREATE_PROGRAM_PERMISSION', { payload: formCreatePermissions })
       const programDeletePermissions = [
         "manager",
@@ -136,7 +136,7 @@ export default defineComponent({
         "mf-programs", 
         "mfp-delete",
       ]
-      store.dispatch('system/CHECK_MANAGER_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
 
       // store.dispatch('system/CHECK_DELETE_PROGRAM_PERMISSION', { payload: programDeletePermissions })
     })

@@ -322,5 +322,28 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-   
+    function allowAapcrForm($pmaps_id,$form_id){
+
+        try{
+            $permission = false;
+            $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
+
+            $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
+           
+            if(count($formAccessDetails)){
+              $permission = true;
+            }
+
+            if(count($formStaffAccessDetails)){
+                $permission = true;
+            }
+            return response()->json([
+                'permission' => $permission,
+
+            ], 200);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+    
 }

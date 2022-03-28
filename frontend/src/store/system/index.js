@@ -455,7 +455,7 @@ export default {
         })
       })
     },
-    CHECK_MANAGER_PERMISSION({ commit }, { payload }) {
+    CHECK_PERMISSION({ commit }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
