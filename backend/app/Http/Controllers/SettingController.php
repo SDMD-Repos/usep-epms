@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\CascadingLevel;
 use App\Category;
 use App\Form;
+use App\FormAccess;
 use App\FormField;
 use App\FormFieldSetting;
 use App\Group;
@@ -564,12 +565,15 @@ class SettingController extends Controller
         }
     }
 
-    public function getAllForms()
+    public function getAllForms($pmaps_id)
     {
-        $forms = Form::orderBy('ordering', 'ASC')->get();
-
+        // $forms = Form::orderBy('ordering', 'ASC')->get();
+        $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id]])->orWhere([['staff_id',$pmaps_id]])->with('form')->get();
+        
+     
+        // $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
         return response()->json([
-            'spmsForms' => $forms
+            'spmsForms' => $formAccessDetails
         ], 200);
     }
 

@@ -145,9 +145,9 @@ export async function deleteMeasure(id) {
     .catch(err => console.log(err))
 }
 
-export async function getAllForms() {
+export async function getAllForms(pmaps_id) {
   return apiClient
-    .get('/settings/get-all-spms-forms')
+    .get('/settings/get-all-spms-forms/'+pmaps_id)
     .then(response => {
       return response.data
     })

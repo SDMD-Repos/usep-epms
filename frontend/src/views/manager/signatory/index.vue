@@ -1,11 +1,12 @@
 <template>
-  <a-card>
+  <a-card v-if="formList.length">
     <a-tabs v-model:activeKey="activeKey" :animated="false">
       <template v-for="(form, index) in formList" :key="index">
-        <a-tab-pane :tab="form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.id" /></a-tab-pane>
+        <a-tab-pane :tab="form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.form.id" /></a-tab-pane>
       </template>
     </a-tabs>
   </a-card>
+  <div v-else>You have no permission to access this page</div>
 </template>
 <script>
 import SignatoryForm from '@/components/Manager/Signatory/Main'
@@ -24,7 +25,10 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_ALL_FORMS')
+      store.dispatch('formManager/FETCH_ALL_FORMS',{payload: {
+                                                              pmaps_id: store.state.user.pmapsId,
+                                                            },
+                                                    })
     })
 
     return {

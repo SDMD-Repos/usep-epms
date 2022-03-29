@@ -419,13 +419,14 @@ export default {
         }
       })
     },
-    FETCH_ALL_FORMS({ commit }) {
+    FETCH_ALL_FORMS({ commit },{ payload }) {
+      const { pmaps_id } = payload
       commit('SET_STATE', {
         loading: true,
       })
 
       const getAllForms = mapApiProviders.getAllForms
-      getAllForms().then(response => {
+      getAllForms(pmaps_id).then(response => {
         if (response) {
           const { spmsForms } = response
           commit('SET_STATE', {
