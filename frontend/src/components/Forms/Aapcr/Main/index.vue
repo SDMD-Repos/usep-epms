@@ -40,7 +40,7 @@
       </div>
     </a-spin>
   </div>
-  <div v-else><span>No Access Rights.</span></div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
