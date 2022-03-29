@@ -28,7 +28,7 @@ export default defineComponent({
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
-    functionId: { type: String, default: "" },
+    functionId: { type: Number, default: null },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
     targetsBasisList: { type: Array, default: () => { return [] }},

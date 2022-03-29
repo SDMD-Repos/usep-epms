@@ -61,6 +61,20 @@ export const useFormFields = form => {
     }
   }
 
+  const saveOfficeListVp = field => {
+    const list = storedOffices.value[field]
+    if(list.length) {
+      console.log("form.program")
+      console.log(form.program)
+      form.value[field] = form.program ? form.program : null
+      form.value.options[field] = []
+      storedOffices.value[field] = []
+      if (cachedOffice.value[field].length) {
+        cachedOffice.value[field] = []
+      }
+    }
+  }
+
   const updateOfficeList = field => {
     form.value.options[field] = form.value[field]
     cachedOffice.value[field] = form.value[field]
@@ -122,6 +136,7 @@ export const useFormFields = form => {
     filterBasisOption,
     onOfficeChange,
     saveOfficeList,
+    saveOfficeListVp,
     updateOfficeList,
     deleteOfficeItem,
   }

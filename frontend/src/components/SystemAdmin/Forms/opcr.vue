@@ -118,7 +118,7 @@ export default defineComponent({
       }else
         Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Head',
+          content: () => 'Please select an Office Head',
         })
     }
 
@@ -134,7 +134,7 @@ export default defineComponent({
       }else
         Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Staff',
+          content: () => 'Please select an Office Staff',
         })
     }
 

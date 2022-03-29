@@ -113,7 +113,7 @@ export default defineComponent({
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
-    functionId: { type: String, default: "" },
+    functionId: { type: Number, default: null },
     itemSource: { type: Array, default: () => { return [] }},
     budgetList: { type: Array, default: () => { return [] }},
     mainCategory: { type: Object, default: () => { return {} }},
