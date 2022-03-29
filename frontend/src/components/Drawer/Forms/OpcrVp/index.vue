@@ -140,8 +140,7 @@
                   :tree-data="programsWithFunction"
                   placeholder="Select a Program"
                   tree-default-expand-all
-                >
-                </a-tree-select>
+                />
               </a-col>
               <a-col :span="2" :offset="1">
                 <DeleteFilled @click="deleteOfficeItem('implementing', index)"/>
@@ -263,11 +262,12 @@ export default defineComponent({
       return functions.map(function(functionValue){
         const programs = store.getters['formManager/manager'].programs
         return {'children' : programs.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
+          mapValue.key = functionValue.id + "-" + mapValue.id
           mapValue.title = mapValue.name
           mapValue.value = mapValue.id
           mapValue.category = {}
           return mapValue
-          }), title: functionValue.name,disabled: true}
+          }), value: "p-"+ functionValue.id, key: functionValue.id.toString(), title: functionValue.name,selectable: false}
       })
     })
 
