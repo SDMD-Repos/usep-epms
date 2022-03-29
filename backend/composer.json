@@ -7,12 +7,19 @@
         "laravel"
     ],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Xint0-elab/phpjasper.git"
+        }
+    ],
     "require": {
         "php": "^7.2.5|^8.0",
         "ext-json": "*",
         "doctrine/dbal": "2.*",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
+        "geekcom/phpjasper": "dev-Upgrade_to_JasperStarter_3.6.2",
         "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
         "laravel/framework": "^7.29",
         "laravel/passport": "~9.0",

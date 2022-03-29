@@ -1,32 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.0.final using JasperReports Library version 6.19.0-646c68931cebf1a58bc65c4359d1f0ca223c5e94  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="aapcr" language="groovy" pageWidth="938" pageHeight="612" orientation="Landscape" columnWidth="898" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="be2c73b6-eb3d-45b7-8c2a-78f34c496094">
 	<property name="ireport.zoom" value="1.6105100000000163"/>
 	<property name="ireport.x" value="13"/>
 	<property name="ireport.y" value="288"/>
-	<style name="ProgramHeader" mode="Opaque">
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_order} == "1"]]></conditionExpression>
-			<style mode="Opaque" forecolor="#000000" backcolor="#F7CAAC" fill="Solid" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="5" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
-		</conditionalStyle>
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_order} != "1"]]></conditionExpression>
-			<style mode="Transparent" forecolor="#000000" backcolor="#FFFFFF" fill="Solid" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="5" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
-		</conditionalStyle>
-	</style>
-	<style name="subCategoryHeader">
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_order} != "1"]]></conditionExpression>
-			<style mode="Opaque" forecolor="#000000" fill="Solid" hAlign="Left" vAlign="Middle" markup="none" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica" isPdfEmbedded="false"/>
-		</conditionalStyle>
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{subCategory} == "Outcome Indicators" || $F{subCategory} == "Output Indicators"]]></conditionExpression>
-			<style mode="Transparent" forecolor="#000000" backcolor="#D8D8D8" fill="Solid" hAlign="Center" markup="styled" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="Helvetica-Bold" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
-		</conditionalStyle>
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{subCategory} != "Outcome Indicators" && $F{subCategory} != "Output Indicators" && $F{category_id} == "1"]]></conditionExpression>
-			<style mode="Opaque" forecolor="#000000" backcolor="#FBE4D5" fill="Solid" hAlign="Center" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfFontName="DejaVu Sans" isPdfEmbedded="true"/>
-		</conditionalStyle>
-	</style>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<parameter name="usepLogo" class="java.lang.String"/>
 	<parameter name="year" class="java.lang.String"/>
 	<parameter name="preparedBy" class="java.lang.String"/>
@@ -39,254 +17,14 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["C:\\xampp\\htdocs\\epms\\public\\files\\"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="programsDataSet" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="preparedByPosition" class="java.lang.String"/>
 	<parameter name="public_path" class="java.lang.String"/>
 	<parameter name="notFinal" class="java.lang.String"/>
 	<parameter name="reviewedByPosition" class="java.lang.String"/>
 	<parameter name="totalBudget" class="java.lang.String"/>
-	<field name="pi_name" class="java.lang.String"/>
-	<field name="subCategory" class="java.lang.String"/>
-	<field name="program" class="java.lang.String"/>
-	<field name="function" class="java.lang.String"/>
-	<field name="category_id" class="java.lang.String"/>
-	<field name="category_order" class="java.lang.String"/>
-	<field name="allocatedBudget" class="java.lang.String"/>
-	<field name="subPICount" class="java.lang.String"/>
-	<field name="target" class="java.lang.String"/>
-	<field name="measures" class="java.lang.String"/>
-	<field name="implementing" class="java.lang.String"/>
-	<field name="supporting" class="java.lang.String"/>
-	<field name="targetsBasis" class="java.lang.String"/>
-	<field name="otherRemarks" class="java.lang.String"/>
-	<field name="programBudget" class="java.math.BigDecimal"/>
-	<field name="subCategoryParent_1" class="java.lang.String"/>
-	<field name="subCategoryParent_2" class="java.lang.String"/>
-	<field name="subCategoryParent_3" class="java.lang.String"/>
-	<variable name="programTotal" class="java.math.BigDecimal" resetType="Group" resetGroup="ProgramGroup" calculation="First">
-		<variableExpression><![CDATA[$F{programBudget}]]></variableExpression>
-		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
-	</variable>
-	<variable name="subCategoryCount" class="java.lang.Integer" resetType="Group" resetGroup="GroupSubCategory" calculation="Sum">
-		<variableExpression><![CDATA[$F{subPICount} == "0" ? 1 : 0]]></variableExpression>
-		<initialValueExpression><![CDATA[1]]></initialValueExpression>
-	</variable>
-	<group name="GroupFunction">
-		<groupExpression><![CDATA[$F{function}]]></groupExpression>
-		<groupHeader>
-			<band height="11">
-				<textField>
-					<reportElement mode="Opaque" x="0" y="0" width="898" height="11" forecolor="#FFFFFF" backcolor="#385623" uuid="f47197d7-09f2-47e7-84f9-0e30e01cdba0"/>
-					<box leftPadding="2">
-						<pen lineWidth="0.5" lineColor="#000000"/>
-						<topPen lineWidth="0.5" lineColor="#000000"/>
-						<leftPen lineWidth="0.5" lineColor="#000000"/>
-						<bottomPen lineWidth="0.5" lineColor="#000000"/>
-						<rightPen lineWidth="0.5" lineColor="#000000"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{function}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="ProgramGroup">
-		<groupExpression><![CDATA[$F{program}]]></groupExpression>
-		<groupHeader>
-			<band height="11">
-				<staticText>
-					<reportElement style="ProgramHeader" mode="Opaque" x="0" y="0" width="898" height="11" uuid="048d329d-14a2-49a3-aec3-3ca4a81f0568"/>
-					<box>
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.5"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="6"/>
-					</textElement>
-					<text><![CDATA[]]></text>
-				</staticText>
-				<textField evaluationTime="Group" evaluationGroup="ProgramGroup" pattern="#,##0">
-					<reportElement style="ProgramHeader" mode="Transparent" x="377" y="0" width="45" height="11" uuid="cf5ca0b9-931c-45cf-a14c-c7ed71d28b7a"/>
-					<box rightPadding="2"/>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$V{programTotal}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement style="ProgramHeader" mode="Transparent" x="0" y="0" width="227" height="11" uuid="35ee4f31-5138-4d78-b995-0e16439714b2"/>
-					<box leftPadding="2">
-						<pen lineWidth="0.0"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{program}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="GroupParentSubCategory1">
-		<groupExpression><![CDATA[$F{subCategoryParent_1}]]></groupExpression>
-		<groupHeader>
-			<band height="10">
-				<printWhenExpression><![CDATA[!$F{subCategoryParent_1}.isEmpty()]]></printWhenExpression>
-				<staticText>
-					<reportElement mode="Opaque" x="0" y="0" width="898" height="10" uuid="048d329d-14a2-49a3-aec3-3ca4a81f0568"/>
-					<box>
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.5"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="6"/>
-					</textElement>
-					<text><![CDATA[]]></text>
-				</staticText>
-				<textField>
-					<reportElement mode="Transparent" x="0" y="0" width="227" height="10" uuid="32e72565-7ca0-4cf6-8cf3-adaf4d20f98d">
-						<printWhenExpression><![CDATA[!$F{subCategoryParent_1}.isEmpty()]]></printWhenExpression>
-					</reportElement>
-					<box leftPadding="2">
-						<pen lineWidth="0.0"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true" isItalic="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{subCategoryParent_1}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="GroupParentSubCategory2">
-		<groupExpression><![CDATA[$F{subCategoryParent_2}]]></groupExpression>
-		<groupHeader>
-			<band height="10">
-				<printWhenExpression><![CDATA[!$F{subCategoryParent_2}.isEmpty()]]></printWhenExpression>
-				<staticText>
-					<reportElement mode="Opaque" x="0" y="0" width="898" height="10" uuid="048d329d-14a2-49a3-aec3-3ca4a81f0568"/>
-					<box>
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.5"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="6"/>
-					</textElement>
-					<text><![CDATA[]]></text>
-				</staticText>
-				<textField>
-					<reportElement mode="Transparent" x="0" y="0" width="227" height="10" uuid="32e72565-7ca0-4cf6-8cf3-adaf4d20f98d">
-						<printWhenExpression><![CDATA[!$F{subCategoryParent_2}.isEmpty()]]></printWhenExpression>
-					</reportElement>
-					<box leftPadding="2">
-						<pen lineWidth="0.0"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true" isItalic="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{subCategoryParent_2}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="GroupParentSubCategory3">
-		<groupExpression><![CDATA[$F{subCategoryParent_3}]]></groupExpression>
-		<groupHeader>
-			<band height="10">
-				<printWhenExpression><![CDATA[!$F{subCategoryParent_3}.isEmpty()]]></printWhenExpression>
-				<staticText>
-					<reportElement mode="Opaque" x="0" y="0" width="898" height="10" uuid="048d329d-14a2-49a3-aec3-3ca4a81f0568"/>
-					<box>
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.5"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="6"/>
-					</textElement>
-					<text><![CDATA[]]></text>
-				</staticText>
-				<textField>
-					<reportElement mode="Transparent" x="0" y="0" width="227" height="10" uuid="32e72565-7ca0-4cf6-8cf3-adaf4d20f98d">
-						<printWhenExpression><![CDATA[!$F{subCategoryParent_3}.isEmpty()]]></printWhenExpression>
-					</reportElement>
-					<box leftPadding="2">
-						<pen lineWidth="0.0"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" isBold="true" isItalic="true"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{subCategoryParent_3}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
-	<group name="GroupSubCategory" minHeightToStartNewPage="30">
-		<groupExpression><![CDATA[$F{subCategory}]]></groupExpression>
-		<groupHeader>
-			<band height="10">
-				<printWhenExpression><![CDATA[!$F{subCategory}.isEmpty()]]></printWhenExpression>
-				<staticText>
-					<reportElement style="subCategoryHeader" mode="Opaque" x="0" y="0" width="898" height="10" uuid="048d329d-14a2-49a3-aec3-3ca4a81f0568"/>
-					<box>
-						<pen lineWidth="0.5"/>
-						<topPen lineWidth="0.5"/>
-						<leftPen lineWidth="0.5"/>
-						<bottomPen lineWidth="0.5"/>
-						<rightPen lineWidth="0.5"/>
-					</box>
-					<textElement>
-						<font size="6"/>
-					</textElement>
-					<text><![CDATA[]]></text>
-				</staticText>
-				<textField>
-					<reportElement style="subCategoryHeader" mode="Transparent" x="0" y="0" width="227" height="10" uuid="32e72565-7ca0-4cf6-8cf3-adaf4d20f98d">
-						<printWhenExpression><![CDATA[!$F{subCategory}.isEmpty()]]></printWhenExpression>
-					</reportElement>
-					<box leftPadding="2">
-						<pen lineWidth="0.0"/>
-						<topPen lineWidth="0.0"/>
-						<leftPen lineWidth="0.0"/>
-						<bottomPen lineWidth="0.0"/>
-						<rightPen lineWidth="0.0"/>
-					</box>
-					<textElement verticalAlignment="Middle">
-						<font fontName="DejaVu Sans" size="6" pdfEncoding="Identity-H"/>
-					</textElement>
-					<textFieldExpression><![CDATA[$F{subCategory}]]></textFieldExpression>
-				</textField>
-			</band>
-		</groupHeader>
-	</group>
+	<queryString language="JSON">
+		<![CDATA[data.main]]>
+	</queryString>
 	<background>
 		<band height="572">
 			<image>
@@ -736,170 +474,16 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="13" splitType="Stretch">
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="227" height="13" isPrintWhenDetailOverflows="true" uuid="5c2fe0f9-57a4-462e-942f-92aa3db906f3"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{subPICount} != "0" ? ("     "+$V{subCategoryCount}+"."+$F{subPICount}+" "+$F{pi_name}) : ($V{subCategoryCount}+". "+$F{pi_name})]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="227" y="0" width="75" height="13" isPrintWhenDetailOverflows="true" uuid="534f3092-277b-4df0-8611-a6713f391c76"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{target}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="302" y="0" width="75" height="13" isPrintWhenDetailOverflows="true" uuid="7b45409c-d3e9-44b5-9867-b14f81a4a671"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{measures}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="422" y="0" width="120" height="13" isPrintWhenDetailOverflows="true" uuid="063619d8-d9f0-42fc-a32e-eaa7331badd1"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{targetsBasis}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="718" y="0" width="90" height="13" isPrintWhenDetailOverflows="true" uuid="e135e28d-251d-42dd-82ee-cbf1b5d30c4b"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{otherRemarks}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement stretchType="RelativeToTallestObject" x="808" y="0" width="30" height="13" uuid="a1744168-c2d9-422a-a8b7-3298d370f6fe"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<staticText>
-				<reportElement stretchType="RelativeToTallestObject" x="838" y="0" width="30" height="13" uuid="98a68718-b351-4984-bcc9-adacf85168c6"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<staticText>
-				<reportElement stretchType="RelativeToTallestObject" x="868" y="0" width="30" height="13" uuid="c8223f2d-824c-4bdf-b5c5-aeba2e9677a9"/>
-				<box>
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<break>
-				<reportElement x="0" y="12" width="100" height="1" uuid="ae796357-c003-4943-a710-6a0f96300018">
-					<printWhenExpression><![CDATA[$V{PAGE_NUMBER} == 1 && $V{COLUMN_COUNT} > 13]]></printWhenExpression>
-				</reportElement>
-			</break>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="542" y="0" width="88" height="13" isPrintWhenDetailOverflows="true" uuid="f8686477-6a50-4c86-b2b4-0fb7d668b914"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{implementing}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="630" y="0" width="88" height="13" isPrintWhenDetailOverflows="true" uuid="67580173-7782-4567-b084-7f81483a64cd"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{supporting}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement stretchType="RelativeToTallestObject" x="377" y="0" width="45" height="13" isPrintWhenDetailOverflows="true" uuid="ff1901a2-bd43-4b7e-955f-790e2584ffcc"/>
-				<box topPadding="2" leftPadding="2" bottomPadding="2" rightPadding="2">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="DejaVu Sans" size="6"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{allocatedBudget}]]></textFieldExpression>
-			</textField>
+		<band height="30">
+			<subreport>
+				<reportElement x="0" y="0" width="898" height="30" uuid="21c0536b-1cda-4404-8d81-5b28f4f71652"/>
+				<dataSourceExpression><![CDATA[(net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}.subDataSource("main")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{public_path} + "\\raw\\aapcr_details.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</detail>
 	<summary>
-		<band height="175">
+		<band height="176">
 			<staticText>
 				<reportElement mode="Opaque" x="0" y="11" width="898" height="10" backcolor="#8EAADB" uuid="57f07b3f-a5c4-4c86-937f-b5936e539f6d"/>
 				<box leftPadding="2">
@@ -914,11 +498,6 @@
 				</textElement>
 				<text><![CDATA[OVER ALL RATING]]></text>
 			</staticText>
-			<subreport>
-				<reportElement x="0" y="21" width="808" height="36" uuid="b4f90694-e143-4f1c-b81c-fc6562b31aff"/>
-				<dataSourceExpression><![CDATA[$P{programsDataSet}]]></dataSourceExpression>
-				<subreportExpression><![CDATA[$P{public_path} + "\\files\\aapcr_summary.jasper"]]></subreportExpression>
-			</subreport>
 			<staticText>
 				<reportElement positionType="Float" x="0" y="57" width="898" height="10" forecolor="#FF3333" uuid="1acd30ff-b7c2-4e6e-80ad-c13f81469867"/>
 				<box leftPadding="2">
@@ -1176,6 +755,11 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{totalBudget}]]></textFieldExpression>
 			</textField>
+			<subreport>
+				<reportElement x="0" y="21" width="808" height="36" uuid="76927f7e-3e72-4285-a2e4-004c6f946a35"/>
+				<dataSourceExpression><![CDATA[(net.sf.jasperreports.engine.data.JsonDataSource)$P{REPORT_DATA_SOURCE}.subDataSource("programsDataSet")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{public_path} + "\\raw\\aapcr_summary.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</summary>
 </jasperReport>
