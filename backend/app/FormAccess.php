@@ -11,4 +11,10 @@ class FormAccess extends Model
 
 
     protected $table = "form_access";
+
+
+    public function form()
+    {
+        return $this->belongsTo('App\Form', 'form_id');
+    }
 }

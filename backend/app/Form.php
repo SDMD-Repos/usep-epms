@@ -21,4 +21,9 @@ class Form extends Model
         return $this->hasMany('App\OtherProgram');
     }
 
+    public function formAccess()
+    {
+        return $this->hasMany('App\FormAccess', 'form_id');
+    }
+
 }
