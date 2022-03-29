@@ -104,13 +104,13 @@
                 v-model:value="form.options.implementing"
                 style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
-                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing.length > 0"
+                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing ? form.implementing.length > 0 : false"
                 allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'implementing') }" />
             </a-col>
             <a-col :span="2">
-              <a-tooltip :title="!form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.implementing && !form.implementing.length" type="primary" @click="saveOfficeListVp('implementing')">
+              <a-tooltip :title="form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
+                <a-button v-if="form.implementing && !form.implementing.length" type="primary" @click="saveOfficeListVp('implementing')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -128,6 +128,11 @@
                 <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
               </a-col>
               <a-col :span="8">
+<!--                <a-select v-model:value="form.implementing[index].cascadeTo" style="width: 100%">-->
+<!--                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">-->
+<!--                    {{ category.name }}-->
+<!--                  </a-select-option>-->
+<!--                </a-select>-->
                 <a-tree-select
                   v-model:value="form.implementing[index].cascadeTo"
                   style="width: 100%"
@@ -153,13 +158,13 @@
                 v-model:value="form.options.supporting"
                 style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
-                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting.length > 0"
+                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting ? form.supporting.length > 0 : false"
                 allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'supporting') }" />
             </a-col>
             <a-col :span="2">
-              <a-tooltip :title="!form.supporting.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.supporting.length" type="primary" @click="saveOfficeListVp('supporting')">
+              <a-tooltip :title="form.supporting && !form.supporting.length ? 'Save List' : 'Edit List'">
+                <a-button v-if="form.supporting && !form.supporting.length" type="primary" @click="saveOfficeListVp('supporting')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -262,7 +267,7 @@ export default defineComponent({
           mapValue.value = mapValue.id
           mapValue.category = {}
           return mapValue
-          }),id: functionValue.id, title: functionValue.name,disabled: true}
+          }), title: functionValue.name,disabled: true}
       })
     })
 

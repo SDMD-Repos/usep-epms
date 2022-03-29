@@ -64,9 +64,7 @@ export const useFormFields = form => {
   const saveOfficeListVp = field => {
     const list = storedOffices.value[field]
     if(list.length) {
-      console.log("form.program")
-      console.log(form.program)
-      form.value[field] = form.program ? form.program : null
+      form.value[field] = mappedOfficeList(list, field, parseInt(form.program ? form.program : {}))
       form.value.options[field] = []
       storedOffices.value[field] = []
       if (cachedOffice.value[field].length) {
