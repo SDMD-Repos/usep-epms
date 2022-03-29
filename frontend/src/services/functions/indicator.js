@@ -102,6 +102,24 @@ const defaultOpcrVpFormData = {
   remarks: '',
 }
 
+const defaultOpcrFormData = {
+  program: null,
+  subCategory: null,
+  name: '',
+  isHeader: false,
+  target: '',
+  measures: [],
+  budget: null,
+  targetsBasis: '',
+  implementing: [],
+  supporting: [],
+  options: {
+    implementing: [],
+    supporting: [],
+  },
+  remarks: '',
+}
+
 const defaultOpcrTemplateData = {
   subCategory: null,
   name: '',
@@ -118,11 +136,15 @@ export const useDefaultFormData = props => {
     case 'aapcr':
       defaultData.value = defaultAapcrFormData
       break
-    case 'opcrtemplate':
-      defaultData.value = defaultOpcrTemplateData
-      break;
     case 'opcrvp':
       defaultData.value = defaultOpcrVpFormData
+      break
+    case 'opcr':
+      defaultData.value = defaultOpcrFormData
+      break
+    case 'opcrtemplate':
+      defaultData.value = defaultOpcrTemplateData
+      break
   }
 
   const formData = reactive(defaultData.value)
@@ -167,6 +189,7 @@ export const useDefaultFormData = props => {
       })
       break;
     case 'opcrvp':
+    case 'opcr':
       let programValidator = async (rule, value) => {
         const { parentDetails } = props.config.value
         const hasParent = (typeof parentDetails === 'undefined') || (typeof parentDetails !== 'undefined' && parentDetails.subCategory !== null)
@@ -241,6 +264,7 @@ export const useDefaultFormData = props => {
       case 'opcrtemplate':
         break
       case 'opcrvp':
+      case 'opcr':
         formData.budget = newData.budget
         formData.targetsBasis = newData.targetsBasis
         formData.implementing = newData.implementing

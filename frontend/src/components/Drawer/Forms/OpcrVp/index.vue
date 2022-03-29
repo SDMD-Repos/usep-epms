@@ -109,8 +109,8 @@
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'implementing') }" />
             </a-col>
             <a-col :span="2">
-              <a-tooltip :title="!form.implementing.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.implementing.length" type="primary" @click="saveOfficeList('implementing')">
+              <a-tooltip :title="!form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
+                <a-button v-if="!form.implementing && !form.implementing.length" type="primary" @click="saveOfficeListVp('implementing')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -121,18 +121,22 @@
           </a-row>
         </a-form-item>
 
-        <div v-if="form.implementing.length">
+        <div v-if="form.implementing && form.implementing.length">
           <div v-for="(office, index) in form.implementing" :key="index">
             <a-row type="flex" align="middle">
               <a-col :span="5" :offset="3">
                 <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
               </a-col>
               <a-col :span="8">
-                <a-select v-model:value="form.implementing[index].cascadeTo" style="width: 100%">
-                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
-                    {{ category.name }}
-                  </a-select-option>
-                </a-select>
+                <a-tree-select
+                  v-model:value="form.implementing[index].cascadeTo"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="programsWithFunction"
+                  placeholder="Select a Program"
+                  tree-default-expand-all
+                >
+                </a-tree-select>
               </a-col>
               <a-col :span="2" :offset="1">
                 <DeleteFilled @click="deleteOfficeItem('implementing', index)"/>
@@ -155,7 +159,7 @@
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="!form.supporting.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.supporting.length" type="primary" @click="saveOfficeList('supporting')">
+                <a-button v-if="!form.supporting.length" type="primary" @click="saveOfficeListVp('supporting')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -224,7 +228,7 @@ export default defineComponent({
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
-    drawerId: { type: String, default: "" },
+    drawerId: { type: Number, default: null },
     targetsBasisList: { type: Array, default: () => { return [] }},
     categories: { type: Array, default: () => { return [] }},
     currentYear: { type: Number, default: new Date().getFullYear() },
@@ -249,6 +253,19 @@ export default defineComponent({
       return programs.filter(i => i.category_id === props.drawerId)
     })
 
+    const programsWithFunction = computed( () => {
+      const functions = store.getters['formManager/manager'].functions
+      return functions.map(function(functionValue){
+        const programs = store.getters['formManager/manager'].programs
+        return {'children' : programs.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
+          mapValue.title = mapValue.name
+          mapValue.value = mapValue.id
+          mapValue.category = {}
+          return mapValue
+          }),id: functionValue.id, title: functionValue.name,disabled: true}
+      })
+    })
+
     const subCategories = computed(() => {
       const subs = store.getters['formManager/subCategories']
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
@@ -256,6 +273,7 @@ export default defineComponent({
 
     const measuresList  = computed(() => store.getters['formManager/manager'].measures)
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
+    const programs  = computed(() => store.getters['formManager/manager'].programs)
 
     watch(() => [props.drawerConfig, props.formObject], ([drawerConfig, formObject]) => {
       config.value = drawerConfig
@@ -270,7 +288,7 @@ export default defineComponent({
       // DATA
       typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
       // METHOD
-      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeListVp, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
 
     const onLoad = () => {
@@ -333,6 +351,8 @@ export default defineComponent({
       form,
 
       programsByFunction,
+      programsWithFunction,
+
       subCategories,
       measuresList,
       officesList,
@@ -349,7 +369,7 @@ export default defineComponent({
       changeNullValue,
       filterBasisOption,
       onOfficeChange,
-      saveOfficeList,
+      saveOfficeListVp,
       updateOfficeList,
       deleteOfficeItem,
     }

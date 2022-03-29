@@ -1,62 +1,76 @@
 <template>
   <div>
-    <indicator-table :year="year" :form-id="formId" :function-id="functionId" :form-table-columns="modifiedTableColumns"
-                     :item-source="dataSource" :allow-edit="allowEdit"
-                     @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"/>
 
-    <opcr-form :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :current-year="year"
-                  :targets-basis-list="targetsBasisList" :categories="categories"  :validate="validate"
-                  :validate-infos="validateInfos"
-                  @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
-                  @close-drawer="closeDrawer"/>
+    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
+      <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
+        {{ y.name }}
+      </a-select-option>
+    </a-select>
+
+    <div class="mt-4">
+      <indicator-table :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
+                       :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
+                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
+                       @delete-item="deleteItem"/>
+
+      <opcr-template-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
+                                 :validate="validate" :validate-infos="validateInfos"
+                                 @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
+                                 @close-drawer="closeDrawer" />
+    </div>
   </div>
 </template>
 <script>
-import { defineComponent, computed, ref, reactive, watch, onMounted, createVNode } from "vue"
-import { Form, Modal } from "ant-design-vue"
-import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
-import { formTableColumns } from "@/services/columns"
+import { defineComponent, ref, watch, reactive, computed, createVNode } from "vue"
+import { useStore } from 'vuex'
+import { Form, Modal } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { formTemplateTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
-import OpcrForm from '@/components/Drawer/Forms/Opcr'
+import OpcrTemplateFormDrawer from '@/components/Drawer/Forms/OpcrTemplate'
 
 const useForm = Form.useForm
 
 export default defineComponent({
-  name: 'OpcrItems',
-  components: { IndicatorTable, OpcrForm },
+  name: "OpcrItems",
+  components: { IndicatorTable, OpcrTemplateFormDrawer },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
-    formId: { type: String, default: "" },
     functionId: { type: String, default: "" },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
-    targetsBasisList: { type: Array, default: () => { return [] }},
-    allowEdit: { type: Boolean, default: false },
+    formId: { type: String, default: "" },
     counter: { type: Number, default: 0 },
   },
-  emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item'],
+  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
+    'update-source-item'],
   setup(props, { emit }) {
+    const store = useStore()
+
     // DATA
-    const modifiedTableColumns = ref()
+    const mainCategory = ref(undefined)
+    const displayIndicatorList = ref(false)
     const count = ref(0)
     const dataSource = computed(()=> { return props.itemSource })
+
+    // COMPUTED
+    const programs = computed(() => store.getters['formManager/manager'].programs)
+    const otherPrograms = computed(() => store.getters['formManager/manager'].otherPrograms)
+    const allPrograms = computed(() => {
+      const programData = programs.value && typeof programs.value != 'undefined' ? programs.value : []
+      const otherProgramData = otherPrograms.value && typeof otherPrograms.value != 'undefined' ? otherPrograms.value : []
+      return programData.concat(otherProgramData)
+    })
+    const programsByFunction = computed( () => { return allPrograms.value.filter(i => i.category_id === parseInt(props.functionId)) })
 
     const {
       drawerConfig,
       openDrawer, resetDrawerSettings } = useDrawerSettings()
 
-    const computedConfig = computed(() => { return drawerConfig })
-
-    const parameters = reactive({...props, config: computedConfig })
-
-    const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
+    const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(props)
 
     // EVENTS
-    onMounted(() => {
-      modifyColumns()
-    })
-
     watch(() => props.counter, counter => {
       count.value = counter
     })
@@ -64,22 +78,10 @@ export default defineComponent({
     const { resetFields, validate, validateInfos } = useForm(formData, rules)
 
     // METHODS
-    const modifyColumns = () => {
-      let columns = JSON.parse(JSON.stringify(formTableColumns))
-      const remarksIndex = columns.findIndex(i => i.key === 'remarks')
-      columns[remarksIndex].title = "Remarks"
-      const deleteKeys = ['subCategory', 'cascadingLevel']
-      columns = [...columns.filter(i => deleteKeys.indexOf(i.key) === -1)]
-      const addendum = {
-        title: '#',
-        key: 'count',
-        dataIndex: 'count',
-        className: 'column-count',
-        slots: { customRender: 'count' },
-        width: 60,
+    const loadPIs = e => {
+      if (e !== '' && typeof e !== 'undefined') {
+        displayIndicatorList.value = true
       }
-      columns.splice(0, 0, addendum)
-      modifiedTableColumns.value = columns
     }
 
     const isTargetsExists = find => {
@@ -90,6 +92,7 @@ export default defineComponent({
         }
         isExists = data.value === find
       })
+
       return isExists
     }
 
@@ -106,19 +109,12 @@ export default defineComponent({
         key: key,
         id: key,
         type: drawerConfig.value.type,
-        category: props.functionId,
         subCategory: data.value.subCategory,
-        program: data.value.program,
+        program: mainCategory.value.key,
         name: data.value.name,
         isHeader: data.value.isHeader,
         target: data.value.target,
         measures: data.value.measures,
-        budget: data.value.budget,
-        targetsBasis: data.value.targetsBasis,
-        implementing: data.value.implementing,
-        supporting: data.value.supporting,
-        remarks: data.value.remarks,
-        deleted: 0,
       }
 
       if (drawerConfig.value.type === 'pi') {
@@ -155,12 +151,8 @@ export default defineComponent({
     const handleAddSub = key => {
       const newData = dataSource.value.filter(item => key === item.key)[0]
       formData.subCategory = newData.subCategory
-      formData.program = newData.program
       if (!newData.isHeader) {
         formData.measures = newData.measures
-        formData.targetsBasis = newData.targetsBasis
-        formData.implementing = newData.implementing
-        formData.supporting = newData.supporting
       }
       openDrawer({ action: 'newsub', parentDetails: { ...newData }})
     }
@@ -196,14 +188,6 @@ export default defineComponent({
     }
 
     const updateTableItem = async data => {
-      if (drawerConfig.value.type === 'pi') {
-        if (!data.updateData.isHeader) {
-          const { targetsBasis } = data.updateData.value
-          if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
-            await emit('add-targets-basis-item', targetsBasis)
-          }
-        }
-      }
 
       const { parentDetails } = drawerConfig.value
       await emit('update-source-item', {
@@ -253,15 +237,12 @@ export default defineComponent({
     }
 
     return {
-      modifiedTableColumns,
+      formTemplateTableColumns,
+      mainCategory,
+      displayIndicatorList,
 
-      closeDrawer,
-      addTableItem,
-      handleAddSub,
-      editItem,
-      updateTableItem,
-      deleteItem,
-
+      programsByFunction,
+      programs,
       // useDrawerSettings
       drawerConfig,
       openDrawer,
@@ -273,6 +254,14 @@ export default defineComponent({
       validateInfos,
       validate,
       dataSource,
+
+      loadPIs,
+      addTableItem,
+      handleAddSub,
+      closeDrawer,
+      editItem,
+      updateTableItem,
+      deleteItem,
     }
   },
 })

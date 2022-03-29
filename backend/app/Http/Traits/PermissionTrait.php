@@ -15,7 +15,7 @@ trait PermissionTrait {
 
     private function fetchUserAccessRights(){
         $user = Auth::user();
-        $this->userAccessRights = UserAccessRights::where('user_id', $user->id)->get();
+        $this->userAccessRights = UserAccessRights::where('user_id', $user->id)->where('deleted_at', null)->get();
     }
 
     private function fetchAllChildrenPermission($id){

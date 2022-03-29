@@ -113,12 +113,12 @@ export const getMenuData = [
       {
         title: 'Form',
         key: 'opcrForm',
-        url: '/form/opcrsss',
+        url: '/form/opcr',
       },
       {
         title: 'List',
         key: 'opcrList',
-        url: '/list/opcrsss',
+        url: '/list/opcr',
       },
     ],
   },
