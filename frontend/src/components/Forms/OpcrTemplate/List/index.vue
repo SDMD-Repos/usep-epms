@@ -48,7 +48,7 @@ export default defineComponent({
     const updateForm = id => {
       router.push({
         name: 'main.form',
-        params: { formId: props.formId, opcrTemplateId: id },
+        params: { formId: props.formId, opcrTemplateId: id, update: true },
       })
     }
 

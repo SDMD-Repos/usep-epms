@@ -14,7 +14,7 @@ export default {
     ...STORED_SETTINGS({
       // VB:REPLACE-START:SETTINGS
       authProvider: 'jwt',
-      acronym: 'e-PMS',
+      acronym: 'ePMS',
       logo: 'USeP',
       logoName: 'University of Southeastern Philippines',
       description: 'Electronic Performance Management System',

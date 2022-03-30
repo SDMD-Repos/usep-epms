@@ -67,6 +67,7 @@ export default defineComponent({
     formId: { type: String, default: null },
   },
   setup(props) {
+    const PAGE_TITLE = "OPCR Programs"
     const store = useStore()
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
@@ -137,12 +138,14 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
+      store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       fetchAllPrograms(year.value)
     })
 
     // METHODS
     const fetchAllPrograms = async selectedYear => {
+      resetForm()
       await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
       await fetchPrograms(selectedYear)
       await fetchOtherPrograms(selectedYear)

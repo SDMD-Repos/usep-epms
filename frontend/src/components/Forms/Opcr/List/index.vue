@@ -24,7 +24,7 @@ export default defineComponent({
     formId: { type: String, default: '' },
   },
   setup(props) {
-    const PAGE_TITLE = 'OPCR Template List'
+    const PAGE_TITLE = 'OPCR List'
 
     const store = useStore()
     const router = useRouter()
