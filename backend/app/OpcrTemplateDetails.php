@@ -42,7 +42,7 @@ class OpcrTemplateDetails extends Model
 
     public function mainDetails()
     {
-        return $this->hasMany("App\AapcrDetail", 'parent_id');
+        return $this->hasMany("App\OpcrTemplateDetails", 'parent_id');
     }
 
     public function subDetails()
