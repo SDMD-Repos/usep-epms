@@ -181,11 +181,19 @@
                 <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
               </a-col>
               <a-col :span="8">
-                <a-select v-model:value="form.supporting[index].cascadeTo" style="width: 100%">
-                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
-                    {{ category.name }}
-                  </a-select-option>
-                </a-select>
+<!--                <a-select v-model:value="form.supporting[index].cascadeTo" style="width: 100%">-->
+<!--                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">-->
+<!--                    {{ category.name }}-->
+<!--                  </a-select-option>-->
+<!--                </a-select>-->
+                <a-tree-select
+                  v-model:value="form.supporting[index].cascadeTo"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="programsWithFunction"
+                  placeholder="Select a Program"
+                  tree-default-expand-all
+                />
               </a-col>
               <a-col :span="2" :offset="1">
                 <DeleteFilled @click="deleteOfficeItem('supporting', index)"/>

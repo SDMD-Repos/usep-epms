@@ -7,7 +7,7 @@
     <a-collapse-panel key="2" header="OPCR (VPs)" >
       <p>OPCR (VPs)</p>
     </a-collapse-panel>
-    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission">
+    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
       <form-admin-opcr/>
     </a-collapse-panel>
     <a-collapse-panel key="4" header="CPCR">
@@ -36,9 +36,12 @@ export default defineComponent({
     setup() {
       const store = useStore()
       const activeKey = ref([]);
+      const aapcrFormId = 'aapcr'
+      const opcrFormId = 'opcr'
       const opcrFormPermission = computed(() => store.getters['system/permission'].opcrFormPermission)
       const aapcrFormPermission = computed(() => store.getters['system/permission'].aapcrFormPermission)
       const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
+      const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
       onMounted(() => {
         const opcrFormPermissions = [
           "adminPermission", //ACCESS PERMISSION
@@ -53,14 +56,19 @@ export default defineComponent({
           "apf-aapcr", //Set assigned office head to each OPCR
         ]
         store.dispatch('system/CHECK_AAPCR_FORM_PERMISSION', { payload: aapcrFormPermissions })
-        store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
+        store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', {
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
-                                                                    form_id:'aapcr',
+                                                                    form_id:aapcrFormId,
                                                                      },
                                                             })
-    
-        
+        store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', {
+          payload: {
+            pmaps_id: store.state.user.pmapsId,
+            form_id:opcrFormId,
+          },
+        })
+
       })
 
       return {
@@ -68,6 +76,7 @@ export default defineComponent({
         opcrFormPermission,
         aapcrFormPermission,
         aapcrHeadPermission,
+        opcrHeadPermission,
       }
 
     },
