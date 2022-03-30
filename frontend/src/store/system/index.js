@@ -36,6 +36,7 @@ export default {
       createAapcrPermission: false,
       aapcrHeadPermission: false,
       aapcrFormPermission: false,
+      opcrHeadPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -107,9 +108,9 @@ export default {
             const checkAccessPermission = mapApiProviders.checkAccessPermission
             checkAccessPermission(payload).then(response => {
               if (response) {
-                const { permissions } = response
+                const { hasPermission } = response
                 commit('SET_STATE', {
-                  opcrFormPermission: permissions,
+                  opcrFormPermission: hasPermission,
                 })
               }
               commit('SET_STATE', {
@@ -117,7 +118,7 @@ export default {
               })
             })
           },
-        
+
         FETCH_AAPCR_HEAD({ commit }, { payload }) {
           commit('SET_STATE', {
             loading: true,
@@ -125,7 +126,7 @@ export default {
           const fetchOfficeHead = mapApiProviders.fetchOfficeHead
           fetchOfficeHead(payload.form_id).then(response => {
             if (response) {
-              
+
               commit('SET_STATE', {
                 officeHeadDetails : {
                             pmaps_id: response.officeHeadDetails.pmaps_id,
@@ -418,6 +419,24 @@ export default {
     //     })
     //   })
     // },
+    CHECK_OPCR_HEAD_PERMISSION({ commit }, { payload }) {
+      const { pmaps_id,form_id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
+      checkFormHeadPermission(pmaps_id,form_id).then(response => {
+        if (response) {
+          const { permission } = response
+          commit('SET_STATE', {
+            opcrHeadPermission: permission,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
     CHECK_APCR_HEAD_PERMISSION({ commit }, { payload }) {
       const { pmaps_id,form_id } = payload
       commit('SET_STATE', {
@@ -438,16 +457,16 @@ export default {
       })
     },
     CHECK_AAPCR_FORM_PERMISSION({ commit }, { payload }) {
-      
+
       commit('SET_STATE', {
         loading: true,
       })
       const checkAccessPermission = mapApiProviders.checkAccessPermission
       checkAccessPermission(payload).then(response => {
         if (response) {
-          const { permissions } = response
+          const { hasPermission } = response
           commit('SET_STATE', {
-            aapcrFormPermission: permissions,
+            aapcrFormPermission: hasPermission,
           })
         }
         commit('SET_STATE', {
@@ -475,7 +494,7 @@ export default {
       })
     },
     },
-    
+
     getters: {
       permission: state => state,
     },
