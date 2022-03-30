@@ -11,6 +11,7 @@ use App\Signatory;
 use App\VpOpcr;
 use App\VpOpcrDetailOffice;
 use Illuminate\Support\Facades\Storage;
+use PHPJasper\PHPJasper;
 
 trait PdfTrait {
     use ConverterTrait;
@@ -86,6 +87,7 @@ trait PdfTrait {
                 'function' => $function,
                 'program' => $detail->program->name,
                 'subCategory' => $subCategory,
+                'parentSubCategory' => $detail->sub_category_id ? $detail->subCategory->parent_id : NULL,
                 'pi_name' => $detail->pi_name,
                 'target' => $detail->target,
                 'measures' => implode(", ", $measures),
@@ -129,6 +131,7 @@ trait PdfTrait {
                         'function' => $function,
                         'program' => $detail->program->name,
                         'subCategory' => $subCategory,
+                        'parentSubCategory' => $detail->sub_category_id ? $detail->subCategory->parent_id : NULL,
                         'pi_name' => $subPi->pi_name,
                         'target' => $subPi->target,
                         'measures' => implode(", ", $subMeasures),
@@ -169,8 +172,8 @@ trait PdfTrait {
             'approvedBy' => strtoupper($signatory['approvedBy']),
             'approvedDate' => $signatory['approvedDate'],
             'approvingPosition' => $signatory['approvedByPosition'],
-            'programsDataSet' => $programsDataSet,
-            'public_path' => $publicPath
+//            'programsDataSet' => $programsDataSet,
+            'public_path' => $publicPath,
         ];
 
         $storagePath = '';
@@ -180,20 +183,47 @@ trait PdfTrait {
             $documentName = "AAPCR_". $id;
         }
 
-        $jasperReport = new Jasperreport();
-        $jasperReport->showReport('aapcr', $params, $data, 'PDF', $documentName, $storagePath);
+        $extension = 'pdf' ;
+        $filename =  $documentName  . "_". date("Ymd");
+        $input = public_path('raw/aapcr.jasper');
+        $output = base_path('/public/forms/' . $filename);
 
-        if(!$isUnpublish) {
-            $pdf = public_path('forms/'.$documentName.".pdf");
+        $jsonArry = array('data' => ['main' => $data, 'programsDataSet' => $programsDataSet]);
+        $jsonTmpfilePath = storage_path('app/public/json/' . $filename . '.json');
+        $jsonTmpfile = fopen($jsonTmpfilePath, 'w');
+        fwrite($jsonTmpfile, json_encode($jsonArry));
+        fclose($jsonTmpfile);
+        $datafile = $jsonTmpfilePath;
 
-            return response()->download($pdf);
-        }else {
-            $pdf = file_exists(public_path() . "/storage/uploads/published/" . $documentName . ".pdf");
+        $options = [
+            'format' => ['pdf'],
+            'params' => $params,
+            'locale' => 'en',
+            'db_connection' => [
+                'driver' => 'json',
+                'data_file' => $datafile,
+                'json_query' => 'data'
+            ]
+        ];
 
-            if ($pdf) {
-                return true;
-            } else { return false; }
+        $jasper = new PHPJasper();
+
+        $jasper->compile(public_path(). '/raw/aapcr.jrxml')->execute();
+
+        $jasper->process(
+            $input,
+            $output,
+            $options
+        )->execute();
+
+
+        $file = $output .'.'.$extension ;
+
+        if (!file_exists($file)) {
+            abort(404);
         }
+
+        return response()->download($file)->deleteFileAfterSend();
     }
 
     // VP's OPCR
