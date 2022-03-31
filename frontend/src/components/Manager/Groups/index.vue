@@ -2,7 +2,7 @@
   <div>
     <a-table :columns="columns" :data-source="groups" :loading="loading" bordered>
       <template #title>
-        <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!createGroupPermission">
+        <a-button type="primary" class="mr-3" @click="openModal('create', null)" v-if="createGroupPermission">
           <template #icon><PlusOutlined /></template>
           New Group
         </a-button>

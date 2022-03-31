@@ -11,7 +11,8 @@
         <a-form layout="vertical"
                 ref="formRef"
                 :model="formState"
-                :rules="rules">
+                :rules="rules"
+                v-if="createProgramPermission">
           <div class="row">
             <div class="col-lg-6">
               <a-form-item ref="name" label="Program Name" name="name">
@@ -37,8 +38,8 @@
             </div>
           </div>
           <div class="form-actions mt-0">
-            <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit" :disabled="!createProgramPermission">Add</a-button>
-            <a-button type="link" v-if="previousPrograms.length" :disabled="!createProgramPermission" @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
+            <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit" >Add</a-button>
+            <a-button type="link" v-if="previousPrograms.length"  @click="changePreviousModal">Add {{ year - 1}} Programs</a-button>
           </div>
         </a-form>
 
@@ -143,7 +144,9 @@ export default defineComponent({
 
     // METHODS
     const fetchData = async selectedYear => {
-      resetForm()
+      if(createProgramPermission.value){
+         resetForm()
+      }
       await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})

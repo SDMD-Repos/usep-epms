@@ -27,8 +27,14 @@ class AccessRightsSeeder extends Seeder
 
         DB::table('access_rights')->insert([
             [
+                'permission_id' => 'm-form',
+                'permission_name' => 'Form',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
                 'permission_id' => 'm-group',
-                'permission_name' => 'Group',
+                'permission_name' => 'Groups',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
                 'create_id' => 'admin',
             ],
@@ -38,18 +44,8 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
                 'create_id' => 'admin',
             ],
-            // [
-            //     'permission_id' => 'm-signatories',
-            //     'permission_name' => 'Signatories',
-            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
-            //     'create_id' => 'admin',
-            // ],
-            [
-                'permission_id' => 'm-form',
-                'permission_name' => 'Form',
-                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
-                'create_id' => 'admin',
-            ],
+          
+           
         ]);
 
       
@@ -81,38 +77,7 @@ class AccessRightsSeeder extends Seeder
             ],
         ]);
 
-        // DB::table('access_rights')->insert([
-        //     [
-        //         'permission_id' => 'ms-aapcr',
-        //         'permission_name' => 'AAPCR Signatory',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-            // [
-            //     'permission_id' => 'ms-opcrvp',
-            //     'permission_name' => 'OPCR (VPs) Signatory',
-            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-            //     'create_id' => 'admin',
-            // ],
-            // [
-            //     'permission_id' => 'ms-opcr',
-            //     'permission_name' => 'OPCR Signatory',
-            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-            //     'create_id' => 'admin',
-            // ],
-            // [
-            //     'permission_id' => 'ms-cpcr',
-            //     'permission_name' => 'CPCR Signatory',
-            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-            //     'create_id' => 'admin',
-            // ],
-            // [
-            //     'permission_id' => 'ms-ipcr',
-            //     'permission_name' => 'IPCR Signatory',
-            //     'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","m-signatories")->first()->id,
-            //     'create_id' => 'admin',
-            // ],
-        // ]);
+  
 
         DB::table('access_rights')->insert([
             [
@@ -201,7 +166,7 @@ class AccessRightsSeeder extends Seeder
         DB::table('access_rights')->insert([
             [
                 'permission_id' => 'adminPermission',
-                'permission_name' => 'Access Permission',
+                'permission_name' => 'Access Rights',
                 'create_id' => 'admin',
             ],
         ]);
@@ -316,69 +281,5 @@ class AccessRightsSeeder extends Seeder
            
 
         ]);
-
-
-        // DB::table('access_rights')->insert([
-        //     [
-        //         'permission_id' => 'msa-create',
-        //         'permission_name' => 'create',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-aapcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msa-delete',
-        //         'permission_name' => 'delete',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-aapcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission__id' => 'msovp-create',
-        //         'permission_name' => 'create',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcrvp")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msovp-delete',
-        //         'permission_name' => 'delete',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcrvp")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'mso-create',
-        //         'permission_name' => 'create',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'mso-delete',
-        //         'permission_name' => 'delete',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-opcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msc-create',
-        //         'permission_name' => 'create',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-cpcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msc-delete',
-        //         'permission_name' => 'delete',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-cpcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msi-create',
-        //         'permission_name' => 'create',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        //     [
-        //         'permission_id' => 'msi-delete',
-        //         'permission_name' => 'delete',
-        //         'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ms-ipcr")->first()->id,
-        //         'create_id' => 'admin',
-        //     ],
-        // ]);
     }
 }

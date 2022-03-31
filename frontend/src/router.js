@@ -86,7 +86,7 @@ const router = createRouter({
           name: 'systemAdminPermission',
           props: true,
           meta: {
-            title: 'Access Permission',
+            title: 'Access Rights',
           },
           component: () => import('./views/system/admin'),
         },

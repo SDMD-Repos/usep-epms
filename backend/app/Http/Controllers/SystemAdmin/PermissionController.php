@@ -175,6 +175,14 @@ class PermissionController extends Controller
                     $newList->delete();
                 }
             }
+            if(!count($currentList)){
+                $accessListss  = UserAccessRights::where([
+                    ['user_id', $details->UserID],
+                ])->get();
+                foreach($accessListss as $newList){
+                    $newList->delete();
+                }
+            }
 
             return response()->json("Access rights have been save!", 200);
 

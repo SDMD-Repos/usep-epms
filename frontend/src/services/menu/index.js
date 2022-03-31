@@ -161,7 +161,7 @@ export const getMenuData = [
     title: 'System Admn',
   },
   {
-    title: 'Access Permission',
+    title: 'Access Rights',
     key: 'systemAdmin',
     icon: 'fe fe-lock',
     url: '/system/admin/permisson',

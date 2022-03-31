@@ -88,7 +88,7 @@ export default defineComponent({
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
     const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
 
-    console.log(hasAapcrAccess)
+    
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
     })
@@ -105,6 +105,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
+      if(hasAapcrAccess.value || aapcrPermission.value){
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('aapcr/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -129,6 +130,7 @@ export default defineComponent({
       ]
      
        store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrPermissions, name:'aapcrPermission'} })
+       }
     })
 
     // METHODS

@@ -26,7 +26,7 @@ class StoreUserPermission extends FormRequest
         return [
             //
             'personnelId' => 'required|string',
-            'listPermissions' => 'required|array',
+            // 'listPermissions' => 'required|array',
         ];
     }
 }

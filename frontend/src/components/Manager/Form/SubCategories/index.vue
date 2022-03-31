@@ -12,7 +12,8 @@
       <a-form layout="vertical"
               ref="formRef"
               :model="formState"
-              :rules="rules">
+              :rules="rules"
+              v-if="createSubCatPermission">
         <div class="row">
           <div class="col-lg-4">
             <a-form-item ref='name' label="Sub Category Name" name="name">
@@ -57,8 +58,8 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" class="mr-3" :disabled="!createSubCatPermission"  @click="onSubmit">Add</a-button>
-           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length"  :disabled="!createSubCatPermission" @change="resetForm" >
+          <a-button style="width: 150px;" type="primary" class="mr-3"   @click="onSubmit">Add</a-button>
+           <a-checkbox v-model:checked="checked" v-if="prevSubCategories.length"   @change="resetForm" >
                 Add {{ year - 1}} Sub Categories
             </a-checkbox>
           <a-button type="link" v-if="prevSubCategories.length" @click="changePreviousModal"></a-button>
@@ -66,7 +67,7 @@
       </a-form>
     </div>
 
-    <sub-categories-table :sub-category-list="subCategories" :is-delete="deleteSubCatPermission" :all-access="allAccess" @delete="onDelete"/>
+    <sub-categories-table :sub-category-list="subCategories" :is-delete="deleteSubCatPermission"  @delete="onDelete"/>
   </a-spin>
 </template>
 <script>

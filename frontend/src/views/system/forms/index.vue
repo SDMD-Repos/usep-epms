@@ -13,9 +13,7 @@
     <a-collapse-panel key="4" header="CPCR">
       <p>CPCR</p>
     </a-collapse-panel>
-    <a-collapse-panel key="5" header="IPCR">
-      <p>IPCR</p>
-    </a-collapse-panel>
+   
   </a-collapse>
 
 </template>

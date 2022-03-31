@@ -37,14 +37,14 @@
         </a-row>
 
         <div class="mt-4" v-if="data.length">
-          <a-table  class="ant-table-striped" :row-class-name="(record, index) => (index % 2 === 1 ? 'table-striped' : null)" :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
+          <a-table  class="ant-table-striped"  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
                     :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false" />
         </div>
 
         <div class="mt-4"></div>
         <a-row type="flex" justify="center" align="middle">
-          <a-button v-if="updateBtn" type="primary" @click="onSave" >Save</a-button>
-          <a-button v-else type="primary" @click="onUpdate" >Update</a-button>
+          <a-button v-if="updateBtn && savebtn" type="primary" @click="onSave" >Save</a-button>
+          <a-button v-else-if="!updateBtn && savebtn" type="primary" @click="onUpdate" >Update</a-button>
         </a-row>
       </a-spin>
     </div>
@@ -74,6 +74,7 @@ export default defineComponent({
     const accessList = ref([])
     const selectedRowKeys = ref([])
     const updateBtn = ref(true)
+    const savebtn = ref(false)
 
     let formLoading = ref(false)
 
@@ -102,7 +103,9 @@ export default defineComponent({
 
     const getPersonnelList = officeId => {
       memberList.value = []
+      personnelId.value = []
       if (officeId) {
+        store.dispatch('system/FETCH_PERMISSION')
         formLoading.value = true
         const id = officeId.value
         getPersonnelByOffice(id).then(response => {
@@ -110,6 +113,7 @@ export default defineComponent({
             const { personnel } = response
             memberList.value = personnel
           }
+         
           formLoading.value = false
         })
       }
@@ -117,8 +121,10 @@ export default defineComponent({
 
     const getAccessList = personnelId => {
       accessList.value = []
+      selectedRowKeys.value = []
       if (personnelId) {
         formLoading.value = true
+         savebtn.value = true
         const id = personnelId.value
         getAccessByUser(id).then(response => {
           if (response.status) {
@@ -132,6 +138,8 @@ export default defineComponent({
           }
           formLoading.value = false
         })
+      }else{
+        savebtn.value = false
       }
     }
 
@@ -168,6 +176,7 @@ export default defineComponent({
       onSave,
       getAccessList,
       onUpdate,
+      savebtn,
     };
   },
 });

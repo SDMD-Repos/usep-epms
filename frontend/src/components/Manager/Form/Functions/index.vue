@@ -12,7 +12,8 @@
       <a-form layout="vertical"
               ref="formRef"
               :model="formState"
-              :rules="rules">
+              :rules="rules"
+              v-if="funcCreatePermission">
         <div class="row">
           <div class="col-lg-5">
             <a-form-item ref="name" label="Function Name" name="name">
@@ -27,8 +28,8 @@
           </div>
         </div>
         <div class="form-actions mt-0">
-          <a-button style="width: 150px;" type="primary" :disabled="!funcCreatePermission" class="mr-3" @click="onSubmit">Add</a-button>
-          <a-button type="link" v-if="previousFunctions.length" :disabled="!funcCreatePermission" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
+          <a-button style="width: 150px;" type="primary" class="mr-3" @click="onSubmit">Add</a-button>
+          <a-button type="link" v-if="previousFunctions.length" @click="changePreviousModal">Add {{ year - 1}} functions</a-button>
         </div>
       </a-form>
     </div>

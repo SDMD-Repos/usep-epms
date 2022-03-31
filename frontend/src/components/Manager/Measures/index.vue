@@ -10,12 +10,12 @@
 
     <div class="mt-4">
       <a-table :columns="columns" :data-source="measuresList" :loading="loading" bordered>
-        <template #title>
-          <a-button type="primary" class="mr-3" @click="openModal('create', null)" :disabled="!createMeasuresPermission" >
+        <template #title v-if="createMeasuresPermission">
+          <a-button type="primary" class="mr-3" @click="openModal('create', null)" >
             <template #icon><PlusOutlined /></template>
             New Measure
           </a-button>
-          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" :disabled="!createMeasuresPermission">Add {{ year - 1}} measures</a-button>
+          <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" >Add {{ year - 1}} measures</a-button>
         </template>
 
         <template #dateCreated="{ record }">
