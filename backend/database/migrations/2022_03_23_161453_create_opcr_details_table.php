@@ -14,8 +14,29 @@ class CreateOpcrDetailsTable extends Migration
     public function up()
     {
         Schema::create('opcr_details', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->integer('id')->autoIncrement();
+            $table->integer('vp_opcr_id');
+            $table->smallInteger('is_header')->default(0)->nullable();
+            $table->text('pi_name');
+            $table->string('target')->nullable();
+            $table->float('allocated_budget', 11, 2)->nullable();
+            $table->string('targets_basis', 100)->nullable();
+            $table->integer('category_id');
+            $table->integer('sub_category_id')->nullable();
+            $table->integer('program_id')->nullable();
+            $table->text('remarks')->nullable();
+            $table->integer('parent_id')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->string('create_id', 35);
+            $table->timestamp('updated_at')->nullable();
+            $table->string('modify_id', 35)->nullable();
+            $table->softDeletes();
+            $table->text('history');
+
+            $table->foreign('vp_opcr_id')->references('id')->on('vp_opcrs')->onUpdate('cascade');
+            $table->foreign('category_id')->references('id')->on('categories')->onUpdate('cascade');
+            $table->foreign('sub_category_id')->references('id')->on('sub_categories')->onUpdate('cascade');
+            $table->foreign('program_id')->references('id')->on('programs')->onUpdate('cascade');
         });
     }
 

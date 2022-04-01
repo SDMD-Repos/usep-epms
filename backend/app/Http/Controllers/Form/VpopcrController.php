@@ -368,7 +368,7 @@ class VpopcrController extends Controller
             $this->saveMeasures($detail, $data['measures']);
 
             $officeModel = new VpOpcrDetailOffice();
-
+            dd($data);
             $this->saveOffices([
                 'model' => $officeModel,
                 'detailId' => $detail->id,

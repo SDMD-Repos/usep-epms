@@ -2,7 +2,7 @@ import apiClient from '@/services/axios'
 
 export function checkSavedForm(year) {
   return apiClient
-    .get('/forms/opcr/check-saved-template/' + year)
+    .get('/forms/opcr/check-saved/' + year)
     .then(response => {
       return response.data
     })

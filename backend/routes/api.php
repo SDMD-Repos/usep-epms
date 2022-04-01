@@ -145,9 +145,13 @@ Route::group([
     ], function() {
 
         //GET
+
+        //TEMPLATE
         Route::get('/check-saved-template/{year}', 'Form\OpcrController@checkSavedTemplate');
         Route::get('/view-template/{id}', 'Form\OpcrController@viewTemplate');
         Route::get('/template-list', 'Form\OpcrController@getAllOpcrTemplate');
+        //OPCR
+        Route::get('/check-saved/{year}', 'Form\OpcrController@checkSaved');
 
         //POST
         Route::post('/save-template', 'Form\OpcrController@saveTemplate');
