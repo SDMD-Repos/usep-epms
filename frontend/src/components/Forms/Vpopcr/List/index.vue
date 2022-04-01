@@ -4,14 +4,14 @@
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
 
-    <upload-publish-modal
+<!--    <upload-publish-modal
       :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
       :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
-      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload"/>
+      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload"/>-->
 
-    <uploaded-list-modal
+    <unpublished-forms-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
-      @close-list-modal="closeListModal" @view-file="viewPdf" @delete-file="openUploadOnDelete" />
+      @close-list-modal="closeListModal" @view-file="viewPdf" />
   </div>
 </template>
 
@@ -20,19 +20,19 @@ import { computed, defineComponent, ref, onMounted } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
-import { useUploadFile } from '@/services/functions/upload'
+// import { useUploadFile } from '@/services/functions/upload'
 import { useViewPublishedFiles } from '@/services/functions/published'
 import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
 import FormListTable from '@/components/Tables/Forms/List'
-import UploadPublishModal from '@/components/Modals/UploadPublish'
-import UploadedListModal from '@/components/Modals/UploadedList'
+// import UploadPublishModal from '@/components/Modals/UploadPublish'
+import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import { message, notification } from "ant-design-vue"
 
 export default defineComponent({
   components: {
     FormListTable,
-    UploadPublishModal,
-    UploadedListModal,
+    // UploadPublishModal,
+    UnpublishedFormsModal,
   },
   props: {
     formId: { type: String, default: '' },
@@ -47,12 +47,12 @@ export default defineComponent({
     let columns = ref([])
 
 
-    const {
+    /*const {
       // DATA
       isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
       // METHODS
       unpublish, addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
-    } = useUploadFile()
+    } = useUploadFile()*/
 
     const { isUploadedViewed, viewedForm,
       viewUploadedList, onCloseList, uploadedListState } = useViewPublishedFiles()
@@ -180,13 +180,14 @@ export default defineComponent({
     return {
       columns,
 
-      isUploadOpen,
+      list,
+      loading,
+
+      /*isUploadOpen,
       okPublishText,
       noteInModal,
       cachedId,
-      list,
-      loading,
-      fileList,
+      fileList,*/
 
       isUploadedViewed,
       viewedForm,
@@ -198,11 +199,11 @@ export default defineComponent({
       handleCancelUpload,
       closeListModal,
 
-      unpublish,
+      /*unpublish,
       addUploadItem,
       removeFile,
       cancelUpload,
-      openUploadOnDelete,
+      openUploadOnDelete,*/
 
       viewUploadedList,
       onCloseList,

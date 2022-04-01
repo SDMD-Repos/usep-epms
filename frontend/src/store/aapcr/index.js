@@ -119,7 +119,7 @@ export default {
           dispatch('FETCH_LIST')
           notification.success({
             message: 'Success',
-            description: 'AAPCR was unpublished successfully',
+            description: 'The request to unpublish the form has been sent successfully',
           })
         }
         commit('SET_STATE', {
@@ -199,7 +199,7 @@ export default {
         key: payload.key,
       })
     },
-    CHECK_APCR_PERMISSION({ commit }, { payload }) {
+    CHECK_AAPCR_PERMISSION({ commit }, { payload }) {
       const { pmaps_id,form_id } = payload
       commit('SET_STATE', {
         loading: true,

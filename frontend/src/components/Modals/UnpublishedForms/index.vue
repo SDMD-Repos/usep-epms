@@ -8,34 +8,26 @@
              row-key="id">
 
       <!-- Custom column render-->
-      <template #fileName="{ text, record }">
-        <a-button type="link" @click="viewFile(record)">{{ text }}</a-button>
+      <template #documentName="{ text, record }">
+        <a-tooltip title="View PDF">
+          <a-button type="link" @click="viewFile(record)">{{ text }}</a-button>
+        </a-tooltip>
       </template>
 
-      <template #operation="{ record }">
-        <a-popconfirm
-          title="Are you sure you want to delete this file?"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="onDelete(record)"
-        >
-          <a-tooltip>
-            <template #title><span>Delete</span></template>
-            <DeleteOutlined :style="{fontSize: '18px'}"/>
-          </a-tooltip>
-        </a-popconfirm>
+      <template #details="{ record }">
+        Unpublished {{ record.changed_date_disp }} by {{ record.requested_by }}
       </template>
     </a-table>
   </a-modal>
 </template>
 <script>
 import { defineComponent, ref, watch } from 'vue'
-import { uploadedListColumns } from '@/services/columns'
-import { DeleteOutlined } from "@ant-design/icons-vue"
+import { unplishedFormsColumns } from '@/services/columns'
+// import { DeleteOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
-  name: 'UploadedListModal',
-  components: { DeleteOutlined },
+  name: 'UnpublishedFormsModal',
+  // components: { DeleteOutlined },
   props: {
     modalState: Boolean,
     formDetails: { type: Object, default: () => {} },
@@ -49,7 +41,7 @@ export default defineComponent({
     watch(() => [props.modalState, props.formDetails], ([visible, details]) => {
       isVisible.value = visible
       documentName.value = details.document_name || details.office_name || null
-      list.value = details.files || []
+      list.value = details.status.filter(i => i.status === 'verified') || []
     })
 
     const onClose = () => {
@@ -60,13 +52,13 @@ export default defineComponent({
       emit('view-file', data)
     }
 
-    const onDelete = (data) => {
+    /*const onDelete = (data) => {
       emit('delete-file', data)
       emit('close-list-modal')
-    }
+    }*/
 
     return {
-      columns: uploadedListColumns,
+      columns: unplishedFormsColumns,
 
       isVisible,
       documentName,
@@ -74,7 +66,7 @@ export default defineComponent({
 
       onClose,
       viewFile,
-      onDelete,
+      // onDelete,
     }
   },
 })

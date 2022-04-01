@@ -233,22 +233,17 @@ export const listTableColumns = [
   },
 ]
 
-export const uploadedListColumns = [
+export const unplishedFormsColumns = [
   {
-    title: 'File Name',
-    dataIndex: 'file_name',
+    title: 'Document Name',
+    dataIndex: 'document_name',
     width: 350,
-    slots: { customRender: 'fileName' },
+    slots: { customRender: 'documentName' },
   },
   {
-    title: 'Date & Time Uploaded',
-    dataIndex: 'created_at_disp',
+    title: 'Details',
+    dataIndex: '',
     className: 'column-created-at',
-  },
-  {
-    title: '',
-    key: 'operation',
-    className: 'column-action',
-    slots: { customRender: 'operation' },
+    slots: { customRender: 'details' },
   },
 ]

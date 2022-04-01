@@ -97,7 +97,7 @@ const router = createRouter({
           meta: {
             title: 'Requests',
           },
-          component: () => import('./views/system/admin/permission'),
+          component: () => import('./views/system/admin/requests'),
         },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],

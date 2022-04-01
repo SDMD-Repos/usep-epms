@@ -26,4 +26,13 @@ class Form extends Model
         return $this->hasMany('App\FormAccess', 'form_id');
     }
 
+    /**
+     * Get the status for the form.
+     */
+
+    public function unpublishStatus()
+    {
+        return $this->hasMany('App\FormUnpublishStatus', 'form_type');
+    }
+
 }

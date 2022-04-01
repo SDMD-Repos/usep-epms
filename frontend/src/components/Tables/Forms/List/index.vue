@@ -33,36 +33,31 @@
         </a-tooltip>
         <a-divider type="vertical" />
       </template>
-      <a-tooltip v-if="form !== 'opcrtemplate'">
-        <template #title><span>View PDF</span></template>
+      <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
         <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
       </a-tooltip>
       <template v-if="record.finalized_date && !record.published_date && record.is_active">
         <a-divider type="vertical" />
-        <a-tooltip>
-          <template #title><span>Publish</span></template>
+        <a-tooltip title="Publish">
           <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
         </a-tooltip>
       </template>
       <template v-if="record.published_date && record.status && record.is_active && (!record.status.filter(i => i.status === 'pending').length)">
         <a-divider type="vertical" />
-        <a-tooltip>
-          <template #title><span>Request to unpublish</span></template>
-          <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record.id)" />
+        <a-tooltip title="Request to unpublish">
+          <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record)" />
         </a-tooltip>
       </template>
       <template v-if="record.published_date && record.is_active && form === 'opcrtemplate'">
         <a-divider type="vertical" />
-        <a-tooltip>
-          <template #title><span>Unpublish</span></template>
+        <a-tooltip title="Unpublish">
           <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublishTemplate(record.id)" />
         </a-tooltip>
       </template>
-      <template v-if="record.files && record.files.length">
+      <template v-if="record.status && record.status.length && record.status.filter(i => i.status === 'verified').length">
         <a-divider type="vertical" />
-        <a-tooltip>
-          <template #title><span>View Archived</span></template>
-          <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUploadedList(record)"/>
+        <a-tooltip title="View Archived">
+          <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUnpublishedForms(record)"/>
         </a-tooltip>
       </template>
     </template>
@@ -73,12 +68,7 @@ import { computed, defineComponent, createVNode } from "vue"
 import { useStore } from 'vuex'
 import moment from 'moment'
 import {
-  EditOutlined,
-  FilePdfOutlined,
-  FileDoneOutlined,
-  CloseSquareFilled,
-  UnorderedListOutlined,
-  ExclamationCircleOutlined,
+  EditOutlined, FilePdfOutlined, FileDoneOutlined, CloseSquareFilled, UnorderedListOutlined, ExclamationCircleOutlined,
 } from "@ant-design/icons-vue"
 
 import { Modal } from "ant-design-vue"
@@ -104,7 +94,7 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-uploaded-list','unpublish-template'],
+  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms','unpublish-template'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -151,7 +141,7 @@ export default defineComponent({
       emit('view-pdf', data)
     }
 
-    const onUnpublish = id => {
+    const onUnpublish = data => {
       Modal.confirm({
         title: () => 'Are you sure you want to unpublish this?',
         icon: () => createVNode(ExclamationCircleOutlined),
@@ -159,7 +149,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
-          emit('unpublish', id)
+          emit('unpublish', data)
         },
         onCancel() {},
       });
@@ -179,8 +169,8 @@ export default defineComponent({
       });
     }
 
-    const openUploadedList = details => {
-      emit('view-uploaded-list', details)
+    const openUnpublishedForms = details => {
+      emit('view-unpublished-forms', details)
     }
 
     return {
@@ -193,7 +183,7 @@ export default defineComponent({
       viewPdf,
       onUnpublish,
       onUnpublishTemplate,
-      openUploadedList,
+      openUnpublishedForms,
     }
   },
 })

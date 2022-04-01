@@ -100,8 +100,6 @@ Route::group([
         Route::get('/view/{id}', 'Form\AapcrController@view');
         Route::get('/viewPdf/{id}', 'AppController@viewAapcrPdf');
         Route::post('/update/{id}', 'Form\AapcrController@update');
-        Route::get('/viewUploadedFile/{id}', 'Form\AapcrController@viewUploadedFile');
-        Route::post('/update-file', 'Form\AapcrController@updateFile');
     });
 
     # OPCR (VP) Controller routes
@@ -176,6 +174,14 @@ Route::group([
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
     Route::get('/allow-aapcr-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowAapcrForm');
+
+    Route::group([
+        'prefix' => 'requests'
+    ], function() {
+        Route::get('/get-all-unpublish', 'SystemAdmin\RequestsController@getAllUnpublishRequests');
+        Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateRequestStatus');
+        Route::get('/view-unpublished-form/{id}', 'SystemAdmin\RequestsController@viewUnpublishedForm');
+    });
 });
 
 Route::group([

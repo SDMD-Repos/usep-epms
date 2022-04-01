@@ -1,6 +1,6 @@
-import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
+import { ref, computed } from 'vue'
 import moment from 'moment'
+import { useStore } from 'vuex'
 
 export const useViewPublishedFiles = () => {
   const store = useStore()
@@ -16,13 +16,13 @@ export const useViewPublishedFiles = () => {
 
   const dateFormat = computed(() => store.getters.mainStore.dateFormat)
 
-  const viewUploadedList = details => {
-    const files = [...details.files]
+  const viewUnpublishedForms = details => {
+    const statuses = [...details.status]
     data.value.isViewed = true
-    files.forEach(item => {
-      item.created_at_disp = moment(item.created_at).format(dateFormat.value)
+    statuses.forEach(item => {
+      item.changed_date_disp = moment(item.changed_date).format(dateFormat.value)
     })
-    details.files = files
+    details.status = statuses
     data.value.viewedForm = details
   }
 
@@ -41,7 +41,7 @@ export const useViewPublishedFiles = () => {
     isUploadedViewed,
     viewedForm,
 
-    viewUploadedList,
+    viewUnpublishedForms,
     onCloseList,
     uploadedListState,
   }
