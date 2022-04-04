@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Form;
 
 use App\Aapcr;
 use App\AapcrDetail;
+use App\FormField;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UpdateVpOpcr;
@@ -346,6 +347,8 @@ class VpopcrController extends Controller
 
     public function saveVpOpcrDetails($id, $data, $isNew=0)
     {
+        $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
+
         $detail = new VpOpcrDetail();
 
         $detail->vp_opcr_id = $id;
@@ -368,20 +371,14 @@ class VpopcrController extends Controller
             $this->saveMeasures($detail, $data['measures']);
 
             $officeModel = new VpOpcrDetailOffice();
-
-            $this->saveOffices([
-                'model' => $officeModel,
-                'detailId' => $detail->id,
-                'offices' => $data['implementing'],
-                'fieldName' => 'implementing',
-            ]);
-
-            $this->saveOffices([
-                'model' => $officeModel,
-                'detailId' => $detail->id,
-                'offices' => $data['supporting'],
-                'fieldName' => 'supporting',
-            ]);
+            foreach($formFields as $formField) {
+                $this->saveOffices([
+                    'model' => $officeModel,
+                    'detailId' => $detail->id,
+                    'offices' => $data[$formField->code],
+                    'fieldName' => $formField->id,
+                ]);
+            }
         }
 
         if($isNew){

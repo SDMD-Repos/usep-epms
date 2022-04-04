@@ -28,7 +28,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { formTemplateTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
-import OpcrTemplateFormDrawer from '@/components/Drawer/Forms/OpcrTemplate'
+import OpcrTemplateFormDrawer from '@/components/Drawer/Forms/Opcr'
 
 const useForm = Form.useForm
 
@@ -37,7 +37,7 @@ export default defineComponent({
   components: { IndicatorTable, OpcrTemplateFormDrawer },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
-    functionId: { type: String, default: "" },
+    functionId: { type: Number, default: null },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
     formId: { type: String, default: "" },

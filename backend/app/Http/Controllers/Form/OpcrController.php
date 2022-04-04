@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateOpcrTemplate;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\FormTrait;
 use App\OpcrTemplate;
+use App\Opcr;
 use App\OpcrTemplateDetails;
 use App\OpcrTemplateDetailsMeasures;
 use App\Program;
@@ -43,6 +44,19 @@ class OpcrController extends Controller
     public function checkSavedTemplate($year)
     {
         $hasSaved = OpcrTemplate::where([
+            ['year', $year],
+            ['is_active', 1],
+            ['deleted_at', null],
+        ])->first();
+
+        return response()->json([
+            'hasSaved' => $hasSaved !== null
+        ], 200);
+    }
+
+    public function checkSaved($year)
+    {
+        $hasSaved = Opcr::where([
             ['year', $year],
             ['is_active', 1],
             ['deleted_at', null],
