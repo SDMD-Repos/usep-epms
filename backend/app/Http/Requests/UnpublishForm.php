@@ -26,6 +26,7 @@ class UnpublishForm extends FormRequest
         return [
             'remarks' => 'required',
             'id' => 'required|integer',
+            'documentName' => 'required',
         ];
     }
 

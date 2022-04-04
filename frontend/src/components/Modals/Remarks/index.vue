@@ -11,7 +11,7 @@ import { defineComponent, watch, ref } from "vue"
 export default defineComponent({
   name: "UnpublishRemarks",
   props: { isUnpublish: Boolean },
-  emits: ['unpublish'],
+  emits: ['unpublish', 'close-remarks-modal'],
   setup(props, { emit }) {
     const isVisible = ref(false)
     const remarks = ref('')
@@ -26,6 +26,7 @@ export default defineComponent({
     }
 
     const onClose = () => {
+      emit('close-remarks-modal')
       resetForm()
     }
 

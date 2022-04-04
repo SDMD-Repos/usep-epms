@@ -5,7 +5,7 @@
         <div class="card">
           <div class="card-body">
             <a-tabs v-model:activeKey="activeKey" :animated="false">
-              <a-tab-pane tab="Functions" key="1"><functions-form v-if="activeKey === '1'"/></a-tab-pane>
+              <a-tab-pane tab="Unpublish" key="1"><unpublish-requests v-if="activeKey === '1'"/></a-tab-pane>
             </a-tabs>
           </div>
         </div>
@@ -15,8 +15,10 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
+import UnpublishRequests from '@/components/SystemAdmin/Admin/Requests/unpublish'
 
 export default defineComponent({
+  components: { UnpublishRequests },
   setup() {
     return {
       activeKey: ref('1'),

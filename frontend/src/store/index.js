@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+
 import user from './user'
 import settings from './settings'
 import formManager from './formManager'
@@ -8,7 +9,7 @@ import opcrvp from './opcrvp'
 import opcr from './opcr'
 import opcrtemplate from './opcr/template'
 import system from './system'
-
+import requests from './system/requests'
 
 export default createStore({
   modules: {
@@ -21,6 +22,7 @@ export default createStore({
     opcr,
     opcrtemplate,
     system,
+    requests,
   },
   state: {
     dateFormat: 'YYYY-MM-DD hh:mm A',

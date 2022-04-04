@@ -80,21 +80,3 @@ export function update(id, data) {
     })
     .catch(err => console.log(err))
 }
-
-export function viewUploadedFile(id) {
-  return apiClient
-    .get('/forms/aapcr/viewUploadedFile/' + id, { responseType: 'blob' })
-    .then(response => {
-      return response.data
-    })
-    .catch(err => console.log(err))
-}
-
-export function updateFile(data) {
-  return apiClient
-    .post('/forms/aapcr/update-file', data)
-    .then(response => {
-      return response.data
-    })
-    .catch(err => console.log(err))
-}

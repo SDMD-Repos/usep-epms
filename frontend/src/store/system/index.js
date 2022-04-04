@@ -11,7 +11,7 @@ const mapApiProviders = {
     saveOfficeStaff: system.saveOfficeStaff,
     checkAccessPermission: system.checkAccessPermission,
     checkFormHeadPermission: system.checkFormHeadPermission,
-  }
+}
 
 export default {
     namespaced: true,

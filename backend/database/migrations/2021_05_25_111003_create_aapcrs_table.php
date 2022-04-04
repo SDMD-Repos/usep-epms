@@ -16,7 +16,7 @@ class CreateAapcrsTable extends Migration
         Schema::create('aapcrs', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->year('year');
-            $table->string('document_name');
+            $table->string('document_name', 100);
             $table->date('end_effectivity')->nullable();
             $table->dateTime('reviewed_date')->nullable();
             $table->dateTime('approved_date')->nullable();

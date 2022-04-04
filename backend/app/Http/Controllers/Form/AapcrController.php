@@ -6,7 +6,6 @@ use App\Aapcr;
 use App\AapcrDetail;
 use App\AapcrDetailMeasure;
 use App\AapcrDetailOffice;
-use App\AapcrFile;
 use App\AapcrProgramBudget;
 use App\FormField;
 use App\FormUnpublishStatus;
@@ -14,7 +13,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateAapcr;
-use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\PdfTrait;
@@ -43,7 +41,7 @@ class AapcrController extends Controller
 
     public function getAllAapcrs()
     {
-        $aapcrList = Aapcr::select("*", "id as key")->with('files', 'status')->orderBy('created_at', 'ASC')->get();
+        $aapcrList = Aapcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
 
         return response()->json([
             'aapcrList' => $aapcrList
@@ -207,45 +205,6 @@ class AapcrController extends Controller
         }
     }
 
-    /*public function unpublish(UploadPdfFile $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validated = $request->validated();
-
-            $files = $validated['files'];
-            $id = $validated['id'];
-
-            $aapcr = Aapcr::find($id);
-
-            $aapcr->published_date = NULL;
-            $aapcr->updated_at = Carbon::now();
-            $aapcr->modify_id = $this->login_user->pmaps_id;
-            $aapcr->history = $aapcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if($aapcr->save()) {
-                $model = new AapcrFile();
-
-                $this->uploadFiles($model, $id, $files);
-            }else {
-                DB::rollBack();
-            }
-
-            DB::commit();
-
-            return response()->json('AAPCR was unpublished successfully', 200);
-        } catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
-        }
-    }*/
-
     public function unpublish(UnpublishForm $request)
     {
         try {
@@ -253,25 +212,24 @@ class AapcrController extends Controller
 
             $remarks = $validated['remarks'];
             $id = $validated['id'];
+            $document_name = $validated['documentName'];
 
             DB::beginTransaction();
 
-            $isUploaded = $this->viewAapcrPdf($id, 1);
+            $unpublished = new FormUnpublishStatus();
 
-            if($isUploaded) {
-                $unpublished = new FormUnpublishStatus();
+            $unpublished->form_type = 'aapcr';
+            $unpublished->form_id = $id;
+            $unpublished->document_name = $document_name;
+            $unpublished->remarks = $remarks;
+            $unpublished->status = 'pending';
+            $unpublished->requested_date = Carbon::now();
+            $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->create_id = $this->login_user->pmaps_id;
+            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-                $unpublished->form_type = 'aapcr';
-                $unpublished->form_id = $id;
-                $unpublished->remarks = $remarks;
-                $unpublished->status = 'pending';
-                $unpublished->requested_date = Carbon::now();
-                $unpublished->create_id = $this->login_user->pmaps_id;
-                $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                if(!$unpublished->save()) {
-                    DB::rollBack();
-                }
+            if(!$unpublished->save()) {
+                DB::rollBack();
             }
 
             DB::commit();
@@ -700,50 +658,6 @@ class AapcrController extends Controller
                     DB::rollBack();
                 }
             }
-        }
-    }
-
-    public function viewUploadedFile($id)
-    {
-        $model = new AapcrFile();
-
-        $file = $this->viewFile($model, $id);
-
-        return response()->download($file['contents'], '', $file['headers']);
-    }
-
-    public function updateFile(UploadPdfFile $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validated = $request->validated();
-
-            $fileModel = new AapcrFile();
-
-            $formModel = new Aapcr();
-
-            $params = [
-                'fileModel' => $fileModel,
-                'formModel' => $formModel,
-                'validated' => $validated
-            ];
-
-            $data = $this->processUpdateFile($params);
-
-            DB::commit();
-
-            return response()->json([
-                'data' => $data
-            ], 200);
-        } catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
         }
     }
 }

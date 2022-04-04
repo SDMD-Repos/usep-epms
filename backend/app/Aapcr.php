@@ -51,15 +51,6 @@ class Aapcr extends Model
     }
 
     /**
-     * Get the files for the aapcr.
-     */
-
-    public function files()
-    {
-        return $this->hasMany('App\AapcrFile', 'form_id');
-    }
-
-    /**
      * Get the form unpublish status of the aapcr.
      */
 

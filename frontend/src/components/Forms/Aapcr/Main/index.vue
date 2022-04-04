@@ -4,7 +4,7 @@
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
-          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkIfDataSourceEmpty" :disabled="editMode">
             <template v-for="(y, i) in years" :key="i">
               <a-select-option :value="y"> {{ y }} </a-select-option>
             </template>
@@ -105,7 +105,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      if(hasAapcrAccess.value || aapcrPermission.value){
+      checkUserPermission()
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('aapcr/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -117,51 +117,67 @@ export default defineComponent({
       } else {
         checkFormAvailability()
       }
-      store.dispatch('aapcr/CHECK_APCR_PERMISSION', { 
-                                                          payload: {
-                                                                    pmaps_id: store.state.user.pmapsId,
-                                                                    form_id:'aapcr',
-                                                                     },
-                                                            })
-
-      const aapcrPermissions = [
-        "form",
-        "f-aapcr", 
-      ]
-     
-       store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrPermissions, name:'aapcrPermission'} })
-       }
+ 
     })
 
     // METHODS
-    const checkFormAvailability = () => {
-      resetFormFields()
-
+    const checkIfDataSourceEmpty = () => {
       if(year.value !== cachedYear.value) {
-        isCheckingForm.value = true
-        checkSavedForm(year.value).then(response => {
-          if(response) {
-            const { hasSaved } = response
-            isCheckingForm.value = false
-            if(hasSaved) {
-              Modal.error({
-                title: () => 'Unable to create an AAPCR for the year ' + year.value,
-                content: () => 'Please check the AAPCR list or select a different year to create a new AAPCR',
-              })
-              if (editMode.value) {
-                year.value = cachedYear.value
-              } else {
-                allowEdit.value = false
-              }
-            } else {
-              if (!editMode.value) {
-                allowEdit.value = true
-                initializeFormFields()
-              }
+        if(dataSource.value.length > 0) {
+          Modal.confirm({
+            title: () => 'Your data will be lost if you proceed',
+            content: () => 'Are you sure you want to continue?',
+            icon: () => createVNode(ExclamationCircleOutlined),
+            okText: 'Yes',
+            cancelText: 'No',
+            onOk() {
+              checkFormAvailability()
+            },
+            onCancel() {
+              year.value = cachedYear.value
+            },
+          })
+        } else {
+          checkFormAvailability()
+        }
+      }
+    }
+
+    const checkFormAvailability = () => {
+      cachedYear.value = year.value
+      isCheckingForm.value = true
+      checkSavedForm(year.value).then( response => {
+        if(response) {
+          const { hasSaved } = response
+          isCheckingForm.value = false
+          if(hasSaved) {
+            Modal.error({
+              title: () => 'Unable to create an AAPCR for the year ' + year.value,
+              content: () => 'Please check the AAPCR list or select a different year to create a new AAPCR',
+            })
+
+            allowEdit.value = false
+            resetFormFields()
+          } else {
+            if (!editMode.value) {
+              processForm()
             }
           }
-        })
-      }
+        }
+      })
+    }
+
+    const processForm = async () => {
+      allowEdit.value = true
+      await resetFormFields()
+      await initializeFormFields()
+    }
+
+    const checkUserPermission = () => {
+      const aapcrPermissions = [ "form", "f-aapcr" ]
+
+      store.dispatch('aapcr/CHECK_AAPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' }})
+      store.dispatch('system/CHECK_PERMISSION', { payload: { permission: aapcrPermissions, name: 'aapcrPermission' }})
     }
 
     const initializeFormFields = async () => {
@@ -174,6 +190,8 @@ export default defineComponent({
     }
 
     const resetFormFields = () => {
+      store.commit('aapcr/SET_STATE', { dataSource: [] })
+
       store.commit('formManager/SET_STATE', {
         functions: [],
         subCategories: [],
@@ -291,13 +309,14 @@ export default defineComponent({
       spinningTip,
 
       validateForm,
-      checkFormAvailability,
+      checkIfDataSourceEmpty,
 
       // useFormOperations
       dataSource,
       targetsBasisList,
       counter,
       deletedItems,
+      cachedYear,
 
       updateDataSource,
       addTargetsBasisItem,
