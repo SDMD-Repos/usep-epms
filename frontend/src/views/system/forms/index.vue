@@ -5,7 +5,7 @@
          <form-admin/>
     </a-collapse-panel>
     <a-collapse-panel key="2" header="OPCR (VPs)" >
-      <p>OPCR (VPs)</p>
+      <form-admin-opcr-vp/>
     </a-collapse-panel>
     <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
       <form-admin-opcr/>
@@ -25,11 +25,13 @@ import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/Forms/aapcr'
 
 import FormAdminOpcr from '@/components/SystemAdmin/Forms/opcr'
+import FormAdminOpcrVp from '@/components/SystemAdmin/Forms/opcrvp'
 export default defineComponent({
     name:"FormAdminTable",
     components: {
         FormAdmin,
         FormAdminOpcr,
+        FormAdminOpcrVp,
     },
     setup() {
       const store = useStore()
