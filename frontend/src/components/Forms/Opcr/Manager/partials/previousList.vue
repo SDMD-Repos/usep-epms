@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="isVisible" :title="`${year-1} functions`" ok-text="Add to list"
+  <a-modal v-model:visible="isVisible" :title="`${year-1} Programs`" ok-text="Add to list"
            @ok="addPreviousPrograms" @cancel="closeModal" width="700px">
 
     <a-select v-model:value="selectedFunction" placeholder="Select Function" style="width: 200px">
@@ -41,7 +41,7 @@ export default defineComponent({
 
     const columns = [
       { title: 'Name', dataIndex: 'name', key: 'name' },
-      { title: `Previous Function (${props.year})`, dataIndex: 'category.name', key: 'category_id', disabled: 'disabled' },
+      { title: `Previous Function (${props.year-1})`, dataIndex: 'category.name', key: 'category_id', disabled: 'disabled' },
       { title: 'Percentage', dataIndex: 'percentage' },
     ]
 
@@ -75,7 +75,7 @@ export default defineComponent({
         });
       }else{
         Modal.error({
-          title: () => 'Unable to add program/s in to list',
+          title: () => 'Unable to add program/s in to the list',
           content: () => 'Please select a function',
         })
       }

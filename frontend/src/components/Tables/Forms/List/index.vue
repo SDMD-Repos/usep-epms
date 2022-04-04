@@ -31,9 +31,9 @@
           <template #title><span>Update</span></template>
           <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
         </a-tooltip>
-        <a-divider type="vertical" />
       </template>
       <a-tooltip v-if="form !== 'opcrtemplate'">
+        <a-divider type="vertical" />
         <template #title><span>View PDF</span></template>
         <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
       </a-tooltip>

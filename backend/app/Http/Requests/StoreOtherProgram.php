@@ -34,7 +34,7 @@ class StoreOtherProgram extends FormRequest
             ],
             'category_id' => 'required',
             'formId' => 'required',
-            'percentage' => 'numeric|min:0|max:100',
+            'percentage' => 'nullable|numeric|min:0|max:100',
             'year' => ''
         ];
     }

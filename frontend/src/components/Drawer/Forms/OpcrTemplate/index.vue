@@ -22,7 +22,7 @@
 
       <a-form-item v-bind="validateInfos.subCategory">
         <template #label>
-          <span :class="{'required-indicator': drawerId !== 'support_functions'}">Sub Category</span>
+          <span>Sub Category</span>
         </template>
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
@@ -103,7 +103,7 @@ export default defineComponent({
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
-    drawerId: { type: String, default: "" },
+    drawerId: { type: Number, default: null },
     categories: { type: Array, default: () => { return [] }},
     currentYear: { type: Number, default: new Date().getFullYear() },
     validate: { type: Function, default: () => {} },

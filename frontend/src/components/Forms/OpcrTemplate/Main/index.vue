@@ -4,7 +4,7 @@
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
-          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability" :disabled="!!isUpdateMode">
             <template v-for="(y, i) in years" :key="i">
               <a-select-option :value="y"> {{ y }} </a-select-option>
             </template>
@@ -55,7 +55,7 @@ export default defineComponent({
     opcrTemplateId: { type: Number, default: 0 },
   },
   setup(props) {
-    const PAGE_TITLE = "OPCR Template Form"
+    const PAGE_TITLE = "OPCR Form Template"
 
     const store = useStore()
     const router = useRouter()
@@ -66,6 +66,7 @@ export default defineComponent({
     const opcrTemplateId = ref(null)
     const formId = 'opcr'
     const isCheckingForm = ref(false)
+    const isUpdateMode = ref(typeof route.params.update !== 'undefined' && route.params.update)
 
     const {
       // DATA
@@ -263,6 +264,7 @@ export default defineComponent({
       deleteSourceItem,
       updateSourceItem,
       addDeletedItem,
+      isUpdateMode,
 
     }
   },

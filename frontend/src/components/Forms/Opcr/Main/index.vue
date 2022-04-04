@@ -55,7 +55,7 @@ export default defineComponent({
     opcrTemplateId: { type: Number, default: 0 },
   },
   setup(props) {
-    const PAGE_TITLE = "OPCR Template Form"
+    const PAGE_TITLE = "OPCR Form"
 
     const store = useStore()
     const router = useRouter()
@@ -117,8 +117,8 @@ export default defineComponent({
             isCheckingForm.value = false
             if(hasSaved) {
               Modal.error({
-                title: () => 'Unable to create an OPCR Template for the year ' + year.value,
-                content: () => 'Please check the OPCR Template list or select a different year to create a new OPCR Template',
+                title: () => 'Unable to create an OPCR for the year ' + year.value,
+                content: () => 'Please check the OPCR list or select a different year to create a new OPCR Template',
               })
               if (editMode.value) {
                 year.value = cachedYear.value

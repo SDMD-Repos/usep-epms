@@ -74,7 +74,7 @@ export default defineComponent({
         });
       }else{
         Modal.error({
-          title: () => 'Unable to add program/s in to list',
+          title: () => 'Unable to add program/s in to the list',
           content: () => 'Please select a function',
         })
       }

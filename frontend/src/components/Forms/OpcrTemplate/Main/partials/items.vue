@@ -37,7 +37,7 @@ export default defineComponent({
   components: { IndicatorTable, OpcrTemplateFormDrawer },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
-    functionId: { type: String, default: "" },
+    functionId: { type: Number, default: null },
     categories: { type: Array, default: () => { return [] }},
     itemSource: { type: Array, default: () => { return [] }},
     formId: { type: String, default: "" },
