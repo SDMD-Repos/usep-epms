@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\Auth;
 trait PermissionTrait {
     use ConverterTrait;
 
-    private function fetchPermissions(){
-        $this->permissions = AccessRight::get();
-    }
-
     private function fetchUserAccessRights(){
         $user = Auth::user();
         $this->userAccessRights = UserAccessRights::where('user_id', $user->id)->where('deleted_at', null)->get();

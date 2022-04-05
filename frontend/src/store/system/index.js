@@ -11,6 +11,9 @@ const mapApiProviders = {
     saveOfficeStaff: system.saveOfficeStaff,
     checkAccessPermission: system.checkAccessPermission,
     checkFormHeadPermission: system.checkFormHeadPermission,
+    getUserAccessRights: system.getUserAccessRights,
+    getAccessRights: system.getAccessRights,
+    getAccessRights: system.getAccessRights,
 }
 
 export default {
@@ -19,6 +22,8 @@ export default {
       loading: false,
       opcrFormPermission: false,
       list: [],
+      userAccess: [],
+      accessRights: [],
       officeHeadDetails: [],
       createFormPermission: false,
       deleteFormPermission: false,
@@ -118,7 +123,40 @@ export default {
               })
             })
           },
-
+      GET_USER_ACCESS_RIGHTS({ commit }) {
+        commit('SET_STATE', {
+          loading: true,
+        })
+        const getUserAccessRights = mapApiProviders.getUserAccessRights
+        getUserAccessRights().then(response => {
+          if (response) {
+            const { userAccess } = response
+            commit('SET_STATE', {
+              userAccess: userAccess,
+            })
+          }
+          commit('SET_STATE', {
+            loading: false,
+          })
+        })
+      },
+      GET_ACCESS_RIGHTS({ commit }) {
+        commit('SET_STATE', {
+          loading: true,
+        })
+        const getAccessRights = mapApiProviders.getAccessRights
+        getAccessRights().then(response => {
+          if (response) {
+            const { accessRights } = response
+            commit('SET_STATE', {
+              accessRights: accessRights,
+            })
+          }
+          commit('SET_STATE', {
+            loading: false,
+          })
+        })
+      },
         FETCH_AAPCR_HEAD({ commit }, { payload }) {
           commit('SET_STATE', {
             loading: true,
@@ -446,7 +484,6 @@ export default {
       checkFormHeadPermission(pmaps_id,form_id).then(response => {
         if (response) {
           const { permission } = response
-          console.log(permission)
           commit('SET_STATE', {
             aapcrHeadPermission: permission,
           })

@@ -176,6 +176,8 @@ Route::group([
     Route::get('/fetch-office-head/{form_id}','SystemAdmin\PermissionController@fetchOfficeHead');
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
+    Route::post('/user-access-rights', 'SystemAdmin\PermissionController@getUserAccessRights');
+    Route::get('/access-rights', 'SystemAdmin\PermissionController@getAccessRights');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
     Route::get('/allow-aapcr-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowAapcrForm');
 

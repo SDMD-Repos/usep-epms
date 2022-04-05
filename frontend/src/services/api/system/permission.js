@@ -72,6 +72,15 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
+export function getUserAccessRights() {
+  return apiClient
+    .post('/system/user-access-rights')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
   export function checkFormHeadPermission(pmaps_id,form_id) {
     return apiClient
       .get('/system/check-form-head/'+pmaps_id+'/'+form_id)
@@ -90,6 +99,14 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
+export function getAccessRights() {
+  return apiClient
+    .get('/system/access-rights')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
 
 
-  
+

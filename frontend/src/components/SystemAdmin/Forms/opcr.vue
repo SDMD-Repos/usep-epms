@@ -72,6 +72,8 @@
 import { computed, defineComponent, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
+import { usePermission } from '@/services/functions/permission'
+
 export default defineComponent({
   name: 'OpcrTab',
   components: {},
@@ -88,6 +90,13 @@ export default defineComponent({
 
     const editBtnHead = ref(false)
     const editBtnStaff = ref(false)
+
+    const { hasAccess } = usePermission( ['ap-form','ap-manager'])
+
+    onMounted(() => {
+      store.dispatch('system/GET_USER_ACCESS_RIGHTS')
+      store.dispatch('system/GET_ACCESS_RIGHTS')
+    })
 
     const fetchPersonnelList  = officeId => {
       const id = officeId.value
@@ -150,7 +159,7 @@ export default defineComponent({
       headId,
       staffId,
       officeId,
-
+      hasAccess,
       personnelList,
       vpOffices,
       loading,

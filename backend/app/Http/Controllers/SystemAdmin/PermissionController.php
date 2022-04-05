@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SystemAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\AccessRight;
 use App\User;
@@ -255,6 +256,15 @@ class PermissionController extends Controller
         return response()->json(['hasPermission' => false], 200);
     }
 
+    function fetchPermissions(){
+        $this->permissions = AccessRight::get();
+    }
+
+    function fetchUserAccessRights(){
+        $user = Auth::user();
+        $this->userAccessRights = UserAccessRights::where('user_id', $user->id)->where('deleted_at', null)->get();
+    }
+
     function fetchOfficeHead($form_id){
 
         try{
@@ -318,7 +328,7 @@ class PermissionController extends Controller
             $permission = false;
             // $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
-           
+
             if(count($formAccessDetails)){
               $permission = true;
             }
@@ -337,7 +347,7 @@ class PermissionController extends Controller
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
 
             $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
-           
+
             if(count($formAccessDetails)){
               $permission = true;
             }
@@ -353,5 +363,28 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-    
+     function getUserAccessRights(){
+        try{
+            $user = Auth::user();
+            return response()->json([
+                'userAccess' => UserAccessRights::where('user_id', $user->id)->get()
+            ], 200);
+
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+
+    function getAccessRights(){
+        try{
+            $user = Auth::user();
+            return response()->json([
+                'accessRights' => AccessRight::get()
+            ], 200);
+
+        }catch(\Exception $e){
+            return response()->json($e->getMessage());
+        }
+    }
+
 }
