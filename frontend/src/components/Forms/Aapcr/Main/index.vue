@@ -111,13 +111,13 @@ export default defineComponent({
       resetFormFields()
 
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
-
-      if(aapcrId.value) {
-        getFormDetails()
-      } else {
-        checkFormAvailability()
-      }
- 
+      if(hasAapcrAccess.value || aapcrPermission.value){
+          if(aapcrId.value) {
+            getFormDetails()
+          } else {
+            checkFormAvailability()
+          }
+          }
     })
 
     // METHODS
