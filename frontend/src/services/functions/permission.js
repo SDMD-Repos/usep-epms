@@ -12,42 +12,59 @@ export const usePermission = (moduleArray) => {
   })
 
   const checkPermission = () => {
-    moduleArray.forEach(function (value){
-      var module = accessRights.value.find((permission) => permission.permission_id === value)
+    for (let i = 0; i < moduleArray.length; i++){
+      var module = accessRights.value.find((permission) => permission.permission_id === moduleArray[i])
       var cPermission = fetchAllChildrenPermission(module.id)
-      if (hasUserAccess(module.id) && !hasChildrenPermission(cPermission)) hasAccess.value = true
+
+      if (hasUserAccess(module.id) && !hasChildrenPermission(cPermission)){
+        hasAccess.value = true
+        return
+      }
       else {
         var parent = getParentPermission(module.id)
+
         do {
           var pPermission = fetchAllChildrenPermission(parent)
-          if (hasUserAccess(parent) && !hasChildrenPermission(pPermission)) hasAccess.value = true
+          if (hasUserAccess(parent) && !hasChildrenPermission(pPermission)){
+            hasAccess.value = true
+            return
+          }
         }while (parent = getParentPermission(parent))
       }
-    })
-    hasAccess.value = false
+    }
   }
 
   const fetchAllChildrenPermission = (id) => {
     let permissions = []
+    let allChildrenPermission = []
+    let childPermission = getChildrenPermission(id)
+
     getChildrenPermission(id).forEach(function (value, key){
-      permissions = permissions.concat(fetchAllChildrenPermission(value))
+      allChildrenPermission = fetchAllChildrenPermission(value)
+      if (allChildrenPermission.length)
+        permissions.push(fetchAllChildrenPermission(value))
     })
+    if (childPermission.length)
+      permissions.concat(childPermission)
     return permissions
   }
 
   const getChildrenPermission = (id) => {
     let permissions = []
     accessRights.value.forEach(function (value, key){
-      if (value.parent_id === id) permissions.concat(value.id)
+      if (value.parent_id === id) {
+        permissions.push(value.id)
+      }
     })
     return permissions
   }
 
   const hasUserAccess = (id) => {
-    if (accessRights.value && accessRights.value.length)
-      accessRights.value.forEach(function (value, key){
-        if (id === value.access_right_id) return true
-      })
+
+    if (userAccess.value && accessRights.value.length)
+      for (let i = 0; i < userAccess.value.length; i++){
+        if (id === userAccess.value[i].access_right_id) return true
+      }
     return false
   }
 
@@ -65,9 +82,11 @@ export const usePermission = (moduleArray) => {
   }
 
   const getParentPermission = (id) => {
-    accessRights.value.forEach(function (value){
-      if (value.id === id) return value.parent_id
-    })
+    if (accessRights.value && accessRights.value.length){
+      for (let i = 0; i < accessRights.value.length; i++) {
+        if (accessRights.value[i].id === id) return accessRights.value[i].parent_id
+      }
+    }
     return false
   }
 
