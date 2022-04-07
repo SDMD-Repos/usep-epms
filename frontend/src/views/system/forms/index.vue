@@ -46,8 +46,6 @@ export default defineComponent({
       const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
 
       onMounted(() => {
-        store.dispatch('system/GET_USER_ACCESS_RIGHTS')
-        store.dispatch('system/GET_ACCESS_RIGHTS')
 
         const aapcrFormPermissions = [
           "adminPermission", //ACCESS PERMISSION

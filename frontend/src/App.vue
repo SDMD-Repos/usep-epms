@@ -31,6 +31,8 @@ export default {
 
     // initial auth check
     onMounted(() => {
+      store.dispatch('system/GET_USER_ACCESS_RIGHTS')
+      store.dispatch('system/GET_ACCESS_RIGHTS')
       store.dispatch('user/LOAD_CURRENT_ACCOUNT')
     })
 

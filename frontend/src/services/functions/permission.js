@@ -42,7 +42,7 @@ export const usePermission = (moduleArray) => {
     getChildrenPermission(id).forEach(function (value, key){
       allChildrenPermission = fetchAllChildrenPermission(value)
       if (allChildrenPermission.length)
-        permissions.push(fetchAllChildrenPermission(value))
+        permissions.push(allChildrenPermission)
     })
     if (childPermission.length)
       permissions.concat(childPermission)
