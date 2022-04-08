@@ -32,10 +32,10 @@ class RequestsController extends Controller
 
     }
 
-    public function getAllUnpublishRequests()
+    public function getAllUnpublishRequests($status)
     {
         $unpublishList = FormUnpublishStatus::select("*", 'id as key')
-                                            ->orderBy('status', 'desc')->orderBy('created_at', 'desc')
+                                            ->where('status', $status)->orderBy('created_at', 'desc')
                                             ->with('form:id,abbreviation')
                                             ->get();
 

@@ -71,19 +71,21 @@ trait OfficeTrait {
 
             $data = new \stdClass();
 
-            $data->id = "allColleges";
-            $data->value = "allColleges";
-            $data->title = "All Colleges";
-            $data->cascadeTo = null;
-            $data->children = $this->getChildOffices("allColleges",1);
+            if(!isset($status->isOfficesOnly) || (!$status->isOfficesOnly)) {
+                $data->id = "allColleges";
+                $data->value = "allColleges";
+                $data->title = "All Colleges";
+                $data->cascadeTo = null;
+                $data->children = $this->getChildOffices("allColleges",1);
 
-            if($checkable) {
-                $data->checkable = $checkable->allColleges;
-            } elseif($selectable) {
-                $data->selectable = $selectable->allColleges;
+                if($checkable) {
+                    $data->checkable = $checkable->allColleges;
+                } elseif($selectable) {
+                    $data->selectable = $selectable->allColleges;
+                }
+
+                array_push($values, $data);
             }
-
-            array_push($values, $data);
 
             $isAcronym = isset($status->isAcronym) && $status->isAcronym;
 

@@ -20,7 +20,8 @@ import { message } from 'ant-design-vue'
 import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
 import { useViewPublishedFiles } from '@/services/functions/published'
-import { viewUnpublishedForm } from '@/services/api/system/requests'
+import { getUnpublishedFormData } from '@/services/api/system/requests'
+import { fetchPdfData } from '@/services/api/mainForms/aapcr'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
@@ -108,12 +109,24 @@ export default defineComponent({
       })
     }
 
-    const viewPdf = data => {
-      message.loading('Loading...')
+    const viewPdf = params => {
+      const { data } = params
+      const fromUnpublished = typeof params.fromUnpublished !== 'undefined' ? params.fromUnpublished : false
 
+      let renderer = null
       const documentName = data.document_name || data.file_name
 
-      viewUnpublishedForm(data.id).then(response => {
+      if(!fromUnpublished) {
+        store.commit('aapcr/SET_STATE', { loading: true })
+
+        renderer = fetchPdfData
+      }else {
+        message.loading('Loading...')
+
+        renderer = getUnpublishedFormData
+      }
+
+      renderer(data.id).then(response => {
         if (response) {
           const blob = new Blob([response], { type: 'application/pdf' })
           const fileUrl = window.URL.createObjectURL(blob)
@@ -123,7 +136,10 @@ export default defineComponent({
 
           const route = router.resolve({ name: "viewerPdf" });
           window.open(route.href, "_blank")
-
+        }
+        if(!fromUnpublished) {
+          store.commit('aapcr/SET_STATE', { loading: false })
+        }else {
           message.destroy()
         }
       })

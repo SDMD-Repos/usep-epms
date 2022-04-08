@@ -35,4 +35,13 @@ class AapcrDetailOffice extends Model
     {
         return $this->belongsTo('App\FormField', 'office_type_id');
     }
+
+    /**
+     * Get the category of the offices.
+     */
+
+    public function category()
+    {
+        return $this->belongsTo('App\Category', 'cascade_to');
+    }
 }

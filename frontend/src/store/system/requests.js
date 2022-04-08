@@ -5,7 +5,6 @@ import * as system from '@/services/api/system/requests'
 const mapApiProviders = {
   getAllUnpublishRequests: system.getAllUnpublishRequests,
   updateRequestStatus: system.updateRequestStatus,
-  viewUnpublishedForm: system.viewUnpublishedForm,
 }
 
 export default {
@@ -22,12 +21,13 @@ export default {
     },
   },
   actions: {
-    FETCH_UNPUBLISH_LIST({ commit }) {
+    FETCH_UNPUBLISH_LIST({ commit }, { payload }) {
+      const { status } = payload
       commit('SET_STATE', {
         loading: true,
       })
       const allUnpublishRequests = mapApiProviders.getAllUnpublishRequests
-      allUnpublishRequests().then(response => {
+      allUnpublishRequests(status).then(response => {
         if (response) {
           const { unpublishList } = response
           commit('SET_STATE', {
@@ -46,7 +46,7 @@ export default {
       const updateRequestStatus = mapApiProviders.updateRequestStatus
       updateRequestStatus(payload).then(response => {
         if (response) {
-          dispatch('FETCH_UNPUBLISH_LIST')
+          dispatch('FETCH_UNPUBLISH_LIST', { payload: { status: 'pending' }})
           notification.success({
             message: 'Success',
             description: response,

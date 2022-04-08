@@ -138,7 +138,7 @@ export default defineComponent({
     }
 
     const viewPdf = data => {
-      emit('view-pdf', data)
+      emit('view-pdf', { data: data })
     }
 
     const onUnpublish = data => {

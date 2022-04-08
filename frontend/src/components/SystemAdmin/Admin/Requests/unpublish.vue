@@ -1,6 +1,11 @@
 <template>
   <div>
-    <a-table :columns="columns" :data-source="unpublishList" :loading="loading">
+    <a-select v-model:value="status" style="width: 200px" @change="fetchUnpublishList">
+      <a-select-option value="pending">Pending</a-select-option>
+      <a-select-option value="declined">Declined</a-select-option>
+      <a-select-option value="verified">Verified</a-select-option>
+    </a-select>
+    <a-table class="mt-4" :columns="columns" :data-source="unpublishList" :loading="loading">
       <template #count="{ index }">
         <span>{{ index + 1}}</span>
       </template>
@@ -46,7 +51,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, onMounted, computed } from "vue"
+import { defineComponent, onMounted, ref, computed } from "vue"
 import { useStore } from 'vuex'
 import moment from 'moment'
 import { InfoCircleOutlined } from '@ant-design/icons-vue'
@@ -68,6 +73,11 @@ const columns = [
     key: 'document_name',
   },
   {
+    title: 'Reason',
+    dataIndex: 'remarks',
+    key: 'remarks',
+  },
+  {
     title: 'Status',
     key: 'status',
     slots: { customRender: 'status' },
@@ -86,6 +96,9 @@ export default defineComponent({
   setup() {
     const store = useStore()
 
+    // DATA
+    const status = ref('pending')
+
     // COMPUTED
     const dateFormat = computed(() => store.getters.mainStore.dateFormat)
     const unpublishList = computed(() => store.getters['requests/unpublish'])
@@ -93,10 +106,14 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('requests/FETCH_UNPUBLISH_LIST')
+      fetchUnpublishList(status.value)
     })
 
     // METHODS
+    const fetchUnpublishList = status => {
+      store.dispatch('requests/FETCH_UNPUBLISH_LIST', { payload: { status: status }})
+    }
+
     const getRequestStatusClass = status => {
       switch (status) {
         case 'pending':
@@ -116,10 +133,13 @@ export default defineComponent({
       moment,
       columns,
 
+      status,
+
       dateFormat,
       loading,
       unpublishList,
 
+      fetchUnpublishList,
       getRequestStatusClass,
       changeRequest,
     }

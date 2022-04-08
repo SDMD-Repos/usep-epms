@@ -1,33 +1,39 @@
 <template>
-  <a-table :columns="columns" :data-source="formFields" row-key="id" :pagination="false" :loading="loading" bordered>
-    <template #settings="{ record }">
-      <div v-if="record.code === 'implementing' || record.code === 'supporting'">
-        <span v-if="record.id in editableData">
-          <a-select v-model:value="editableData[record.id]['settings']" placeholder="Select"
-                    label-in-value style="width: 400px">
-            <a-select-option v-for="data in functions" :value="data.id.toString()" :key="data.id" :label="data.name">
-              {{ data.name }}
-            </a-select-option>
-          </a-select>
-        </span>
-        <template v-else>Cascade to: <b>{{ record.settingLabel }}</b></template>
-      </div>
-    </template>
+  <div>
+    <a-divider>Fields</a-divider>
 
-    <template #operation="{ record }" >
-      <span v-if="record.id in editableData">
-        <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
-          <a-button type="primary" shape="round" size="small" >
-            {{ record.settings ? "Update" : "Save" }}
-          </a-button>
-        </a-popconfirm>
-        <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
-      </span>
-      <span v-else>
-        <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
-      </span>
-    </template>
-  </a-table>
+    <a-table class="mt-4" :columns="columns" :data-source="formFields" row-key="id" :pagination="false"
+             :show-header="false" bordered>
+      <template #settings="{ record }">
+        <div v-if="record.code === 'implementing' || record.code === 'supporting'">
+          <span v-if="record.id in editableData">
+            <a-select v-model:value="editableData[record.id]['settings']" placeholder="Select"
+                      label-in-value style="width: 400px">
+              <a-select-option v-for="data in functions" :value="data.id.toString()" :key="data.id" :label="data.name">
+                {{ data.name }}
+              </a-select-option>
+            </a-select>
+          </span>
+          <template v-else>Cascade to: <b>{{ record.settingLabel }}</b></template>
+        </div>
+      </template>
+
+      <template #operation="{ record }" >
+        <span v-if="record.id in editableData">
+          <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
+            <a-button type="primary" shape="round" size="small" >
+              {{ record.settings ? "Update" : "Save" }}
+            </a-button>
+          </a-popconfirm>
+          <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
+        </span>
+        <span v-else>
+          <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
+        </span>
+      </template>
+    </a-table>
+  </div>
+
 </template>
 <script>
 import { defineComponent, reactive, computed } from "vue"
@@ -41,7 +47,7 @@ const columns = [
 ]
 
 export default defineComponent({
-  name: "FieldsFormTable",
+  name: "FieldsTable",
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     isCreate: Boolean,
@@ -68,7 +74,6 @@ export default defineComponent({
       })
     })
     const functions = computed(() => store.getters['formManager/functions'])
-    const loading = computed(() => store.getters['formManager/manager'].loading)
 
     // METHODS
     const edit = key => {
@@ -106,7 +111,6 @@ export default defineComponent({
 
       formFields,
       functions,
-      loading,
 
       edit,
       save,

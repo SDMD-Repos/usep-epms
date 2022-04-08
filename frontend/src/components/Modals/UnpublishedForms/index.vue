@@ -1,29 +1,55 @@
 <template>
   <a-modal v-model:visible="isVisible" :title="documentName"
-           width="50%" wrap-class-name="viewUploadedModal" :footer="null"
+           width="60%" wrap-class-name="viewUploadedModal" :footer="null"
            @cancel="onClose">
     <a-table :columns="columns"
              :data-source="list"
              size="small"
-             row-key="id">
+             row-key="id" bordered>
 
       <!-- Custom column render-->
-      <template #documentName="{ text, record }">
-        <a-tooltip title="View PDF">
-          <a-button type="link" @click="viewFile(record)">{{ text }}</a-button>
-        </a-tooltip>
+      <template #count="{ index }">
+        {{ index + 1 }}
       </template>
 
       <template #details="{ record }">
         Unpublished {{ record.changed_date_disp }} by {{ record.requested_by }}
+      </template>
+
+      <template #operation="{ record }">
+        <a-tooltip title="View PDF">
+          <a-button type="link" @click="viewFile(record)">View</a-button>
+        </a-tooltip>
       </template>
     </a-table>
   </a-modal>
 </template>
 <script>
 import { defineComponent, ref, watch } from 'vue'
-import { unplishedFormsColumns } from '@/services/columns'
 // import { DeleteOutlined } from "@ant-design/icons-vue"
+
+const unplishedFormsColumns = [
+  {
+    title: '#',
+    width: 50,
+    slots: { customRender: 'count' },
+  },
+  {
+    title: 'Reason',
+    dataIndex: 'remarks',
+    key: 'remarks',
+    width: 500,
+  },
+  {
+    title: 'Details',
+    width: 400,
+    slots: { customRender: 'details' },
+  },
+  {
+    title: 'Action',
+    slots: { customRender: 'operation' },
+  },
+]
 
 export default defineComponent({
   name: 'UnpublishedFormsModal',
@@ -49,13 +75,8 @@ export default defineComponent({
     }
 
     const viewFile = data => {
-      emit('view-file', data)
+      emit('view-file', { data: data, fromUnpublished: true })
     }
-
-    /*const onDelete = (data) => {
-      emit('delete-file', data)
-      emit('close-list-modal')
-    }*/
 
     return {
       columns: unplishedFormsColumns,

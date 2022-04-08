@@ -169,12 +169,12 @@ export default defineComponent({
       getAapcrDetailsByOffice(vpOffice.value.key, year.value).then(response => {
         if(response) {
           if(response.aapcrId) {
-            store.commit('opcrvp/SET_STATE', {
-              dataSource: response.dataSource,
-            })
+            store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
+
             allowEdit.value = true
             aapcrId.value = response.aapcrId
             targetsBasisList.value = response.targetsBasisList
+
             initializeVPForm()
           }else {
             Modal.warning({

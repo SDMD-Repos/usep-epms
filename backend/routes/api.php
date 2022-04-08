@@ -43,6 +43,7 @@ Route::group([
     Route::get('/get-all-functions/{year}', 'SettingController@getFunctions');
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
+    Route::post('/update-function-default-program/{id}', 'SettingController@updateProgramFunction');
 
     Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
@@ -178,7 +179,7 @@ Route::group([
     Route::group([
         'prefix' => 'requests'
     ], function() {
-        Route::get('/get-all-unpublish', 'SystemAdmin\RequestsController@getAllUnpublishRequests');
+        Route::get('/get-all-unpublish/{status}', 'SystemAdmin\RequestsController@getAllUnpublishRequests');
         Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateRequestStatus');
         Route::get('/view-unpublished-form/{id}', 'SystemAdmin\RequestsController@viewUnpublishedForm');
     });

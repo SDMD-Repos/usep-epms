@@ -1,10 +1,12 @@
 import * as manager from '@/services/api/manager'
 import { notification } from 'ant-design-vue'
+import {updateFunctionProgram} from "../../services/api/manager";
 
 const mapApiProviders = {
   getFunctions: manager.getFunctions,
   createFunction: manager.createNewFunction,
   deleteFunction: manager.deleteFunction,
+  updateFunctionProgram: manager.updateFunctionProgram,
   getPrograms: manager.getPrograms,
   createProgram: manager.addNewProgram,
   getOtherPrograms: manager.getOtherPrograms,
@@ -122,6 +124,23 @@ export default {
         }
       })
     },
+    UPDATE_PROGRAM_FUNCTION({ commit, dispatch }, { payload }) {
+      const { id, defaultProgram, year } = payload
+      commit('SET_STATE', { loading: true })
+
+      const updateFunctionProgram = mapApiProviders.updateFunctionProgram
+      updateFunctionProgram(defaultProgram, id).then(response => {
+        if (response) {
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
+          notification.success({
+            message: 'Success',
+            description: 'Settings was saved successfully',
+          })
+        }else {
+          commit('SET_STATE', { loading: false })
+        }
+      })
+    },
     FETCH_PROGRAMS({ commit }, { payload }) {
       const { year } = payload
 
@@ -191,7 +210,7 @@ export default {
         })
       })
     },
-     CREATE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
+    CREATE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
@@ -385,7 +404,6 @@ export default {
         items: items,
         deleted: deleted,
       }
-
 
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {

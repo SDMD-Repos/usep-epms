@@ -27,6 +27,15 @@ export function deleteFunction(id) {
     .catch(err => console.log(err))
 }
 
+export function updateFunctionProgram(data, id) {
+  return apiClient
+    .post('/settings/update-function-default-program/' + id, data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function getPrograms(year) {
   return apiClient
     .get('/settings/get-all-programs/' + year)

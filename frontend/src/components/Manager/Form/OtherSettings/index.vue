@@ -1,27 +1,31 @@
 <template>
   <div>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSettings">
-      <template v-for="(y, i) in years" :key="i">
-        <a-select-option :value="y">
-          {{ y }}
-        </a-select-option>
-      </template>
-    </a-select>
+    <a-spin :spinning="loading">
+      <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSettings">
+        <template v-for="(y, i) in years" :key="i">
+          <a-select-option :value="y">
+            {{ y }}
+          </a-select-option>
+        </template>
+      </a-select>
 
-    <div class="mt-5">
-      <form-table :year="year" :is-create="createFieldPermission"  @handle-save="handleSave"/>
-    </div>
+      <div class="mt-5">
+        <fields-table :year="year" :is-create="createFieldPermission"  @handle-save="handleSave"/>
+        <br />
+        <functions-table :year="year" :is-create="createFieldPermission" @handle-save="updateFunctionProgram" />
+      </div>
+    </a-spin>
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted } from "vue"
+import { defineComponent, ref, onMounted, computed } from "vue"
 import { useStore } from "vuex";
-import FormTable from './partials/formTable'
-
+import FieldsTable from './partials/fieldsTable'
+import functionsTable from './partials/functionsTable'
 
 export default defineComponent({
-  name: 'FieldsManager',
-  components: { FormTable },
+  name: 'OtherSettingsManager',
+  components: { FieldsTable, functionsTable },
   setup() {
     const store = useStore()
 
@@ -29,6 +33,8 @@ export default defineComponent({
     const year = ref(new Date().getFullYear())
 
     // COMPUTED
+    const loading = computed(() => store.getters['formManager/manager'].loading)
+
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -38,21 +44,16 @@ export default defineComponent({
       }
       return lists
     })
-    const createFieldPermission = computed(() => store.getters['system/permission'].createFieldPermission)
 
+    const createFieldPermission = computed(() => store.getters['system/permission'].createFieldPermission)
 
     // EVEMTS
     onMounted(() => {
       fetchSettings(year.value)
 
-       const fieldPermissions = [
-        "manager",
-        "m-form", 
-        "mf-fields", 
-      ]
-      // store.dispatch('system/CHECK_CREATE_FIELD_PERMISSION', { payload: fieldPermissions })
-       store.dispatch('system/CHECK_PERMISSION', { payload: {permission: fieldPermissions, name:'createFieldPermission'} })
+      const fieldPermissions = ["manager", "m-form", "mf-fields" ]
 
+      store.dispatch('system/CHECK_PERMISSION', { payload: { permission: fieldPermissions, name:'createFieldPermission'} })
     })
 
     //METHODS
@@ -86,12 +87,21 @@ export default defineComponent({
       }
     }
 
+    const updateFunctionProgram = data => {
+      store.dispatch('formManager/UPDATE_PROGRAM_FUNCTION',
+        { payload: { id: data.id, defaultProgram: data.defaultProgram, year: year.value } })
+    }
+
     return {
       year,
+
+      loading,
       years,
       createFieldPermission,
+
       fetchSettings,
       handleSave,
+      updateFunctionProgram,
     }
   },
 })

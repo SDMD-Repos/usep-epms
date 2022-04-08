@@ -29,21 +29,11 @@
         </span>
       </template>
     </a-table>
-    <form-modal ref="groupModal" :visible="isOpenModal"
-                :modal-title="modalTitle"
-                :action-type="action"
-                :ok-text="okText"
-                :form-state="formState"
-                :form-rules="rules"
-                :office-list="offices"
-                :supervising-list="vpOfficesList"
-                :validate="validate"
-                :validate-infos="validateInfos"
-                :is-edit="editGroupPermission"
-                :is-delete="deleteGroupPermission"
-                @change-action="changeAction"
-                @close-modal="resetModalData"
-                @submit-form="submitForm"/>
+
+    <form-modal ref="groupModal" :visible="isOpenModal" :modal-title="modalTitle" :action-type="action" :ok-text="okText"
+                :form-state="formState" :form-rules="rules" :office-list="offices" :supervising-list="vpOfficesList"
+                :validate="validate" :validate-infos="validateInfos" :is-edit="editGroupPermission" :is-delete="deleteGroupPermission"
+                @change-action="changeAction" @close-modal="resetModalData" @submit-form="submitForm"/>
   </div>
 </template>
 <script>
@@ -124,51 +114,38 @@ export default defineComponent({
         { validator: checkIfEmpty, trigger: 'change' },
       ],
     })
-   
+
     // EVENTS
     onMounted(() => {
+      checkUserPermission()
+
       store.dispatch('formManager/FETCH_GROUPS')
+
       let params = {
         selectable: {
-          allColleges: true,
+          allColleges: false,
           mains: true,
         },
         isAcronym: false,
+        isOfficesOnly: true,
       }
+
       params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
-
-      const groupCreatePermissions = [
-        "manager",
-        "m-group", 
-        "mg-create",
-      ]
-      // store.dispatch('system/CHECK_CREATE_GROUP_PERMISSION', { payload: groupCreatePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupCreatePermissions, name:'createGroupPermission'} })
-
-      const groupeEditPermissions = [
-        "manager",
-        "m-group", 
-        "mg-edit",
-      ]
-      // store.dispatch('system/CHECK_EDIT_GROUP_PERMISSION', { payload: groupeEditPermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupeEditPermissions, name:'editGroupPermission'} })
-
-      const groupeDeletePermissions = [
-        "manager",
-        "m-group", 
-        "mg-delete",
-      ]
-      // store.dispatch('system/CHECK_DELETE_GROUP_PERMISSION', { payload: groupeDeletePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupeDeletePermissions, name:'deleteGroupPermission'} })
-
     })
 
-   
-  
-
     // METHODS
+    const checkUserPermission = () => {
+      const groupCreatePermissions = ["manager", "m-group", "mg-create"]
+      const groupeEditPermissions = ["manager", "m-group", "mg-edit"]
+      const groupeDeletePermissions = ["manager", "m-group", "mg-delete"]
+
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupCreatePermissions, name:'createGroupPermission'} })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupeEditPermissions, name:'editGroupPermission'} })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: groupeDeletePermissions, name:'deleteGroupPermission'} })
+    }
+
     const openModal = (event, record) => {
       resetModalData()
       isOpenModal.value = true

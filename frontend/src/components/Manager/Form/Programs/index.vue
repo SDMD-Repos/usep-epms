@@ -121,28 +121,20 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousPrograms: [] })
+
       fetchData(year.value)
-
-      const programCreatePermissions = [
-        "manager",
-        "m-form", 
-        "mf-programs", 
-        "mfp-create",
-      ]
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
-      // store.dispatch('system/CHECK_CREATE_PROGRAM_PERMISSION', { payload: formCreatePermissions })
-      const programDeletePermissions = [
-        "manager",
-        "m-form", 
-        "mf-programs", 
-        "mfp-delete",
-      ]
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
-
-      // store.dispatch('system/CHECK_DELETE_PROGRAM_PERMISSION', { payload: programDeletePermissions })
+      checkUserPermission()
     })
 
     // METHODS
+    const checkUserPermission = () => {
+      const programCreatePermissions = ["manager", "m-form", "mf-programs", "mfp-create"]
+      const programDeletePermissions = ["manager", "m-form", "mf-programs", "mfp-delete"]
+
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
+    }
+
     const fetchData = async selectedYear => {
       if(createProgramPermission.value){
          resetForm()

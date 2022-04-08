@@ -1,8 +1,8 @@
 import apiClient from '@/services/axios'
 
-export async function getAllUnpublishRequests() {
+export async function getAllUnpublishRequests(status) {
   return apiClient
-    .get('/system/requests/get-all-unpublish')
+    .get('/system/requests/get-all-unpublish/' + status)
     .then(response => {
       return response.data
     })
@@ -18,7 +18,7 @@ export function updateRequestStatus(data) {
     .catch(err => console.log(err))
 }
 
-export async function viewUnpublishedForm(id) {
+export async function getUnpublishedFormData(id) {
   return apiClient
     .get('/system/requests/view-unpublished-form/' + id, { responseType: 'blob' })
     .then(response => {

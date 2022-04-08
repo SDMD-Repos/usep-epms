@@ -18,6 +18,7 @@ use App\Http\Requests\StoreProgram;
 use App\Http\Requests\StoreOtherProgram;
 use App\Http\Requests\StoreSignatory;
 use App\Http\Requests\StoreSubCategory;
+use App\Http\Requests\UpdateDefaultProgram;
 use App\Http\Requests\UpdateGroup;
 use App\Http\Traits\OfficeTrait;
 use App\Measure;
@@ -141,6 +142,41 @@ class SettingController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
+    }
+
+    public function updateProgramFunction(UpdateDefaultProgram $request, $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            $defaultProgram = $validated['defaultProgram'];
+
+            DB::beginTransaction();
+
+            $category = Category::find($id);
+
+            $category->default_program_id = $defaultProgram['key'];
+            $category->modify_id = $this->login_user->pmaps_id;
+            $category->updated_at = Carbon::now();
+            $category->history = $category->history . "Update Default Program " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if(!$category->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json("Function's default program was updated successfully", 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+
     }
 
     public function getSubCategories($year, $isNested=0)
@@ -569,8 +605,8 @@ class SettingController extends Controller
     {
         // $forms = Form::orderBy('ordering', 'ASC')->get();
         $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id]])->orWhere([['staff_id',$pmaps_id]])->with('form')->get();
-        
-     
+
+
         // $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
         return response()->json([
             'spmsForms' => $formAccessDetails

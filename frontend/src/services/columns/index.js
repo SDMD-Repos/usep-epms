@@ -232,18 +232,3 @@ export const listTableColumns = [
     slots: { customRender: 'operation' },
   },
 ]
-
-export const unplishedFormsColumns = [
-  {
-    title: 'Document Name',
-    dataIndex: 'document_name',
-    width: 350,
-    slots: { customRender: 'documentName' },
-  },
-  {
-    title: 'Details',
-    dataIndex: '',
-    className: 'column-created-at',
-    slots: { customRender: 'details' },
-  },
-]

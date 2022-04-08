@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Form;
 
 use App\Aapcr;
 use App\AapcrDetail;
+use App\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UpdateVpOpcr;
@@ -25,29 +26,7 @@ class VpopcrController extends Controller
 {
     use ConverterTrait, FileTrait, FormTrait;
 
-//    private $login_user;
-
     private $STO = 5;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /*public function __construct()
-    {
-
-        $this->middleware(function ($request, $next) {
-            $this->login_user = Auth::user();
-
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
-            return $next($request);
-        });
-
-    }*/
 
     public function checkSaved($officeId, $year)
     {
@@ -91,7 +70,6 @@ class VpopcrController extends Controller
         if ($query) {
             # Loop through PI details
             foreach($query->detailsOrdered as $data) {
-                $detail = [];
 
                 $programId = $data->program_id;
 
@@ -103,134 +81,142 @@ class VpopcrController extends Controller
 
                 $this->getTargetsBasisList($data->targets_basis);
 
-                # Check whether PI will be cascaded in core or support functions
-                # Set default sub category id and name based on the new category id
-                $hasCore = $this->array_any(function ($x, $arr) {
-                    return $x->cascade_to === 'core_functions' &&
-                        ($x->vp_office_id === $arr['vpId'] || $x->office_id === $arr['vpId'] ||
-                            ($x->is_group && $x->group->supervising_id === (int)$arr['vpId']));
-                }, $data->offices, ['vpId' => $vpId]);
+                $tempCategoryList = [];
 
-                if($hasCore){
-                    $detailIndex = 'core_functions';
+                foreach($data->offices as $dataOffice) {
+                    if(($dataOffice['vp_office_id'] === $vpId || $dataOffice['office_id'] === $vpId ||
+                        ($dataOffice['is_group'] && $dataOffice->group->supervising_id === (int)$vpId))) {
 
-                    if($data->category_id === 'support_functions'){
-                        $programId = null;
-                    }
-                }else{
-                    $detailIndex = 'support_functions';
+//                        $filteredOffices[] = $dataOffice;
 
-                    if($data->category_id === 'core_functions'){
-                        $programId = $this->STO;
-                    }
-                }
+                        $isCategoryExists = array_filter($tempCategoryList, function($x) use ($dataOffice){
+                            return $x['id'] === $dataOffice['cascade_to'];
+                        });
 
-                if($data->category_id !== $detailIndex){
-                    $subCategory = null;
-                }
-
-                $this->getTargetsBasisList($data->targets_basis);
-
-                $item = array(
-                    'key' => $data->id,
-                    'id' => $data->id,
-                    'category' => $detailIndex,
-                    'subCategory' => $subCategory,
-                    'program' => $programId,
-                    'name' => $data->pi_name,
-                    'isHeader' => false,
-                    'target' => $data->target,
-                    'measures' => $extracted['measures'],
-                    'budget' => $data->allocated_budget,
-                    'targetsBasis' => $data->targets_basis,
-                    'implementing' => $offices['implementing'],
-                    'supporting' => $offices['supporting'] ?? [],
-                    'remarks' => $data->other_remarks,
-                    'deleted' => 0,
-                    'isCascaded' => 1
-                );
-
-                if($data->parent_id) {
-                    $parent = AapcrDetail::where('id', $data->parent_id)->first();
-
-                    if($parent) {
-                        $isExists = 0;
-
-                        foreach($parentIds as $id) {
-                            if($id['id'] === $parent->id && $detailIndex === $id['index']) {
-                                $isExists = 1;
-                            }
+                        if(!$isCategoryExists) {
+                            $tempCategoryList[] = $dataOffice->category;
                         }
 
-                        if(!$isExists){
-                            if($parent->is_header) {
+                    }
+                }
 
-                                $detail = array(
-                                    'key' => $parent->id,
-                                    'id' => $parent->id,
-                                    'type' => 'pi',
-                                    'category' => $detailIndex,
-                                    'subCategory' => $subCategory,
-                                    'program' => $programId,
-                                    'name' => $parent->pi_name,
-                                    'isHeader' => true,
-                                    'target' => '',
-                                    'measures' => [],
-                                    'budget' => 0.00,
-                                    'targetsBasis' => '',
-                                    'implementing' => [],
-                                    'supporting' => [],
-                                    'remarks' => '',
-                                    'children' => [],
-                                    'deleted' => 0,
-                                    'isCascaded' => 1
-                                );
+                foreach($tempCategoryList as $categoryList) {
+                    $detail = [];
 
-                                $item['type'] = 'sub';
+                    $detailIndex = $categoryList->id;
 
-                                $detail['children'][] = $item;
+                    if($data->category_id !== $detailIndex){
+                        $subCategory = null;
+                        $programId = $categoryList->default_program_id;
+                    }
 
-                                array_push($parentIds, array(
-                                    'id' => $parent->id,
-                                    'index' => $detailIndex
-                                ));
-                            }else{
-//                                $sub['children'] = [];
-                                $item['type'] = 'pi';
+                    $this->getTargetsBasisList($data->targets_basis);
 
-                                $detail = $item;
+                    $item = array(
+                        'key' => $data->id,
+                        'id' => $data->id,
+                        'category' => $detailIndex,
+                        'subCategory' => $subCategory,
+                        'program' => $programId,
+                        'name' => $data->pi_name,
+                        'isHeader' => false,
+                        'target' => $data->target,
+                        'measures' => $extracted['measures'],
+                        'budget' => $data->allocated_budget,
+                        'targetsBasis' => $data->targets_basis,
+                        'implementing' => $offices['implementing'],
+                        'supporting' => $offices['supporting'] ?? [],
+                        'remarks' => $data->other_remarks,
+                        'deleted' => 0,
+                        'isCascaded' => 1
+                    );
+
+                    if($data->parent_id) {
+                        $parent = AapcrDetail::where('id', $data->parent_id)->first();
+
+                        if($parent) {
+                            $isExists = 0;
+
+                            foreach($parentIds as $id) {
+                                if($id['id'] === $parent->id && $detailIndex === $id['index']) {
+                                    $isExists = 1;
+                                }
                             }
-                        }else{
-                            foreach($dataSource as $key => $source) {
-                                if($source['id'] === $parent->id && $detailIndex === $source['category']) {
+
+                            if(!$isExists){
+
+                                if($parent->is_header) {
+
+                                    $detail = array(
+                                        'key' => $parent->id,
+                                        'id' => $parent->id,
+                                        'type' => 'pi',
+                                        'category' => $detailIndex,
+                                        'subCategory' => $subCategory,
+                                        'program' => $programId,
+                                        'name' => $parent->pi_name,
+                                        'isHeader' => true,
+                                        'target' => '',
+                                        'measures' => [],
+                                        'budget' => 0.00,
+                                        'targetsBasis' => '',
+                                        'implementing' => [],
+                                        'supporting' => [],
+                                        'remarks' => '',
+                                        'children' => [],
+                                        'deleted' => 0,
+                                        'isCascaded' => 1
+                                    );
+
                                     $item['type'] = 'sub';
 
-                                    $dataSource[$key]['children'][] = $item;
+                                    $detail['children'][] = $item;
+
+                                    $parentIds[] = array(
+                                        'id' => $parent->id,
+                                        'index' => $detailIndex
+                                    );
+
+                                }else{
+
+                                    $item['type'] = 'pi';
+
+                                    $detail = $item;
+                                }
+                            }else{
+                                foreach($dataSource as $key =>  $source) {
+                                    if($source['id'] === $parent->id && $detailIndex === $source['category']) {
+
+                                        $item['type'] = 'sub';
+
+                                        $dataSource[$key]['children'][] = $item;
+                                    }
                                 }
                             }
                         }
+                    } else{
+
+                        $item['type'] = 'pi';
+
+                        $detail = $item;
+
+                        $parentIds[] = array(
+                            'id' => $data->id,
+                            'index' => $detailIndex
+                        );
                     }
-                } else{
-                    $item['type'] = 'pi';
 
-                    $detail = $item;
-
-                    array_push($parentIds, array(
-                        'id' => $data->id,
-                        'index' => $detailIndex
-                    ));
-                }
-
-                if(count($detail)) {
-                    $dataSource[] = $detail; // Add new PI to array
-                }
+                    if(count($detail)) {
+                        $dataSource[] = $detail; // Add new PI to array
+                    }
+                } # end category list loop
             } # end loop of PI details
         }
-
+        
         return response()->json([
             'dataSource' => $dataSource,
             'aapcrId' => $query->id ?? null,
-            'targetsBasisList' => $this->targetsBasisList
+            'targetsBasisList' => $this->targetsBasisList,
         ], 200);
     }
 

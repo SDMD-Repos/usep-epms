@@ -172,10 +172,11 @@ trait PdfTrait {
             'approvedDate' => $signatory['approvedDate'],
             'approvingPosition' => $signatory['approvedByPosition'],
             'public_path' => $publicPath,
+            'storage_path_public' => storage_path('app/public'),
         ];
 
         $extension = 'pdf' ;
-        $input = public_path('raw/aapcr.jasper');
+        $input = storage_path('app/public') . '/raw/aapcr.jasper';
 
         if(!$isUnpublish) {
             $filename =  $documentName  . "_". date("Ymd");
@@ -205,7 +206,7 @@ trait PdfTrait {
 
         $jasper = new PHPJasper();
 
-        $jasper->compile(public_path(). '/raw/aapcr.jrxml')->execute();
+        $jasper->compile(storage_path('app/public') . '/raw/aapcr.jrxml')->execute();
 
         $jasper->process(
             $input,

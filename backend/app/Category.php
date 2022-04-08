@@ -10,7 +10,7 @@ class Category extends Model
     use SoftDeletes;
 
     /**
-     * The category that belong to the aapcrSubCategories.
+     * The category that belong to the sub categories.
      */
     public function subCategory()
     {
@@ -18,10 +18,18 @@ class Category extends Model
     }
 
     /**
-     * The category that belong to the aapcrPrograms.
+     * The category that belong to the programs.
      */
     public function programs()
     {
         return $this->hasMany('App\Program');
+    }
+
+    /**
+     * The category that belong to the AAPCR offices
+     */
+    public function aapcrOffices()
+    {
+        return $this->hasMany('App\AapcrDetailOffice', 'cascade_to');
     }
 }
