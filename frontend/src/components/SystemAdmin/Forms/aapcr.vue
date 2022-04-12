@@ -92,7 +92,7 @@ export default defineComponent({
     const store = useStore()
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const loading = computed(() => store.getters['external/external'].loading)
-    const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetails)
+    const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
     const createAapcrPermission = computed(() => store.getters['system/permission'].createAapcrPermission)
     const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
 
@@ -115,7 +115,7 @@ export default defineComponent({
 
 //  parseInt(officeHeadOfficeId.value) === item.value
      onMounted(() => {
-      store.dispatch('system/FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
+      store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
 
      const aapcrCreatePermissions = [
         "adminPermission",
@@ -124,7 +124,8 @@ export default defineComponent({
       ]
       // console.log(store.state.user.id)
 
-      store.dispatch('system/CHECK_CREATE_AAPCR_PERMISSION', { payload: aapcrCreatePermissions })
+      // store.dispatch('system/CHECK_CREATE_AAPCR_PERMISSION', { payload: aapcrCreatePermissions })
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrCreatePermissions, name:'createAapcrPermission'} })
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
@@ -187,7 +188,7 @@ export default defineComponent({
       let params = {
        pmaps_id: staffId.value,
        form_id: 'aapcr',
-       office_id: staffId.value,
+       office_id: officeId.value,
       }
 
       if(staffId.value){

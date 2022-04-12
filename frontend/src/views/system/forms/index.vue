@@ -4,8 +4,8 @@
     <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
          <form-admin/>
     </a-collapse-panel>
-    <a-collapse-panel key="2" header="OPCR (VPs)" >
-      <p>OPCR (VPs)</p>
+    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled="!vpopcrHeadPermission && !vpopcrHeadPermission">
+      <form-admin-opcr-vp/>
     </a-collapse-panel>
     <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
       <form-admin-opcr/>
@@ -25,11 +25,13 @@ import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/Forms/aapcr'
 
 import FormAdminOpcr from '@/components/SystemAdmin/Forms/opcr'
+import FormAdminOpcrVp from '@/components/SystemAdmin/Forms/opcrvp'
 export default defineComponent({
     name:"FormAdminTable",
     components: {
         FormAdmin,
         FormAdminOpcr,
+        FormAdminOpcrVp,
     },
     setup() {
       const store = useStore()
@@ -40,6 +42,7 @@ export default defineComponent({
       const aapcrFormPermission = computed(() => store.getters['system/permission'].aapcrFormPermission)
       const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
       const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
+      const vpopcrHeadPermission = computed(() => store.getters['system/permission'].vpopcrHeadPermission)
       onMounted(() => {
         const opcrFormPermissions = [
           "adminPermission", //ACCESS PERMISSION
@@ -60,12 +63,19 @@ export default defineComponent({
                                                                     form_id:aapcrFormId,
                                                                      },
                                                             })
-        store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', {
-          payload: {
-            pmaps_id: store.state.user.pmapsId,
-            form_id:opcrFormId,
-          },
-        })
+      const vpopcrCreatePermissions = [
+        "adminPermission",
+        "ap-form", 
+        "apf-opcrvr",
+      ]
+
+      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: vpopcrCreatePermissions, name:'createVpOpcrPermission'} })
+      store.dispatch('system/CHECK_VPOPCR_HEAD_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id: 'vpopcr',
+                                                                     },
+                                                            })
 
       })
 
@@ -75,6 +85,9 @@ export default defineComponent({
         aapcrFormPermission,
         aapcrHeadPermission,
         opcrHeadPermission,
+        vpopcrHeadPermission,
+        createVpOpcrPermission,
+        
       }
 
     },

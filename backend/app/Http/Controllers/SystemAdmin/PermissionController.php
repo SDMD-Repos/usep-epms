@@ -23,6 +23,7 @@ class PermissionController extends Controller
     private $userAccessRights;
 
     private $opcrFormId = 'opcr';
+    private $opcrvpFormId = 'vpopcr';
 
     function detailsPermission()
     {
@@ -202,7 +203,7 @@ class PermissionController extends Controller
             $form_id = $validated['form_id'];
             $condition = ['form_id' => $form_id];
 
-            if ($this->opcrFormId === $form_id){
+            if ($this->opcrFormId === $form_id || $this->opcrvpFormId === $form_id){
                 $condition['office_id'] = $office_id;
             }
 
@@ -255,11 +256,17 @@ class PermissionController extends Controller
         return response()->json(['hasPermission' => false], 200);
     }
 
-    function fetchOfficeHead($form_id){
+    function fetchOfficeHead($form_id,$office_id=""){
 
         try{
-            $officeHeadDetails  = FormAccess::where('form_id',$form_id)->first();
-
+          
+            $condition  = ['form_id' => $form_id];
+            if($form_id==='vpopcr'){
+                $condition['office_id'] = $office_id;
+            }
+           
+            $officeHeadDetails  = FormAccess::where($condition)->first();
+            
             return response()->json([
                 'officeHeadDetails' => $officeHeadDetails,
 
@@ -279,7 +286,7 @@ class PermissionController extends Controller
             $form_id = $validated['form_id'];
             $condition = ['form_id' => $form_id];
 
-            if ($this->opcrFormId === $form_id){
+            if ($this->opcrFormId === $form_id || $this->opcrvpFormId === $form_id ){
                 $condition['office_id'] = $office_id;
             }
 
