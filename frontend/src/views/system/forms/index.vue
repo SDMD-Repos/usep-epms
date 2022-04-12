@@ -4,7 +4,7 @@
     <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
          <form-admin/>
     </a-collapse-panel>
-    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled="!vpopcrHeadPermission && !vpopcrHeadPermission">
+    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled="!createVpOpcrPermission && !vpopcrHeadPermission">
       <form-admin-opcr-vp/>
     </a-collapse-panel>
     <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
@@ -43,6 +43,8 @@ export default defineComponent({
       const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
       const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
       const vpopcrHeadPermission = computed(() => store.getters['system/permission'].vpopcrHeadPermission)
+      const createVpOpcrPermission = computed(() => store.getters['system/permission'].createVpOpcrPermission)
+      
       onMounted(() => {
         const opcrFormPermissions = [
           "adminPermission", //ACCESS PERMISSION

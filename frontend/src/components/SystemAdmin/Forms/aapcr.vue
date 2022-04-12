@@ -18,7 +18,7 @@
                       @change="getPersonnelList"
                       v-if="editBtn"
                     />
-                    <span v-else>{{officeDetails.office_name}}</span>
+                    <span v-else>{{officeDetails ? officeDetails.office_name  : "Not Set"}}</span>
                   </a-col>
                 </a-row>
 
@@ -37,7 +37,7 @@
                         label-in-value
                         v-if="editBtn"
                       />
-                     <span v-else>{{officeDetails.pmaps_name}}</span>
+                     <span v-else>{{officeDetails ? officeDetails.pmaps_name  : "Not Set"}}</span>
                   </a-col>
 
                 </a-row>
@@ -64,7 +64,7 @@
                         label-in-value
                         v-if="editBtnStaff"
                       />
-                      <span v-else>{{officeDetails.staff_name || "Not Set"}}</span>
+                      <span v-else>{{officeDetails ? officeDetails.staff_name  : "Not Set"}}</span>
                   </a-col>
                 </a-row>
                  <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
