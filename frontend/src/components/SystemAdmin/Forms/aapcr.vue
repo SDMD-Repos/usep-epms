@@ -138,6 +138,7 @@ export default defineComponent({
 
     const getPersonnelList = officeId => {
       memberList.value = []
+      personnelId.value = []
       if (officeId) {
         formLoading.value = true
         const id = officeId.value
