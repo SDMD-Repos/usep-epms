@@ -45,9 +45,9 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
-  export function fetchOfficeHead(data) {
+  export function fetchOfficeHead(form_id,pmaps_id) {
     return apiClient
-      .get('/system/fetch-office-head/'+data)
+      .get('/system/fetch-office-head/'+form_id+"/"+pmaps_id)
       .then(response => {
         return response.data
       })

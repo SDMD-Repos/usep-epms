@@ -19,24 +19,12 @@ export default {
       loading: false,
       opcrFormPermission: false,
       list: [],
-      officeHeadDetails: [],
-      createFormPermission: false,
-      deleteFormPermission: false,
-      createProgramPermission: false,
-      deleteProgramPermission: false,
-      createSubCatPermission: false,
-      deleteSubCatPermission: false,
-      createFieldPermission: false,
-      createGroupPermission: false,
-      editGroupPermission: false,
-      deleteGroupPermission: false,
-      createMeasuresPermission: false,
-      editMeasuresPermission: false,
-      deleteMeasuresPermission: false,
-      createAapcrPermission: false,
+      officeHeadDetailsAAPCR: [],
+      officeHeadDetailsVPOPCR: [],
       aapcrHeadPermission: false,
       aapcrFormPermission: false,
       opcrHeadPermission: false,
+      vpopcrHeadPermission: false,
     },
     mutations: {
       SET_STATE(state, payload) {
@@ -119,24 +107,25 @@ export default {
             })
           },
 
-        FETCH_AAPCR_HEAD({ commit }, { payload }) {
+        FETCH_OFFICE_DETAILS({ commit }, { payload }) {
+          const {form_id , office_id} = payload
           commit('SET_STATE', {
             loading: true,
           })
+         
           const fetchOfficeHead = mapApiProviders.fetchOfficeHead
-          fetchOfficeHead(payload.form_id).then(response => {
+          fetchOfficeHead(form_id,office_id).then(response => {
             if (response) {
-
-              commit('SET_STATE', {
-                officeHeadDetails : {
-                            pmaps_id: response.officeHeadDetails.pmaps_id,
-                            pmaps_name: response.officeHeadDetails.pmaps_name,
-                            office_id: response.officeHeadDetails.office_id,
-                            office_name: response.officeHeadDetails.office_name,
-                            staff_id: response.officeHeadDetails.staff_id,
-                            staff_name: response.officeHeadDetails.staff_name,
-                },
-              })
+                if(form_id==='aapcr'){
+                  commit('SET_STATE', {
+                    officeHeadDetailsAAPCR : response.officeHeadDetails,
+                  })
+                }else if(form_id==='vpopcr'){
+                  commit('SET_STATE', {
+                    officeHeadDetailsVPOPCR : response.officeHeadDetails,
+                  })
+                }
+            
             }
             commit('SET_STATE', {
               loading: false,
@@ -151,7 +140,7 @@ export default {
         const saveOfficeHead = mapApiProviders.saveOfficeHead
         saveOfficeHead(payload).then(response => {
           if (response) {
-            dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
+            // dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:form_id}})
               notification.success({
               message: 'Success',
               description: form_id.toUpperCase() + ' Head has been assigned.',
@@ -170,7 +159,7 @@ export default {
         const saveOfficeStaff = mapApiProviders.saveOfficeStaff
         saveOfficeStaff(payload).then(response => {
           if (response) {
-            dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:'aapcr'}})
+            dispatch('FETCH_OFFICE_DETAILS',{payload:{form_id:form_id}})
               notification.success({
               message: 'Success',
               description: form_id.toUpperCase() + ' Staff has been assigned.',
@@ -493,7 +482,28 @@ export default {
         })
       })
     },
+    CHECK_VPOPCR_HEAD_PERMISSION({ commit }, { payload }) {
+      const { pmaps_id,form_id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      console.log("hello")
+      const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
+      checkFormHeadPermission(pmaps_id,form_id).then(response => {
+        if (response) {
+          const { permission } = response
+       
+          commit('SET_STATE', {
+            vpopcrHeadPermission: permission,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
     },
+    },
+   
 
     getters: {
       permission: state => state,

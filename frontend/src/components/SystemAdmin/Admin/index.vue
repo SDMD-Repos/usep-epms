@@ -74,7 +74,7 @@ export default defineComponent({
     const accessList = ref([])
     const selectedRowKeys = ref([])
     const updateBtn = ref(true)
-    let savebtn = ref(false)
+    const savebtn = ref(false)
 
     let formLoading = ref(false)
 
@@ -91,7 +91,6 @@ export default defineComponent({
         },
         isAcronym: false,
       }
-      savebtn.value = false
       params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES_CHILDREN')
@@ -105,8 +104,6 @@ export default defineComponent({
     const getPersonnelList = officeId => {
       memberList.value = []
       personnelId.value = []
-      selectedRowKeys.value = []
-      savebtn.value = false
       if (officeId) {
         store.dispatch('system/FETCH_PERMISSION')
         formLoading.value = true
@@ -125,7 +122,6 @@ export default defineComponent({
     const getAccessList = personnelId => {
       accessList.value = []
       selectedRowKeys.value = []
-      savebtn.value = false
       if (personnelId) {
         formLoading.value = true
          savebtn.value = true

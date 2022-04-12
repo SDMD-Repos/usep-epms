@@ -169,7 +169,7 @@ Route::group([
     Route::get('/get-permission-by-user/{id}', 'SystemAdmin\PermissionController@fetchPermissionByUser');
     Route::post('/update-permission', 'SystemAdmin\PermissionController@updatePermission');
     Route::post('/save-office-head','SystemAdmin\PermissionController@saveOfficeHead');
-    Route::get('/fetch-office-head/{form_id}','SystemAdmin\PermissionController@fetchOfficeHead');
+    Route::get('/fetch-office-head/{form_id}/{office_id}','SystemAdmin\PermissionController@fetchOfficeHead');
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
