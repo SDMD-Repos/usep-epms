@@ -44,8 +44,9 @@
 
                  <a-row type="flex" justify="center" class="mt-3" v-if="createAapcrPermission">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" > Save</a-button>
-                   <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEdit"  v-else>Edit</a-button>
+                      <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" > Save</a-button>
+                      <a-button style="width: 100px;" type="primary" v-if="editBtn" @click="onCancel">Cancel</a-button>
+                      <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEdit"  v-else>Edit</a-button>
                    </a-col>
               </a-row>
                 <a-divider />
@@ -70,6 +71,7 @@
                  <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
                      <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
+                      <a-button style="width: 100px;" type="primary" class="mr-3" @click="onCancelStaff" v-if="editBtnStaff" >Cancel</a-button>
                    <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
                    </a-col>
               </a-row>
@@ -181,9 +183,26 @@ export default defineComponent({
           content: () => 'Please select a Office Head',
         })
       }
-
-
     }
+
+    const onCancel = () =>{
+          editBtn.value = false;
+          officeId.value = []
+          personnelId.value = []
+          staffId.value = []
+          memberList.value = []
+          store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
+      }
+
+
+    const onCancelStaff = () =>{
+          editBtnStaff.value = false;
+          officeId.value = []
+          personnelId.value = []
+          staffId.value = []
+          memberList.value = []
+          store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
+      }
 
     const onSaveStaff = () =>{
       let params = {
@@ -231,6 +250,8 @@ export default defineComponent({
       editBtnStaff,
       onEdit,
       onEditStaff,
+      onCancel,
+      onCancelStaff,
       // isCreate,
       // allAccess,
       createAapcrPermission,

@@ -108,13 +108,13 @@ export default {
           },
 
         FETCH_OFFICE_DETAILS({ commit }, { payload }) {
-          const {form_id , office_id} = payload
-          commit('SET_STATE', {
+          const {form_id} = payload
+          commit('SET_STATE', { 
             loading: true,
           })
-         
+
           const fetchOfficeHead = mapApiProviders.fetchOfficeHead
-          fetchOfficeHead(form_id,office_id).then(response => {
+          fetchOfficeHead(form_id, payload.office_id ? payload.office_id.value: 0 ).then(response => {
             if (response) {
                 if(form_id==='aapcr'){
                   commit('SET_STATE', {
@@ -136,11 +136,11 @@ export default {
         commit('SET_STATE', {
           loading: true,
         })
-        const { form_id } = payload
+        const { form_id, office_id } = payload
         const saveOfficeHead = mapApiProviders.saveOfficeHead
         saveOfficeHead(payload).then(response => {
           if (response) {
-            // dispatch('FETCH_AAPCR_HEAD',{payload:{form_id:form_id}})
+            dispatch('FETCH_OFFICE_DETAILS',{payload:{form_id:form_id, office_id: office_id}})
               notification.success({
               message: 'Success',
               description: form_id.toUpperCase() + ' Head has been assigned.',
@@ -170,244 +170,7 @@ export default {
           })
         })
     },
-    // CHECK_CREATE_FORM_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createFormPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_DELETE_FORM_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         deleteFormPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_PROGRAM_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createProgramPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_DELETE_PROGRAM_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         deleteProgramPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_SUBCAT_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createSubCatPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_DELETE_SUBCAT_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         deleteSubCatPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_FIELD_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createFieldPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_GROUP_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createGroupPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_EDIT_GROUP_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         editGroupPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_DELETE_GROUP_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         deleteGroupPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_MEASURES_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createMeasuresPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_EDIT_MEASURES_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         editMeasuresPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_DELETE_MEASURES_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         deleteMeasuresPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
-    // CHECK_CREATE_AAPCR_PERMISSION({ commit }, { payload }) {
-    //   commit('SET_STATE', {
-    //     loading: true,
-    //   })
-    //   const checkAccessPermission = mapApiProviders.checkAccessPermission
-    //   checkAccessPermission(payload).then(response => {
-    //     if (response) {
-    //       const { permissions } = response
-    //       commit('SET_STATE', {
-    //         createAapcrPermission: permissions,
-    //       })
-    //     }
-    //     commit('SET_STATE', {
-    //       loading: false,
-    //     })
-    //   })
-    // },
+   
     CHECK_OPCR_HEAD_PERMISSION({ commit }, { payload }) {
       const { pmaps_id,form_id } = payload
       commit('SET_STATE', {
@@ -431,11 +194,14 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
+
+      console.log(pmaps_id)
+      console.log(form_id)
       const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
       checkFormHeadPermission(pmaps_id,form_id).then(response => {
         if (response) {
           const { permission } = response
-          console.log(permission)
+          
           commit('SET_STATE', {
             aapcrHeadPermission: permission,
           })
@@ -487,7 +253,7 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      console.log("hello")
+      
       const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
       checkFormHeadPermission(pmaps_id,form_id).then(response => {
         if (response) {

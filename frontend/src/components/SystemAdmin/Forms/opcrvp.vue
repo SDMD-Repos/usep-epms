@@ -33,14 +33,16 @@
           :tree-data="memberList"
            v-if="editBtn"
         />
-           <span v-else>{{officeDetails.pmaps_name || "Not Set"}}</span>
+           <span v-else>{{officeDetails ? officeDetails.pmaps_name : "Not Set"}}</span>
          </a-col>
       </a-row>
         <div class="mt-4"></div>
-        <a-row type="flex" justify="center" align="middle" v-if="createVpOpcrPermission" >
-              <a-button style="width: 90px;" type="primary" v-if="editBtn" @click="onSave">Save</a-button>
-              <a-button style="width: 90px;" type="primary" v-if="editBtn" @click="onCancel">Cancel</a-button>
-              <a-button style="width: 90px;" type="primary" v-else @click="onEdit">Edit</a-button>
+        <a-row type="flex" justify="center"  class="mt-3"  v-if="createVpOpcrPermission" >
+         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
+              <a-button style="width: 90px;"   type="primary"  class="mr-3" v-if="editBtn" @click="onSave">Save</a-button>
+              <a-button style="width: 90px;"  type="primary" class="mr-3"  v-if="editBtn" @click="onCancel">Cancel</a-button>
+              <a-button style="width: 90px;"  type="primary" class="mr-3"  v-else @click="onEdit">Edit</a-button>
+              </a-col>
         </a-row>
         <a-row type="flex" class="mt-3">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Staff Head: </b></a-col>
@@ -57,15 +59,18 @@
           :tree-data="memberListStaff"
            v-if="editBtnStaff"
         />
-          <span v-else>{{officeDetails.staff_name || "Not Set"}}</span>
+          <span v-else>{{ officeDetails && officeDetails.staff_name === null  ? officeDetails.staff_name: "Not Set"}}</span>
          </a-col>
         </a-row>
          <div class="mt-4"></div>
-            <a-row type="flex" justify="center" align="middle" v-if="vpopcrHeadPermission && officeDetails.pmaps_id ===  loginId ">
-            <a-button style="width: 90px;" type="primary"  v-if="editBtnStaff" @click="onSaveStaff">Save</a-button>
-            <a-button style="width: 90px;" type="primary" v-if="editBtnStaff" @click="onCancelStaff">Cancel</a-button>
-            <a-button style="width: 90px;" type="primary" v-else @click="onEditStaff">Edit</a-button>
+            <a-row type="flex" justify="center"  class="mt-3" v-if="vpopcrHeadPermission && officeDetails.pmaps_id ===  loginId ">
+                <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
+            <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onSaveStaff">Save</a-button>
+            <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onCancelStaff">Cancel</a-button>
+            <a-button style="width: 90px;" type="primary" class="mr-3" v-else @click="onEditStaff">Edit</a-button>
+            </a-col>
             </a-row>
+             <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
     </a-form-item>
   </div>
 </template>
@@ -136,7 +141,7 @@ export default defineComponent({
       
         store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
  
-        store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'vpopcr',office_id:officeId.value}})
+        store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'vpopcr',office_id:officeId}})
         staffId.value = []
         getPersonnelList(officeId)
         getStaffList(officeId)
@@ -153,7 +158,7 @@ export default defineComponent({
         }
         if(personnelId.value){
           store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
-         
+        
         }else{
           Modal.error({
           title: () => 'Unable to proceed',
@@ -196,6 +201,7 @@ export default defineComponent({
 
         if(staffId.value){
             store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
+            
         }else{
             Modal.error({
               title: () => 'Unable to proceed',
