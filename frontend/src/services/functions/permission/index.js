@@ -3,7 +3,7 @@ import { useStore } from 'vuex'
 
 
 export const usePermission = (permission)  => {
-    const { listCreate, listDelete , listEdit } = permission
+    const { listCreate, listDelete , listEdit, listAapcr } = permission
        
     const accessLists = computed(() => store.getters['user/access'])
     const store = useStore()
@@ -17,10 +17,16 @@ export const usePermission = (permission)  => {
     const editPermission = accessLists.value.filter((value)=>{
             return listEdit ?  listEdit.includes(value.permission_id) : 0
             });
+    
+    const aapcrPermission = accessLists.value.filter((value)=>{
+      return listAapcr ?  listAapcr.includes(value.permission_id) : 0
+      });
+
 
     const isCreate = ref(false)
     const isDelete = ref(false)
     const isEdit = ref(false)
+    const aapcrFormPermission = ref(false)
 
     if(createPermission.length > 0){
         isCreate.value = true;
@@ -34,10 +40,15 @@ export const usePermission = (permission)  => {
         isEdit.value = true;
     }
 
+    if(aapcrPermission.length > 0){
+      aapcrFormPermission.value = true;
+  }
+
   return {
     isCreate,
     isDelete,
     isEdit,
+    aapcrFormPermission,
   }
 }
 

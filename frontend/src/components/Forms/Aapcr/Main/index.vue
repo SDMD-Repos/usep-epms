@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasAapcrAccess || aapcrPermission">
+  <div v-if="hasAapcrAccess || aapcrFormPermission">
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -53,6 +53,7 @@ import { useProgramBudget } from '@/services/functions/form/main'
 import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/aapcr'
 import IndicatorComponent from './partials/items'
 import BudgetListComponent from './partials/budget'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "AAPCRForm",
@@ -86,7 +87,7 @@ export default defineComponent({
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
-    const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
+    // const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
 
     
     const loading = computed(() => {
@@ -103,6 +104,15 @@ export default defineComponent({
       return tip
     })
 
+    const permission ={
+                      listAapcr: [ "form", "f-aapcr" ],
+                    }
+    const {
+          // DATA
+        aapcrFormPermission,
+          // METHODS
+      } = usePermission(permission)
+
     // EVENTS
     onMounted(() => {
       checkUserPermission()
@@ -111,7 +121,7 @@ export default defineComponent({
       resetFormFields()
 
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
-      if(hasAapcrAccess.value || aapcrPermission.value){
+      if(hasAapcrAccess.value || aapcrFormPermission.value){
           if(aapcrId.value) {
             getFormDetails()
           } else {
@@ -174,10 +184,10 @@ export default defineComponent({
     }
 
     const checkUserPermission = () => {
-      const aapcrPermissions = [ "form", "f-aapcr" ]
+      // const aapcrPermissions = [ "form", "f-aapcr" ]
 
       store.dispatch('aapcr/CHECK_AAPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' }})
-      store.dispatch('system/CHECK_PERMISSION', { payload: { permission: aapcrPermissions, name: 'aapcrPermission' }})
+      // store.dispatch('system/CHECK_PERMISSION', { payload: { permission: aapcrPermissions, name: 'aapcrPermission' }})
     }
 
     const initializeFormFields = async () => {
@@ -301,7 +311,8 @@ export default defineComponent({
       allowEdit,
       isCheckingForm,
       hasAapcrAccess,
-      aapcrPermission,
+      // aapcrPermission,
+      aapcrFormPermission,
 
       years,
       categories,

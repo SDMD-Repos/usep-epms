@@ -42,7 +42,7 @@
 
                 </a-row>
 
-                 <a-row type="flex" justify="center" class="mt-3" v-if="createAapcrPermission">
+                 <a-row type="flex" justify="center" class="mt-3" v-if="aapcrFormPermission">
                    <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
                       <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSave" v-if="editBtn" > Save</a-button>
                       <a-button style="width: 100px;" type="primary" v-if="editBtn" @click="onCancel">Cancel</a-button>
@@ -65,7 +65,7 @@
                         label-in-value
                         v-if="editBtnStaff"
                       />
-                      <span v-else>{{officeDetails ? officeDetails.staff_name  : "Not Set"}}</span>
+                      <span v-else>{{officeDetails ? officeDetails.staff_name ? officeDetails.staff_name : "Not Set"  : "Not Set"}}</span>
                   </a-col>
                 </a-row>
                  <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
@@ -86,6 +86,7 @@ import { computed, defineComponent, onMounted, ref , watch} from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import { getPersonnelByOffice } from '@/services/api/hris';
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: 'AapcrTab',
@@ -95,13 +96,11 @@ export default defineComponent({
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const loading = computed(() => store.getters['external/external'].loading)
     const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
-    const createAapcrPermission = computed(() => store.getters['system/permission'].createAapcrPermission)
+  
     const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
 
   
-    // const subOffice = computed(()=>{
-    //   return typeof officeDetails.value.office_id !== 'undefined'? getStaffList(officeDetails.value.office_id) : []
-    // })
+ 
     const officeId = ref(undefined)
 
     const editBtn = ref(false)
@@ -114,20 +113,17 @@ export default defineComponent({
 
     let formLoading = ref(false)
 
+    const permission ={
+                      listAapcr: ["adminPermission","ap-form", "apf-aapcr"],
+                    }
+     const {
+          // DATA
+        aapcrFormPermission,
+          // METHODS
+      } = usePermission(permission)
 
-//  parseInt(officeHeadOfficeId.value) === item.value
      onMounted(() => {
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
-
-     const aapcrCreatePermissions = [
-        "adminPermission",
-        "ap-form", 
-        "apf-aapcr",
-      ]
-      // console.log(store.state.user.id)
-
-      // store.dispatch('system/CHECK_CREATE_AAPCR_PERMISSION', { payload: aapcrCreatePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrCreatePermissions, name:'createAapcrPermission'} })
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', { 
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
@@ -208,8 +204,8 @@ export default defineComponent({
       let params = {
        pmaps_id: staffId.value,
        form_id: 'aapcr',
-       office_id: officeId.value,
-      }
+       office_id:  {"value":officeDetails.value.office_id},
+       }
 
       if(staffId.value){
             store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
@@ -226,6 +222,7 @@ export default defineComponent({
     }
     const onEditStaff = () =>{
       getStaffList(officeDetails.value.office_id)
+     
       editBtnStaff.value = true;
     }
 
@@ -254,7 +251,7 @@ export default defineComponent({
       onCancelStaff,
       // isCreate,
       // allAccess,
-      createAapcrPermission,
+      aapcrFormPermission,
       aapcrHeadPermission,
       getStaffList,
       staffId,

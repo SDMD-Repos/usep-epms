@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasAapcrAccess || aapcrPermission">
+  <div v-if="hasAapcrAccess || aapcrFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-unpublished-forms="viewUnpublishedForms" />
@@ -25,6 +25,7 @@ import { fetchPdfData } from '@/services/api/mainForms/aapcr'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "AapcrList",
@@ -51,20 +52,23 @@ export default defineComponent({
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
-    const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
+    
 
     const { isUploadedViewed, viewedForm,
       viewUnpublishedForms, onCloseList, uploadedListState } = useViewPublishedFiles()
 
+    const permission ={
+                      listAapcr: [ "form", "f-aapcr" ],
+                    }
+    const {
+          // DATA
+        aapcrFormPermission,
+          // METHODS
+      } = usePermission(permission)
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-
-      const aapcrPermissions = ["form", "f-aapcr"]
-
       store.dispatch('aapcr/CHECK_AAPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId,  form_id:'aapcr' }})
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: aapcrPermissions, name:'aapcrPermission'} })
-
       store.dispatch('aapcr/FETCH_LIST')
     })
 
@@ -160,7 +164,7 @@ export default defineComponent({
       list,
       loading,
       hasAapcrAccess,
-      aapcrPermission,
+      aapcrFormPermission,
 
       isUploadedViewed,
       viewedForm,
