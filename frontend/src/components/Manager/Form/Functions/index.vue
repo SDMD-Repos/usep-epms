@@ -13,7 +13,7 @@
               ref="formRef"
               :model="formState"
               :rules="rules"
-              v-if="funcCreatePermission">
+              v-if="isCreate">
         <div class="row">
           <div class="col-lg-5">
             <a-form-item ref="name" label="Function Name" name="name">
@@ -34,7 +34,7 @@
       </a-form>
     </div>
 
-    <functions-table :year="year" :is-delete="funcDeletePermission"  />
+    <functions-table :year="year" :is-delete="isDelete"  />
 
     <previous-list :visible="isPreviousViewed" :year="year" :list="previousFunctions"
                    @close-modal="changePreviousModal" @save-functions="onMultipleSave"/>
@@ -47,7 +47,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import FunctionsTable from './partials/lists'
 import PreviousList from './partials/previousList'
-
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "FunctionsManager",
@@ -91,9 +91,6 @@ export default defineComponent({
     // COMPUTED
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousFunctions = computed(() => store.getters['formManager/manager'].previousFunctions)
-    const funcCreatePermission = computed(() => store.getters['system/permission'].createFormPermission)
-    const funcDeletePermission = computed(() => store.getters['system/permission'].deleteFormPermission)
-    
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -103,27 +100,20 @@ export default defineComponent({
       }
       return lists
     })
+    const permission ={
+                        listCreate: ["manager","m-form", "mf-functions","mff-create"],
+                        listDelete: ["manager","m-form", "mf-functions","mff-delete"],
+                      }
+
+     const {
+          // DATA
+        isCreate,isDelete,
+          // METHODS
+
+      } = usePermission(permission)
 
     
     onMounted(() => {
-      const formCreatePermissions = [
-        "manager",
-        "m-form", 
-        "mf-functions", //Set assigned office head to each OPCR
-        "mff-create",
-      ];
-      // store.dispatch('system/CHECK_CREATE_FORM_PERMISSION', { payload: formCreatePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: formCreatePermissions, name:'createFormPermission'} })
-
-      const formDeletePermissions = [
-        "manager",
-        "m-form", 
-        "mf-functions", //Set assigned office head to each OPCR
-        "mff-delete",
-      ]
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: formDeletePermissions, name:'deleteFormPermission'} })
-
-      // store.dispatch('system/CHECK_DELETE_FORM_PERMISSION', { payload: formDeletePermissions })
     })
 
 
@@ -188,8 +178,8 @@ export default defineComponent({
       loading,
       years,
       previousFunctions,
-      funcCreatePermission,
-      funcDeletePermission,
+      isCreate,
+      isDelete,
       fetchPreviousFunctions,
       onSubmit,
       resetForm,
