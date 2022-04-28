@@ -151,8 +151,8 @@ export default defineComponent({
       }
     }
 
-    const handleAddSub = key => {
-      const newData = dataSource.value.filter(item => key === item.key)[0]
+    const handleAddSub = record => {
+      const newData = dataSource.value.filter(item => record.key === item.key)[0]
       formData.subCategory = newData.subCategory
       if (!newData.isHeader) {
         formData.measures = newData.measures

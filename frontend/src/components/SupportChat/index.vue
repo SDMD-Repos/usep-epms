@@ -22,18 +22,15 @@
           <i class="fe fe-x-square font-size-21 align-middle text-gray-6" />
         </button>
       </div>
-      <general14 />
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import General14 from '@/widgets/WidgetsGeneral/14'
 
 export default {
   components: {
-    General14,
   },
   computed: mapState(['settings']),
   methods: {

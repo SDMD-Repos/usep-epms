@@ -16,10 +16,8 @@ use App\VpOpcr;
 use App\VpOpcrDetail;
 use App\VpOpcrDetailMeasure;
 use App\VpOpcrDetailOffice;
-use App\VpOpcrFile;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class VpopcrController extends Controller
@@ -27,11 +25,6 @@ class VpopcrController extends Controller
     use ConverterTrait, FileTrait, FormTrait;
 
     private $STO = 5;
-
-
-
-
-
 
     public function checkSaved($officeId, $year)
     {
@@ -83,7 +76,7 @@ class VpopcrController extends Controller
 
                 $subCategory = $extracted['subCategory'];
 
-                $offices = $this->splitPIOffices($data->offices, 1);
+                $offices = $this->splitPIOffices($data, ['splitOffices' => 1, 'origin' => 'vpopcr']);
 
                 $this->getTargetsBasisList($data->targets_basis);
 
@@ -102,7 +95,6 @@ class VpopcrController extends Controller
                         if(!$isCategoryExists) {
                             $tempCategoryList[] = $dataOffice->category;
                         }
-
                     }
                 }
 
@@ -150,7 +142,6 @@ class VpopcrController extends Controller
                             }
 
                             if(!$isExists){
-
                                 if($parent->is_header) {
 
                                     $detail = array(
@@ -218,7 +209,7 @@ class VpopcrController extends Controller
                 } # end category list loop
             } # end loop of PI details
         }
-        
+
         return response()->json([
             'dataSource' => $dataSource,
             'aapcrId' => $query->id ?? null,
@@ -282,9 +273,7 @@ class VpopcrController extends Controller
                         array_push($savedHeaders, $source['key']);
                     }
 
-                    $saveDetail = (!$isNew && !isset($source['children']))
-                        || ($isNew)
-                        || $storeHeader;
+                    $saveDetail = (!$isNew && !isset($source['children'])) || ($isNew) || $storeHeader;
 
                     if($saveDetail) {
                         $source['aapcr_detail_id'] = $aapcrDetailId;
@@ -364,6 +353,7 @@ class VpopcrController extends Controller
             $officeModel = new VpOpcrDetailOffice();
             foreach($formFields as $formField) {
                 $this->saveOffices([
+                    'form' => 'vpopcr',
                     'model' => $officeModel,
                     'detailId' => $detail->id,
                     'offices' => $data[$formField->code],
@@ -853,6 +843,8 @@ class VpopcrController extends Controller
 
     public function updateDetails($data, $updated)
     {
+        $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
+
         $original = $updated->getOriginal();
 
         $isHeader = $data['isHeader'] ? 1 : 0;
@@ -908,19 +900,15 @@ class VpopcrController extends Controller
 
         $officeModel = new VpOpcrDetailOffice();
 
-        $this->updateOffices([
-            'model' => $officeModel,
-            'detailId' => $data['id'],
-            'offices' => $data['implementing'],
-            'type' => 'implementing',
-        ]);
-
-        $this->updateOffices([
-            'model' => $officeModel,
-            'detailId' => $data['id'],
-            'offices' => $data['supporting'],
-            'type' => 'supporting',
-        ]);
+        foreach($formFields as $formField) {
+            $this->updateOffices([
+                'form' => 'vpopcr',
+                'model' => $officeModel,
+                'detailId' => $data['id'],
+                'offices' => $data[$formField->code],
+                'type' => $formField->id,
+            ]);
+        }
     }
 
     public function viewUploadedFile($id)

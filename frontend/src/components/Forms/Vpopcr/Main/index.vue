@@ -195,6 +195,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
     }
 
@@ -277,33 +278,17 @@ export default defineComponent({
     }
 
     return {
-      vpOffice,
-      allowEdit,
+      vpOffice, allowEdit,
 
-      vpOfficesList,
-      categories,
-      loading,
-      spinningTip,
+      vpOfficesList, categories, loading, spinningTip,
 
-      checkFormDetails,
-      validateForm,
+      checkFormDetails, validateForm,
 
       // useFormOperations
-      dataSource,
-      targetsBasisList,
-      counter,
-      deletedItems,
-      editMode,
-      isFinalized,
-      year,
-      cachedYear,
+      dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear,
       years,
 
-      updateDataSource,
-      addTargetsBasisItem,
-      updateSourceItem,
-      deleteSourceItem,
-      addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
     }
   },
 })

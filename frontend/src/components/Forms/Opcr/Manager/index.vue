@@ -152,8 +152,8 @@ export default defineComponent({
     }
 
     const fetchPrograms = async selectedYear => {
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { formId: props.formId, year: selectedYear, isPrevious: false }})
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { formId: props.formId, year: (selectedYear - 1), isPrevious: true }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: (selectedYear - 1), isPrevious: true }})
     }
 
     const fetchOtherPrograms = async selectedYear => {

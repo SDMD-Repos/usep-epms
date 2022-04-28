@@ -144,7 +144,7 @@ export default defineComponent({
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
         await resetFields()
-        await handleAddSub(parentDetails.key)
+        await handleAddSub(parentDetails)
       }
     }
 

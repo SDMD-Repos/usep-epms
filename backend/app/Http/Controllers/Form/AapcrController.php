@@ -143,6 +143,7 @@ class AapcrController extends Controller
 
             foreach($formFields as $formField) {
                 $this->saveOffices([
+                    'form' => 'aapcr',
                     'model' => $officeModel,
                     'detailId' => $detail->id,
                     'offices' => $values[$formField->code],
@@ -554,6 +555,7 @@ class AapcrController extends Controller
 
                 foreach($formFields as $formField) {
                     $this->updateOffices([
+                        'form' => 'aapcr',
                         'model' => $officeModel,
                         'detailId' => $data['id'],
                         'offices' => $data[$formField->code],

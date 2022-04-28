@@ -84,7 +84,7 @@ const defaultAapcrFormData = {
   remarks: '',
 }
 
-const defaultOpcrVpFormData = {
+const defaultOpcrVpFormData = () => ({
   program: null,
   subCategory: null,
   name: '',
@@ -100,7 +100,7 @@ const defaultOpcrVpFormData = {
     supporting: [],
   },
   remarks: '',
-}
+})
 
 const defaultOpcrFormData = {
   program: null,
@@ -137,7 +137,7 @@ export const useDefaultFormData = props => {
       defaultData.value = defaultAapcrFormData
       break
     case 'opcrvp':
-      defaultData.value = defaultOpcrVpFormData
+      defaultData.value = defaultOpcrVpFormData()
       break
     case 'opcr':
       defaultData.value = defaultOpcrFormData
@@ -153,17 +153,39 @@ export const useDefaultFormData = props => {
   let validateNonHeader = async (rule, value) => {
     if (!formData.isHeader) {
       if (value === '' || value === null || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
-        if((rule.field === 'implementing' && formData.options.implementing.length) || (rule.field === 'supporting' && formData.options.supporting.length)) {
+        if((rule.field === 'implementing' && formData.options.implementing.length)
+          || (rule.field === 'supporting' && formData.options.supporting.length)) {
           return Promise.reject('Please click the check icon to save the data')
         } else {
           if(rule.field === 'supporting') {
             return Promise.resolve()
           }
-
           return Promise.reject('This field is required')
         }
       } else {
         return Promise.resolve()
+      }
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  let validateOfficesForVP = async (rule, value) => {
+    if (!formData.isHeader) {
+      if(rule.field === 'options.implementing' || rule.field === 'options.supporting') {
+        if(!formData.implementing.length || !formData.supporting.length) {
+          if(value.length) {
+            return Promise.reject('Please click the check icon to save the data')
+          }else {
+            if(rule.field === 'options.supporting') {
+              return Promise.resolve()
+            }
+
+            if(!formData.implementing.length) {
+              return Promise.reject('This field is required')
+            }
+          }
+        }
       }
     } else {
       return Promise.resolve()
@@ -206,11 +228,12 @@ export const useDefaultFormData = props => {
         measures: [{ validator: validateNonHeader, trigger: 'blur'}],
         targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
         implementing: [
-          { validator: validateNonHeader, trigger: 'blur'},
+          { validator: validateOfficesForVP, trigger: 'blur'},
           { type: 'array' },
         ],
+        cascadeTo: [{ validator: validateNonHeader, trigger: 'blur'}],
         supporting: [
-          { validator: validateNonHeader, trigger: 'blur'},
+          { validator: validateOfficesForVP, trigger: 'blur'},
           { type: 'array' },
         ],
       })
@@ -240,13 +263,9 @@ export const useDefaultFormData = props => {
         break
       case 'opcrtemplate':
     }
-
-
-
   }
 
   const assignFormData = newData => {
-
     formData.subCategory = newData.subCategory
     formData.name = newData.name
     formData.isHeader = newData.isHeader
@@ -273,7 +292,6 @@ export const useDefaultFormData = props => {
         formData.program = newData.program
         break
     }
-
   }
 
   return {

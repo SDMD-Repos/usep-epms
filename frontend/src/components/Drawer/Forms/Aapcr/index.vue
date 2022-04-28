@@ -103,7 +103,7 @@
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.implementing"
-                style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
+                style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
                 :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing.length > 0"
                 allow-clear tree-checkable label-in-value
@@ -148,7 +148,7 @@
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.supporting"
-                style="width: 100%" placeholder="Select an office/s" tree-node-filter-prop="title"
+                style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
                 :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting.length > 0"
                 allow-clear tree-checkable label-in-value
@@ -280,6 +280,7 @@ export default defineComponent({
         },
         isAcronym: true,
         currentYear: props.currentYear,
+        includeGroups: true,
       }
       params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })

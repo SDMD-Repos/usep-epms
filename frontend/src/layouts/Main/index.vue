@@ -14,7 +14,7 @@
         vb__layout__borderless: settings.isBorderless,
       }"
     >
-      <vb-variants />
+<!--      <vb-variants />-->
       <!-- <vb-sidebar />
       <vb-support-chat /> -->
       <vb-menu-classic v-if="settings.layoutMenu === 'classic'" />
@@ -55,7 +55,7 @@ import { useStore } from 'vuex'
 import VbTopbar from '@/components/Topbar'
 // import VbSidebar from '@/components/Sidebar'
 // import VbSupportChat from '@/components/SupportChat'
-import VbVariants from '@/components/Variants'
+// import VbVariants from '@/components/Variants'
 import VbMenuClassic from '@/components/MenuClassic'
 import VbMenuFlyout from '@/components/MenuFlyout'
 import VbMenuSimply from '@/components/MenuSimply'
@@ -72,7 +72,7 @@ export default {
     VbTopbar,
     // VbSidebar,
     // VbSupportChat,
-    VbVariants,
+    // VbVariants,
     VbBreadcrumbs,
     VbBreadcrumbs2,
     VbFooter,

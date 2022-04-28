@@ -55,7 +55,6 @@ trait FormTrait {
             } else {
                 if(!array_key_exists('children', $office)){
                     $newOffice->vp_office_id = $office['pId'];
-
                     $office_name = $office['acronym'];
                 }else{
                     $office_name = $office['label'];
@@ -65,9 +64,22 @@ trait FormTrait {
                 $newOffice->office_name = $office_name;
             }
 
+            switch ($params['form']) {
+                case 'aapcr':
+                    $newOffice->cascade_to = $office['cascadeTo'];
+                    break;
+                case 'vpopcr':
+                    $cascadeTo = explode("-", $office['cascadeTo']);
+
+                    $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                    $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                    $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                    break;
+            }
+
+
             $newOffice->detail_id = $detailId;
             $newOffice->office_type_id = $fieldName;
-            $newOffice->cascade_to = $office['cascadeTo'];
             $newOffice->create_id = $this->login_user->pmaps_id;
             $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -158,7 +170,12 @@ trait FormTrait {
 
                 $newOffice->detail_id = $detailId;
                 $newOffice->office_type_id = $type;
-                $newOffice->cascade_to = $office['cascadeTo'];
+
+                switch ($params['form']){
+                    case 'aapcr':
+                        $newOffice->cascade_to = $office['cascadeTo'];
+                        break;
+                }
 
                 if(isset($office['isGroup']) && $office['isGroup']) {
                     $newOffice->is_group = true;

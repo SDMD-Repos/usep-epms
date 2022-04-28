@@ -134,35 +134,37 @@ trait OfficeTrait {
 
         $decoded = json_decode($nodeStatus);
 
-        $groups = Group::where('effective_until', '>=', $decoded->currentYear)->get();
+        if(isset($decoded->includeGroups) && $decoded->includeGroups) {
+            $groups = Group::where('effective_until', '>=', $decoded->currentYear)->get();
 
-        $children = [];
+            $children = [];
 
-        foreach($groups as $group) {
+            foreach($groups as $group) {
+                $data = new \stdClass();
+
+                $data->id = $group->id;
+                $data->value = $group->id;
+                $data->title = $group->name;
+                $data->pId = 'allGroups';
+                $data->cascadeTo = null;
+                $data->isGroup = true;
+
+                array_push($children, $data);
+            }
+
             $data = new \stdClass();
 
-            $data->id = $group->id;
-            $data->value = $group->id;
-            $data->title = $group->name;
-            $data->pId = 'allGroups';
-            $data->cascadeTo = null;
+            $data->id = "groups";
+            $data->value = "groups";
+            $data->title = "Groups";
             $data->isGroup = true;
+            $data->cascadeTo = null;
+            $data->children = $children;
+            $data->checkable = false;
+            $data->selectable = false;
 
-            array_push($children, $data);
+            array_push($offices, $data);
         }
-
-        $data = new \stdClass();
-
-        $data->id = "groups";
-        $data->value = "groups";
-        $data->title = "Groups";
-        $data->isGroup = true;
-        $data->cascadeTo = null;
-        $data->children = $children;
-        $data->checkable = false;
-        $data->selectable = false;
-
-        array_push($offices, $data);
 
         return response()->json([
             'officesAccountable' => $offices

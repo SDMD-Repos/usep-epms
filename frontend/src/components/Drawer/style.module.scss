@@ -1,3 +1,17 @@
 @import '@/mixins.scss';
 
 .withNewLine { white-space: pre-wrap; }
+
+ul.no-bullets {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li.offices {
+  margin-bottom: 8px;
+}
+
+li.offices .anticon {
+  margin-right: 8px;
+}
