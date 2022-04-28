@@ -195,8 +195,7 @@ export default {
         loading: true,
       })
 
-      console.log(pmaps_id)
-      console.log(form_id)
+
       const checkFormHeadPermission = mapApiProviders.checkFormHeadPermission
       checkFormHeadPermission(pmaps_id,form_id).then(response => {
         if (response) {

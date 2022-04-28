@@ -13,7 +13,7 @@
               ref="formRef"
               :model="formState"
               :rules="rules"
-              v-if="createSubCatPermission">
+              v-if="isCreate">
         <div class="row">
           <div class="col-lg-4">
             <a-form-item ref='name' label="Sub Category Name" name="name">
@@ -67,7 +67,7 @@
       </a-form>
     </div>
 
-    <sub-categories-table :sub-category-list="subCategories" :is-delete="deleteSubCatPermission"  @delete="onDelete"/>
+    <sub-categories-table :sub-category-list="subCategories" :is-delete="isDelete"  @delete="onDelete"/>
   </a-spin>
 </template>
 <script>
@@ -76,6 +76,7 @@ import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import SubCategoriesTable from './partials/lists'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "SubCategoriesManager",
@@ -91,8 +92,6 @@ export default defineComponent({
     const subCategories = computed(() => store.getters['formManager/subCategories'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const prevSubCategories = computed(() => store.getters['formManager/manager'].prevSubCategories)
-    const createSubCatPermission = computed(() => store.getters['system/permission'].createSubCatPermission)
-    const deleteSubCatPermission = computed(() => store.getters['system/permission'].deleteSubCatPermission)
 
     const parentSubs = computed(() => {
       const parents = subCategories.value.filter((i) => {
@@ -144,7 +143,15 @@ export default defineComponent({
       value: 'id',
     }
 
-   
+    const permission ={
+                      listCreate: ["manager","m-form", "mf-subcat","mfs-create"],
+                      listDelete: ["manager","m-form", "mf-subcat","mfs-delete"],
+                    }
+    const {
+        // DATA
+      isCreate,isDelete,
+        // METHODS
+    } = usePermission(permission)
 
     // EVENTS
 
@@ -152,23 +159,7 @@ export default defineComponent({
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
 
-      const subCatCreatePermissions = [
-        "manager",
-        "m-form", 
-        "mf-subcat", 
-        "mfs-create",
-      ]
-      // store.dispatch('system/CHECK_CREATE_SUBCAT_PERMISSION', { payload: subCatCreatePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: subCatCreatePermissions, name:'createSubCatPermission'} })
-
-      const subCatDeletePermissions = [
-        "manager",
-        "m-form", 
-        "mf-subcat", 
-        "mfs-delete",
-      ]
-      // store.dispatch('system/CHECK_DELETE_SUBCAT_PERMISSION', { payload: subCatDeletePermissions })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: subCatDeletePermissions, name:'deleteSubCatPermission'} })
+   
     })
 
     const onDelete = key => {
@@ -234,8 +225,8 @@ export default defineComponent({
       parentSubs,
       isPreviousViewed,
       prevSubCategories,
-      createSubCatPermission,
-      deleteSubCatPermission,
+      isCreate,
+      isDelete,
       checked,
       formRef,
       formState,

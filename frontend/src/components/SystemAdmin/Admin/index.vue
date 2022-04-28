@@ -37,8 +37,21 @@
         </a-row>
 
         <div class="mt-4" v-if="data.length">
-          <a-table  class="ant-table-striped"  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
-                    :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false" />
+          <!-- <a-table  class="ant-table-striped"  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
+              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false" /> -->
+          <a-tree
+          :show-line="true"
+          :show-icon="false"
+          checkable
+          :tree-data="data"
+          v-model:checkedKeys="checkedKeys"
+          @check="onCheck"
+          :field-names="fieldNames"
+        >
+         <template #title="{ permission_name}">
+             <span>{{ permission_name }}</span>
+           </template>
+        </a-tree>
         </div>
 
         <div class="mt-4"></div>
@@ -50,7 +63,7 @@
     </div>
 </template>
 <script>
-import { defineComponent, onMounted, ref, computed  } from 'vue';
+import { defineComponent, onMounted, ref, computed } from 'vue';
 import { useStore } from 'vuex'
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
@@ -72,7 +85,7 @@ export default defineComponent({
     const personnelId = ref(undefined)
     const memberList = ref([])
     const accessList = ref([])
-    const selectedRowKeys = ref([])
+    const checkedKeys = ref([])
     const updateBtn = ref(true)
     const savebtn = ref(false)
 
@@ -82,6 +95,11 @@ export default defineComponent({
     const loading = computed(() => store.getters['system/permission'].loading)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const vpOffices = computed(() => store.getters['external/external'].getVpOfficeChildren)
+
+    const fieldNames = {
+      children: 'children',
+      title: 'permission_name',
+    };
 
     onMounted(() => {
       let params = {
@@ -97,9 +115,7 @@ export default defineComponent({
       store.dispatch('system/FETCH_PERMISSION')
     })
 
-    const onSelectChange = selected => {
-      selectedRowKeys.value = selected;
-    };
+    
 
     const getPersonnelList = officeId => {
       memberList.value = []
@@ -121,7 +137,7 @@ export default defineComponent({
 
     const getAccessList = personnelId => {
       accessList.value = []
-      selectedRowKeys.value = []
+      checkedKeys.value = []
       if (personnelId) {
         formLoading.value = true
          savebtn.value = true
@@ -129,11 +145,11 @@ export default defineComponent({
         getAccessByUser(id).then(response => {
           if (response.status) {
             response.accessLists.forEach((accessList) =>{
-              selectedRowKeys.value.push(accessList.access_right_id);
+              checkedKeys.value.push(accessList.access_right_id);
             })
             updateBtn.value = false ;
           }else{
-            selectedRowKeys.value = [];
+            checkedKeys.value = [];
             updateBtn.value = true ;
           }
           formLoading.value = false
@@ -146,17 +162,29 @@ export default defineComponent({
     const onSave = () => {
        let params = {
          personnelId: personnelId.value.value,
-         listPermissions : selectedRowKeys.value,
+         listPermissions : checkedKeys.value,
        }
+
       store.dispatch('system/SAVE_PERMISSION',{ payload: params })
     }
     const onUpdate = () => {
       let params = {
         personnelId: personnelId.value.value,
-        listPermissions : selectedRowKeys.value,
+        listPermissions : checkedKeys.value,
       }
       store.dispatch('system/UPDATE_PERMISSION',{ payload: params })
     }
+
+    const onCheck = (data, { checkedNodes }) => {
+      checkedNodes.forEach((checkedNode) => {
+        if (typeof checkedNode.props.dataRef.children !== "undefined") {
+          const { children } = checkedNode.props.dataRef;
+          checkedKeys.value = checkedKeys.value.filter(
+            (o1) => !children.some((o2) => o1 === o2.key),
+          );
+        }
+      });
+    };
 
     return {
       data: list,
@@ -166,17 +194,20 @@ export default defineComponent({
       officeId,
       personnelId,
       memberList,
-      selectedRowKeys,
+      fieldNames,
+      checkedKeys,
       formLoading,
       accessList,
       updateBtn,
       loading,
+
       getPersonnelList,
-      onSelectChange,
+      // onSelectChange,
       onSave,
       getAccessList,
       onUpdate,
       savebtn,
+      onCheck,
     };
   },
 });

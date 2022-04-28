@@ -10,9 +10,9 @@
       </a-select>
 
       <div class="mt-5">
-        <fields-table :year="year" :is-create="createFieldPermission"  @handle-save="handleSave"/>
+        <fields-table :year="year" :is-create="isCreate"  @handle-save="handleSave"/>
         <br />
-        <functions-table :year="year" :is-create="createFieldPermission" @handle-save="updateFunctionProgram" />
+        <functions-table :year="year" :is-create="isCreate" @handle-save="updateFunctionProgram" />
       </div>
     </a-spin>
   </div>
@@ -22,6 +22,7 @@ import { defineComponent, ref, onMounted, computed } from "vue"
 import { useStore } from "vuex";
 import FieldsTable from './partials/fieldsTable'
 import functionsTable from './partials/functionsTable'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: 'OtherSettingsManager',
@@ -45,15 +46,18 @@ export default defineComponent({
       return lists
     })
 
-    const createFieldPermission = computed(() => store.getters['system/permission'].createFieldPermission)
-
+    const permission ={
+                        listCreate: ["manager", "m-form", "mf-fields" ],
+                      }
+    const {
+        // DATA
+      isCreate,
+        // METHODS
+    } = usePermission(permission)
+    
     // EVEMTS
     onMounted(() => {
       fetchSettings(year.value)
-
-      const fieldPermissions = ["manager", "m-form", "mf-fields" ]
-
-      store.dispatch('system/CHECK_PERMISSION', { payload: { permission: fieldPermissions, name:'createFieldPermission'} })
     })
 
     //METHODS
@@ -97,7 +101,7 @@ export default defineComponent({
 
       loading,
       years,
-      createFieldPermission,
+      isCreate,
 
       fetchSettings,
       handleSave,
