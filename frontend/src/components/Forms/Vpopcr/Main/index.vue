@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="hasVpopcrAccess || opcrvpFormPermission">
     <a-spin :spinning="loading" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -50,6 +50,7 @@
       </div>
     </a-spin>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
@@ -60,6 +61,8 @@ import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
 import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/opcrvp'
 import IndicatorComponent from './partials/items'
+import { usePermission } from '@/services/functions/permission'
+
 
 export default defineComponent({
   name: "VpOPCRForm",
@@ -84,13 +87,31 @@ export default defineComponent({
       // METHOD
       updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
     } = useFormOperations(props)
+     const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+     const accessOfficeId = computed(() => store.getters['opcrvp/form'].accessOfficeId)
 
-    const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
+    //  let vpOfficesList = hasVpopcrAccess.value  ? computed(() => { return store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )}) : computed(() => store.getters['external/external'].vpOffices)
+     let vpOfficesList =  computed(() => {
+       let res = store.getters['external/external'].vpOffices
+            if(hasVpopcrAccess.value){
+                  res = store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )
+            }
+       return res 
+     })
+      
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['opcrvp/form'].loading
     })
 
+    const permission ={
+                      listOpcrvp: [ "form", "f-opcrvp" ],
+                    }
+    const {
+          // DATA
+        opcrvpFormPermission,
+          // METHODS
+      } = usePermission(permission)
     const spinningTip = computed(() => {
       let tip = ''
       if (loading.value) {
@@ -100,10 +121,11 @@ export default defineComponent({
       }*/
       return tip
     })
+   
 
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-
+      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
 
       if(vpOpcrId.value) {
@@ -280,7 +302,7 @@ export default defineComponent({
     return {
       vpOffice, allowEdit,
 
-      vpOfficesList, categories, loading, spinningTip,
+      vpOfficesList, categories, loading, spinningTip, hasVpopcrAccess,opcrvpFormPermission,
 
       checkFormDetails, validateForm,
 

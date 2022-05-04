@@ -4,10 +4,10 @@
     <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
          <form-admin/>
     </a-collapse-panel>
-    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !vpopcrHeadPermission">
+    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !opcrvpFormPermission && !vpopcrHeadPermission">
       <form-admin-opcr-vp/>
     </a-collapse-panel>
-    <a-collapse-panel key="3" header="OPCR" :disabled=" !opcrHeadPermission">
+    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
       <form-admin-opcr/>
     </a-collapse-panel>
     <a-collapse-panel key="4" header="CPCR">
@@ -17,7 +17,6 @@
   </a-collapse>
 
 </template>
-
 
 <script>
 import { computed, defineComponent, onMounted, ref  } from 'vue';
@@ -40,17 +39,20 @@ export default defineComponent({
       const activeKey = ref([]);
       const aapcrFormId = 'aapcr'
       const opcrFormId = 'opcr'
-      // const opcrFormPermission = computed(() => store.getters['system/permission'].opcrFormPermission)
+      const vpopcrFormId = 'vpopcr'
+  
       const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
       const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
       const vpopcrHeadPermission = computed(() => store.getters['system/permission'].vpopcrHeadPermission)
-      // const createVpOpcrPermission = computed(() => store.getters['system/permission'].createVpOpcrPermission)
+
       const permission ={
                         listAapcr: ["adminPermission","ap-form", "apf-aapcr"],
+                        listOpcrvp: ["adminPermission","ap-form", "apf-opcrvr"],
+                        listOpcr: ["adminPermission","ap-form", "apf-opcr"],
                       }
       const {
           // DATA
-        aapcrFormPermission,
+        aapcrFormPermission,opcrvpFormPermission,opcrFormPermission,
           // METHODS
       } = usePermission(permission)
 
@@ -59,26 +61,31 @@ export default defineComponent({
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', {
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
-                                                                    form_id:aapcrFormId,
+                                                                    form_id: aapcrFormId,
                                                                      },
                                                             })
       store.dispatch('system/CHECK_VPOPCR_HEAD_PERMISSION', { 
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
-                                                                    form_id: 'vpopcr',
+                                                                    form_id: vpopcrFormId,
                                                                      },
                                                             })
-
+      store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', { 
+                                                          payload: {
+                                                                    pmaps_id: store.state.user.pmapsId,
+                                                                    form_id: opcrFormId,
+                                                                     },
+                                                            })
       })
 
       return {
         activeKey,
-        // opcrFormPermission,
+        opcrFormPermission,
         aapcrFormPermission,
         aapcrHeadPermission,
         opcrHeadPermission,
         vpopcrHeadPermission,
-        // createVpOpcrPermission,
+        opcrvpFormPermission,
         
       }
 

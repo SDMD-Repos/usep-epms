@@ -10,7 +10,7 @@ const mapApiProviders = {
   unpublish: aapcrForm.unpublish,
   deactivate: aapcrForm.deactivate,
   update: aapcrForm.update,
-  permission: system.checkAllowAapcrForm,
+  permission: system.checkAllowForm,
 }
 
 export default {

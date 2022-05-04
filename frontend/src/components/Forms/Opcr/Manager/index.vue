@@ -1,4 +1,5 @@
 <template>
+<div v-if="opcrFormPermission" >
   <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchAllPrograms">
     <template v-for="(y, i) in years" :key="i">
       <a-select-option :value="y">
@@ -46,8 +47,11 @@
 
       <previous-list :visible="isPreviousViewed" :year="year" :list="allPreviousPrograms"
                      @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
+    
     </a-spin>
   </div>
+  </div>
+   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
@@ -56,6 +60,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "OtherProgramsManager",
@@ -136,11 +141,23 @@ export default defineComponent({
       value: 'id',
     }
 
+      const permission ={
+                      listOpcr: [ "form", "f-opcr" ],
+                    }
+    const {
+          // DATA
+        opcrFormPermission,
+          // METHODS
+      } = usePermission(permission)
+
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
-      fetchAllPrograms(year.value)
+      if(opcrFormPermission.value){
+          fetchAllPrograms(year.value)
+      }
+     
     })
 
     // METHODS
@@ -233,6 +250,7 @@ export default defineComponent({
       otherPrograms,
       programs,
       allPreviousPrograms,
+      opcrFormPermission,
     };
   },
 });

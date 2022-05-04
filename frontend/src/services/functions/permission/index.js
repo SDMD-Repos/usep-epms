@@ -3,7 +3,7 @@ import { useStore } from 'vuex'
 
 
 export const usePermission = (permission)  => {
-    const { listCreate, listDelete , listEdit, listAapcr } = permission
+    const { listCreate, listDelete , listEdit, listAapcr, listOpcrvp, listOpcr} = permission
        
     const accessLists = computed(() => store.getters['user/access'])
     const store = useStore()
@@ -21,12 +21,22 @@ export const usePermission = (permission)  => {
     const aapcrPermission = accessLists.value.filter((value)=>{
       return listAapcr ?  listAapcr.includes(value.permission_id) : 0
       });
+    
+    const opcrvpPermission = accessLists.value.filter((value)=>{
+      return listOpcrvp ?  listOpcrvp.includes(value.permission_id) : 0
+      });
+
+    const opcrPermission = accessLists.value.filter((value)=>{
+      return listOpcr ?  listOpcr.includes(value.permission_id) : 0
+      });
 
 
     const isCreate = ref(false)
     const isDelete = ref(false)
     const isEdit = ref(false)
     const aapcrFormPermission = ref(false)
+    const opcrvpFormPermission = ref(false)
+    const opcrFormPermission = ref(false)
 
     if(createPermission.length > 0){
         isCreate.value = true;
@@ -42,13 +52,23 @@ export const usePermission = (permission)  => {
 
     if(aapcrPermission.length > 0){
       aapcrFormPermission.value = true;
-  }
+    }
+
+    if(opcrvpPermission.length > 0){
+      opcrvpFormPermission.value = true;
+    }
+
+    if(opcrPermission.length > 0){
+      opcrFormPermission.value = true;
+    }
 
   return {
     isCreate,
     isDelete,
     isEdit,
     aapcrFormPermission,
+    opcrvpFormPermission,
+    opcrFormPermission,
   }
 }
 
