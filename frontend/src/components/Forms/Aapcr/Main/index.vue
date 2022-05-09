@@ -43,7 +43,7 @@
   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, createVNode, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
@@ -51,9 +51,9 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useFormOperations } from '@/services/functions/indicator'
 import { useProgramBudget } from '@/services/functions/form/main'
 import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/aapcr'
+import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 import BudgetListComponent from './partials/budget'
-import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "AAPCRForm",
@@ -87,9 +87,8 @@ export default defineComponent({
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
-    // const aapcrPermission = computed(() => store.getters['system/permission'].aapcrPermission)
 
-    
+
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
     })
@@ -104,14 +103,8 @@ export default defineComponent({
       return tip
     })
 
-    const permission ={
-                      listAapcr: [ "form", "f-aapcr" ],
-                    }
-    const {
-          // DATA
-        aapcrFormPermission,
-          // METHODS
-      } = usePermission(permission)
+    const permission ={ listAapcr: [ "form", "f-aapcr" ] }
+    const { aapcrFormPermission } = usePermission(permission)
 
     // EVENTS
     onMounted(() => {
@@ -122,13 +115,17 @@ export default defineComponent({
 
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
       if(hasAapcrAccess.value || aapcrFormPermission.value){
-          if(aapcrId.value) {
-            getFormDetails()
-          } else {
-            checkFormAvailability()
-          }
-          }
+        if(aapcrId.value) {
+          getFormDetails()
+        } else {
+          checkFormAvailability()
+        }
+      }
     })
+
+    onBeforeUnmount(() => {
+      resetFormFields()
+    });
 
     // METHODS
     const checkIfDataSourceEmpty = () => {
@@ -184,10 +181,7 @@ export default defineComponent({
     }
 
     const checkUserPermission = () => {
-      // const aapcrPermissions = [ "form", "f-aapcr" ]
-
       store.dispatch('aapcr/CHECK_AAPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' }})
-      // store.dispatch('system/CHECK_PERMISSION', { payload: { permission: aapcrPermissions, name: 'aapcrPermission' }})
     }
 
     const initializeFormFields = async () => {
@@ -196,7 +190,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'aapcr' }})
     }
 
     const resetFormFields = () => {

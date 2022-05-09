@@ -61,7 +61,8 @@ Route::group([
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
 
-    Route::get('/get-all-spms-forms/{pmaps_id}', 'SettingController@getAllForms');
+    Route::get('/get-user-form-access/{pmaps_id}', 'SettingController@getUserFormAccess');
+    Route::get('/get-all-spms-forms', 'SettingController@getAllForms');
 
     Route::get('/get-all-signatory-types', 'SettingController@getAllSignatoryTypes');
 
@@ -77,7 +78,7 @@ Route::group([
 
     Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
 
-    Route::get('/get-all-form-fields/{year}', 'SettingController@getAllFormFields');
+    Route::get('/get-all-form-fields/{year}/{formId}', 'SettingController@getAllFormFields');
     Route::post('/save-form-field-settings', 'SettingController@saveFormFieldSettings');
     Route::post('/update-form-field-settings/{id}', 'SettingController@updateFormFieldSettings');
 });

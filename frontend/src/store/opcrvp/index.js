@@ -176,14 +176,14 @@ export default {
     UPDATE_SOURCE_ITEM({ commit }, { payload }) {
       commit('UPDATE_STATE_ITEM', {
         type: 'dataSource',
-        details: payload.updateData.value,
+        details: payload.updateData,
         index: payload.updateId,
       })
     },
     UPDATE_SOURCE_SUB_ITEM({ commit }, { payload }) {
       commit('UPDATE_STATE_SUB_ITEM', {
         type: 'dataSource',
-        details: payload.updateData.value,
+        details: payload.updateData,
         index: payload.updateId,
         parent: payload.parentId,
       })

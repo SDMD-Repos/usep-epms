@@ -154,9 +154,18 @@ export async function deleteMeasure(id) {
     .catch(err => console.log(err))
 }
 
-export async function getAllForms(pmaps_id) {
+export async function getAllForms() {
   return apiClient
-    .get('/settings/get-all-spms-forms/'+pmaps_id)
+    .get('/settings/get-all-spms-forms')
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getUserFormAccess($pmaps_id) {
+  return apiClient
+    .get('/settings/get-user-form-access/' + $pmaps_id)
     .then(response => {
       return response.data
     })
@@ -253,9 +262,9 @@ export async function getCascadingLevels() {
     .catch(err => console.log(err))
 }
 
-export async function getAllFormFields(year) {
+export async function getAllFormFields(year, formId) {
   return apiClient
-    .get('/settings/get-all-form-fields/' + year)
+    .get('/settings/get-all-form-fields/' + year + "/" + formId)
     .then(response => {
       return response.data
     })

@@ -33,17 +33,11 @@
       </div>
     </a-spin>
 
-    <form-modal :visible="isOpenModal"
-                :modal-title="modalTitle"
-                :ok-text="okText"
-                :action-type="action"
-                :office-list="offices"
-                :position-list="positionList"
-                :details="signatoryDetails"
-                :form-state="formState"
-                @add-signatory="addSignatory"
-                @delete-signatory="deleteSignatory"
-                @close-modal="resetFormModal"/>
+    <form-modal
+      :visible="isOpenModal" :modal-title="modalTitle" :ok-text="okText" :action-type="action" :office-list="offices"
+      :position-list="positionList" :details="signatoryDetails" :form-state="formState"
+      @add-signatory="addSignatory" @delete-signatory="deleteSignatory" @close-modal="resetFormModal"
+    />
   </div>
 </template>
 <script>
@@ -57,10 +51,7 @@ import FormModal from './partials/formModal'
 export default defineComponent({
   name: "SignatoryManager",
   components: {
-    SignatoryList,
-    FormModal,
-    UserAddOutlined,
-    EditOutlined,
+    SignatoryList, FormModal, UserAddOutlined, EditOutlined,
   },
   props: {
     formName: {

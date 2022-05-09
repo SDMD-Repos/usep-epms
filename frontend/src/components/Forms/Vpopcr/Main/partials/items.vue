@@ -11,7 +11,9 @@
   </div>
 </template>
 <script>
-import { defineComponent, computed, ref, reactive, watch, onMounted, createVNode } from "vue"
+import { defineComponent, ref, reactive, watch, onMounted, createVNode, computed } from "vue"
+import { useStore } from 'vuex'
+import { cloneDeep } from 'lodash-es'
 import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
 import { formTableColumns } from "@/services/columns"
@@ -34,6 +36,8 @@ export default defineComponent({
   },
   emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item'],
   setup(props, { emit }) {
+    const store = useStore()
+
     // DATA
     const modifiedTableColumns = ref()
     const count = ref(0)
@@ -50,7 +54,7 @@ export default defineComponent({
     const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
 
     // EVENTS
-    onMounted(() => {
+    onMounted( () => {
       modifyColumns()
     })
 
@@ -168,25 +172,25 @@ export default defineComponent({
     const editItem = data => {
       let editData = null, updateId = null, parentDetails = undefined
       if (data.type === 'pi') {
-        editData = dataSource.value.filter(item => item.key === data.key)[0]
+        editData = cloneDeep(dataSource.value.filter(item => item.key === data.key)[0])
         updateId = dataSource.value.findIndex(record => record.key === data.key)
       } else {
         let shouldBreak = false
 
         dataSource.value.forEach(item => {
           if (typeof item.children !== 'undefined') {
-            const temp = item.children.filter(i => i.key === data.key)
+            const child = item.children.filter(i => i.key === data.key)
             if (shouldBreak) {
               return
             }
-            if (temp.length) {
-              editData = temp[0]
+            if (child.length) {
+              editData = cloneDeep(child[0])
               shouldBreak = true
               updateId = item.children.findIndex(i => i.key === data.key)
               parentDetails = { ...item }
               return
             }
-            console.log(temp)
+            console.log(child)
           }
         })
       }
@@ -198,7 +202,7 @@ export default defineComponent({
     const updateTableItem = async data => {
       if (drawerConfig.value.type === 'pi') {
         if (!data.updateData.isHeader) {
-          const { targetsBasis } = data.updateData.value
+          const { targetsBasis } = data.updateData
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
             await emit('add-targets-basis-item', targetsBasis)
           }
@@ -206,6 +210,7 @@ export default defineComponent({
       }
 
       const { parentDetails } = drawerConfig.value
+      
       await emit('update-source-item', {
         updateData: data.updateData,
         updateId: data.updateId,

@@ -10,9 +10,9 @@
       </a-select>
 
       <div class="mt-5">
-        <fields-table :year="year" :is-create="isCreate"  @handle-save="handleSave"/>
-        <br />
         <functions-table :year="year" :is-create="isCreate" @handle-save="updateFunctionProgram" />
+        <br />
+        <fields-table :year="year" :is-create="isCreate" @handle-save="handleSave"/>
       </div>
     </a-spin>
   </div>
@@ -46,28 +46,22 @@ export default defineComponent({
       return lists
     })
 
-    const permission ={
-                        listCreate: ["manager", "m-form", "mf-fields" ],
-                      }
-    const {
-        // DATA
-      isCreate,
-        // METHODS
-    } = usePermission(permission)
-    
-    // EVEMTS
+    const permission ={ listCreate: ["manager", "m-form", "mf-fields" ] }
+
+    const { isCreate } = usePermission(permission)
+
+    // EVENTS
     onMounted(() => {
       fetchSettings(year.value)
     })
 
     //METHODS
     const fetchSettings = value => {
-      store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: value }})
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: value }})
     }
 
     const handleSave = data => {
-      const { code, id } = data
+      const { code, id, formId } = data
 
       switch (code) {
         case 'implementing':
@@ -76,6 +70,7 @@ export default defineComponent({
             year: year.value,
             fieldId: id,
             setting: data.settings.settings,
+            formId: formId,
           }
 
           if(!data.isUpdate) {

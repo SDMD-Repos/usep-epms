@@ -26,7 +26,7 @@
         <template #label>
           <span class="required-indicator">Program</span>
         </template>
-        <a-select v-model:value="form.program" placeholder="Select" :disabled="config.type === 'sub'">
+        <a-select v-model:value="form.program" placeholder="Select" :disabled="config.type === 'sub'" >
           <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
             {{ y.name }}
           </a-select-option>
@@ -111,7 +111,12 @@
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="form.implementing && !form.implementing.length" type="primary" @click="saveOfficeListVp('implementing')">
+                <a-button v-if="form.implementing && !form.implementing.length" type="primary"
+                          @click="checkDefaultCascadeTo({
+                            field: 'implementing',
+                            categoryId: drawerId,
+                            options: functionsWithProgram
+                          })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -162,7 +167,12 @@
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="form.supporting && !form.supporting.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="form.supporting && !form.supporting.length" type="primary" @click="saveOfficeListVp('supporting')">
+                <a-button v-if="form.supporting && !form.supporting.length" type="primary"
+                          @click="checkDefaultCascadeTo({
+                            field: 'supporting',
+                            categoryId: drawerId,
+                            options: functionsWithProgram
+                          })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -224,12 +234,13 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch, onMounted, computed } from 'vue'
+import { defineComponent, ref, watch, computed } from 'vue'
 import { useStore } from "vuex";
+import { cloneDeep } from 'lodash-es'
 import { message, TreeSelect } from "ant-design-vue"
 import { CheckOutlined, EditOutlined, DeleteFilled } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
-import { cloneDeep } from 'lodash-es'
+import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 export default defineComponent({
   name: 'OpcrVpFormDrawer',
@@ -242,7 +253,7 @@ export default defineComponent({
     rules: { type: Object, default: () => { return {} }},
     currentYear: { type: Number, default: new Date().getFullYear() },
   },
-  emits: ['close-drawer', 'toggle-is-header', 'add-table-item', 'update-table-item'],
+  emits: ['close-drawer', 'toggle-is-header', 'add-table-item', 'update-table-item', 'update-cascade-to'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -261,33 +272,6 @@ export default defineComponent({
       return programs.filter(i => i.category_id === props.drawerId)
     })
 
-    const functionsWithProgram = computed( () => {
-      const functions = store.getters['formManager/manager'].functions
-
-      return functions.map(function(functionValue){
-        const programs = store.getters['formManager/manager'].programs
-        const otherPrograms = store.getters['formManager/manager'].otherPrograms
-        const mergedPrograms = otherPrograms.length ? programs.concat(otherPrograms) : programs
-
-        return {
-          'children' : mergedPrograms.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
-            let mappedKey = functionValue.id + "-" + mapValue.id
-            if(typeof mapValue.form_id !== 'undefined') {
-              mappedKey = mappedKey + "-" + mapValue.form_id
-            }
-            mapValue.key = mappedKey
-            mapValue.title = mapValue.name
-            mapValue.value = mappedKey
-            return mapValue
-          }),
-          value: functionValue.id,
-          key: functionValue.id.toString(),
-          title: functionValue.name,
-          selectable: false,
-        }
-      })
-    })
-
     const subCategories = computed(() => {
       const subs = store.getters['formManager/subCategories']
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
@@ -296,37 +280,22 @@ export default defineComponent({
     const measuresList  = computed(() => store.getters['formManager/manager'].measures)
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
 
+    const { functionsWithProgram } = useModifiedStates()
+
     // EVENTS
     watch(() => [props.drawerConfig, props.formObject], ([drawerConfig, formObject]) => {
       config.value = drawerConfig
       form.value = formObject
     })
 
-    onMounted(() => {
-      onLoad()
-    })
-
     const {
       // DATA
       typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
       // METHODS
-      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeListVp, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
 
     // METHODS
-    const onLoad = () => {
-      let params = {
-        checkable: {
-          allColleges: true,
-          mains: false,
-        },
-        isAcronym: true,
-        currentYear: props.currentYear,
-      }
-      params = encodeURIComponent(JSON.stringify(params))
-      store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
-    }
-
     const toggleIsHeader = checked => {
       if(checked) {
         emit('toggle-is-header')
@@ -340,15 +309,27 @@ export default defineComponent({
         storedOffices.value[office] = []
       }
 
-      if (config.value.updateId === null) {
-        values.implementing = cloneDeep(form.value.implementing)
-        values.supporting = cloneDeep(form.value.supporting)
+      values.implementing = cloneDeep(form.value.implementing)
+      values.supporting = cloneDeep(form.value.supporting)
 
+      if (config.value.updateId === null) {
         await emit('add-table-item', { data: values, resetFields: resetForm() })
         msgContent = 'Added!'
       } else {
+        values.type = config.value.type
+
+        if(values.isHeader) {
+          values.target = ''
+          values.measures = []
+          values.budget = null
+          values.targetsBasis = ''
+          values.implementing = []
+          values.supporting = []
+          values.remarks = ''
+        }
+
         await emit('update-table-item', {
-          updateData: form,
+          updateData: values,
           updateId: config.value.updateId,
           resetFields: resetForm(),
         })
@@ -379,7 +360,7 @@ export default defineComponent({
 
       typeOptions, formItemLayout, tooltipHeaderText,
 
-      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeListVp, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
 
       toggleIsHeader, onFinish, resetFormData,
     }

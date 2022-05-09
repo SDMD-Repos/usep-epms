@@ -26,7 +26,8 @@ class StoreFormFieldSetting extends FormRequest
         return [
             'year' => 'required|digits:4',
             'fieldId' => 'required',
-            'setting' => 'required'
+            'setting' => 'required',
+            'formId' => 'required'
         ];
     }
 }

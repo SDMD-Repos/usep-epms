@@ -196,7 +196,18 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
-      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
+
+      let params = {
+        checkable: {
+          allColleges: true,
+          mains: false,
+        },
+        isAcronym: true,
+        currentYear: year,
+      }
+      params = encodeURIComponent(JSON.stringify(params))
+      await store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 
     const getVpOpcrDetails = () => {

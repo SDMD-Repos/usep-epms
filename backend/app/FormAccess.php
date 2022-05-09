@@ -3,15 +3,18 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FormAccess extends Model
 {
-    //
-    protected $fillable = ['form_id', 'pmaps_id','office_id','create_id','office_name','pmaps_name','staff_id','staff_name'];
+    use SoftDeletes;
 
+    protected $fillable = [
+        'form_id', 'pmaps_id', 'office_id', 'staff_id',
+        'create_at', 'create_id', 'updated_at', 'modify_id', 'deleted_at'
+    ];
 
     protected $table = "form_access";
-
 
     public function form()
     {

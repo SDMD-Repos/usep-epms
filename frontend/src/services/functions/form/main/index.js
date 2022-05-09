@@ -1,7 +1,8 @@
-import { Modal } from "ant-design-vue";
 import { ref, createVNode, computed } from "vue";
-import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useStore } from "vuex"
+import { Modal } from "ant-design-vue";
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+import { useExtras } from '@/services/functions/extras'
 
 export const useFormFields = form => {
   const store = useStore()
@@ -15,6 +16,8 @@ export const useFormFields = form => {
 
   // COMPUTED
   const formFields = computed(() => store.getters['formManager/manager'].formFields)
+
+  const { findInNested } = useExtras()
 
   const changeNullValue = (value, label) => {
     if (typeof value === 'undefined' || value === 0) {
@@ -53,6 +56,7 @@ export const useFormFields = form => {
           form.value[field] = mappedOfficeList(list, field, parseInt(filtered[0].settings.setting))
           form.value.options[field] = []
           storedOffices.value[field] = []
+
           if (cachedOffice.value[field].length) {
             cachedOffice.value[field] = []
           }
@@ -61,15 +65,42 @@ export const useFormFields = form => {
     }
   }
 
-  const saveOfficeListVp = field => {
+  const checkDefaultCascadeTo = params => {
+    const { field, categoryId, options } = params
     const list = storedOffices.value[field]
+
     if(list.length) {
-      form.value[field] = mappedOfficeList(list, field, null)
-      form.value.options[field] = []
-      storedOffices.value[field] = []
-      if (cachedOffice.value[field].length) {
-          cachedOffice.value[field] = []
+      const filtered = formFields.value.filter(i => i.code === field)
+
+      if(filtered.length) {
+        if(filtered[0].settings === null) {
+          let cascadeTo
+
+          if(form.value.program) {
+            const concatCategoryProgram = categoryId + "-" + form.value['program']
+            const isOptionExists = findInNested(options, concatCategoryProgram)
+            cascadeTo = typeof isOptionExists !== 'undefined' ? concatCategoryProgram : null
+          }else {
+            cascadeTo = null
+          }
+
+          saveOfficeListVP({ list: list, field: field, defaultCascade: cascadeTo })
+        }else {
+          saveOfficeListVP({ list: list, field: field, defaultCascade: filtered[0].settings.setting })
+        }
       }
+    }
+  }
+
+  const saveOfficeListVP = params => {
+    const { list, field, defaultCascade } = params
+
+    form.value[field] = mappedOfficeList(list, field, defaultCascade)
+    form.value.options[field] = []
+    storedOffices.value[field] = []
+
+    if (cachedOffice.value[field].length) {
+      cachedOffice.value[field] = []
     }
   }
 
@@ -134,7 +165,7 @@ export const useFormFields = form => {
     filterBasisOption,
     onOfficeChange,
     saveOfficeList,
-    saveOfficeListVp,
+    checkDefaultCascadeTo,
     updateOfficeList,
     deleteOfficeItem,
   }

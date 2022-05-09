@@ -251,8 +251,10 @@ export const useDefaultFormData = props => {
   const resetFormAsHeader = () => {
     formData.target = ''
     formData.measures = []
+    console.log(props.formId)
     switch (props.formId) {
       case 'aapcr':
+      case 'opcrvp':
         formData.budget = null
         formData.targetsBasis = ''
         formData.implementing = []
@@ -279,8 +281,7 @@ export const useDefaultFormData = props => {
         formData.implementing = newData.implementing
         formData.supporting = newData.supporting
         formData.remarks = newData.remarks
-        break
-      case 'opcrtemplate':
+        formData.cascadingLevel = newData.cascadingLevel
         break
       case 'opcrvp':
       case 'opcr':
@@ -290,6 +291,8 @@ export const useDefaultFormData = props => {
         formData.supporting = newData.supporting
         formData.remarks = newData.remarks
         formData.program = newData.program
+        break
+      case 'opcrtemplate':
         break
     }
   }

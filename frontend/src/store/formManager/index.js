@@ -1,6 +1,5 @@
 import * as manager from '@/services/api/manager'
 import { notification } from 'ant-design-vue'
-import {updateFunctionProgram} from "../../services/api/manager";
 
 const mapApiProviders = {
   getFunctions: manager.getFunctions,
@@ -21,6 +20,7 @@ const mapApiProviders = {
   updateMeasure: manager.updateMeasure,
   deleteMeasure: manager.deleteMeasure,
   getAllForms: manager.getAllForms,
+  getUserFormAccess: manager.getUserFormAccess,
   getAllSignatoryTypes: manager.getAllSignatoryTypes,
   getYearSignatories: manager.getYearSignatories,
   saveSignatories: manager.saveSignatories,
@@ -52,6 +52,7 @@ export default {
     previousCategories: [],
     previousMeasures: [],
     forms: [],
+    userFormAccess: [],
     signatoryTypes: [],
     signatories: [],
     cascadingLevels: [],
@@ -437,18 +438,36 @@ export default {
         }
       })
     },
-    FETCH_ALL_FORMS({ commit },{ payload }) {
-      const { pmaps_id } = payload
+    FETCH_ALL_FORMS({ commit }) {
       commit('SET_STATE', {
         loading: true,
       })
 
       const getAllForms = mapApiProviders.getAllForms
-      getAllForms(pmaps_id).then(response => {
+      getAllForms().then(response => {
         if (response) {
-          const { spmsForms } = response
+          const { forms } = response
           commit('SET_STATE', {
-            forms: spmsForms,
+            forms: forms,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    FETCH_USER_FORM_ACCESS({ commit }, { payload }) {
+      const { pmapsId } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const getUserFormAccess = mapApiProviders.getUserFormAccess
+      getUserFormAccess(pmapsId).then(response => {
+        if (response) {
+          const { userForms } = response
+          commit('SET_STATE', {
+            userFormAccess: userForms,
           })
         }
         commit('SET_STATE', {
@@ -647,13 +666,13 @@ export default {
       })
     },
     FETCH_FORM_FIELDS({ commit }, { payload }) {
-      const { year } = payload
+      const { year, formId } = payload
       commit('SET_STATE', {
         loading: true,
       })
 
       const getAllFormFields = mapApiProviders.getAllFormFields
-      getAllFormFields(year).then(response => {
+      getAllFormFields(year, formId).then(response => {
         if (response) {
           const { formFields } = response
           commit('SET_STATE', {
@@ -666,7 +685,7 @@ export default {
       })
     },
     SAVE_FORM_FIELD_SETTINGS({ commit, dispatch }, { payload }) {
-      const { year } = payload
+      const { year, formId } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -679,7 +698,7 @@ export default {
             description: 'Settings was saved successfully',
           })
         }
-        dispatch('FETCH_FORM_FIELDS', { payload: { year: year }})
+        dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId }})
         commit('SET_STATE', {
           loading: false,
         })
@@ -689,12 +708,12 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const { settingId, year } = payload
+      const { settingId, year, formId } = payload
 
       const updateFormFieldSettings = mapApiProviders.updateFormFieldSettings
       updateFormFieldSettings(payload, settingId).then(response => {
         if (response) {
-          dispatch('FETCH_FORM_FIELDS', { payload: { year: year }})
+          dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId }})
           notification.success({
             message: 'Success',
             description: 'Settings was updated successfully',

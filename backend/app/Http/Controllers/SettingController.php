@@ -601,15 +601,21 @@ class SettingController extends Controller
         }
     }
 
-    public function getAllForms($pmaps_id)
+    public function getAllForms()
     {
-        // $forms = Form::orderBy('ordering', 'ASC')->get();
-        $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id]])->orWhere([['staff_id',$pmaps_id]])->with('form')->get();
+        $forms = Form::orderBy('ordering', 'asc')->get();
 
+        return response()->json(['forms' => $forms], 200);
+    }
 
-        // $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
+    public function getUserFormAccess($pmaps_id)
+    {
+        $userForms = FormAccess::where(function($q) use ($pmaps_id) {
+            $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
+        })->with('form')->get();
+
         return response()->json([
-            'spmsForms' => $formAccessDetails
+            'userForms' => $userForms
         ], 200);
     }
 
@@ -1092,10 +1098,10 @@ class SettingController extends Controller
         ], 200);
     }
 
-    public function getAllFormFields($year)
+    public function getAllFormFields($year, $formId)
     {
-        $formFields = FormField::with(['settings' => function($query) use ($year) {
-            $query->where('year', $year);
+        $formFields = FormField::with(['settings' => function($query) use ($year, $formId) {
+            $query->where('year', $year)->where('form_id', $formId);
         }])->get();
 
         return response()->json([
@@ -1110,11 +1116,12 @@ class SettingController extends Controller
 
             $year = $validated['year'];
             $fieldId = $validated['fieldId'];
+            $formId = $validated['formId'];
             $setting = $validated['setting'];
 
             DB::beginTransaction();
 
-            $isExists = FormFieldSetting::where('year', $year)->where('field_id', $fieldId)->first();
+            $isExists = FormFieldSetting::where('year', $year)->where('field_id', $fieldId)->where('form_id', $formId)->first();
 
             if ($isExists) {
                 return response()->json('Unable to save data. Settings has already been set', 409);
@@ -1124,6 +1131,7 @@ class SettingController extends Controller
 
             $settings->year = $year;
             $settings->field_id = $fieldId;
+            $settings->form_id = $formId;
             $settings->setting = $setting['value'];
             $settings->create_id = $this->login_user->pmaps_id;
             $settings->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
