@@ -102,9 +102,11 @@ trait ConverterTrait {
 
         $officeList = $data;
 
-        switch ($conditions['origin']) {
-            case 'vpopcr':
-                $officeList = $data->offices;
+        if(isset($conditions['origin'])) {
+            switch ($conditions['origin']) {
+                case 'vpopcr':
+                    $officeList = $data->offices;
+            }
         }
 
         foreach($officeList as $datum) {

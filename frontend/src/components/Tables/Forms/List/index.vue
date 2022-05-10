@@ -19,7 +19,9 @@
         <span v-else class="font-size-12 badge badge-primary">
           Inactive
         </span>
-        <span v-if="record.status && record.status.filter(i => i.status === 'pending').length" class="font-size-12 badge badge-warning">
+        <span v-if="record.status && record.status.filter(i => i.status === 'pending').length"
+              class="font-size-12 badge badge-warning" :style="{cursor: 'pointer'}"
+              @click="cancelUnpublishRequest(record)">
           Pending unpublish request
         </span>
       </div>
@@ -76,25 +78,15 @@ import { Modal } from "ant-design-vue"
 export default defineComponent({
   name: "FormListTable",
   components: {
-    EditOutlined,
-    FilePdfOutlined,
-    FileDoneOutlined,
-    CloseSquareFilled,
-    UnorderedListOutlined,
+    EditOutlined, FilePdfOutlined, FileDoneOutlined, CloseSquareFilled, UnorderedListOutlined,
   },
   props: {
-    columns: {
-      type: Array,
-      default: () => { return [] },
-    },
-    dataList: {
-      type: Array,
-      default: () => { return [] },
-    },
+    columns: { type: Array, default: () => { return [] } },
+    dataList: { type: Array, default: () => { return [] } },
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms','unpublish-template'],
+  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms','unpublish-template', 'cancel-unpublish-request'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -155,6 +147,20 @@ export default defineComponent({
       });
     }
 
+    const cancelUnpublishRequest = data => {
+      Modal.confirm({
+        title: () => 'Are you sure you want to cancel your request?',
+        icon: () => createVNode(ExclamationCircleOutlined),
+        content: () => 'You won\'t be able to revert this!',
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk() {
+          emit('cancel-unpublish-request', data)
+        },
+        onCancel() {},
+      });
+    }
+
     const onUnpublishTemplate = id => {
       Modal.confirm({
         title: () => 'Are you sure you want to unpublish this?',
@@ -182,6 +188,7 @@ export default defineComponent({
       handlePublish,
       viewPdf,
       onUnpublish,
+      cancelUnpublishRequest,
       onUnpublishTemplate,
       openUnpublishedForms,
     }

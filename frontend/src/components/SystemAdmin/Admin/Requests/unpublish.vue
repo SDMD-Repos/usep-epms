@@ -126,7 +126,12 @@ export default defineComponent({
     }
 
     const changeRequest = (id, status) => {
-      store.dispatch('requests/UPDATE_REQUEST_STATUS', { payload: { id: id, status: status }})
+      store.dispatch('requests/UPDATE_REQUEST_STATUS', {
+        payload: {
+          id: id, status: status, origin: null,
+          callback: { dispatch: 'requests/FETCH_UNPUBLISH_LIST', payload: { payload: { status: 'pending' }} },
+        },
+      })
     }
 
     return {

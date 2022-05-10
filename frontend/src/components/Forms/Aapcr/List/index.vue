@@ -2,13 +2,15 @@
   <div v-if="hasAapcrAccess || aapcrFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-unpublished-forms="viewUnpublishedForms" />
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
+      @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
 
     <unpublished-forms-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
       @close-list-modal="closeListModal" @view-file="viewPdf" />
 
-    <unpublish-remarks-modal :is-unpublish="isUnpublish" @unpublish="unpublish" @close-remarks-modal="changeRemarksState"/>
+    <unpublish-remarks-modal
+      :is-unpublish="isUnpublish" @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
   </div>
    <div v-else><span>You have no permission to access this page.</span></div>
 </template>
@@ -29,11 +31,7 @@ import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "AapcrList",
-  components: {
-    FormListTable,
-    UnpublishedFormsModal,
-    UnpublishRemarksModal,
-  },
+  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
   props: {
     formId: { type: String, default: '' },
   },
@@ -52,19 +50,14 @@ export default defineComponent({
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
-    
 
     const { isUploadedViewed, viewedForm,
       viewUnpublishedForms, onCloseList, uploadedListState } = useViewPublishedFiles()
 
-    const permission ={
-                      listAapcr: [ "form", "f-aapcr" ],
-                    }
-    const {
-          // DATA
-        aapcrFormPermission,
-          // METHODS
-      } = usePermission(permission)
+    const permission = { listAapcr: [ "form", "f-aapcr" ] }
+
+    const { aapcrFormPermission } = usePermission(permission)
+
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
@@ -110,6 +103,15 @@ export default defineComponent({
       store.dispatch('aapcr/UNPUBLISH', { payload: data }).then(() => {
         isUnpublish.value = !isUnpublish.value
         unpublishedData.value = null
+      })
+    }
+
+    const onUnpublishCancel = data => {
+      store.dispatch('requests/UPDATE_REQUEST_STATUS', {
+        payload: {
+          id: data.id, status: 'cancelled', origin: 'aapcr',
+          callback: { dispatch: 'aapcr/FETCH_LIST', payload: null },
+        },
       })
     }
 
@@ -174,6 +176,7 @@ export default defineComponent({
       openUnpublishRemarks,
       changeRemarksState,
       unpublish,
+      onUnpublishCancel,
       viewPdf,
 
       closeListModal,

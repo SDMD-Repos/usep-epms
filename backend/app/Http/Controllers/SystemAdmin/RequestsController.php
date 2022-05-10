@@ -51,10 +51,15 @@ class RequestsController extends Controller
 
             $id = $validated['id'];
             $status = $validated['status'];
+            $origin = isset($validated['origin']) ? $validated['origin'] : null;
 
             DB::beginTransaction();
 
-            $request = FormUnpublishStatus::find($id);
+            if(!$origin) {
+                $request = FormUnpublishStatus::find($id);
+            } else {
+                $request = FormUnpublishStatus::where('form_id', $id)->where('form_type', $validated['origin'])->first();
+            }
 
             $original = $request->getOriginal();
 
@@ -64,7 +69,7 @@ class RequestsController extends Controller
             $request->updated_at = Carbon::now();
             $request->modify_id = $this->login_user->fullName;
 
-            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullName;
+            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             $request->history .= $request->history . $history;
 

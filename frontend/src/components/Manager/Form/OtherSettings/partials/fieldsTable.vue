@@ -65,8 +65,8 @@ import { useExtras } from "@/services/functions/extras";
 import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 const columns = [
-  { title: 'Field', dataIndex: 'field_name', key: 'field_name', width: 500 },
-  { title: 'Settings', dataIndex: 'settings', width: 650, slots: { customRender: 'settings' } },
+  { title: 'Field', dataIndex: 'field_name', key: 'field_name' },
+  { title: 'Settings', dataIndex: 'settings', slots: { customRender: 'settings' } },
   { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
 ]
 

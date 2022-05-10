@@ -73,21 +73,9 @@ export const useFormFields = form => {
       const filtered = formFields.value.filter(i => i.code === field)
 
       if(filtered.length) {
-        if(filtered[0].settings === null) {
-          let cascadeTo
+        const cascadeTo = filtered[0].settings !== null ? filtered[0].settings.setting : null
 
-          if(form.value.program) {
-            const concatCategoryProgram = categoryId + "-" + form.value['program']
-            const isOptionExists = findInNested(options, concatCategoryProgram)
-            cascadeTo = typeof isOptionExists !== 'undefined' ? concatCategoryProgram : null
-          }else {
-            cascadeTo = null
-          }
-
-          saveOfficeListVP({ list: list, field: field, defaultCascade: cascadeTo })
-        }else {
-          saveOfficeListVP({ list: list, field: field, defaultCascade: filtered[0].settings.setting })
-        }
+        saveOfficeListVP({ list: list, field: field, defaultCascade: cascadeTo })
       }
     }
   }

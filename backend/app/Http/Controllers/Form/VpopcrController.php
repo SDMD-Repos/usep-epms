@@ -219,7 +219,7 @@ class VpopcrController extends Controller
 
     public function getAllVpOpcrs()
     {
-        $list = VpOpcr::select("*", "id as key")->with('files')->orderBy('created_at', 'ASC')->get();
+        $list = VpOpcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
 
         return response()->json([
             'list' => $list

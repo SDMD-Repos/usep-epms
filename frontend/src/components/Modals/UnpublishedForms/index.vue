@@ -2,10 +2,8 @@
   <a-modal v-model:visible="isVisible" :title="documentName"
            width="60%" wrap-class-name="viewUploadedModal" :footer="null"
            @cancel="onClose">
-    <a-table :columns="columns"
-             :data-source="list"
-             size="small"
-             row-key="id" bordered>
+
+    <a-table :columns="columns" :data-source="list" size="small" row-key="id" bordered>
 
       <!-- Custom column render-->
       <template #count="{ index }">
@@ -38,15 +36,14 @@ const unplishedFormsColumns = [
     title: 'Reason',
     dataIndex: 'remarks',
     key: 'remarks',
-    width: 500,
   },
   {
     title: 'Details',
-    width: 400,
     slots: { customRender: 'details' },
   },
   {
     title: 'Action',
+    width: 50,
     slots: { customRender: 'operation' },
   },
 ]

@@ -38,8 +38,8 @@ import { useStore } from "vuex"
 import { cloneDeep } from "lodash-es";
 
 const columns = [
-  { title: 'Field', dataIndex: 'name', key: 'name', width: 500 },
-  { title: 'Settings', dataIndex: 'settings', width: 650, slots: { customRender: 'settings' } },
+  { title: 'Field', dataIndex: 'name', key: 'name' },
+  { title: 'Settings', dataIndex: 'settings', slots: { customRender: 'settings' } },
   { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
 ]
 

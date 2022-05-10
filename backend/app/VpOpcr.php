@@ -40,4 +40,14 @@ class VpOpcr extends Model
     {
         return $this->details()->whereNull('parent_id')->orderByRaw('-`aapcr_detail_id` DESC');
     }
+
+    /**
+     * Get the form unpublish status of the vp's opcr.
+     */
+
+    public function status()
+    {
+        return $this->hasMany('App\FormUnpublishStatus', 'form_id')
+            ->where('form_type', '=', 'vpopcr');
+    }
 }
