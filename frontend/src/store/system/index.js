@@ -21,6 +21,7 @@ export default {
       list: [],
       officeHeadDetailsAAPCR: [],
       officeHeadDetailsVPOPCR: [],
+      officeHeadDetailsOPCR: [],
       aapcrHeadPermission: false,
       aapcrFormPermission: false,
       opcrHeadPermission: false,
@@ -112,7 +113,7 @@ export default {
           commit('SET_STATE', { 
             loading: true,
           })
-
+          
           const fetchOfficeHead = mapApiProviders.fetchOfficeHead
           fetchOfficeHead(form_id, payload.office_id ? payload.office_id.value: 0 ).then(response => {
             if (response) {
@@ -124,7 +125,12 @@ export default {
                   commit('SET_STATE', {
                     officeHeadDetailsVPOPCR : response.officeHeadDetails,
                   })
+                }else if(form_id==='opcr'){
+                  commit('SET_STATE', {
+                    officeHeadDetailsOPCR : response.officeHeadDetails,
+                  })
                 }
+                
             
             }
             commit('SET_STATE', {
@@ -155,11 +161,11 @@ export default {
         commit('SET_STATE', {
           loading: true,
         })
-        const { form_id } = payload
+        const { form_id, office_id } = payload
         const saveOfficeStaff = mapApiProviders.saveOfficeStaff
         saveOfficeStaff(payload).then(response => {
           if (response) {
-            dispatch('FETCH_OFFICE_DETAILS',{payload:{form_id:form_id}})
+            dispatch('FETCH_OFFICE_DETAILS',{payload:{form_id:form_id, office_id: office_id}})
               notification.success({
               message: 'Success',
               description: form_id.toUpperCase() + ' Staff has been assigned.',

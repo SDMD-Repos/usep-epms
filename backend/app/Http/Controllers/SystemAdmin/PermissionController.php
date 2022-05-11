@@ -261,7 +261,7 @@ class PermissionController extends Controller
         try{
           
             $condition  = ['form_id' => $form_id];
-            if($form_id==='vpopcr'){
+            if($form_id==='vpopcr'|| $form_id==='opcr' ){
                 $condition['office_id'] = $office_id;
             }
            
@@ -331,29 +331,33 @@ class PermissionController extends Controller
             }
             return response()->json([
                 'permission' => $permission,
-
             ], 200);
         }catch(\Exception $e){
             return response()->json($e->getMessage());
         }
     }
-    function allowAapcrForm($pmaps_id,$form_id){
+    function allowForm($pmaps_id,$form_id){
 
         try{
             $permission = false;
+            $office_id = 0;
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
 
             $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
            
             if(count($formAccessDetails)){
-              $permission = true;
+                $permission = true;
+                $office_id = $formAccessDetails[0]->office_id;
             }
 
             if(count($formStaffAccessDetails)){
                 $permission = true;
+                $office_id = $formStaffAccessDetails[0]->office_id;
             }
+            
             return response()->json([
                 'permission' => $permission,
+                'office_id'=> $office_id,
 
             ], 200);
         }catch(\Exception $e){

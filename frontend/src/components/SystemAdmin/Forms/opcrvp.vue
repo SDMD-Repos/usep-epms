@@ -33,11 +33,11 @@
           :tree-data="memberList"
            v-if="editBtn"
         />
-           <span v-else>{{officeDetails ? officeDetails.pmaps_name : "Not Set"}}</span>
+           <span v-else>{{officeDetails ?  officeDetails.pmaps_name  ?  officeDetails.pmaps_name : "Not Set" : "Not Set"}}</span>
          </a-col>
       </a-row>
         <div class="mt-4"></div>
-        <a-row type="flex" justify="center"  class="mt-3"  v-if="createVpOpcrPermission" >
+        <a-row type="flex" justify="center"  class="mt-3"  v-if="opcrvpFormPermission" >
          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
               <a-button style="width: 90px;"   type="primary"  class="mr-3" v-if="editBtn" @click="onSave">Save</a-button>
               <a-button style="width: 90px;"  type="primary" class="mr-3"  v-if="editBtn" @click="onCancel">Cancel</a-button>
@@ -59,7 +59,7 @@
           :tree-data="memberListStaff"
            v-if="editBtnStaff"
         />
-          <span v-else>{{ officeDetails && officeDetails.staff_name === null  ? officeDetails.staff_name: "Not Set"}}</span>
+          <span v-else>{{ officeDetails ? officeDetails.staff_name ?  officeDetails.staff_name : "Not Set" : "Not Set"}}</span>
          </a-col>
         </a-row>
          <div class="mt-4"></div>
@@ -81,6 +81,7 @@ import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 
 import { getPersonnelByOffice } from '@/services/api/hris';
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: 'OpcrVpTab',
@@ -89,7 +90,6 @@ export default defineComponent({
       const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
       // const formAccessDetails = computed(() => store.getters['external/external'].formAccessDetails)
       const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsVPOPCR)
-      const createVpOpcrPermission = computed(() => store.getters['system/permission'].createVpOpcrPermission)
       const vpopcrHeadPermission = computed(() => store.getters['system/permission'].vpopcrHeadPermission)
       
       const officeId = ref(undefined)
@@ -105,7 +105,14 @@ export default defineComponent({
       let formLoading = ref(false)
       const editBtn = ref(false)
       const editBtnStaff = ref(false)
-     
+      const permission ={
+                      listOpcrvp: ["adminPermission","ap-form", "apf-opcrvr"],
+                    }
+      const {
+          // DATA
+        opcrvpFormPermission,
+          // METHODS
+      } = usePermission(permission)
 
       const getPersonnelList = officeId => {
        memberList.value = []
@@ -138,15 +145,11 @@ export default defineComponent({
     }
 
       const getOfficeEmployee = officeId => {
-      
         store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
- 
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'vpopcr',office_id:officeId}})
         staffId.value = []
         getPersonnelList(officeId)
         getStaffList(officeId)
-      
-
       }
 
       const onSave = () => { 
@@ -158,7 +161,6 @@ export default defineComponent({
         }
         if(personnelId.value){
           store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
-        
         }else{
           Modal.error({
           title: () => 'Unable to proceed',
@@ -183,6 +185,7 @@ export default defineComponent({
           personnelId.value = []
           staffId.value = []
           memberList.value = []
+          store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
       }
 
       const onEdit = () => { 
@@ -208,20 +211,13 @@ export default defineComponent({
               content: () => 'Please select a Office Staff',
             })
         }
+         editBtnStaff.value=false
       }
 
 
       onMounted(() => {
-       store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
-
-        const vpopcrCreatePermissions = [
-        "adminPermission",
-        "ap-form", 
-        "apf-opcrvr",
-      ]
-
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: vpopcrCreatePermissions, name:'createVpOpcrPermission'} })
-      store.dispatch('system/CHECK_VPOPCR_HEAD_PERMISSION', { 
+        store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
+        store.dispatch('system/CHECK_VPOPCR_HEAD_PERMISSION', { 
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
                                                                     form_id: 'vpopcr',
@@ -230,9 +226,7 @@ export default defineComponent({
                                                             
       })
 
-
-    
-
+      
     return  {
       officeId,
       headId,
@@ -245,7 +239,7 @@ export default defineComponent({
       editBtn,
       officeDetails,
       editBtnStaff,
-      createVpOpcrPermission,
+      opcrvpFormPermission,
       vpopcrHeadPermission,
       loginId,
 
