@@ -24,7 +24,6 @@
 </template>
 <script>
 import { defineComponent, ref, watch } from 'vue'
-// import { DeleteOutlined } from "@ant-design/icons-vue"
 
 const unplishedFormsColumns = [
   {
@@ -50,7 +49,6 @@ const unplishedFormsColumns = [
 
 export default defineComponent({
   name: 'UnpublishedFormsModal',
-  // components: { DeleteOutlined },
   props: {
     modalState: Boolean,
     formDetails: { type: Object, default: () => {} },

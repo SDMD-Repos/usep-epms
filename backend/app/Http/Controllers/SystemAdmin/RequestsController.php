@@ -44,22 +44,17 @@ class RequestsController extends Controller
         ], 200);
     }
 
-    public function updateRequestStatus(UpdateRequestStatus $request)
+    public function updateFormRequestStatus(UpdateRequestStatus $request)
     {
         try {
             $validated = $request->validated();
 
             $id = $validated['id'];
             $status = $validated['status'];
-            $origin = isset($validated['origin']) ? $validated['origin'] : null;
 
             DB::beginTransaction();
 
-            if(!$origin) {
-                $request = FormUnpublishStatus::find($id);
-            } else {
-                $request = FormUnpublishStatus::where('form_id', $id)->where('form_type', $validated['origin'])->first();
-            }
+            $request = FormUnpublishStatus::find($id);
 
             $original = $request->getOriginal();
 

@@ -10,10 +10,9 @@
 import { defineComponent, ref, onMounted, computed } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { notification, message } from 'ant-design-vue'
 import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
-import { useUploadFile } from '@/services/functions/upload'
+import { useUnpublish } from '@/services/functions/formListActions'
 import FormListTable from '@/components/Tables/Forms/List'
 
 export default defineComponent({
@@ -36,7 +35,7 @@ export default defineComponent({
     const list = computed(() => store.getters['opcrtemplate/form'].list)
     const loading = computed(() => store.getters['opcrtemplate/form'].loading)
 
-    const { unpublish } = useUploadFile()
+    const { unpublish } = useUnpublish()
 
     // EVENTS
     onMounted(() => {

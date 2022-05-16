@@ -103,19 +103,16 @@ export default defineComponent({
 
     onMounted(() => {
       let params = {
-        selectable: {
-          allColleges: false,
-          mains: true,
-        },
+        selectable: { allColleges: false, mains: true },
         isAcronym: false,
       }
-      params = encodeURIComponent(JSON.stringify(params))
+
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES_CHILDREN')
       store.dispatch('system/FETCH_PERMISSION')
     })
 
-    
+
 
     const getPersonnelList = officeId => {
       memberList.value = []
@@ -129,7 +126,7 @@ export default defineComponent({
             const { personnel } = response
             memberList.value = personnel
           }
-         
+
           formLoading.value = false
         })
       }

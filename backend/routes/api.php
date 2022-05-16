@@ -185,7 +185,7 @@ Route::group([
         'prefix' => 'requests'
     ], function() {
         Route::get('/get-all-unpublish/{status}', 'SystemAdmin\RequestsController@getAllUnpublishRequests');
-        Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateRequestStatus');
+        Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateFormRequestStatus');
         Route::get('/view-unpublished-form/{id}', 'SystemAdmin\RequestsController@viewUnpublishedForm');
     });
 });
@@ -194,13 +194,13 @@ Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
 ], function() {
-    Route::get('/get-main-offices-children/{nodeStatus}', 'SettingController@getMainOfficesWithChildren');
+    Route::post('/get-main-offices-children', 'SettingController@getMainOfficesWithChildren');
     Route::get('/get-vp-offices-children', 'SettingController@getVpOfficeWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
-    Route::get('/get-offices-accountable/{nodeStatus}', 'SettingController@getOfficesAccountable');
+    Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');
 
     Route::get('/get-form-access-by-office/{id}', 'SystemAdmin\PermissionController@getFormAccessByOffice');
 });

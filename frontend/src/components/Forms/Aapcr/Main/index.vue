@@ -80,6 +80,7 @@ export default defineComponent({
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
+      resetFormFields,
     } = useFormOperations(props)
 
     const { budgetList, addBudgetListItem, deleteBudgetItem } = useProgramBudget()
@@ -87,7 +88,6 @@ export default defineComponent({
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
-
 
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['aapcr/form'].loading
@@ -103,7 +103,7 @@ export default defineComponent({
       return tip
     })
 
-    const permission ={ listAapcr: [ "form", "f-aapcr" ] }
+    const permission = { listAapcr: [ "form", "f-aapcr" ] }
     const { aapcrFormPermission } = usePermission(permission)
 
     // EVENTS
@@ -191,19 +191,6 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'aapcr' }})
-    }
-
-    const resetFormFields = () => {
-      store.commit('aapcr/SET_STATE', { dataSource: [] })
-
-      store.commit('formManager/SET_STATE', {
-        functions: [],
-        subCategories: [],
-        measures: [],
-        cascadingLevels: [],
-        programs: [],
-        formFields: [],
-      })
     }
 
     const getFormDetails = () => {

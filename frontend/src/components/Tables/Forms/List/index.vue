@@ -86,7 +86,10 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
   },
-  emits: ['update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms','unpublish-template', 'cancel-unpublish-request'],
+  emits: [
+    'update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms','unpublish-template',
+    'cancel-unpublish-request',
+  ],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -155,7 +158,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
-          emit('cancel-unpublish-request', data)
+          emit('cancel-unpublish-request', { data: data, form: props.form } )
         },
         onCancel() {},
       });

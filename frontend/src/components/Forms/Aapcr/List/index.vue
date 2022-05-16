@@ -7,10 +7,11 @@
 
     <unpublished-forms-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
-      @close-list-modal="closeListModal" @view-file="viewPdf" />
+      @close-list-modal="onCloseList" @view-file="viewPdf" />
 
     <unpublish-remarks-modal
-      :is-unpublish="isUnpublish" @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
+      :is-unpublish="isUnpublish" :form-id="formId"
+      @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
   </div>
    <div v-else><span>You have no permission to access this page.</span></div>
 </template>
@@ -21,13 +22,13 @@ import { useStore } from 'vuex'
 import { message } from 'ant-design-vue'
 import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
-import { useViewPublishedFiles } from '@/services/functions/published'
+import { useUnpublish, useViewPublishedFiles } from '@/services/functions/formListActions'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
 import { fetchPdfData } from '@/services/api/mainForms/aapcr'
+import { usePermission } from '@/services/functions/permission'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
-import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "AapcrList",
@@ -43,8 +44,6 @@ export default defineComponent({
 
     // DATA
     const documentName = ref(null)
-    const isUnpublish = ref(false)
-    const unpublishedData = ref(null)
 
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
@@ -52,7 +51,11 @@ export default defineComponent({
     const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
 
     const { isUploadedViewed, viewedForm,
-      viewUnpublishedForms, onCloseList, uploadedListState } = useViewPublishedFiles()
+      viewUnpublishedForms, onCloseList } = useViewPublishedFiles()
+
+    const { unpublishedData, isUnpublish,
+      openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
+    } = useUnpublish()
 
     const permission = { listAapcr: [ "form", "f-aapcr" ] }
 
@@ -79,40 +82,6 @@ export default defineComponent({
         year: data.year,
       }
       store.dispatch('aapcr/PUBLISH', { payload: payload })
-    }
-
-    const openUnpublishRemarks = data => {
-      changeRemarksState()
-      unpublishedData.value = {
-        id: data.id,
-        documentName: data.document_name,
-      }
-    }
-
-    const changeRemarksState = () => {
-      isUnpublish.value = !isUnpublish.value
-    }
-
-    const unpublish = remarks => {
-      const data = {
-        id: unpublishedData.value.id,
-        remarks: remarks.value,
-        documentName: unpublishedData.value.documentName,
-      }
-
-      store.dispatch('aapcr/UNPUBLISH', { payload: data }).then(() => {
-        isUnpublish.value = !isUnpublish.value
-        unpublishedData.value = null
-      })
-    }
-
-    const onUnpublishCancel = data => {
-      store.dispatch('requests/UPDATE_REQUEST_STATUS', {
-        payload: {
-          id: data.id, status: 'cancelled', origin: 'aapcr',
-          callback: { dispatch: 'aapcr/FETCH_LIST', payload: null },
-        },
-      })
     }
 
     const viewPdf = params => {
@@ -151,38 +120,24 @@ export default defineComponent({
       })
     }
 
-    const closeListModal = () => {
-      uploadedListState(false)
-    }
-
     return {
       moment,
-      unpublishedData,
 
       documentName,
-      isUnpublish,
 
-      columns: listTableColumns,
-      list,
-      loading,
-      hasAapcrAccess,
-      aapcrFormPermission,
+      columns: listTableColumns, list, loading, hasAapcrAccess, aapcrFormPermission,
 
-      isUploadedViewed,
-      viewedForm,
+      isUploadedViewed, viewedForm,
 
-      updateForm,
-      publish,
-      openUnpublishRemarks,
-      changeRemarksState,
-      unpublish,
-      onUnpublishCancel,
-      viewPdf,
+      updateForm, publish, viewPdf,
 
-      closeListModal,
+      // useUnpublish
+      unpublishedData, isUnpublish,
 
-      viewUnpublishedForms,
-      onCloseList,
+      openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
+
+      // useViewPublishedFiles
+      viewUnpublishedForms, onCloseList,
     }
   },
 })

@@ -106,11 +106,11 @@ trait ConverterTrait {
             switch ($conditions['origin']) {
                 case 'vpopcr':
                     $officeList = $data->offices;
+                    break;
             }
         }
 
         foreach($officeList as $datum) {
-
             $officeType = $datum->field->code;
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
@@ -136,14 +136,22 @@ trait ConverterTrait {
                 $ipcrPeriod = $datum->ipcrPeriod;
             }*/
 
-            $cascadeTo = $datum->cascade_to;
-
-            /*if(isset($conditions['origin'])) {
+            if(isset($conditions['origin'])) {
                 switch ($conditions['origin']) {
-                    case 'aapcr':
-                        $cascadeTo = 'f-' . $datum->cascade_to;
+                    case 'vpopcr-view':
+                        $cascadeTo = $datum->category_id;
+
+                        if($datum->program_id) {
+                            $cascadeTo = $datum->program->category_id . '-' . $datum->program_id;
+                        }else if($datum->other_program_id) {
+                            $cascadeTo = $datum->otherProgram->category_id . '-' . $datum->other_program_id . '-opcr';
+                        }
+                        break;
+                    default:
+                        $cascadeTo = $datum->cascade_to;
+                        break;
                 }
-            }*/
+            }
 
             $offices[$officeType][$counter] = array(
                 'label' => $officeName,

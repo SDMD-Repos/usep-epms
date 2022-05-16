@@ -3,32 +3,34 @@ import { useStore } from 'vuex'
 
 
 export const usePermission = (permission)  => {
-    const { listCreate, listDelete , listEdit, listAapcr, listOpcrvp, listOpcr} = permission
-       
+    const { listCreate, listDelete , listEdit, listAapcr, listOpcrvp, listOpcr } = permission
+
     const accessLists = computed(() => store.getters['user/access'])
     const store = useStore()
 
-    const createPermission = accessLists.value.filter((value)=>{
-            return listCreate  ? listCreate.includes(value.permission_id) : 0
-            });
-    const deletePermission = accessLists.value.filter((value)=>{
-            return listDelete  ? listDelete.includes(value.permission_id) : 0
-            });
-    const editPermission = accessLists.value.filter((value)=>{
-            return listEdit ?  listEdit.includes(value.permission_id) : 0
-            });
-    
-    const aapcrPermission = accessLists.value.filter((value)=>{
-      return listAapcr ?  listAapcr.includes(value.permission_id) : 0
-      });
-    
-    const opcrvpPermission = accessLists.value.filter((value)=>{
-      return listOpcrvp ?  listOpcrvp.includes(value.permission_id) : 0
-      });
+    const createPermission = accessLists.value.filter((value) => {
+      return listCreate  ? listCreate.includes(value.permission_id) : 0
+    });
 
-    const opcrPermission = accessLists.value.filter((value)=>{
+    const deletePermission = accessLists.value.filter((value) => {
+      return listDelete  ? listDelete.includes(value.permission_id) : 0
+    });
+
+    const editPermission = accessLists.value.filter((value) => {
+      return listEdit ?  listEdit.includes(value.permission_id) : 0
+    });
+
+    const aapcrPermission = accessLists.value.filter((value) => {
+      return listAapcr ?  listAapcr.includes(value.permission_id) : 0
+    });
+
+    const opcrvpPermission = accessLists.value.filter((value) => {
+      return listOpcrvp ?  listOpcrvp.includes(value.permission_id) : 0
+    });
+
+    const opcrPermission = accessLists.value.filter((value) => {
       return listOpcr ?  listOpcr.includes(value.permission_id) : 0
-      });
+    });
 
 
     const isCreate = ref(false)
@@ -39,15 +41,15 @@ export const usePermission = (permission)  => {
     const opcrFormPermission = ref(false)
 
     if(createPermission.length > 0){
-        isCreate.value = true;
-    } 
+      isCreate.value = true;
+    }
 
     if(deletePermission.length > 0){
-        isDelete.value = true;
+      isDelete.value = true;
     }
 
     if(editPermission.length > 0){
-        isEdit.value = true;
+      isEdit.value = true;
     }
 
     if(aapcrPermission.length > 0){

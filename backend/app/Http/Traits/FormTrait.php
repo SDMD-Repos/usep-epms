@@ -175,6 +175,13 @@ trait FormTrait {
                     case 'aapcr':
                         $newOffice->cascade_to = $office['cascadeTo'];
                         break;
+                    case 'vpopcr':
+                        $cascadeTo = explode("-", $office['cascadeTo']);
+
+                        $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                        $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                        $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                        break;
                 }
 
                 if(isset($office['isGroup']) && $office['isGroup']) {
@@ -199,7 +206,7 @@ trait FormTrait {
                 if(!$newOffice->save()){
                     DB::rollBack();
                 }else{
-                    array_push($officeIds, $newOffice->id);
+                    $officeIds[] = $newOffice->id;
                 }
             }else{
                 $history = '';
@@ -227,7 +234,7 @@ trait FormTrait {
                     DB::rollBack();
                 }
 
-                array_push($officeIds, $updatedOffice->id);
+                $officeIds[] = $updatedOffice->id;
             }
         }
 

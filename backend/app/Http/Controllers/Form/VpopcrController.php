@@ -270,7 +270,7 @@ class VpopcrController extends Controller
 
                     if($source['isHeader'] && !in_array($source['key'], $savedHeaders)) {
                         $storeHeader = 1;
-                        array_push($savedHeaders, $source['key']);
+                        $savedHeaders[] = $source['key'];
                     }
 
                     $saveDetail = (!$isNew && !isset($source['children'])) || ($isNew) || $storeHeader;
@@ -555,10 +555,10 @@ class VpopcrController extends Controller
 
                     $dataSource[] = $this->getVpOpcrDetails($parentDetails, $data);
 
-                    array_push($parentIds, array(
+                    $parentIds[] = array(
                         'id' => $parentDetails->id,
                         'index' => $detail->category_id
-                    ));
+                    );
 
                 } else{
                     foreach($dataSource as $key => $source) {
@@ -591,10 +591,10 @@ class VpopcrController extends Controller
 
                 $dataSource[] = $data;
 
-                array_push($parentIds, array(
+                $parentIds[] = array(
                     'id' => $detail->id,
                     'index' => $detail->category_id
-                ));
+                );
             }
         }
 
@@ -616,7 +616,7 @@ class VpopcrController extends Controller
 
     public function getVpOpcrDetails($data, $children)
     {
-        $offices = $this->splitPIOffices($data->offices, 1);
+        $offices = $this->splitPIOffices($data->offices, ['splitOffices' => 1, 'origin' => 'vpopcr-view']);
 
         $this->getTargetsBasisList($data->targets_basis);
 

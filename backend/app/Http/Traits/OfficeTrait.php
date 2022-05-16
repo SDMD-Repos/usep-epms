@@ -3,6 +3,7 @@
 namespace App\Http\Traits;
 
 use App\Group;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 trait OfficeTrait {
@@ -54,16 +55,15 @@ trait OfficeTrait {
         }
     }
 
-    public function getMainOfficesWithChildren($nodeStatus, $params=array())
+    public function getMainOfficesWithChildren($status, $params=array())
     {
-        $status = json_decode($nodeStatus);
         $checkable = null;
         $selectable = null;
 
-        if(isset($status->checkable)) {
-            $checkable = $status->checkable;
-        } elseif(isset($status->selectable)) {
-            $selectable = $status->selectable;
+        if(isset($status['checkable'])) {
+            $checkable = $status['checkable'];
+        } elseif(isset($status['selectable'])) {
+            $selectable = $status['selectable'];
         }
 
         try {
@@ -71,7 +71,7 @@ trait OfficeTrait {
 
             $data = new \stdClass();
 
-            if(!isset($status->isOfficesOnly) || (!$status->isOfficesOnly)) {
+            if(!isset($status['isOfficesOnly']) || (!$status['isOfficesOnly'])) {
                 $data->id = "allColleges";
                 $data->value = "allColleges";
                 $data->title = "All Colleges";
@@ -79,15 +79,15 @@ trait OfficeTrait {
                 $data->children = $this->getChildOffices("allColleges",1);
 
                 if($checkable) {
-                    $data->checkable = $checkable->allColleges;
+                    $data->checkable = $checkable['allColleges'];
                 } elseif($selectable) {
-                    $data->selectable = $selectable->allColleges;
+                    $data->selectable = $selectable['allColleges'];
                 }
 
-                array_push($values, $data);
+                $values[] = $data;
             }
 
-            $isAcronym = isset($status->isAcronym) && $status->isAcronym;
+            $isAcronym = isset($status['isAcronym']) && $status['isAcronym'];
 
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
                 'token' => config('services.hris.data')
@@ -107,12 +107,12 @@ trait OfficeTrait {
                     $data->children = $this->getChildOffices($vpoffice->id,1);
 
                     if($checkable) {
-                        $data->checkable = $checkable->mains;
+                        $data->checkable = $checkable['mains'];
                     } elseif($selectable) {
-                        $data->selectable = $selectable->mains;
+                        $data->selectable = $selectable['mains'];
                     }
 
-                    array_push($values, $data);
+                    $values[] = $data;
                 }
 
                 if(empty($params)){
@@ -128,14 +128,16 @@ trait OfficeTrait {
         }
     }
 
-    public function getOfficesAccountable($nodeStatus)
+    public function getOfficesAccountable(Request $request)
     {
-        $offices = $this->getMainOfficesWithChildren($nodeStatus, ['fromForm' => true]);
+        $nodeStatus = $request->input();
 
-        $decoded = json_decode($nodeStatus);
+        $groupStatus = $nodeStatus['groups'] ?? null;
 
-        if(isset($decoded->includeGroups) && $decoded->includeGroups) {
-            $groups = Group::where('effective_until', '>=', $decoded->currentYear)->get();
+        $offices = $this->getMainOfficesWithChildren($nodeStatus, ['origin' => 'form']);
+
+        if($groupStatus && $groupStatus['included']) {
+            $groups = Group::where('effective_until', '>=', $nodeStatus['currentYear'])->get();
 
             $children = [];
 
@@ -148,8 +150,9 @@ trait OfficeTrait {
                 $data->pId = 'allGroups';
                 $data->cascadeTo = null;
                 $data->isGroup = true;
+                $data->disabled = isset($groupStatus['officeId']) && ($groupStatus['officeId']['key'] !== $group->supervising_id);
 
-                array_push($children, $data);
+                $children[] = $data;
             }
 
             $data = new \stdClass();
@@ -163,7 +166,7 @@ trait OfficeTrait {
             $data->checkable = false;
             $data->selectable = false;
 
-            array_push($offices, $data);
+            $offices[] = $data;
         }
 
         return response()->json([

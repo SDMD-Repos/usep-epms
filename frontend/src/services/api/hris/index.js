@@ -11,7 +11,7 @@ export async function getMainOfficesOnly(data) {
 
 export async function getMainOfficesWithChildren(data) {
   return apiClient
-    .get('/hris/get-main-offices-children/' + data)
+    .post('/hris/get-main-offices-children', data)
     .then(response => {
       return response.data
     })
@@ -66,7 +66,7 @@ export async function getAllPositions() {
 
 export async function getOfficesAccountable(data) {
   return apiClient
-    .get('/hris/get-offices-accountable/' + data)
+    .post('/hris/get-offices-accountable',  data)
     .then(response => {
       return response.data
     })

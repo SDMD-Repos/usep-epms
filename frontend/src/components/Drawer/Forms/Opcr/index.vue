@@ -306,14 +306,11 @@ export default defineComponent({
 
     const onLoad = () => {
       let params = {
-        checkable: {
-          allColleges: true,
-          mains: false,
-        },
+        checkable: { allColleges: true, mains: false },
         isAcronym: true,
         currentYear: props.currentYear,
       }
-      params = encodeURIComponent(JSON.stringify(params))
+
       store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 

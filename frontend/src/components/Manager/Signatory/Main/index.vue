@@ -99,13 +99,10 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       let params = {
-        selectable: {
-          allColleges: true,
-          mains: true,
-        },
+        selectable: { allColleges: true, mains: true },
         isAcronym: false,
       }
-      params = encodeURIComponent(JSON.stringify(params))
+
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
       store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')

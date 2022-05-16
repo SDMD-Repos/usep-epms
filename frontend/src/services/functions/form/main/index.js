@@ -136,26 +136,22 @@ export const useFormFields = form => {
       content: () => '',
       okText: 'Yes',
       cancelText: 'No',
-      onOk() {
-        form.value[field].splice(index, 1)
-      },
+      onOk() { form.value[field].splice(index, 1) },
       onCancel() {},
     })
   }
 
-  return {
-    typeOptions,
-    formItemLayout,
-    tooltipHeaderText,
-    storedOffices,
+  const syncCascadeOption = (field, index, value) => {
+    const offices = form.value[field]
 
-    changeNullValue,
-    filterBasisOption,
-    onOfficeChange,
-    saveOfficeList,
-    checkDefaultCascadeTo,
-    updateOfficeList,
-    deleteOfficeItem,
+    if(index < 1) { offices.forEach((data, i) => { if(i) { data.cascadeTo = value } }) }
+  }
+
+  return {
+    typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
+
+    changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, checkDefaultCascadeTo,
+    updateOfficeList, deleteOfficeItem, syncCascadeOption,
   }
 }
 

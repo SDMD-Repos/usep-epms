@@ -130,7 +130,11 @@
         <div v-if="form.implementing.length">
           <template v-for="(office, index) in form.implementing" :key="index">
             <a-form-item :name="['implementing', index, 'cascadeTo']" :rules="rules.cascadeTo">
-              <template #label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }}</template>
+              <template #label>
+                <span class="officeName">
+                  {{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }}
+                </span>
+              </template>
               <a-row :gutter="0">
                 <a-col :span="18" :offset="1">
                   <a-tree-select
@@ -140,6 +144,7 @@
                     :tree-data="functionsWithProgram"
                     placeholder="Select a Program"
                     tree-default-expand-all
+                    @change="syncCascadeOption('implementing', index, office.cascadeTo)"
                   />
                 </a-col>
                 <a-col :span="2" :offset="1">
@@ -196,6 +201,7 @@
                     :tree-data="functionsWithProgram"
                     placeholder="Select a Program"
                     tree-default-expand-all
+                    @change="syncCascadeOption('supporting', i, o.cascadeTo)"
                   />
                 </a-col>
                 <a-col :span="2" :offset="1">
@@ -293,6 +299,7 @@ export default defineComponent({
       typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
       // METHODS
       changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
+      syncCascadeOption,
     } = useFormFields(form)
 
     // METHODS
@@ -361,9 +368,11 @@ export default defineComponent({
       typeOptions, formItemLayout, tooltipHeaderText,
 
       changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
+      syncCascadeOption,
 
       toggleIsHeader, onFinish, resetFormData,
     }
   },
 })
 </script>
+

@@ -53,16 +53,15 @@
   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, createVNode, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from "vue-router";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
 import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/opcrvp'
-import IndicatorComponent from './partials/items'
 import { usePermission } from '@/services/functions/permission'
-
+import IndicatorComponent from './partials/items'
 
 export default defineComponent({
   name: "VpOPCRForm",
@@ -85,33 +84,26 @@ export default defineComponent({
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear, years, allowEdit,
       // METHOD
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, resetFormFields,
     } = useFormOperations(props)
-     const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
-     const accessOfficeId = computed(() => store.getters['opcrvp/form'].accessOfficeId)
 
-    //  let vpOfficesList = hasVpopcrAccess.value  ? computed(() => { return store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )}) : computed(() => store.getters['external/external'].vpOffices)
-     let vpOfficesList =  computed(() => {
-       let res = store.getters['external/external'].vpOffices
-            if(hasVpopcrAccess.value){
-                  res = store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )
-            }
-       return res 
-     })
-      
+    // COMPUTED
+    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+    const accessOfficeId = computed(() => store.getters['opcrvp/form'].accessOfficeId)
+
+    let vpOfficesList =  computed(() => {
+      let res = store.getters['external/external'].vpOffices
+      if(hasVpopcrAccess.value){
+        res = store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )
+      }
+      return res
+    })
+
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['opcrvp/form'].loading
     })
 
-    const permission ={
-                      listOpcrvp: [ "form", "f-opcrvp" ],
-                    }
-    const {
-          // DATA
-        opcrvpFormPermission,
-          // METHODS
-      } = usePermission(permission)
     const spinningTip = computed(() => {
       let tip = ''
       if (loading.value) {
@@ -121,8 +113,12 @@ export default defineComponent({
       }*/
       return tip
     })
-   
 
+    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
+
+    const { opcrvpFormPermission } = usePermission(permission)
+
+    // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
@@ -134,6 +130,10 @@ export default defineComponent({
         onLoad()
       }
     })
+
+    onBeforeUnmount(() => {
+      resetFormFields()
+    });
 
     // METHODS
     const onLoad = async () => {
@@ -221,14 +221,11 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
 
       let params = {
-        checkable: {
-          allColleges: true,
-          mains: false,
-        },
+        checkable: { allColleges: true, mains: false },
+        groups: { included: true, officeId: vpOffice.value },
         isAcronym: true,
-        currentYear: year,
+        currentYear: year.value,
       }
-      params = encodeURIComponent(JSON.stringify(params))
       await store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 

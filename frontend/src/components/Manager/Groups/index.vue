@@ -68,7 +68,7 @@ export default defineComponent({
     const groups = computed(() => store.getters['formManager/manager'].groups)
     const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
-  
+
     // DATA
     const isOpenModal = ref(false)
     let action = ref('')
@@ -127,26 +127,22 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      
+
 
       store.dispatch('formManager/FETCH_GROUPS')
 
       let params = {
-        selectable: {
-          allColleges: false,
-          mains: true,
-        },
+        selectable: { allColleges: false, mains: true },
         isAcronym: false,
         isOfficesOnly: true,
       }
 
-      params = encodeURIComponent(JSON.stringify(params))
       store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
     })
 
     // METHODS
-  
+
 
     const openModal = (event, record) => {
       resetModalData()

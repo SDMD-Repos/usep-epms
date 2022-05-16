@@ -26,7 +26,6 @@ class UpdateRequestStatus extends FormRequest
         return [
             'id' => 'required',
             'status' => 'required',
-            'origin' => ''
         ];
     }
 }

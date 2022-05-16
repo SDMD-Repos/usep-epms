@@ -22,13 +22,14 @@ import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 // import { useUploadFile } from '@/services/functions/upload'
-import { useViewPublishedFiles } from '@/services/functions/published'
+import { useViewPublishedFiles } from '@/services/functions/formListActions'
 import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
 import FormListTable from '@/components/Tables/Forms/List'
 // import UploadPublishModal from '@/components/Modals/UploadPublish'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import { message, notification } from "ant-design-vue"
 import { usePermission } from '@/services/functions/permission'
+
 export default defineComponent({
   components: {
     FormListTable,
@@ -47,7 +48,6 @@ export default defineComponent({
     // DATA
     let columns = ref([])
 
-
     /*const {
       // DATA
       isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
@@ -62,21 +62,15 @@ export default defineComponent({
     const list = computed(() => store.getters['opcrvp/form'].list)
     const loading = computed(() => store.getters['opcrvp/form'].loading)
     const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
-    
 
-    const permission ={
-                      listOpcrvp: [ "form", "f-opcrvp" ],
-                    }
-    const {
-          // DATA
-        opcrvpFormPermission,
-          // METHODS
-      } = usePermission(permission)
+    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
+
+    const { opcrvpFormPermission } = usePermission(permission)
 
     onMounted(() => {
       renderColumns()
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       store.dispatch('opcrvp/FETCH_LIST')
     })
 
@@ -109,6 +103,10 @@ export default defineComponent({
         officeId: data.office_id,
       }
       store.dispatch('opcrvp/PUBLISH', { payload: payload })
+    }
+
+    const unpublish = () => {
+
     }
 
     const viewPdf = data => {
@@ -203,12 +201,13 @@ export default defineComponent({
       fileList,*/
 
       isUploadedViewed,
-      viewedForm, 
+      viewedForm,
       hasVpopcrAccess,
       opcrvpFormPermission,
 
       updateForm,
       publish,
+      unpublish,
       viewPdf,
       uploadFile,
       handleCancelUpload,
