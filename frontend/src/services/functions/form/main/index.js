@@ -66,7 +66,7 @@ export const useFormFields = form => {
   }
 
   const checkDefaultCascadeTo = params => {
-    const { field, categoryId, options } = params
+    const { field } = params
     const list = storedOffices.value[field]
 
     if(list.length) {
@@ -113,7 +113,10 @@ export const useFormFields = form => {
         }
         container.pId = item.pId
       }
-      const hasCached = cachedOffice.value[field].filter(i => i.value === item.value)
+      const hasCached = cachedOffice.value[field].filter(i => {
+        return i.value === item.value || i.value === item.value.toString()
+      })
+
       if (hasCached.length) {
         tempCascadeTo = hasCached[0].cascadeTo
       } else if (typeof (item.cascadeTo) !== 'undefined' && item.cascadeTo) {
@@ -148,7 +151,7 @@ export const useFormFields = form => {
   }
 
   return {
-    typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
+    typeOptions, formItemLayout, tooltipHeaderText, storedOffices, cachedOffice,
 
     changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, checkDefaultCascadeTo,
     updateOfficeList, deleteOfficeItem, syncCascadeOption,

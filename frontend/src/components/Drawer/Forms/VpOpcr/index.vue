@@ -112,11 +112,7 @@
             <a-col :span="2">
               <a-tooltip :title="form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
                 <a-button v-if="form.implementing && !form.implementing.length" type="primary"
-                          @click="checkDefaultCascadeTo({
-                            field: 'implementing',
-                            categoryId: drawerId,
-                            options: functionsWithProgram
-                          })">
+                          @click="checkDefaultCascadeTo({ field: 'implementing' })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -173,11 +169,7 @@
             <a-col :span="2">
               <a-tooltip :title="form.supporting && !form.supporting.length ? 'Save List' : 'Edit List'">
                 <a-button v-if="form.supporting && !form.supporting.length" type="primary"
-                          @click="checkDefaultCascadeTo({
-                            field: 'supporting',
-                            categoryId: drawerId,
-                            options: functionsWithProgram
-                          })">
+                          @click="checkDefaultCascadeTo({ field: 'supporting' })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -249,7 +241,7 @@ import { useFormFields } from '@/services/functions/form/main'
 import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 export default defineComponent({
-  name: 'OpcrVpFormDrawer',
+  name: 'VpOpcrFormDrawer',
   components: { CheckOutlined, EditOutlined, DeleteFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
@@ -296,7 +288,7 @@ export default defineComponent({
 
     const {
       // DATA
-      typeOptions, formItemLayout, tooltipHeaderText, storedOffices,
+      typeOptions, formItemLayout, tooltipHeaderText, storedOffices, cachedOffice,
       // METHODS
       changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
       syncCascadeOption,
@@ -361,7 +353,7 @@ export default defineComponent({
     return {
       opcrVpForm, config, form, isSubmitting,
 
-      SHOW_PARENT,
+      SHOW_PARENT, cachedOffice,
 
       programsByFunction, functionsWithProgram, subCategories, measuresList, officesList,
 

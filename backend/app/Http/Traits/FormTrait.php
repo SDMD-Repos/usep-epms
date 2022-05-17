@@ -217,14 +217,41 @@ trait FormTrait {
                     $history = "Selected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                 }else{
-                    $oldCascadeTo = $updatedOffice->cascade_to;
+                    switch ($params['form']) {
+                        case 'aapcr':
+                            $oldCascadeTo = $updatedOffice->cascade_to;
 
-                    $updatedOffice->cascade_to = $office['cascadeTo'];
+                            $updatedOffice->cascade_to = $office['cascadeTo'];
 
-                    if($updatedOffice->isDirty('cascade_to')) {
+                            if($updatedOffice->isDirty('cascade_to')) {
+                                $history = "Updated cascade_to from '".$oldCascadeTo."' to '".$office['cascadeTo']. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+                            break;
+                        case 'vpopcr':
+                            $oldCategoryId = $updatedOffice->category_id;
+                            $oldProgramId = $updatedOffice->program_id;
+                            $oldOtherProgramId = $updatedOffice->other_program_id;
 
-                        $history = "Updated cascade_to from '".$oldCascadeTo."' to '".$office['cascadeTo']. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            $cascadeTo = explode("-", $office['cascadeTo']);
+
+                            $updatedOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                            $updatedOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                            $updatedOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+
+                            if($updatedOffice->isDirty('category_id')) {
+                                $history = "Updated category_id from '".$oldCategoryId."' to '".$updatedOffice->category_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+
+                            if($updatedOffice->isDirty('program_id')) {
+                                $history .= "Updated program_id from '".$oldProgramId."' to '".$updatedOffice->program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+
+                            if($updatedOffice->isDirty('other_program_id')) {
+                                $history .= "Updated other_program_id from '".$oldOtherProgramId."' to '".$updatedOffice->other_program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+                            break;
                     }
+
                 }
 
                 $updatedOffice->modify_id = $this->login_user->pmaps_id;

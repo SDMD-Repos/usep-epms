@@ -129,26 +129,23 @@ const defaultOpcrTemplateData = {
 }
 
 export const useDefaultFormData = props => {
-  const defaultData = ref({})
   const { formId } = props
-  let rules
+  let rules, formData
 
   switch (formId) {
     case 'aapcr':
-      defaultData.value = defaultAapcrFormData
+      formData = reactive({ ...defaultAapcrFormData })
       break
     case 'opcrvp':
-      defaultData.value = defaultOpcrVpFormData()
+      formData = reactive(defaultOpcrVpFormData())
       break
     case 'opcr':
-      defaultData.value = defaultOpcrFormData
+      formData = reactive({ ...defaultOpcrFormData })
       break
     case 'opcrtemplate':
-      defaultData.value = defaultOpcrTemplateData
+      formData = reactive({ ...defaultOpcrTemplateData })
       break
   }
-
-  const formData = reactive(defaultData.value)
 
   // CUSTOM VALIDATORS
   let validateNonHeader = async (rule, value) => {
@@ -269,6 +266,10 @@ export const useDefaultFormData = props => {
     }
   }
 
+  const resetVpOpcrForm = () => {
+    Object.assign(formData, defaultOpcrVpFormData())
+  }
+
   const assignFormData = newData => {
     formData.subCategory = newData.subCategory
     formData.name = newData.name
@@ -298,6 +299,7 @@ export const useDefaultFormData = props => {
     formData,
     rules,
 
+    resetVpOpcrForm,
     resetFormAsHeader,
     assignFormData,
   }

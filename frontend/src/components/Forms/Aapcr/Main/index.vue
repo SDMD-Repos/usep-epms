@@ -197,10 +197,9 @@ export default defineComponent({
       store.commit('aapcr/SET_STATE', {
         loading: true,
       })
-      fetchFormDetails(aapcrId.value).then(response => {
+      fetchFormDetails(aapcrId.value).then(async response => {
         if(response) {
           allowEdit.value = true
-          initializeFormFields()
           store.commit('aapcr/SET_STATE', {
             dataSource: response.dataSource,
           })
@@ -211,6 +210,8 @@ export default defineComponent({
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = true
+
+          await initializeFormFields()
         }
         store.commit('aapcr/SET_STATE', {
           loading: false,

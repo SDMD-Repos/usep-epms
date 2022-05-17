@@ -231,12 +231,11 @@ export default defineComponent({
 
     const getVpOpcrDetails = () => {
       store.commit('opcrvp/SET_STATE', { loading: true })
-      fetchFormDetails(vpOpcrId.value).then(response => {
+      fetchFormDetails(vpOpcrId.value).then(async response => {
         if(response.aapcrId) {
           allowEdit.value = true
 
-          onLoad()
-          initializeVPForm()
+          await onLoad()
 
           store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
 
@@ -246,6 +245,8 @@ export default defineComponent({
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = response.editMode
+
+          await initializeVPForm()
         }
         store.commit('opcrvp/SET_STATE', { loading: false })
       })

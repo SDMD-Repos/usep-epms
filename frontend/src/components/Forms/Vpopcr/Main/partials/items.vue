@@ -19,7 +19,7 @@ import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
 import { formTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
-import OpcrVpForm from '@/components/Drawer/Forms/OpcrVp'
+import OpcrVpForm from '@/components/Drawer/Forms/VpOpcr'
 
 export default defineComponent({
   name: 'OpcrVpItems',
@@ -51,7 +51,7 @@ export default defineComponent({
 
     const parameters = reactive({...props, config: computedConfig })
 
-    const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
+    const { formData, rules, resetVpOpcrForm, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
 
     // EVENTS
     onMounted( () => {
@@ -210,7 +210,7 @@ export default defineComponent({
       }
 
       const { parentDetails } = drawerConfig.value
-      
+
       await emit('update-source-item', {
         updateData: data.updateData,
         updateId: data.updateId,
@@ -256,6 +256,7 @@ export default defineComponent({
       const { isNewIndicator } = params
       await resetDrawerSettings(isNewIndicator)
       await params.callback
+      await resetVpOpcrForm()
       await resetOfficesFields()
     }
 
