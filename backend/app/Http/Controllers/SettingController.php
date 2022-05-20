@@ -31,6 +31,7 @@ use App\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
@@ -1200,4 +1201,14 @@ class SettingController extends Controller
             return response()->json($e->getMessage(), $status);
         }
     }
+
+    public function getAllFormsByPermission(Request $data)
+    {
+
+        
+        $forms = Form::select('*')->whereIn('id', $data)->orderBy('ordering', 'asc')->get();
+
+        return response()->json(['forms' => $forms], 200);
+    }
+
 }
