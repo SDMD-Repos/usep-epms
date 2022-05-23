@@ -202,7 +202,7 @@ trait PdfTrait {
         ];
 
         $pdfData = [
-            'documentName' => $documentName,
+            'documentNamess' => $documentName,
             'isUnpublish' => $isUnpublish,
             'form' => 'aapcr',
             'id' => $id,
