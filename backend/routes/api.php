@@ -81,6 +81,8 @@ Route::group([
     Route::get('/get-all-form-fields/{year}/{formId}', 'SettingController@getAllFormFields');
     Route::post('/save-form-field-settings', 'SettingController@saveFormFieldSettings');
     Route::post('/update-form-field-settings/{id}', 'SettingController@updateFormFieldSettings');
+
+    Route::post('/get-all-spms-forms-permission', 'SettingController@getAllFormsByPermission');
 });
 
 Route::group([
@@ -202,5 +204,5 @@ Route::group([
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
     Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');
 
-    Route::get('/get-form-access-by-office/{id}', 'SystemAdmin\PermissionController@getFormAccessByOffice');
+  
 });
