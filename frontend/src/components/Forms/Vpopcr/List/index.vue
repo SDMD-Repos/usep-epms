@@ -109,11 +109,14 @@ export default defineComponent({
 
     }
 
-    const viewPdf = data => {
+    const viewPdf = params => {
+      const { data } =  params
+      const fromUnpublished = typeof params.fromUnpublished !== 'undefined' ? params.fromUnpublished : false
+
       let renderer = null
       const documentName = data.office_name || data.file_name
 
-      if(!isUploadedViewed.value) {
+      if(!fromUnpublished) {
         store.commit('opcrvp/SET_STATE', { loading: true })
 
         renderer = renderPdf
@@ -134,7 +137,7 @@ export default defineComponent({
           const route = router.resolve({ name: "viewerPdf" })
           window.open(route.href, "_blank")
         }
-        if(!isUploadedViewed.value) {
+        if(!fromUnpublished) {
           store.commit('opcrvp/SET_STATE', { loading: false })
         }else {
           message.destroy()

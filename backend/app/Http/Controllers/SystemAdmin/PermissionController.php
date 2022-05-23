@@ -14,11 +14,10 @@ use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
 use App\FormAccess;
 use App\Http\Requests\StoreFormAccess;
-use Carbon\Carbon;
 
 class PermissionController extends Controller
 {
-    use OfficeTrait,FormTrait,PermissionTrait;
+    use OfficeTrait, FormTrait, PermissionTrait;
 
     private $userAccessRights;
 
@@ -259,14 +258,14 @@ class PermissionController extends Controller
     function fetchOfficeHead($form_id,$office_id=""){
 
         try{
-          
+
             $condition  = ['form_id' => $form_id];
             if($form_id==='vpopcr'|| $form_id==='opcr' ){
                 $condition['office_id'] = $office_id;
             }
-           
+
             $officeHeadDetails  = FormAccess::where($condition)->first();
-            
+
             return response()->json([
                 'officeHeadDetails' => $officeHeadDetails,
 
@@ -325,7 +324,7 @@ class PermissionController extends Controller
             $permission = false;
             // $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
-           
+
             if(count($formAccessDetails)){
               $permission = true;
             }
@@ -344,7 +343,7 @@ class PermissionController extends Controller
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
 
             $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
-           
+
             if(count($formAccessDetails)){
                 $permission = true;
                 $office_id = $formAccessDetails[0]->office_id;
@@ -354,7 +353,7 @@ class PermissionController extends Controller
                 $permission = true;
                 $office_id = $formStaffAccessDetails[0]->office_id;
             }
-            
+
             return response()->json([
                 'permission' => $permission,
                 'office_id'=> $office_id,
@@ -364,5 +363,5 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-    
+
 }

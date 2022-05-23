@@ -16,7 +16,7 @@ use PHPJasper\PHPJasper;
 trait PdfTrait {
     use ConverterTrait;
 
-    private $programDataSet= [];
+    private $vpProgramDataSet= [];
 
     public function checkDirectories()
     {
@@ -201,62 +201,24 @@ trait PdfTrait {
             'storage_path_public' => storage_path('app/public'),
         ];
 
-        $this->checkDirectories();
-
-        $extension = 'pdf' ;
-        $input = storage_path('app/public') . '/raw/aapcr.jasper';
-
-        if(!$isUnpublish) {
-            $filename =  $documentName  . "_". date("Ymd");
-            $output = base_path('/public/forms/' . $filename);
-        } else{
-            $filename =  "AAPCR_". $id . "_". time();
-            $output = storage_path('app/public/uploads/published/' . $filename);
-        }
-
-        $jsonArry = array('data' => ['main' => $data, 'programsDataSet' => $programsDataSet]);
-        $jsonTmpfilePath = storage_path('app/public/json/' . $filename . '.json');
-        $jsonTmpfile = fopen($jsonTmpfilePath, 'w');
-        fwrite($jsonTmpfile, json_encode($jsonArry));
-        fclose($jsonTmpfile);
-        $datafile = $jsonTmpfilePath;
-
-        $options = [
-            'format' => ['pdf'],
+        $pdfData = [
+            'documentName' => $documentName,
+            'isUnpublish' => $isUnpublish,
+            'form' => 'aapcr',
+            'id' => $id,
+            'jsonArrayData' => ['main' => $data, 'programsDataSet' => $programsDataSet],
             'params' => $params,
-            'locale' => 'en',
-            'db_connection' => [
-                'driver' => 'json',
-                'data_file' => $datafile,
-                'json_query' => 'data'
-            ]
         ];
 
-        $jasper = new PHPJasper();
+        $file = $this->renderPDFFile($pdfData);
 
-        $jasper->compile(storage_path('app/public') . '/raw/aapcr.jrxml')->execute();
-
-        $jasper->process(
-            $input,
-            $output,
-            $options
-        )->execute();
-
-
-        $file = $output .'.'.$extension ;
-
-        if (!file_exists($file)) {
-            abort(404);
-        }else if($isUnpublish) {
-            return $filename .'.'.$extension;
-        }
-
-        return response()->download($file)->deleteFileAfterSend();
+        if(!$isUnpublish) {
+            return response()->download($file)->deleteFileAfterSend();
+        } else { return $file; }
     }
 
     // VP's OPCR
-
-    public function viewVpOpcrPdf($id)
+    public function viewVpOpcrPdf($id, $isUnpublish=0)
     {
         $vpopcr = VpOpcr::find($id);
 
@@ -357,10 +319,10 @@ trait PdfTrait {
 
                     $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
 
-                    array_push($parentIds, array(
+                    $parentIds[] = [
                         'id' => $parentDetails->id,
                         'index' => $detail->category_id
-                    ));
+                    ];
                 } else {
                     foreach($dataSource as $key => $source) {
                         if($source['id'] === $parentDetails->id && $detail->category_id == $source['categoryId']) {
@@ -383,10 +345,10 @@ trait PdfTrait {
 
                 $dataSource[] = $data;
 
-                array_push($parentIds, array(
+                $parentIds[] = array(
                     'id' => $detail->id,
                     'index' => $detail->category_id
-                ));
+                );
             }
         }
 
@@ -409,15 +371,22 @@ trait PdfTrait {
             'approvingPosition' => $signatory['approvedByPosition'],
             'assessedBy' => 'NAME:',
             'assessedByPosition' => 'PMT-PMG Member/Secretariat',
-            'programsDataSet' => $this->programDataSet
         );
 
-        $jasperReport = new Jasperreport();
-        $jasperReport->showReport('vpopcr', $params, $dataSource, 'PDF', $documentName);
+        $pdfData = [
+            'documentName' => $documentName,
+            'isUnpublish' => $isUnpublish,
+            'form' => 'vpopcr',
+            'id' => $id,
+            'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
+            'params' => $params,
+        ];
 
-        $pdf = public_path('forms/'.$documentName.".pdf");
+        $file = $this->renderPDFFile($pdfData);
 
-        return response()->download($pdf);
+        if(!$isUnpublish) {
+            return response()->download($file)->deleteFileAfterSend();
+        }else { return $file; }
     }
 
     public function getVpOpcrPdfDetails($detail, $children)
@@ -426,15 +395,7 @@ trait PdfTrait {
 
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-        $program = NULL;
-
-        if($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL) {
-            $program = strtoupper($detail->program->name);
-        }else if($detail->category_id === 'support_functions'){
-            $program = $detail->program->name;
-        }
-
-        $subCategory = ($detail->sub_category_id ? $detail->subCategory->name : NULL);
+        $program = $detail->program->name;
 
         $measures = '' ;
 
@@ -452,11 +413,13 @@ trait PdfTrait {
 
         $data = array(
             'id' => $detail->id,
-            'categoryId' => $detail->category_id,
+            'category_id' => $detail->category_id,
+            'category_order' => $detail->category->order,
             'function' => $function,
             'program' => $program,
-            'subCategory' => $subCategory,
-            'piName' => $detail->pi_name,
+            'subCategory' => $detail->sub_category_id ? $detail->subCategory->name : NULL,
+            'parentSubCategory' => $detail->sub_category_id ? $detail->subCategory->parent_id : NULL,
+            'pi_name' => $detail->pi_name,
             'target' => $detail->target,
             'measures' => $measures ? implode(", ", $measures) : '',
             'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
@@ -481,19 +444,20 @@ trait PdfTrait {
 
         if(count($children)){
             $data['children'][] = $children;
+        }else {
+            $data['children'] = null;
         }
 
-        if($detail->category_id === 'support_functions' || ($detail->category_id === 'core_functions' && $detail->sub_category_id !== NULL)){
+        if($detail->category->order != 1 || ($detail->category->order === 1 && $detail->sub_category_id !== NULL)){
 
             $ifSaved = $this->array_any(function($x, $compare){
                 return $x['programName'] === ucwords($compare['progName']);
-            }, $this->programDataSet, ['progName' => strtolower($program)]);
+            }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
 
             if(!$ifSaved) {
-
                 $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-                $this->programDataSet[] = array(
+                $this->vpProgramDataSet[] = array(
                     'categoryName' => $categoryName,
                     'categoryPercentage' => $detail->category->percentage,
                     'programName' => ucwords($detail->program->name),
@@ -601,7 +565,7 @@ trait PdfTrait {
         $measures = array();
 
         foreach($details as $PIMeasure) {
-            array_push($measures, $PIMeasure->name);
+            $measures[] = $PIMeasure->name;
         }
 
         return $measures;
@@ -627,12 +591,68 @@ trait PdfTrait {
             }
 
             //if($getOffice['office_type_id'] === 'implementing') {
-            array_push($allOffices[$getOffice->field->code], $officeName);
+            $allOffices[$getOffice->field->code][] = $officeName;
             /*}else{
                 array_push($allOffices['supporting'], $officeName);
             }*/
         }
 
         return $allOffices;
+    }
+
+    public function renderPDFFile($pdfData=[])
+    {
+        extract($pdfData);
+
+        $this->checkDirectories();
+
+        $extension = 'pdf' ;
+        $input = public_path() . '/raw/' . $form . '.jasper';
+
+        if(!$isUnpublish) {
+            $filename =  $documentName  . "_". date("Ymd");
+            $output = base_path('/public/forms/' . $filename);
+        } else{
+            $filename =  strtoupper($form) . "_". $id . "_". time();
+            $output = storage_path('app/public/uploads/published/' . $filename);
+        }
+
+        $jsonArry = array('data' => $jsonArrayData);
+        $jsonTmpfilePath = storage_path('app/public/json/' . $filename . '.json');
+        $jsonTmpfile = fopen($jsonTmpfilePath, 'w');
+        fwrite($jsonTmpfile, json_encode($jsonArry));
+        fclose($jsonTmpfile);
+        $datafile = $jsonTmpfilePath;
+
+        $options = [
+            'format' => ['pdf'],
+            'params' => $params,
+            'locale' => 'en',
+            'db_connection' => [
+                'driver' => 'json',
+                'data_file' => $datafile,
+                'json_query' => 'data'
+            ]
+        ];
+
+        $jasper = new PHPJasper();
+
+        $jasper->compile(public_path() . '/raw/' . $form . '.jrxml')->execute();
+
+        $jasper->process(
+            $input,
+            $output,
+            $options
+        )->execute();
+
+        $file = $output .'.'.$extension ;
+
+        if (!file_exists($file)) {
+            abort(404);
+        }else if($isUnpublish) {
+            $file = $filename .'.'.$extension;
+        }
+
+        return $file;
     }
 }
