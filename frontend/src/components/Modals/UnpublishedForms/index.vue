@@ -62,7 +62,7 @@ export default defineComponent({
     watch(() => [props.modalState, props.formDetails], ([visible, details]) => {
       isVisible.value = visible
       documentName.value = details.document_name || details.office_name || null
-      list.value = details.status.filter(i => i.status === 'verified') || []
+      list.value = typeof details.status !== 'undefined' ? details.status.filter(i => i.status === 'verified') : []
     })
 
     const onClose = () => {

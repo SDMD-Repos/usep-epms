@@ -13,3 +13,4 @@ yarn-error.log
 .gitignore
 /public/forms/*
 /public/uploads/*
+/public/raw/*.jasper
