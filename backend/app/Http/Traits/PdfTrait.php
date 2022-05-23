@@ -10,12 +10,38 @@ use App\Program;
 use App\Signatory;
 use App\VpOpcr;
 use App\VpOpcrDetailOffice;
+use Illuminate\Support\Facades\Storage;
 use PHPJasper\PHPJasper;
 
 trait PdfTrait {
     use ConverterTrait;
 
     private $programDataSet= [];
+
+    public function checkDirectories()
+    {
+        $jsonPath = public_path('storage/json');
+        $rawPath = public_path('storage/raw');
+        $uploadsPath = public_path('storage/uploads');
+
+        $uploadsPublishedPath = public_path('storage/uploads/published');
+
+        if(!Storage::exists($jsonPath)) {
+            Storage::makeDirectory('public/json', 0777, true, true);
+        }
+
+        if(!Storage::exists($rawPath)) {
+            Storage::makeDirectory('public/raw', 0777, true, true);
+        }
+
+        if(!Storage::exists($uploadsPath)) {
+            Storage::makeDirectory('public/uploads', 0777, true, true);
+        }
+
+        if(!Storage::exists($uploadsPublishedPath)) {
+            Storage::makeDirectory('public/uploads/published', 0777, true, true);
+        }
+    }
 
     // AAPCR
     public function viewAapcrPdf($id, $isUnpublish=0)
@@ -174,6 +200,8 @@ trait PdfTrait {
             'public_path' => $publicPath,
             'storage_path_public' => storage_path('app/public'),
         ];
+
+        $this->checkDirectories();
 
         $extension = 'pdf' ;
         $input = storage_path('app/public') . '/raw/aapcr.jasper';

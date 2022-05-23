@@ -158,7 +158,7 @@ export const getMenuData = [
   },
   {
     category: true,
-    title: 'System Admn',
+    title: 'System Admin',
   },
   {
     title: 'Access Rights',

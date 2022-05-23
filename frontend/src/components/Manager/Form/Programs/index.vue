@@ -12,7 +12,7 @@
                 ref="formRef"
                 :model="formState"
                 :rules="rules"
-                v-if="createProgramPermission">
+                v-if="isCreate">
           <div class="row">
             <div class="col-lg-6">
               <a-form-item ref="name" label="Program Name" name="name">
@@ -43,7 +43,7 @@
           </div>
         </a-form>
 
-        <programs-table :year="year" :is-delete="deleteProgramPermission"/>
+        <programs-table :year="year" :is-delete="isDelete"/>
         <previous-list :visible="isPreviousViewed" :year="year" :list="previousPrograms"
                        @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
     </div>
@@ -56,6 +56,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
+import { usePermission } from '@/services/functions/permission'
+
 
 export default defineComponent({
   name: "ProgramsManager",
@@ -69,9 +71,7 @@ export default defineComponent({
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
-    const createProgramPermission = computed(() => store.getters['system/permission'].createProgramPermission)
-    const deleteProgramPermission = computed(() => store.getters['system/permission'].deleteProgramPermission)
-
+  
     const formRef = ref()
     const isPreviousViewed = ref(false)
     const formState = reactive({
@@ -117,26 +117,29 @@ export default defineComponent({
       title: 'name',
       value: 'id',
     }
+   const permission ={
+                        listCreate: ["manager","m-form", "mf-programs","mfp-create"],
+                        listDelete: ["manager","m-form", "mf-programs","mfp-delete"],
+                      }
+     const {
+          // DATA
+        isCreate,isDelete,
+          // METHODS
+      } = usePermission(permission)
+
 
     // EVENTS
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousPrograms: [] })
 
       fetchData(year.value)
-      checkUserPermission()
+      // checkUserPermission()
     })
 
     // METHODS
-    const checkUserPermission = () => {
-      const programCreatePermissions = ["manager", "m-form", "mf-programs", "mfp-create"]
-      const programDeletePermissions = ["manager", "m-form", "mf-programs", "mfp-delete"]
-
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programCreatePermissions, name:'createProgramPermission'} })
-      store.dispatch('system/CHECK_PERMISSION', { payload: {permission: programDeletePermissions, name:'deleteProgramPermission'} })
-    }
-
+ 
     const fetchData = async selectedYear => {
-      if(createProgramPermission.value){
+      if(isCreate.value){
          resetForm()
       }
       await store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: selectedYear, isPrevious: false }})
@@ -203,8 +206,8 @@ export default defineComponent({
       loading,
       years,
       year,
-      createProgramPermission,
-      deleteProgramPermission,
+      isCreate,
+      isDelete,
       onSubmit,
       resetForm,
       fetchData,

@@ -1,7 +1,7 @@
 import { notification } from 'ant-design-vue'
 
 import * as aapcrForm from '@/services/api/mainForms/aapcr'
-import * as system from '@/services/api/system/permission'
+import { checkAllowForm } from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: aapcrForm.save,
@@ -10,7 +10,7 @@ const mapApiProviders = {
   unpublish: aapcrForm.unpublish,
   deactivate: aapcrForm.deactivate,
   update: aapcrForm.update,
-  permission: system.checkAllowAapcrForm,
+  permission: checkAllowForm,
 }
 
 export default {

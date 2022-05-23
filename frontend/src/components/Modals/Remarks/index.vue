@@ -9,8 +9,8 @@
 import { defineComponent, watch, ref } from "vue"
 
 export default defineComponent({
-  name: "UnpublishRemarks",
-  props: { isUnpublish: Boolean },
+  name: "UnpublishRemarksModal",
+  props: { isUnpublish: Boolean, formId: { type: String, default: '' } },
   emits: ['unpublish', 'close-remarks-modal'],
   setup(props, { emit }) {
     const isVisible = ref(false)
@@ -22,7 +22,7 @@ export default defineComponent({
 
     // METHODS
     const onOkClick = () => {
-      emit('unpublish', remarks)
+      emit('unpublish', { remarks: remarks.value, form: props.formId })
     }
 
     const onClose = () => {

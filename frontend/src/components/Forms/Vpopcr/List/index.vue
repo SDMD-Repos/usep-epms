@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div  v-if="hasVpopcrAccess || opcrvpFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
@@ -13,6 +13,7 @@
       :modal-state="isUploadedViewed" :form-details="viewedForm"
       @close-list-modal="closeListModal" @view-file="viewPdf" />
   </div>
+   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 
 <script>
@@ -21,12 +22,13 @@ import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 // import { useUploadFile } from '@/services/functions/upload'
-import { useViewPublishedFiles } from '@/services/functions/published'
+import { useViewPublishedFiles } from '@/services/functions/formListActions'
 import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
 import FormListTable from '@/components/Tables/Forms/List'
 // import UploadPublishModal from '@/components/Modals/UploadPublish'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import { message, notification } from "ant-design-vue"
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   components: {
@@ -46,7 +48,6 @@ export default defineComponent({
     // DATA
     let columns = ref([])
 
-
     /*const {
       // DATA
       isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
@@ -60,10 +61,16 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['opcrvp/form'].list)
     const loading = computed(() => store.getters['opcrvp/form'].loading)
+    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+
+    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
+
+    const { opcrvpFormPermission } = usePermission(permission)
 
     onMounted(() => {
       renderColumns()
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
+      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       store.dispatch('opcrvp/FETCH_LIST')
     })
 
@@ -96,6 +103,10 @@ export default defineComponent({
         officeId: data.office_id,
       }
       store.dispatch('opcrvp/PUBLISH', { payload: payload })
+    }
+
+    const unpublish = () => {
+
     }
 
     const viewPdf = data => {
@@ -191,9 +202,12 @@ export default defineComponent({
 
       isUploadedViewed,
       viewedForm,
+      hasVpopcrAccess,
+      opcrvpFormPermission,
 
       updateForm,
       publish,
+      unpublish,
       viewPdf,
       uploadFile,
       handleCancelUpload,

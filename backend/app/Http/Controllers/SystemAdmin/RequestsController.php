@@ -44,7 +44,7 @@ class RequestsController extends Controller
         ], 200);
     }
 
-    public function updateRequestStatus(UpdateRequestStatus $request)
+    public function updateFormRequestStatus(UpdateRequestStatus $request)
     {
         try {
             $validated = $request->validated();
@@ -64,7 +64,7 @@ class RequestsController extends Controller
             $request->updated_at = Carbon::now();
             $request->modify_id = $this->login_user->fullName;
 
-            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullName;
+            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
             $request->history .= $request->history . $history;
 

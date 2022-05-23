@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="hasVpopcrAccess || opcrvpFormPermission">
     <a-spin :spinning="loading" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -50,15 +50,17 @@
       </div>
     </a-spin>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, createVNode, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from "vue-router";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
 import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/opcrvp'
+import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 
 export default defineComponent({
@@ -82,10 +84,21 @@ export default defineComponent({
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear, years, allowEdit,
       // METHOD
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, resetFormFields,
     } = useFormOperations(props)
 
-    const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
+    // COMPUTED
+    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+    const accessOfficeId = computed(() => store.getters['opcrvp/form'].accessOfficeId)
+
+    let vpOfficesList =  computed(() => {
+      let res = store.getters['external/external'].vpOffices
+      if(hasVpopcrAccess.value){
+        res = store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )
+      }
+      return res
+    })
+
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['opcrvp/form'].loading
@@ -101,9 +114,14 @@ export default defineComponent({
       return tip
     })
 
+    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
+
+    const { opcrvpFormPermission } = usePermission(permission)
+
+    // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-
+      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
 
       if(vpOpcrId.value) {
@@ -112,6 +130,10 @@ export default defineComponent({
         onLoad()
       }
     })
+
+    onBeforeUnmount(() => {
+      resetFormFields()
+    });
 
     // METHODS
     const onLoad = async () => {
@@ -195,17 +217,25 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
+      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
+
+      let params = {
+        checkable: { allColleges: true, mains: false },
+        groups: { included: true, officeId: vpOffice.value },
+        isAcronym: true,
+        currentYear: year.value,
+      }
+      await store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 
     const getVpOpcrDetails = () => {
       store.commit('opcrvp/SET_STATE', { loading: true })
-      fetchFormDetails(vpOpcrId.value).then(response => {
+      fetchFormDetails(vpOpcrId.value).then(async response => {
         if(response.aapcrId) {
           allowEdit.value = true
 
-          onLoad()
-          initializeVPForm()
+          await onLoad()
 
           store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
 
@@ -215,6 +245,8 @@ export default defineComponent({
           targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = response.editMode
+
+          await initializeVPForm()
         }
         store.commit('opcrvp/SET_STATE', { loading: false })
       })
@@ -277,33 +309,17 @@ export default defineComponent({
     }
 
     return {
-      vpOffice,
-      allowEdit,
+      vpOffice, allowEdit,
 
-      vpOfficesList,
-      categories,
-      loading,
-      spinningTip,
+      vpOfficesList, categories, loading, spinningTip, hasVpopcrAccess,opcrvpFormPermission,
 
-      checkFormDetails,
-      validateForm,
+      checkFormDetails, validateForm,
 
       // useFormOperations
-      dataSource,
-      targetsBasisList,
-      counter,
-      deletedItems,
-      editMode,
-      isFinalized,
-      year,
-      cachedYear,
+      dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear,
       years,
 
-      updateDataSource,
-      addTargetsBasisItem,
-      updateSourceItem,
-      deleteSourceItem,
-      addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
     }
   },
 })

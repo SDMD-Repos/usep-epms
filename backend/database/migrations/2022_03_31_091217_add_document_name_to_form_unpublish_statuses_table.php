@@ -27,7 +27,7 @@ class AddDocumentNameToFormUnpublishStatusesTable extends Migration
             $table->string('file_name', 150)->nullable()->after('changed_by');
         });
 
-        DB::statement("ALTER TABLE form_unpublish_statuses CHANGE COLUMN status status ENUM('pending', 'verified', 'declined') NOT NULL");
+        DB::statement("ALTER TABLE form_unpublish_statuses CHANGE COLUMN status status ENUM('pending', 'verified', 'declined', 'cancelled') NOT NULL");
     }
 
     /**

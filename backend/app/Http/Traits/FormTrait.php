@@ -55,7 +55,6 @@ trait FormTrait {
             } else {
                 if(!array_key_exists('children', $office)){
                     $newOffice->vp_office_id = $office['pId'];
-
                     $office_name = $office['acronym'];
                 }else{
                     $office_name = $office['label'];
@@ -65,9 +64,22 @@ trait FormTrait {
                 $newOffice->office_name = $office_name;
             }
 
+            switch ($params['form']) {
+                case 'aapcr':
+                    $newOffice->cascade_to = $office['cascadeTo'];
+                    break;
+                case 'vpopcr':
+                    $cascadeTo = explode("-", $office['cascadeTo']);
+
+                    $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                    $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                    $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                    break;
+            }
+
+
             $newOffice->detail_id = $detailId;
             $newOffice->office_type_id = $fieldName;
-            $newOffice->cascade_to = $office['cascadeTo'];
             $newOffice->create_id = $this->login_user->pmaps_id;
             $newOffice->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -158,7 +170,19 @@ trait FormTrait {
 
                 $newOffice->detail_id = $detailId;
                 $newOffice->office_type_id = $type;
-                $newOffice->cascade_to = $office['cascadeTo'];
+
+                switch ($params['form']){
+                    case 'aapcr':
+                        $newOffice->cascade_to = $office['cascadeTo'];
+                        break;
+                    case 'vpopcr':
+                        $cascadeTo = explode("-", $office['cascadeTo']);
+
+                        $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                        $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                        $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                        break;
+                }
 
                 if(isset($office['isGroup']) && $office['isGroup']) {
                     $newOffice->is_group = true;
@@ -182,7 +206,7 @@ trait FormTrait {
                 if(!$newOffice->save()){
                     DB::rollBack();
                 }else{
-                    array_push($officeIds, $newOffice->id);
+                    $officeIds[] = $newOffice->id;
                 }
             }else{
                 $history = '';
@@ -193,14 +217,41 @@ trait FormTrait {
                     $history = "Selected " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
                 }else{
-                    $oldCascadeTo = $updatedOffice->cascade_to;
+                    switch ($params['form']) {
+                        case 'aapcr':
+                            $oldCascadeTo = $updatedOffice->cascade_to;
 
-                    $updatedOffice->cascade_to = $office['cascadeTo'];
+                            $updatedOffice->cascade_to = $office['cascadeTo'];
 
-                    if($updatedOffice->isDirty('cascade_to')) {
+                            if($updatedOffice->isDirty('cascade_to')) {
+                                $history = "Updated cascade_to from '".$oldCascadeTo."' to '".$office['cascadeTo']. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+                            break;
+                        case 'vpopcr':
+                            $oldCategoryId = $updatedOffice->category_id;
+                            $oldProgramId = $updatedOffice->program_id;
+                            $oldOtherProgramId = $updatedOffice->other_program_id;
 
-                        $history = "Updated cascade_to from '".$oldCascadeTo."' to '".$office['cascadeTo']. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            $cascadeTo = explode("-", $office['cascadeTo']);
+
+                            $updatedOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                            $updatedOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+                            $updatedOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+
+                            if($updatedOffice->isDirty('category_id')) {
+                                $history = "Updated category_id from '".$oldCategoryId."' to '".$updatedOffice->category_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+
+                            if($updatedOffice->isDirty('program_id')) {
+                                $history .= "Updated program_id from '".$oldProgramId."' to '".$updatedOffice->program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+
+                            if($updatedOffice->isDirty('other_program_id')) {
+                                $history .= "Updated other_program_id from '".$oldOtherProgramId."' to '".$updatedOffice->other_program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                            }
+                            break;
                     }
+
                 }
 
                 $updatedOffice->modify_id = $this->login_user->pmaps_id;
@@ -210,7 +261,7 @@ trait FormTrait {
                     DB::rollBack();
                 }
 
-                array_push($officeIds, $updatedOffice->id);
+                $officeIds[] = $updatedOffice->id;
             }
         }
 

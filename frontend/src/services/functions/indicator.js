@@ -84,7 +84,7 @@ const defaultAapcrFormData = {
   remarks: '',
 }
 
-const defaultOpcrVpFormData = {
+const defaultOpcrVpFormData = () => ({
   program: null,
   subCategory: null,
   name: '',
@@ -100,7 +100,7 @@ const defaultOpcrVpFormData = {
     supporting: [],
   },
   remarks: '',
-}
+})
 
 const defaultOpcrFormData = {
   program: null,
@@ -129,37 +129,35 @@ const defaultOpcrTemplateData = {
 }
 
 export const useDefaultFormData = props => {
-  const defaultData = ref({})
-  let rules
+  const { formId } = props
+  let rules, formData
 
-  switch (props.formId) {
+  switch (formId) {
     case 'aapcr':
-      defaultData.value = defaultAapcrFormData
+      formData = reactive({ ...defaultAapcrFormData })
       break
     case 'opcrvp':
-      defaultData.value = defaultOpcrVpFormData
+      formData = reactive(defaultOpcrVpFormData())
       break
     case 'opcr':
-      defaultData.value = defaultOpcrFormData
+      formData = reactive({ ...defaultOpcrFormData })
       break
     case 'opcrtemplate':
-      defaultData.value = defaultOpcrTemplateData
+      formData = reactive({ ...defaultOpcrTemplateData })
       break
   }
 
-  const formData = reactive(defaultData.value)
-
-  // VALIDATORS
+  // CUSTOM VALIDATORS
   let validateNonHeader = async (rule, value) => {
     if (!formData.isHeader) {
       if (value === '' || value === null || (Array.isArray(value) && !value.length) || typeof value === 'undefined') {
-        if((rule.field === 'implementing' && formData.options.implementing.length) || (rule.field === 'supporting' && formData.options.supporting.length)) {
+        if((rule.field === 'implementing' && formData.options.implementing.length)
+          || (rule.field === 'supporting' && formData.options.supporting.length)) {
           return Promise.reject('Please click the check icon to save the data')
         } else {
           if(rule.field === 'supporting') {
             return Promise.resolve()
           }
-
           return Promise.reject('This field is required')
         }
       } else {
@@ -170,7 +168,7 @@ export const useDefaultFormData = props => {
     }
   }
 
-  switch (props.formId) {
+  switch (formId) {
     case 'aapcr':
       rules = reactive({
         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
@@ -199,6 +197,29 @@ export const useDefaultFormData = props => {
           return Promise.resolve()
         }
       }
+
+      let validateOfficesForVP = async (rule, value) => {
+        if (!formData.isHeader) {
+          if(rule.field === 'options.implementing' || rule.field === 'options.supporting') {
+            if(!formData.implementing.length || !formData.supporting.length) {
+              if(value.length) {
+                return Promise.reject('Please click the check icon to save the data')
+              }else {
+                if(rule.field === 'options.supporting') {
+                  return Promise.resolve()
+                }
+
+                if(!formData.implementing.length) {
+                  return Promise.reject('This field is required')
+                }
+              }
+            }
+          }
+        } else {
+          return Promise.resolve()
+        }
+      }
+
       rules = reactive({
         program: [{ validator: programValidator, trigger: 'blur' }],
         name: [{ required: true, message: 'This field is required', trigger: 'blur' }],
@@ -206,11 +227,12 @@ export const useDefaultFormData = props => {
         measures: [{ validator: validateNonHeader, trigger: 'blur'}],
         targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
         implementing: [
-          { validator: validateNonHeader, trigger: 'blur'},
+          { validator: validateOfficesForVP, trigger: 'blur'},
           { type: 'array' },
         ],
+        cascadeTo: [{ validator: validateNonHeader, trigger: 'blur'}],
         supporting: [
-          { validator: validateNonHeader, trigger: 'blur'},
+          { validator: validateOfficesForVP, trigger: 'blur'},
           { type: 'array' },
         ],
       })
@@ -228,8 +250,10 @@ export const useDefaultFormData = props => {
   const resetFormAsHeader = () => {
     formData.target = ''
     formData.measures = []
-    switch (props.formId) {
+
+    switch (formId) {
       case 'aapcr':
+      case 'opcrvp':
         formData.budget = null
         formData.targetsBasis = ''
         formData.implementing = []
@@ -240,46 +264,42 @@ export const useDefaultFormData = props => {
         break
       case 'opcrtemplate':
     }
+  }
 
-
-
+  const resetVpOpcrForm = () => {
+    Object.assign(formData, defaultOpcrVpFormData())
   }
 
   const assignFormData = newData => {
-
     formData.subCategory = newData.subCategory
     formData.name = newData.name
     formData.isHeader = newData.isHeader
     formData.target = newData.target
     formData.measures = newData.measures
+    formData.budget = newData.budget
+    formData.targetsBasis = newData.targetsBasis
+    formData.implementing = newData.implementing
+    formData.supporting = newData.supporting
+    formData.remarks = newData.remarks
 
-    switch (props.formId) {
+    switch (formId) {
       case 'aapcr':
-        formData.budget = newData.budget
-        formData.targetsBasis = newData.targetsBasis
-        formData.implementing = newData.implementing
-        formData.supporting = newData.supporting
-        formData.remarks = newData.remarks
-        break
-      case 'opcrtemplate':
+        formData.cascadingLevel = newData.cascadingLevel
         break
       case 'opcrvp':
       case 'opcr':
-        formData.budget = newData.budget
-        formData.targetsBasis = newData.targetsBasis
-        formData.implementing = newData.implementing
-        formData.supporting = newData.supporting
-        formData.remarks = newData.remarks
         formData.program = newData.program
         break
+      case 'opcrtemplate':
+        break
     }
-
   }
 
   return {
     formData,
     rules,
 
+    resetVpOpcrForm,
     resetFormAsHeader,
     assignFormData,
   }
@@ -289,6 +309,8 @@ export const useDefaultFormData = props => {
 
 export const useFormOperations = props => {
   const store = useStore()
+
+  const { formId } = props
 
   const targetsBasisList = ref([])
   const counter = ref(0)
@@ -301,7 +323,7 @@ export const useFormOperations = props => {
   const year = ref(new Date().getFullYear())
   const cachedYear = ref(null)
 
-  const dataSource = computed(() => store.state[props.formId].dataSource )
+  const dataSource = computed(() => store.state[formId].dataSource )
 
   const years = computed(() => {
     const now = new Date().getFullYear() + 1
@@ -314,12 +336,12 @@ export const useFormOperations = props => {
   })
 
   const updateDataSource = async ({data, isNew}) => {
-    await store.dispatch(props.formId + '/UPDATE_DATA_SOURCE', { payload : { data, isNew }})
+    await store.dispatch(formId + '/UPDATE_DATA_SOURCE', { payload : { data, isNew }})
     await updateSourceCount(counter.value + 1)
   }
 
   const deleteSourceItem = key => {
-    store.dispatch(props.formId + '/DELETE_SOURCE_ITEM', { payload : { key }})
+    store.dispatch(formId + '/DELETE_SOURCE_ITEM', { payload : { key }})
   }
 
   const addTargetsBasisItem = data => {
@@ -333,11 +355,11 @@ export const useFormOperations = props => {
   const updateSourceItem = async data => {
     const { updateData, updateId } = data
     if(data.type === 'pi') {
-      await store.dispatch(props.formId + '/UPDATE_SOURCE_ITEM', { payload: { updateData, updateId }} )
+      await store.dispatch(formId + '/UPDATE_SOURCE_ITEM', { payload: { updateData, updateId }} )
       await updateChildren(data)
     } else {
       const { parentId } = data
-      await store.dispatch(props.formId + '/UPDATE_SOURCE_SUB_ITEM', { payload: { updateData, updateId, parentId }} )
+      await store.dispatch(formId + '/UPDATE_SOURCE_SUB_ITEM', { payload: { updateData, updateId, parentId }} )
     }
   }
 
@@ -347,14 +369,14 @@ export const useFormOperations = props => {
 
     if (typeof children !== 'undefined' && children.length) {
       children.forEach(i => {
-        if(props.formId === 'opcrvp') {
+        if(formId === 'opcrvp') {
           i.program = updateData.value.program
         }
 
         i.subCategory = updateData.value.subCategory
         if(!updateData.value.isHeader) {
           i.targetsBasis = updateData.value.targetsBasis
-          if(props.formId === 'aapcr') {
+          if(formId === 'aapcr') {
             i.cascadingLevel = updateData.value.cascadingLevel
           }
         }
@@ -366,24 +388,26 @@ export const useFormOperations = props => {
     deletedItems.value.push(id)
   }
 
+  const resetFormFields = () => {
+    store.commit(formId + '/SET_STATE', { dataSource: [] })
+    store.commit('external/SET_STATE', { officesAccountable: [] })
+
+    store.commit('formManager/SET_STATE', {
+      functions: [],
+      subCategories: [],
+      measures: [],
+      cascadingLevels: [],
+      programs: [],
+      formFields: [],
+    })
+  }
+
   return {
-    dataSource,
-    targetsBasisList,
-    counter,
-    deletedItems,
-    editMode,
-    isFinalized,
-    allowEdit,
-    year,
-    cachedYear,
+    dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear,
 
     years,
 
-    updateDataSource,
-    addTargetsBasisItem,
-    updateSourceCount,
-    deleteSourceItem,
-    updateSourceItem,
-    addDeletedItem,
+    updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
+    resetFormFields,
   }
 }

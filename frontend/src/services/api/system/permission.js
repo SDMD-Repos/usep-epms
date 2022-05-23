@@ -81,9 +81,9 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
-  export function checkAllowAapcrForm(pmaps_id,form_id) {
+  export function checkAllowForm(pmaps_id,form_id) {
     return apiClient
-      .get('/system/allow-aapcr-form/'+pmaps_id+'/'+form_id)
+      .get('/system/allow-form/'+pmaps_id+'/'+form_id)
       .then(response => {
         return response.data
       })

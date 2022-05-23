@@ -128,7 +128,7 @@ export default defineComponent({
             okText: 'Yes',
             cancelText: 'No',
             onOk() {
-              handleAddSub(key)
+              handleAddSub(newData)
             },
             onCancel() {},
           })
@@ -144,12 +144,12 @@ export default defineComponent({
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
         await resetFields()
-        await handleAddSub(parentDetails.key)
+        await handleAddSub(parentDetails)
       }
     }
 
-    const handleAddSub = key => {
-      const newData = dataSource.value.filter(item => key === item.key)[0]
+    const handleAddSub = record => {
+      const newData = dataSource.value.filter(item => record.key === item.key)[0]
       formData.subCategory = newData.subCategory
       if (!newData.isHeader) {
         formData.measures = newData.measures

@@ -61,7 +61,8 @@ Route::group([
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
 
-    Route::get('/get-all-spms-forms/{pmaps_id}', 'SettingController@getAllForms');
+    Route::get('/get-user-form-access/{pmaps_id}', 'SettingController@getUserFormAccess');
+    Route::get('/get-all-spms-forms', 'SettingController@getAllForms');
 
     Route::get('/get-all-signatory-types', 'SettingController@getAllSignatoryTypes');
 
@@ -77,7 +78,7 @@ Route::group([
 
     Route::get('/get-all-cascading-levels', 'SettingController@getAllCascadingLevels');
 
-    Route::get('/get-all-form-fields/{year}', 'SettingController@getAllFormFields');
+    Route::get('/get-all-form-fields/{year}/{formId}', 'SettingController@getAllFormFields');
     Route::post('/save-form-field-settings', 'SettingController@saveFormFieldSettings');
     Route::post('/update-form-field-settings/{id}', 'SettingController@updateFormFieldSettings');
 });
@@ -178,13 +179,13 @@ Route::group([
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
-    Route::get('/allow-aapcr-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowAapcrForm');
+    Route::get('/allow-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowForm');
 
     Route::group([
         'prefix' => 'requests'
     ], function() {
         Route::get('/get-all-unpublish/{status}', 'SystemAdmin\RequestsController@getAllUnpublishRequests');
-        Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateRequestStatus');
+        Route::post('/update-request-status', 'SystemAdmin\RequestsController@updateFormRequestStatus');
         Route::get('/view-unpublished-form/{id}', 'SystemAdmin\RequestsController@viewUnpublishedForm');
     });
 });
@@ -193,13 +194,13 @@ Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
 ], function() {
-    Route::get('/get-main-offices-children/{nodeStatus}', 'SettingController@getMainOfficesWithChildren');
+    Route::post('/get-main-offices-children', 'SettingController@getMainOfficesWithChildren');
     Route::get('/get-vp-offices-children', 'SettingController@getVpOfficeWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
-    Route::get('/get-offices-accountable/{nodeStatus}', 'SettingController@getOfficesAccountable');
+    Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');
 
     Route::get('/get-form-access-by-office/{id}', 'SystemAdmin\PermissionController@getFormAccessByOffice');
 });

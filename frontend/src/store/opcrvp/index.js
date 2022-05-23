@@ -1,6 +1,7 @@
 import { notification } from 'ant-design-vue'
 
 import * as opcrvpForm from '@/services/api/mainForms/opcrvp'
+import * as system from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: opcrvpForm.save,
@@ -9,6 +10,7 @@ const mapApiProviders = {
   unpublish: opcrvpForm.unpublish,
   deactivate: opcrvpForm.deactivate,
   update: opcrvpForm.update,
+  permission: system.checkAllowForm,
 }
 
 export default {
@@ -17,6 +19,8 @@ export default {
     loading: false,
     list: [],
     dataSource: [],
+    hasVpopcrAccess: false,
+    accessOfficeId : 0,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -176,14 +180,14 @@ export default {
     UPDATE_SOURCE_ITEM({ commit }, { payload }) {
       commit('UPDATE_STATE_ITEM', {
         type: 'dataSource',
-        details: payload.updateData.value,
+        details: payload.updateData,
         index: payload.updateId,
       })
     },
     UPDATE_SOURCE_SUB_ITEM({ commit }, { payload }) {
       commit('UPDATE_STATE_SUB_ITEM', {
         type: 'dataSource',
-        details: payload.updateData.value,
+        details: payload.updateData,
         index: payload.updateId,
         parent: payload.parentId,
       })
@@ -192,6 +196,26 @@ export default {
       commit('DELETE_STATE_ITEM', {
         type: 'dataSource',
         key: payload.key,
+      })
+    },
+    CHECK_VPOPCR_PERMISSION({ commit }, { payload }) {
+      const { pmaps_id,form_id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const permission = mapApiProviders.permission
+      permission(pmaps_id,form_id).then(response => {
+        if (response) {
+          const { permission,office_id } = response
+
+          commit('SET_STATE', {
+            hasVpopcrAccess: permission,
+            accessOfficeId : office_id,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
       })
     },
   },

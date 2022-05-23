@@ -4,23 +4,22 @@
                      :item-source="dataSource" :allow-edit="allowEdit"
                      @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"/>
 
-    <opcr-vp-form :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :current-year="year"
-                  :targets-basis-list="targetsBasisList" :categories="categories"  :validate="validate"
-                  :validate-infos="validateInfos"
+    <opcr-vp-form :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :rules="rules" :current-year="year"
+                  :targets-basis-list="targetsBasisList"
                   @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
-                  @close-drawer="closeDrawer"/>
+                  @close-drawer="closeDrawer" />
   </div>
 </template>
 <script>
-import { defineComponent, computed, ref, reactive, watch, onMounted, createVNode } from "vue"
-import { Form, Modal } from "ant-design-vue"
+import { defineComponent, ref, reactive, watch, onMounted, createVNode, computed } from "vue"
+import { useStore } from 'vuex'
+import { cloneDeep } from 'lodash-es'
+import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
 import { formTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
-import OpcrVpForm from '@/components/Drawer/Forms/OpcrVp'
-
-const useForm = Form.useForm
+import OpcrVpForm from '@/components/Drawer/Forms/VpOpcr'
 
 export default defineComponent({
   name: 'OpcrVpItems',
@@ -37,6 +36,8 @@ export default defineComponent({
   },
   emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item'],
   setup(props, { emit }) {
+    const store = useStore()
+
     // DATA
     const modifiedTableColumns = ref()
     const count = ref(0)
@@ -50,18 +51,16 @@ export default defineComponent({
 
     const parameters = reactive({...props, config: computedConfig })
 
-    const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
+    const { formData, rules, resetVpOpcrForm, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
 
     // EVENTS
-    onMounted(() => {
+    onMounted( () => {
       modifyColumns()
     })
 
     watch(() => props.counter, counter => {
       count.value = counter
     })
-
-    const { resetFields, validate, validateInfos } = useForm(formData, rules)
 
     // METHODS
     const modifyColumns = () => {
@@ -93,9 +92,11 @@ export default defineComponent({
       return isExists
     }
 
-    const addTableItem = async data => {
-      if (!data.value.isHeader) {
-        const { targetsBasis } = data.value
+    const addTableItem = async params => {
+      const { data } = params
+
+      if (!data.isHeader) {
+        const { targetsBasis } = data
         if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
           await emit('add-targets-basis-item', targetsBasis)
         }
@@ -107,23 +108,24 @@ export default defineComponent({
         id: key,
         type: drawerConfig.value.type,
         category: props.functionId,
-        subCategory: data.value.subCategory,
-        program: data.value.program,
-        name: data.value.name,
-        isHeader: data.value.isHeader,
-        target: data.value.target,
-        measures: data.value.measures,
-        budget: data.value.budget,
-        targetsBasis: data.value.targetsBasis,
-        implementing: data.value.implementing,
-        supporting: data.value.supporting,
-        remarks: data.value.remarks,
+        subCategory: data.subCategory,
+        program: typeof data.program !== 'undefined' ? data.program : null,
+        name: data.name,
+        isHeader: data.isHeader,
+        target: typeof data.target !== 'undefined' ? data.target : '',
+        measures: typeof data.measures !== 'undefined' ? data.measures : [],
+        budget: typeof data.budget !== 'undefined' ? data.budget : null,
+        targetsBasis: typeof data.targetsBasis !== 'undefined' ? data.targetsBasis : '',
+        implementing: typeof data.implementing !== 'undefined' ? data.implementing : [],
+        supporting: typeof data.supporting != 'undefined' ? data.supporting : [],
+        remarks: typeof data.remarks != 'undefined' ? data.remarks : '',
         deleted: 0,
       }
 
       if (drawerConfig.value.type === 'pi') {
         await emit('update-data-source', { data: newData, isNew: true })
-        await resetFields()
+        await params.resetFields
+        await resetOfficesFields()
         if (newData.isHeader) {
           Modal.confirm({
             title: () => 'Do you want to add a sub PI?',
@@ -132,7 +134,7 @@ export default defineComponent({
             okText: 'Yes',
             cancelText: 'No',
             onOk() {
-              handleAddSub(key)
+              handleAddSub(newData)
             },
             onCancel() {},
           })
@@ -147,16 +149,18 @@ export default defineComponent({
         }
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
-        await resetFields()
-        await handleAddSub(parentDetails.key)
+        await params.resetFields
+        await resetOfficesFields()
+        await handleAddSub(parentDetails)
       }
     }
 
-    const handleAddSub = key => {
-      const newData = dataSource.value.filter(item => key === item.key)[0]
+    const handleAddSub = record => {
+      const newData = dataSource.value.filter(item => { return record.key === item.key && record.category === item.category } )[0]
       formData.subCategory = newData.subCategory
       formData.program = newData.program
       if (!newData.isHeader) {
+
         formData.measures = newData.measures
         formData.targetsBasis = newData.targetsBasis
         formData.implementing = newData.implementing
@@ -168,25 +172,25 @@ export default defineComponent({
     const editItem = data => {
       let editData = null, updateId = null, parentDetails = undefined
       if (data.type === 'pi') {
-        editData = dataSource.value.filter(item => item.key === data.key)[0]
+        editData = cloneDeep(dataSource.value.filter(item => item.key === data.key)[0])
         updateId = dataSource.value.findIndex(record => record.key === data.key)
       } else {
         let shouldBreak = false
 
         dataSource.value.forEach(item => {
           if (typeof item.children !== 'undefined') {
-            const temp = item.children.filter(i => i.key === data.key)
+            const child = item.children.filter(i => i.key === data.key)
             if (shouldBreak) {
               return
             }
-            if (temp.length) {
-              editData = temp[0]
+            if (child.length) {
+              editData = cloneDeep(child[0])
               shouldBreak = true
               updateId = item.children.findIndex(i => i.key === data.key)
               parentDetails = { ...item }
               return
             }
-            console.log(temp)
+            console.log(child)
           }
         })
       }
@@ -198,7 +202,7 @@ export default defineComponent({
     const updateTableItem = async data => {
       if (drawerConfig.value.type === 'pi') {
         if (!data.updateData.isHeader) {
-          const { targetsBasis } = data.updateData.value
+          const { targetsBasis } = data.updateData
           if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
             await emit('add-targets-basis-item', targetsBasis)
           }
@@ -206,13 +210,14 @@ export default defineComponent({
       }
 
       const { parentDetails } = drawerConfig.value
+
       await emit('update-source-item', {
         updateData: data.updateData,
         updateId: data.updateId,
         type: drawerConfig.value.type,
         parentId: ((typeof parentDetails !== 'undefined') ? parentDetails.key : undefined),
       })
-      await closeDrawer(0)
+      await closeDrawer({ isNewIndicator: 0, callback: data.resetFields })
     }
 
     const deleteItem = data => {
@@ -247,32 +252,31 @@ export default defineComponent({
       }
     }
 
-    const closeDrawer = async isNewIndicator => {
+    const closeDrawer = async params => {
+      const { isNewIndicator } = params
       await resetDrawerSettings(isNewIndicator)
-      await resetFields()
+      await params.callback
+      await resetVpOpcrForm()
+      await resetOfficesFields()
+    }
+
+    const resetOfficesFields = () => {
+      formData.implementing = []
+      formData.supporting = []
     }
 
     return {
       modifiedTableColumns,
 
-      closeDrawer,
-      addTableItem,
-      handleAddSub,
-      editItem,
-      updateTableItem,
-      deleteItem,
+      closeDrawer, addTableItem, handleAddSub, editItem, updateTableItem, deleteItem,
 
       // useDrawerSettings
-      drawerConfig,
-      openDrawer,
+      drawerConfig, openDrawer,
 
       // useDefaultFormData
-      formData,
-      resetFormAsHeader,
+      formData, resetFormAsHeader,
 
-      validateInfos,
-      validate,
-      dataSource,
+      rules, dataSource,
     }
   },
 })

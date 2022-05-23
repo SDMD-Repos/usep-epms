@@ -43,10 +43,20 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
+
+      const params = {
+        id: payload.id,
+        status: payload.status,
+        origin: payload.origin,
+      }
+
       const updateRequestStatus = mapApiProviders.updateRequestStatus
-      updateRequestStatus(payload).then(response => {
+      updateRequestStatus(params).then(response => {
         if (response) {
-          dispatch('FETCH_UNPUBLISH_LIST', { payload: { status: 'pending' }})
+          const { callback } = payload
+          
+          dispatch(callback.dispatch, callback.payload, { root: true })
+
           notification.success({
             message: 'Success',
             description: response,

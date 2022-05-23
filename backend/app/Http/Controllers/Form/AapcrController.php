@@ -143,6 +143,7 @@ class AapcrController extends Controller
 
             foreach($formFields as $formField) {
                 $this->saveOffices([
+                    'form' => 'aapcr',
                     'model' => $officeModel,
                     'detailId' => $detail->id,
                     'offices' => $values[$formField->code],
@@ -285,7 +286,7 @@ class AapcrController extends Controller
             $budget->categoryBudget = $programBudget->budget;
             $budget->mainCategory = $mainCategory;
 
-            array_push($programsSummary, $budget);
+            $programsSummary[] = $budget;
         }
         # end
 
@@ -295,7 +296,7 @@ class AapcrController extends Controller
 
         # Loop through AAPCR details
         foreach($aapcr->detailParents as $detail) {
-            $offices = $this->splitPIOffices($detail->offices);
+            $offices = $this->splitPIOffices($detail->offices, ['origin' => 'aapcr'] );
 
             $implementing = count($offices) ? $offices['implementing'] : [];
 
@@ -306,7 +307,7 @@ class AapcrController extends Controller
             if(count($detail->subDetails)) {
                 foreach($detail->subDetails as $subPI){
 
-                    $subPIOffices = $this->splitPIOffices($subPI->offices);
+                    $subPIOffices = $this->splitPIOffices($subPI->offices, ['origin' => 'aapcr']);
 
                     $subImplementing = $subPIOffices['implementing'];
 
@@ -334,7 +335,7 @@ class AapcrController extends Controller
                         'remarks' => $subPI->other_remarks,
                     );
 
-                    array_push($subs, $subItem);
+                    $subs[] = $subItem;
 
                 }
             }
@@ -366,7 +367,7 @@ class AapcrController extends Controller
                     $item['children'] = $subs;
                 }
 
-                array_push($dataSource, $item);
+                $dataSource[] = $item;
             }
         }
         # end AAPCR details loop
@@ -554,6 +555,7 @@ class AapcrController extends Controller
 
                 foreach($formFields as $formField) {
                     $this->updateOffices([
+                        'form' => 'aapcr',
                         'model' => $officeModel,
                         'detailId' => $data['id'],
                         'offices' => $data[$formField->code],

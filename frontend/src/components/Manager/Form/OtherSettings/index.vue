@@ -10,9 +10,9 @@
       </a-select>
 
       <div class="mt-5">
-        <fields-table :year="year" :is-create="createFieldPermission"  @handle-save="handleSave"/>
+        <functions-table :year="year" :is-create="isCreate" @handle-save="updateFunctionProgram" />
         <br />
-        <functions-table :year="year" :is-create="createFieldPermission" @handle-save="updateFunctionProgram" />
+        <fields-table :year="year" :is-create="isCreate" @handle-save="handleSave"/>
       </div>
     </a-spin>
   </div>
@@ -22,6 +22,7 @@ import { defineComponent, ref, onMounted, computed } from "vue"
 import { useStore } from "vuex";
 import FieldsTable from './partials/fieldsTable'
 import functionsTable from './partials/functionsTable'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: 'OtherSettingsManager',
@@ -45,25 +46,22 @@ export default defineComponent({
       return lists
     })
 
-    const createFieldPermission = computed(() => store.getters['system/permission'].createFieldPermission)
+    const permission ={ listCreate: ["manager", "m-form", "mf-fields" ] }
 
-    // EVEMTS
+    const { isCreate } = usePermission(permission)
+
+    // EVENTS
     onMounted(() => {
       fetchSettings(year.value)
-
-      const fieldPermissions = ["manager", "m-form", "mf-fields" ]
-
-      store.dispatch('system/CHECK_PERMISSION', { payload: { permission: fieldPermissions, name:'createFieldPermission'} })
     })
 
     //METHODS
     const fetchSettings = value => {
-      store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: value }})
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: value }})
     }
 
     const handleSave = data => {
-      const { code, id } = data
+      const { code, id, formId } = data
 
       switch (code) {
         case 'implementing':
@@ -72,6 +70,7 @@ export default defineComponent({
             year: year.value,
             fieldId: id,
             setting: data.settings.settings,
+            formId: formId,
           }
 
           if(!data.isUpdate) {
@@ -97,7 +96,7 @@ export default defineComponent({
 
       loading,
       years,
-      createFieldPermission,
+      isCreate,
 
       fetchSettings,
       handleSave,

@@ -87,7 +87,7 @@
         <EditFilled @click="handleEdit(record)" v-if="allowedAction(record)"/>
         <a-divider type="vertical" v-if="allowedAction(record)" />
         <template v-if="record.type === 'pi'">
-          <PlusCircleFilled @click="handleAddSub(record.key)"/>
+          <PlusCircleFilled @click="handleAddSub(record)"/>
           <a-divider type="vertical" v-if="allowedAction(record)"/>
         </template>
         <a-popconfirm
@@ -168,8 +168,8 @@ export default defineComponent({
       emit('edit-item',data)
     }
 
-    const handleAddSub = key => {
-      emit('add-sub-item', key)
+    const handleAddSub = data => {
+      emit('add-sub-item', data)
     }
 
     const handleDelete = data => {

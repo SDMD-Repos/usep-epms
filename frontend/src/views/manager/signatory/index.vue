@@ -1,7 +1,7 @@
 <template>
-  <a-card v-if="formList.length">
+  <a-card v-if="userForms.length">
     <a-tabs v-model:activeKey="activeKey" :animated="false">
-      <template v-for="(form, index) in formList" :key="index">
+      <template v-for="(form, index) in userForms" :key="index">
         <a-tab-pane :tab="form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.form.id" /></a-tab-pane>
       </template>
     </a-tabs>
@@ -21,19 +21,18 @@ export default defineComponent({
     const store = useStore()
 
     // COMPUTED
-    const formList = computed(() => store.getters['formManager/manager'].forms)
+    const userForms = computed(() => store.getters['formManager/manager'].userFormAccess)
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_ALL_FORMS',{payload: {
-                                                              pmaps_id: store.state.user.pmapsId,
-                                                            },
-                                                    })
+      store.dispatch('formManager/FETCH_USER_FORM_ACCESS', {
+        payload: { pmapsId: store.state.user.pmapsId },
+      })
     })
 
     return {
       activeKey: ref(0),
-      formList,
+      userForms,
     }
   },
 })

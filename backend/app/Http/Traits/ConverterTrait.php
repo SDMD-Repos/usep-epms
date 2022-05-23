@@ -96,12 +96,21 @@ trait ConverterTrait {
 
     }
 
-    public function splitPIOffices($data, $splitCollege=0)
+    public function splitPIOffices($data, $conditions=[])
     {
         $offices = array();
 
-        foreach($data as $datum) {
+        $officeList = $data;
 
+        if(isset($conditions['origin'])) {
+            switch ($conditions['origin']) {
+                case 'vpopcr':
+                    $officeList = $data->offices;
+                    break;
+            }
+        }
+
+        foreach($officeList as $datum) {
             $officeType = $datum->field->code;
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
@@ -127,10 +136,27 @@ trait ConverterTrait {
                 $ipcrPeriod = $datum->ipcrPeriod;
             }*/
 
+            if(isset($conditions['origin'])) {
+                switch ($conditions['origin']) {
+                    case 'vpopcr-view':
+                        $cascadeTo = $datum->category_id;
+
+                        if($datum->program_id) {
+                            $cascadeTo = $datum->program->category_id . '-' . $datum->program_id;
+                        }else if($datum->other_program_id) {
+                            $cascadeTo = $datum->otherProgram->category_id . '-' . $datum->other_program_id . '-opcr';
+                        }
+                        break;
+                    default:
+                        $cascadeTo = $datum->cascade_to;
+                        break;
+                }
+            }
+
             $offices[$officeType][$counter] = array(
                 'label' => $officeName,
                 'value' => $officeId,
-                'cascadeTo' => (string)$datum->cascade_to,
+                'cascadeTo' => $cascadeTo,
 //                'ipcrPeriod' => $ipcrPeriod
             );
 
