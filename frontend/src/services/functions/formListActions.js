@@ -14,6 +14,7 @@ export const useUnpublish = () => {
     unpublishedData.value = {
       id: data.id,
       documentName: data.document_name,
+      officeName: data.office_name,
     }
   }
 
@@ -23,13 +24,12 @@ export const useUnpublish = () => {
 
   const unpublish = params => {
     const { form, remarks } = params
-
-    const data = {
+    let data = {
       id: unpublishedData.value.id,
       remarks: remarks,
       documentName: unpublishedData.value.documentName,
+      officeName: unpublishedData.value.officeName,
     }
-
     store.dispatch(form + '/UNPUBLISH', { payload: data }).then(() => {
       isUnpublish.value = !isUnpublish.value
       unpublishedData.value = null

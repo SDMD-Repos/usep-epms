@@ -123,6 +123,7 @@ Route::group([
         Route::post('/update/{id}', 'Form\VpopcrController@update');
         Route::get('/viewUploadedFile/{id}', 'Form\VpopcrController@viewUploadedFile');
         Route::post('/update-file', 'Form\VpopcrController@updateFile');
+        Route::get('/viewPdf/{id}', 'VpopcrController@viewOpcrVpPdf');
     });
 
     # OPCR & CPCR Form Controller routes

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Form;
 use App\Aapcr;
 use App\AapcrDetail;
 use App\FormField;
+use App\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
+use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateVpOpcr;
 use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
@@ -395,35 +397,37 @@ class VpopcrController extends Controller
         }
     }
 
-    public function unpublish(UploadPdfFile $request)
+    public function unpublish(UnpublishForm $request)
     {
         try {
-            DB::beginTransaction();
-
             $validated = $request->validated();
 
-            $files = $validated['files'];
+            $remarks = $validated['remarks'];
             $id = $validated['id'];
+            $officeName = $validated['officeName'];
 
-            $vpopcr = VpOpcr::find($id);
+            DB::beginTransaction();
 
-            $vpopcr->published_date = NULL;
-            $vpopcr->updated_at = Carbon::now();
-            $vpopcr->modify_id = $this->login_user->pmaps_id;
-            $vpopcr->history = $vpopcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $unpublished = new FormUnpublishStatus();
 
-            if($vpopcr->save()) {
-                $model = new VpOpcrFile();
+            $unpublished->form_type = 'vpopcr';
+            $unpublished->form_id = $id;
+            $unpublished->document_name = $officeName;
+            $unpublished->remarks = $remarks;
+            $unpublished->status = 'pending';
+            $unpublished->requested_date = Carbon::now();
+            $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->create_id = $this->login_user->pmaps_id;
+            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-                $this->uploadFiles($model, $id, $files);
-            }else {
+            if(!$unpublished->save()) {
                 DB::rollBack();
             }
 
             DB::commit();
 
-            return response()->json('VP\'s OPCR was unpublished successfully', 200);
-        } catch(\Exception $e){
+            return response()->json('OPCR VP was unpublished successfully', 200);
+        }catch(\Exception $e){
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -433,6 +437,45 @@ class VpopcrController extends Controller
             return response()->json($e->getMessage(), $status);
         }
     }
+
+//    public function unpublish(UploadPdfFile $request)
+//    {
+//        try {
+//            DB::beginTransaction();
+//
+//            $validated = $request->validated();
+//
+//            $files = $validated['files'];
+//            $id = $validated['id'];
+//
+//            $vpopcr = VpOpcr::find($id);
+//
+//            $vpopcr->published_date = NULL;
+//            $vpopcr->updated_at = Carbon::now();
+//            $vpopcr->modify_id = $this->login_user->pmaps_id;
+//            $vpopcr->history = $vpopcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+//
+//            if($vpopcr->save()) {
+//                $model = new VpOpcrFile();
+//
+//                $this->uploadFiles($model, $id, $files);
+//            }else {
+//                DB::rollBack();
+//            }
+//
+//            DB::commit();
+//
+//            return response()->json('VP\'s OPCR was unpublished successfully', 200);
+//        } catch(\Exception $e){
+//            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+//                $status = $e->getCode();
+//            } else {
+//                $status = 400;
+//            }
+//
+//            return response()->json($e->getMessage(), $status);
+//        }
+//    }
 
     public function deactivate(Request $request)
     {
