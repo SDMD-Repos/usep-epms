@@ -185,7 +185,7 @@ trait PdfTrait {
 
         $params = [
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
-            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinal' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'totalBudget' => number_format($totalBudget, 0),
             'year' => $aapcr->year,
             'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -357,7 +357,7 @@ trait PdfTrait {
         $params = array(
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
             'public_path' => $publicPath,
-            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinalImage' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'year' => $vpopcr->year,
             'vpOfficeName' => $vpopcr->office_name,
             'preparedBy' => strtoupper($signatory['preparedBy']),
