@@ -134,9 +134,9 @@
 	<field name="function" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
 	<field name="subCategory" class="java.lang.String"/>
-	<field name="parentSubCategory" class="java.lang.Integer"/>
+	<field name="parentSubCategory" class="java.lang.String"/>
 	<field name="pi_name" class="java.lang.String"/>
-	<field name="target" class="java.lang.Integer"/>
+	<field name="target" class="java.lang.String"/>
 	<field name="measures" class="java.lang.String"/>
 	<field name="allocatedBudget" class="java.lang.String"/>
 	<field name="targetsBasis" class="java.lang.String"/>
