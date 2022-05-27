@@ -609,11 +609,13 @@ trait PdfTrait {
         $extension = 'pdf' ;
         $input = public_path() . '/raw/' . $form . '.jasper';
 
+
+
         if(!$isUnpublish) {
             $filename =  $documentName  . "_". date("Ymd");
             $output = base_path('/public/forms/' . $filename);
         } else{
-            $filename =  strtoupper($form) . "_". $id . "_". time();
+            $filename =  $documentName;
             $output = storage_path('app/public/uploads/published/' . $filename);
         }
 
