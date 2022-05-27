@@ -302,8 +302,8 @@ trait PdfTrait {
             if($isParent) {
                 $isExists = 0;
 
-                foreach($parentIds as $id) {
-                    if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
+                foreach($parentIds as $parentId) {
+                    if($parentId['id'] === $parentDetails->id && $detail->category_id === $parentId['index']) {
                         $isExists = 1;
                     }
                 }
@@ -311,6 +311,8 @@ trait PdfTrait {
                 if(!$isExists) {
                     if($parentDetails->category_id !== $detail->category_id){
                         $parentDetails->category_id = $detail->category_id;
+
+                        $parentDetails->program = null;
 
                         $parentDetails->sub_category = null;
                     }else{
@@ -395,7 +397,7 @@ trait PdfTrait {
 
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-        $program = $detail->program->name;
+        $program = $detail->program ? $detail->program->name : null;
 
         $measures = '' ;
 
@@ -454,7 +456,7 @@ trait PdfTrait {
                 return $x['programName'] === ucwords($compare['progName']);
             }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
 
-            if(!$ifSaved) {
+            if(!$ifSaved && $detail->program) {
                 $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
                 $this->vpProgramDataSet[] = array(

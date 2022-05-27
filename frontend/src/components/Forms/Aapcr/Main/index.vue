@@ -31,7 +31,7 @@
       <div class="mt-4" v-if="allowEdit">
         <a-row type="flex" justify="center" align="middle">
           <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
-            <a-button type="primary" ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
+            <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
           </a-col>
           <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
             <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
@@ -43,7 +43,7 @@
   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, onMounted, onBeforeUnmount, createVNode, computed } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, onBeforeMount, createVNode, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
@@ -107,8 +107,11 @@ export default defineComponent({
     const { aapcrFormPermission } = usePermission(permission)
 
     // EVENTS
-    onMounted(() => {
+    onBeforeMount(() => {
       checkUserPermission()
+    })
+
+    onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('aapcr/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -262,6 +265,7 @@ export default defineComponent({
 
     const submitForm = isFinal => {
       const documentName = props.formId.toUpperCase() + '_' + year.value
+
       const details = {
         dataSource: dataSource.value,
         fiscalYear: year.value,

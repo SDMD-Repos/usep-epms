@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import Antd from 'ant-design-vue'
 import PerfectScrollbar from 'vue3-perfect-scrollbar'
 
 import App from './App.vue'
@@ -9,13 +8,51 @@ import store from './store'
 import { i18n } from './localization'
 import { filters } from './filters'
 
+import {
+  Avatar, TreeSelect, InputNumber, Button, Layout, Table, Radio, Dropdown, Menu, Input,
+  Badge, Slider, Form, Tooltip, Select, Switch,
+  Spin, Checkbox, Tabs, Drawer, Divider, AutoComplete, Collapse, Card, List,
+  Tree, Row, Col, Modal, Popconfirm, ConfigProvider, message,
+} from 'ant-design-vue'
+
 const app = createApp(App)
   .use(store)
   .use(router)
   .use(i18n)
-  .use(Antd)
   .use(PerfectScrollbar)
+  .use(Avatar)
+  .use(Popconfirm)
+  .use(Modal)
+  .use(Divider)
+  .use(Row)
+  .use(Col)
+  .use(Tree)
+  .use(List)
+  .use(Card)
+  .use(Button)
+  .use(TreeSelect)
+  .use(Layout)
+  .use(Table)
+  .use(Radio)
+  .use(Dropdown)
+  .use(Menu)
+  .use(Input)
+  .use(Badge)
+  .use(Slider)
+  .use(Form)
+  .use(Tooltip)
+  .use(Select)
+  .use(Spin)
+  .use(Checkbox)
+  .use(Tabs)
+  .use(InputNumber)
+  .use(Drawer)
+  .use(Switch)
+  .use(AutoComplete)
+  .use(Collapse)
+  .use(ConfigProvider)
 
 app.config.globalProperties.$filters = filters
+app.config.globalProperties.$message = message
 
 app.mount('#app')

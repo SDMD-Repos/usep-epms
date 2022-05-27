@@ -36,12 +36,12 @@
           <template #title>
             <span>
               <b> Requested: </b> <br />
-              {{ moment(record.requested_date).format(dateFormat) }} by {{ record.requested_by }}
+              {{ dayjs(record.requested_date).format(dateFormat) }} by {{ record.requested_by }}
             </span>
             <span v-if="record.status !== 'pending'">
               <br />
               <b> {{ record.status === 'verified' ? 'Verified: ' : 'Declined: ' }} </b> <br />
-              {{ moment(record.changed_date).format(dateFormat) }} by {{ record.changed_by }}
+              {{ dayjs(record.changed_date).format(dateFormat) }} by {{ record.changed_by }}
             </span>
           </template>
           <InfoCircleOutlined :style="{ fontSize: '18px' }"/>
@@ -53,7 +53,7 @@
 <script>
 import { defineComponent, onMounted, ref, computed } from "vue"
 import { useStore } from 'vuex'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { InfoCircleOutlined } from '@ant-design/icons-vue'
 
 const columns = [
@@ -135,7 +135,7 @@ export default defineComponent({
     }
 
     return {
-      moment,
+      dayjs,
       columns,
 
       status,

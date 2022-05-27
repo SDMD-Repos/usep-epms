@@ -49,7 +49,7 @@
                 style="width: 100%"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                 :tree-data="parentSubs"
-                :replace-fields="normalizer"
+                :field-names="normalizer"
                 allow-clear
                 tree-default-expand-all
               >
@@ -139,27 +139,21 @@ export default defineComponent({
       ],
     }
     const normalizer = {
-      title: 'name',
+      label: 'name',
       value: 'id',
     }
 
-    const permission ={
-                      listCreate: ["manager","m-form", "mf-subcat","mfs-create"],
-                      listDelete: ["manager","m-form", "mf-subcat","mfs-delete"],
-                    }
-    const {
-        // DATA
-      isCreate,isDelete,
-        // METHODS
-    } = usePermission(permission)
+    const permission = {
+      listCreate: ["manager","m-form", "mf-subcat","mfs-create"],
+      listDelete: ["manager","m-form", "mf-subcat","mfs-delete"],
+    }
+
+    const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
-
     onMounted(() => {
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
-
-   
     })
 
     const onDelete = key => {

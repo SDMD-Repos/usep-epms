@@ -26,18 +26,15 @@
         <template #label>
           <span class="required-indicator">Program</span>
         </template>
-        <a-select v-model:value="form.program" placeholder="Select" :disabled="config.type === 'sub'" >
-          <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
-            {{ y.name }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
+                  :disabled="config.type === 'sub'" />
       </a-form-item>
 
       <a-form-item name="subCategory" label="Sub Category">
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :replace-fields="{ title: 'name', value: 'id'}"
+          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id',}"
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
@@ -71,11 +68,7 @@
           <template #label><span class="required-indicator">Measures</span></template>
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                    style="width: 100%" label-in-value allow-clear >
-            <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
-              {{ measure.name }}
-            </a-select-option>
-          </a-select>
+                    style="width: 100%" :options="measuresList" label-in-value allow-clear />
         </a-form-item>
 
         <a-form-item name="budget" label="Allocated Budget" >
@@ -124,7 +117,7 @@
         </a-form-item>
 
         <div v-if="form.implementing.length">
-          <template v-for="(office, index) in form.implementing" :key="index">
+          <template v-for="(office, index) in form.implementing" :key="office.value">
             <a-form-item :name="['implementing', index, 'cascadeTo']" :rules="rules.cascadeTo">
               <template #label>
                 <span class="officeName">
@@ -234,7 +227,7 @@
 <script>
 import { defineComponent, ref, watch, computed } from 'vue'
 import { useStore } from "vuex";
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep } from 'lodash'
 import { message, TreeSelect } from "ant-design-vue"
 import { CheckOutlined, EditOutlined, DeleteFilled } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
@@ -266,8 +259,8 @@ export default defineComponent({
 
     // COMPUTED
     const programsByFunction = computed( () => {
-      const programs = store.getters['formManager/manager'].programs
-      return programs.filter(i => i.category_id === props.drawerId)
+      const list = store.getters['formManager/manager'].programs
+      return list.filter(i => i.category_id === props.drawerId).map(v => ({ value: v.id, label: v.name }))
     })
 
     const subCategories = computed(() => {
@@ -275,7 +268,11 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => store.getters['formManager/manager'].measures)
+    const measuresList  = computed(() => {
+      const list = store.state.formManager.measures
+      return list.map(i => ({ value: i.key, label: i.name }))
+    })
+
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
 
     const { functionsWithProgram } = useModifiedStates()

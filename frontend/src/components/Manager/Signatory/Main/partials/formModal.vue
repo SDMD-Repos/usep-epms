@@ -1,12 +1,8 @@
 <template>
-  <a-modal v-model:visible="isVisible"
-           :title="modalTitle"
-           :closable="false"
-           :mask-closable="false"
+  <a-modal v-model:visible="isVisible" :title="modalTitle" width="700px"
+           :closable="false" :mask-closable="false"
            :ok-text="okText"
-           width="700px"
-           @ok="onOkClick"
-           @cancel="onCancel">
+           @ok="onOkClick" @cancel="onCancel">
     <a-spin :spinning="formLoading">
       <a-form ref="signatoryRef" layout="vertical" :model="form">
         <template v-for="(data, index) in form.signatories" :key="index">
@@ -22,14 +18,10 @@
             <a-tree-select
               v-model:value="data.officeId"
               v-if="!data.isCustom"
-              style="width: 100%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="officeList"
-              placeholder="Select office"
+              style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              :tree-data="officeList" placeholder="Select office"
               tree-node-filter-prop="title"
-              show-search
-              allow-clear
-              label-in-value
+              show-search allow-clear label-in-value
               @change="getPersonnelList($event, index)"
             />
             <a-input v-else
@@ -42,14 +34,10 @@
             <a-tree-select
               v-if="!data.isCustom"
               v-model:value="data.personnelId"
-              style="width: 100%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="memberList"
-              placeholder="Select Personnel"
+              style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              :tree-data="memberList" placeholder="Select Personnel"
               tree-node-filter-prop="title"
-              show-search
-              allow-clear
-              label-in-value
+              show-search allow-clear label-in-value
               @change="(value, label, extra) => { getPersonnelPosition(value, label, extra, index) }"
             />
             <a-input v-else
@@ -62,11 +50,8 @@
             <a-select v-if="!data.isCustom"
                       ref="positionField"
                       v-model:value="data.position"
-                      :options="positionList"
-                      placeholder="Select Personnel's Position"
-                      style="width: 100%"
-                      show-search
-                      allow-clear />
+                      :options="positionList" placeholder="Select Personnel's Position"
+                      style="width: 100%" show-search allow-clear />
             <a-input v-else
                      v-model:value="data.position"
                      style="width: 100%"
@@ -98,34 +83,13 @@ export default defineComponent({
   },
   props: {
     visible: Boolean,
-    modalTitle: {
-      type: String,
-      default: '',
-    },
-    okText: {
-      type: String,
-      default: '',
-    },
-    details: {
-      type: Object,
-      default: () => { return {} },
-    },
-    actionType: {
-      type: String,
-      default: '',
-    },
-    officeList: {
-      type: Array,
-      default: () => { return [] },
-    },
-    positionList: {
-      type: Array,
-      default: () => { return [] },
-    },
-    formState: {
-      type: Object,
-      default: () => { return {} },
-    },
+    modalTitle: { type: String, default: '' },
+    okText: { type: String, default: '' },
+    details: { type: Object, default: () => { return {} } },
+    actionType: { type: String, default: '' },
+    officeList: { type: Array, default: () => { return [] } },
+    positionList: { type: Array, default: () => { return [] } },
+    formState: { type: Object, default: () => { return {} } },
   },
   emits: ['close-modal', 'submit-form', 'add-signatory', 'delete-signatory'],
   setup(props, { emit }) {
@@ -215,7 +179,7 @@ export default defineComponent({
     const getPersonnelPosition = (value, label, extra, index) => {
       form.value.signatories[index].position = undefined
       if (typeof extra.triggerNode !== 'undefined') {
-        const { position } = extra.triggerNode.dataRef
+        const { position } = extra.triggerNode.props
         const office = form.value.signatories[index].officeId
         const officePosition = position.filter(i => {
           return i.DepartmentID === office.value

@@ -15,7 +15,7 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
-import UnpublishRequests from '@/components/SystemAdmin/Admin/Requests/unpublish'
+import UnpublishRequests from '@/components/SystemAdmin/Requests/unpublish'
 
 export default defineComponent({
   components: { UnpublishRequests },

@@ -1,10 +1,7 @@
 <template>
   <div>
-    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
-      <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
-        {{ y.name }}
-      </a-select-option>
-    </a-select>
+    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value
+              :options="programsByFunction" @change="loadPIs" />
 
     <div class="mt-4">
       <indicator-table :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
@@ -57,9 +54,10 @@ export default defineComponent({
     const dataSource = computed(()=> { return props.itemSource })
 
     // COMPUTED
-    const programs = computed(() => store.getters['formManager/manager'].programs)
-
-    const programsByFunction = computed( () => { return programs.value.filter(i => i.category_id === props.functionId) })
+    const programsByFunction = computed( () => {
+      const list = store.getters['formManager/manager'].programs
+      return list.filter(i => i.category_id === props.functionId).map(v => ({ value: v.id, label: v.name }))
+    })
 
     const {
       drawerConfig,

@@ -9,14 +9,11 @@
 
 <script>
 import { defineComponent,ref } from 'vue'
-import SystemAdmin from '@/components/SystemAdmin/Admin'
-import FormAdmin from '@/views/system/forms'
+import SystemAdmin from '@/components/SystemAdmin/AccessRights/Manager'
+import FormAdmin from '@/views/system/access/forms'
 
 export default defineComponent({
-   components: {
-    SystemAdmin,
-    FormAdmin,
-  },
+   components: { SystemAdmin, FormAdmin },
   setup() {
      return {
       activeKey: ref('1'),

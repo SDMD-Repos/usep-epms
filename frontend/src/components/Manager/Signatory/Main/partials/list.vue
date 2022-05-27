@@ -1,16 +1,18 @@
 <template>
   <div>
     <a-table :columns="columns" :data-source="list" bordered>
-      <template #operation="{ record }">
-        <a-popconfirm
-          title="Are you sure you want to delete this?"
-          @confirm="onDelete(record.key)"
-          ok-text="Yes"
-          cancel-text="No"
-        >
-          <template #icon><warning-outlined /></template>
-          <a type="primary">Delete</a>
-        </a-popconfirm>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'operation'">
+          <a-popconfirm
+            title="Are you sure you want to delete this?"
+            @confirm="onDelete(record.key)"
+            ok-text="Yes"
+            cancel-text="No"
+          >
+            <template #icon><warning-outlined /></template>
+            <a type="primary">Delete</a>
+          </a-popconfirm>
+        </template>
       </template>
     </a-table>
   </div>
@@ -24,7 +26,7 @@ const columns = [
   { title: 'Personnel', className: 'column-personnel', dataIndex: 'personnel_name', key: 'personnelName' },
   { title: 'Office/College', className: 'column-office', dataIndex: 'office_name', key: 'officeName' },
   { title: 'Position', className: 'column-position', dataIndex: 'position', key: 'position' },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 export default defineComponent({

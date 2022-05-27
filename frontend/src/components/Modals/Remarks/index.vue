@@ -21,13 +21,14 @@ export default defineComponent({
     })
 
     // METHODS
-    const onOkClick = () => {
-      emit('unpublish', { remarks: remarks.value, form: props.formId })
+    const onOkClick = async () => {
+      await emit('unpublish', { remarks: remarks.value, form: props.formId })
+      await resetForm()
     }
 
-    const onClose = () => {
-      emit('close-remarks-modal')
-      resetForm()
+    const onClose = async () => {
+      await emit('close-remarks-modal')
+      await resetForm()
     }
 
     const resetForm = () => {

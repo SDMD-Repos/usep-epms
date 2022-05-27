@@ -3,14 +3,8 @@
            @ok="addPreviousMeasures" @cancel="closeModal">
     <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false"
-             :expand-row-by-click="true" :expand-icon-as-cell="false" :expand-icon-column-index="2"
              :row-class-name="(record, index) => (index % 2 === 1 ? 'table-striped' : null)"
     >
-      <template #expandIcon="{ expanded }">
-        <DownCircleFilled v-if="!expanded" class="expand-icon-antd"/>
-        <UpCircleFilled v-else class="expand-icon-antd" />
-      </template>
-
       <template #expandedRowRender="{ record }">
         <a-list size="small" bordered :data-source="record.items">
           <template #renderItem="{ item }">
@@ -28,18 +22,17 @@
   </a-modal>
 </template>
 <script>
-import {defineComponent, ref, watch, reactive, toRefs, createVNode, toRaw} from "vue"
-import {DownCircleFilled, ExclamationCircleOutlined, UpCircleFilled} from '@ant-design/icons-vue'
-import {Modal} from "ant-design-vue";
+import { defineComponent, ref, watch, reactive, toRefs, createVNode } from "vue"
+import {/*DownCircleFilled,*/ ExclamationCircleOutlined/*, UpCircleFilled*/} from '@ant-design/icons-vue'
+import { Modal } from "ant-design-vue";
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
-  { title: '', dataIndex: 'operation', slots: { customRender: 'operation' } },
 ]
 
 export default defineComponent({
   name: "MeasuresPreviousList",
-  components: { DownCircleFilled, UpCircleFilled },
+  // components: { DownCircleFilled, UpCircleFilled },
   props: {
     visible: Boolean,
     year: { type: Number, default: new Date().getFullYear() },

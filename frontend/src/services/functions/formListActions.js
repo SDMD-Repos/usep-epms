@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { useStore } from "vuex";
-import moment from "moment";
+import dayjs from "dayjs";
 
 export const useUnpublish = () => {
   const store = useStore()
@@ -74,7 +74,7 @@ export const useViewPublishedFiles = () => {
     const statuses = [...details.status]
     data.value.isViewed = true
     statuses.forEach(item => {
-      item.changed_date_disp = moment(item.changed_date).format(dateFormat.value)
+      item.changed_date_disp = dayjs(item.changed_date).format(dateFormat.value)
     })
     details.status = statuses
     data.value.viewedForm = details

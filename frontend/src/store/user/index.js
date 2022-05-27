@@ -1,16 +1,9 @@
 import router from '@/router'
 import { notification } from 'ant-design-vue'
 
-import * as firebase from '@/services/api/firebase'
 import * as jwt from '@/services/api/jwt'
 
 const mapAuthProviders = {
-  firebase: {
-    login: firebase.login,
-    register: firebase.register,
-    currentAccount: firebase.currentAccount,
-    logout: firebase.logout,
-  },
   jwt: {
     login: jwt.login,
     register: jwt.register,
@@ -92,7 +85,7 @@ export default {
         })
       })
 
- 
+
     },
     LOGOUT({ commit, rootState }) {
       const logout = mapAuthProviders[rootState.settings.authProvider].logout

@@ -8,25 +8,27 @@
         </a-button>
       </template>
 
-      <template #dateCreated="{ record }">
-        {{ moment(record.created_at).format(mainStore.dateFormat)}}
-      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'created_at'">
+          {{ dayjs(record.created_at).format(mainStore.dateFormat)}}
+        </template>
 
-      <template #operation="{ record }">
-        <a @click="openModal('view', record)">View</a>
-        <span v-if="isDelete">
-          <a-divider type="vertical" />
-          <a-popconfirm
-            title="Are you sure you want to delete this?"
-            @confirm="onDelete(record.key)"
-            ok-text="Yes"
-            cancel-text="No"
+        <template v-if="column.key === 'operation'">
+          <a @click="openModal('view', record)">View</a>
+          <span v-if="isDelete">
+            <a-divider type="vertical" />
+            <a-popconfirm
+              title="Are you sure you want to delete this?"
+              @confirm="onDelete(record.key)"
+              ok-text="Yes"
+              cancel-text="No"
 
-          >
-            <template #icon><warning-outlined /></template>
-            <a type="primary" >Delete</a>
-          </a-popconfirm>
-        </span>
+            >
+              <template #icon><warning-outlined /></template>
+              <a type="primary">Delete</a>
+            </a-popconfirm>
+          </span>
+        </template>
       </template>
     </a-table>
 
@@ -40,15 +42,15 @@
 import FormModal from './partials/formModal'
 import { computed, defineComponent, ref, reactive, toRaw, onMounted, createVNode } from 'vue'
 import { useStore } from 'vuex'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { Form, Modal } from 'ant-design-vue'
 import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { usePermission } from '@/services/functions/permission'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
-  { title: 'Date Created', dataIndex: 'created_at', key: 'created_at', slots: { customRender: 'dateCreated' } },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Date Created', dataIndex: 'created_at', key: 'created_at' },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 const useForm = Form.useForm
@@ -237,7 +239,7 @@ export default defineComponent({
 
     return {
       columns,
-      moment,
+      dayjs,
 
       mainStore,
       loading,

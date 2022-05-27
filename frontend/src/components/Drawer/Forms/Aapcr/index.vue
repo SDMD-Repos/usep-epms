@@ -24,7 +24,7 @@
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :replace-fields="{ title: 'name', value: 'id',}"
+          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id',}"
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
@@ -61,11 +61,8 @@
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
                     style="width: 100%" label-in-value allow-clear
-                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
-            <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
-              {{ measure.name }}
-            </a-select-option>
-          </a-select>
+                    :options="measuresList"
+                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item label="Allocated Budget" v-bind="validateInfos.budget" >
@@ -90,11 +87,8 @@
 
           <a-select v-model:value="form.cascadingLevel" placeholder="Select" style="width: 100%"
                     label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
-                    @blur="validate('cascadingLevel', { trigger: 'blur' }).catch(() => {})">
-            <a-select-option v-for="levelItem in cascadingList" :value="levelItem.id" :key="levelItem.id">
-              {{ levelItem.name }}
-            </a-select-option>
-          </a-select>
+                    :options="cascadingList"
+                    @blur="validate('cascadingLevel', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item v-bind="validateInfos.implementing">
@@ -250,8 +244,16 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => store.getters['formManager/manager'].measures)
-    const cascadingList  = computed(() => store.getters['formManager/manager'].cascadingLevels)
+    const measuresList  = computed(() => {
+      const list = store.state.formManager.measures
+      return list.map(i => ({ value: i.key, label: i.name }))
+    })
+
+    const cascadingList  = computed(() => {
+      const list = store.state.formManager.cascadingLevels
+      return list.map(i => ({ value: i.id, label: i.name }))
+    })
+
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
 
     // EVENTS
