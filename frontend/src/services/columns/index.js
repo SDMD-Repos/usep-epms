@@ -5,7 +5,6 @@ export const formTableColumns = [
     dataIndex: 'subCategory',
     className: 'column-sub-category',
     width: 280,
-    slots: { customRender: 'subCategory' },
   },
   {
     title: 'Performance Indicator',
@@ -20,7 +19,6 @@ export const formTableColumns = [
     dataIndex: 'isHeader',
     className: 'column-is-header',
     width: 100,
-    slots: { customRender: 'isHeader' },
   },
   {
     title: 'Success Indicators',
@@ -36,9 +34,6 @@ export const formTableColumns = [
             dataIndex: 'target',
             className: 'column-target-year',
             width: 225,
-            slots: {
-              title: 'targetYearColumn',
-            },
           },
         ],
       },
@@ -48,7 +43,6 @@ export const formTableColumns = [
         dataIndex: 'measures',
         className: 'column-measures',
         width: 145,
-        slots: { customRender: 'measures' },
       },
     ],
   },
@@ -62,7 +56,6 @@ export const formTableColumns = [
         dataIndex: 'budget',
         className: 'column-in-php',
         width: 150,
-        slots: { customRender: 'budget' },
       },
     ],
   },
@@ -79,7 +72,6 @@ export const formTableColumns = [
     dataIndex: 'cascadingLevel',
     className: 'column-cascading-level',
     width: 190,
-    slots: { customRender: 'cascadingLevel' },
   },
   {
     title: 'Office/s Accountable',
@@ -91,7 +83,6 @@ export const formTableColumns = [
         dataIndex: 'implementing',
         className: 'column-implementing',
         width: 350,
-        slots: { customRender: 'implementing' },
       },
       {
         title: 'Supporting Office',
@@ -99,7 +90,6 @@ export const formTableColumns = [
         dataIndex: 'supporting',
         className: 'column-supporting',
         width: 350,
-        slots: { customRender: 'supporting' },
       },
     ],
   },
@@ -117,7 +107,6 @@ export const formTableColumns = [
     fixed: 'right',
     className: 'column-action',
     width: 100,
-    slots: { customRender: 'action' },
   },
 ]
 
@@ -206,7 +195,6 @@ export const listTableColumns = [
     key: 'dateCreated',
     className: 'column-created-at',
     width: 150,
-    slots: { customRender: 'dateCreated' },
   },
   {
     title: 'Date Published',
@@ -214,7 +202,6 @@ export const listTableColumns = [
     key: 'datePublished',
     className: 'column-published-date',
     width: 150,
-    slots: { customRender: 'datePublished' },
   },
   {
     title: 'Status',
@@ -222,13 +209,12 @@ export const listTableColumns = [
     key: 'status',
     className: 'column-status',
     width: 70,
-    slots: { customRender: 'status' },
   },
   {
     title: 'Action',
     dataIndex: 'operation',
     className: 'column-action',
     width: 250,
-    slots: { customRender: 'operation' },
+    key: 'operation',
   },
 ]

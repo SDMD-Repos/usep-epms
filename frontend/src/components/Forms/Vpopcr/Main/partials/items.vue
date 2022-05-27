@@ -11,9 +11,9 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, reactive, watch, onMounted, createVNode, computed } from "vue"
+import { defineComponent, ref, reactive, watch, onBeforeMount, createVNode, computed } from "vue"
 import { useStore } from 'vuex'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep } from 'lodash'
 import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
 import { formTableColumns } from "@/services/columns"
@@ -54,7 +54,7 @@ export default defineComponent({
     const { formData, rules, resetVpOpcrForm, resetFormAsHeader, assignFormData } = useDefaultFormData(parameters)
 
     // EVENTS
-    onMounted( () => {
+    onBeforeMount( () => {
       modifyColumns()
     })
 
@@ -74,7 +74,6 @@ export default defineComponent({
         key: 'count',
         dataIndex: 'count',
         className: 'column-count',
-        slots: { customRender: 'count' },
         width: 60,
       }
       columns.splice(0, 0, addendum)
@@ -157,7 +156,7 @@ export default defineComponent({
 
     const handleAddSub = record => {
       const newData = dataSource.value.filter(item => { return record.key === item.key && record.category === item.category } )[0]
-      formData.subCategory = newData.subCategory
+      formData.subCategory = newData.subCategory ? newData.subCategory : undefined
       formData.program = newData.program
       if (!newData.isHeader) {
 

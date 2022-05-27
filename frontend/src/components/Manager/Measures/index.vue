@@ -18,13 +18,14 @@
           <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" >Add {{ year - 1}} measures</a-button>
         </template>
 
-        <template #dateCreated="{ record }">
-          {{ moment(record.created_at).format(mainStore.dateFormat) }}
-        </template>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'created_at'">
+            {{ dayjs(record.created_at).format(mainStore.dateFormat) }}
+          </template>
 
-        <template #operation="{ record }">
-          <a @click="openModal('view', record)">View</a>
-          <span v-if="isDelete">
+          <template v-if="column.key === 'operation'">
+            <a @click="openModal('view', record)">View</a>
+            <span v-if="isDelete">
             <a-divider type="vertical" />
             <a-popconfirm
               title="Are you sure you want to delete this?"
@@ -36,17 +37,20 @@
               <a type="primary">Delete</a>
             </a-popconfirm>
           </span>
+          </template>
         </template>
       </a-table>
     </div>
 
-    <form-modal :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"
-                :form-state="formState" :validate="validate" :validate-infos="validateInfos"
-                @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"
-                :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete"/>
+    <form-modal
+      :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"  :form-state="formState"
+      :validate="validate" :validate-infos="validateInfos" :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete"
+      @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"
+    />
 
-    <measures-previous-list :visible="isPreviousViewed" :year="year" :list="previousMeasures"
-                            @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
+    <measures-previous-list
+      :visible="isPreviousViewed" :year="year" :list="previousMeasures"
+      @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
   </div>
 </template>
 <script>
@@ -54,16 +58,15 @@ import { computed, defineComponent, ref, reactive, toRaw, createVNode, onMounted
 import { useStore } from 'vuex'
 import { Form, Modal } from "ant-design-vue";
 import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
 import { usePermission } from '@/services/functions/permission'
 
-
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
-  { title: 'Date Created', dataIndex: 'created_at', key: 'created_at', slots: { customRender: 'dateCreated' } },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Date Created', dataIndex: 'created_at', key: 'created_at' },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 const useForm = Form.useForm
@@ -108,8 +111,8 @@ export default defineComponent({
     const measuresList = computed(() => store.getters['formManager/manager'].measures)
     const previousMeasures = computed(() => store.getters['formManager/manager'].previousMeasures)
     const loading = computed(() => store.getters['formManager/manager'].loading)
-   
-    
+
+
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -119,19 +122,14 @@ export default defineComponent({
       }
       return lists
     })
-    
-      const permission ={
-                        listCreate: ["manager","m-measures", "mm-create"],
-                        listDelete: ["manager","m-measures", "mm-delete"],
-                        listEdit: ["manager","m-measures", "mm-edit"],
-                      }
-     const {
-          // DATA
-        isCreate,isDelete,isEdit,
-          // METHODS
-      } = usePermission(permission)
 
+    const permission = {
+      listCreate: ["manager","m-measures", "mm-create"],
+      listDelete: ["manager","m-measures", "mm-delete"],
+      listEdit: ["manager","m-measures", "mm-edit"],
+    }
 
+    const { isCreate, isDelete, isEdit } = usePermission(permission)
 
     // EVENTS
     onMounted(() => {
@@ -227,7 +225,7 @@ export default defineComponent({
 
     return {
       columns,
-      moment,
+      dayjs,
 
       isOpenModal,
       action,

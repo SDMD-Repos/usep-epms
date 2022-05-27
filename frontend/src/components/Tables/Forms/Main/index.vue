@@ -30,74 +30,76 @@
         </a-row>
       </template>
 
-      <template #subCategory="{ record }" v-if="allowedColumns.subCategory">
-        {{ (record.type === 'pi' && record.subCategory !== null) ? record.subCategory.label : ''}}
+      <template #headerCell="{ column }">
+        <template v-if="column.key === 'target'"> {{ year }} </template>
       </template>
 
-      <template #count="{ record }" v-if="formId === `opcrvp`">
-        {{ record.count }}
-      </template>
-
-      <template #isHeader="{ record }">
-        <div v-if="record.type === 'pi'">
-          <CheckCircleFilled v-if="record.isHeader" :style="{ fontSize: '18px', color: '#2b5c17' }" />
-          <CloseCircleFilled v-else :style="{ fontSize: '18px', color: '#eb2f2f' }" />
-        </div>
-      </template>
-
-      <template #targetYearColumn>
-        {{ year }}
-      </template>
-
-      <template #measures="{ record }">
-        <ul class="form-ul-list">
-          <li v-for="measure in record.measures" :key="measure.key">
-            {{ measure.label.children || measure.label }}
-          </li>
-        </ul>
-      </template>
-
-      <template #budget="{ record }" v-if="formId !== `opcrtemplate`">
-        {{ $filters.numbersWithCommasDecimal(record.budget) }}
-      </template>
-
-      <template #cascadingLevel="{ record }" v-if="formId === `aapcr`">
-        <div v-if="!record.isHeader">
-          {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
-        </div>
-      </template>
-
-      <template #implementing="{ record }" v-if="formId !== `opcrtemplate`">
-        <ul class="form-ul-list">
-          <li v-for="office in record.implementing" :key="office.key">
-            {{ office.label }}
-          </li>
-        </ul>
-      </template>
-
-      <template #supporting="{ record }" v-if="formId !== `opcrtemplate`">
-        <ul class="form-ul-list">
-          <li v-for="office in record.supporting" :key="office.key">
-            {{ office.label }}
-          </li>
-        </ul>
-      </template>
-
-      <template #action="{ record }">
-        <EditFilled @click="handleEdit(record)" v-if="allowedAction(record)"/>
-        <a-divider type="vertical" v-if="allowedAction(record)" />
-        <template v-if="record.type === 'pi'">
-          <PlusCircleFilled @click="handleAddSub(record)"/>
-          <a-divider type="vertical" v-if="allowedAction(record)"/>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'subCategory' && allowedColumns.subCategory">
+          {{ (record.type === 'pi' && (typeof record.subCategory !== 'undefined' && record.subCategory !== null)) ? record.subCategory.label : ''}}
         </template>
-        <a-popconfirm
-          title="Are you sure you want to delete this?"
-          @confirm="handleDelete(record)"
-          ok-text="Yes" cancel-text="No"
-          v-if="allowedAction(record)"
-        >
-          <DeleteFilled />
-        </a-popconfirm>
+
+        <template v-if="column.key === 'count' && formId === `opcrvp`">
+          {{ record.count }}
+        </template>
+
+        <template v-if="column.key === 'isHeader'">
+          <div v-if="record.type === 'pi'">
+            <CheckCircleFilled v-if="record.isHeader" :style="{ fontSize: '18px', color: '#2b5c17' }" />
+            <CloseCircleFilled v-else :style="{ fontSize: '18px', color: '#eb2f2f' }" />
+          </div>
+        </template>
+
+        <template v-if="column.key === 'measures'">
+          <ul class="form-ul-list">
+            <li v-for="measure in record.measures" :key="measure.key">
+              {{ measure.label.children || measure.label }}
+            </li>
+          </ul>
+        </template>
+
+        <template v-if="column.key === 'budget' && formId !== `opcrtemplate`">
+          {{ $filters.numbersWithCommasDecimal(record.budget) }}
+        </template>
+
+        <template v-if="column.key === 'cascadingLevel' && formId === `aapcr`">
+          <div v-if="!record.isHeader">
+            {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
+          </div>
+        </template>
+
+        <template v-if="column.key === 'implementing' && formId !== `opcrtemplate`">
+          <ul class="form-ul-list">
+            <li v-for="office in record.implementing" :key="office.key">
+              {{ office.label }}
+            </li>
+          </ul>
+        </template>
+
+        <template v-if="column.key === 'supporting' && formId !== `opcrtemplate`">
+          <ul class="form-ul-list">
+            <li v-for="office in record.supporting" :key="office.key">
+              {{ office.label }}
+            </li>
+          </ul>
+        </template>
+
+        <template v-if="column.key === 'operation'">
+          <EditFilled @click="handleEdit(record)" v-if="allowedAction(record)"/>
+          <a-divider type="vertical" v-if="allowedAction(record)" />
+          <template v-if="record.type === 'pi'">
+            <PlusCircleFilled @click="handleAddSub(record)"/>
+            <a-divider type="vertical" v-if="allowedAction(record)"/>
+          </template>
+          <a-popconfirm
+            title="Are you sure you want to delete this?"
+            @confirm="handleDelete(record)"
+            ok-text="Yes" cancel-text="No"
+            v-if="allowedAction(record)"
+          >
+            <DeleteFilled />
+          </a-popconfirm>
+        </template>
       </template>
     </a-table>
   </div>

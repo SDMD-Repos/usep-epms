@@ -11,34 +11,27 @@
     <unpublish-remarks-modal
       :is-unpublish="isUnpublish" :form-id="formId"
       @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
-
   </div>
-   <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 
 <script>
-import { computed, defineComponent, ref, onMounted } from "vue"
+import { defineComponent, ref, onMounted, onBeforeMount, computed } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
-// import { useUploadFile } from '@/services/functions/upload'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
-import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
+import { renderPdf, updateFile } from '@/services/api/mainForms/opcrvp'
 import FormListTable from '@/components/Tables/Forms/List'
-// import UploadPublishModal from '@/components/Modals/UploadPublish'
 import { useUnpublish } from '@/services/functions/formListActions'
-import { message, notification } from "ant-design-vue"
 import { usePermission } from '@/services/functions/permission'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
+import { message, notification } from "ant-design-vue"
 
 export default defineComponent({
-  components: {
-    FormListTable,
-    UnpublishedFormsModal,
-    UnpublishRemarksModal,
-  },
+  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
   props: {
     formId: { type: String, default: '' },
   },
@@ -66,8 +59,10 @@ export default defineComponent({
 
     const { opcrvpFormPermission } = usePermission(permission)
 
+    // EVENTS
+    onBeforeMount(() => { renderColumns() })
+
     onMounted(() => {
-      renderColumns()
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       store.dispatch('opcrvp/FETCH_LIST')

@@ -2,7 +2,6 @@ import { ref, createVNode, computed } from "vue";
 import { useStore } from "vuex"
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
-import { useExtras } from '@/services/functions/extras'
 
 export const useFormFields = form => {
   const store = useStore()
@@ -17,11 +16,9 @@ export const useFormFields = form => {
   // COMPUTED
   const formFields = computed(() => store.getters['formManager/manager'].formFields)
 
-  const { findInNested } = useExtras()
-
   const changeNullValue = (value, label) => {
     if (typeof value === 'undefined' || value === 0) {
-      form.value[label] = null
+      // form.value[label] = null
     }
   }
 
@@ -34,8 +31,8 @@ export const useFormFields = form => {
     const { allCheckedNodes } = extra
     if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
       allCheckedNodes.forEach(item => {
-        const { dataRef } = (typeof item.node !== 'undefined') ? item.node.props : item.props
-        storedOffices.value[field].push(dataRef)
+        const { props } = (typeof item.node !== 'undefined') ? item.node : item
+        storedOffices.value[field].push(props)
       })
     }
   }

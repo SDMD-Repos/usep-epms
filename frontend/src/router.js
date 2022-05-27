@@ -88,7 +88,7 @@ const router = createRouter({
           meta: {
             title: 'Access Rights',
           },
-          component: () => import('./views/system/admin'),
+          component: () => import('./views/system/access/manager'),
         },
         {
           path: '/system/admin/requests',
@@ -97,7 +97,7 @@ const router = createRouter({
           meta: {
             title: 'Requests',
           },
-          component: () => import('./views/system/admin/requests'),
+          component: () => import('./views/system/requests'),
         },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],

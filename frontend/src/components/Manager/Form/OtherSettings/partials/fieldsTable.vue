@@ -11,47 +11,49 @@
     </div>
     <a-table class="mt-4" :columns="columns" :data-source="formFields" row-key="id" :pagination="false"
              :show-header="false" bordered>
-      <template #settings="{ record }">
-        <div v-if="record.code === 'implementing' || record.code === 'supporting'">
-          <span v-if="record.id in editableData">
-            <div v-if="formId === 'aapcr'">
-              <a-select v-model:value="editableData[record.id]['settings']" placeholder="Select"
-                        label-in-value style="width: 400px">
-              <a-select-option v-for="data in functions" :value="data.id.toString()" :key="data.id" :label="data.name">
-                {{ data.name }}
-              </a-select-option>
-            </a-select>
-            </div>
-            <div v-else-if="formId === 'vpopcr'">
-              <a-tree-select
-                v-model:value="editableData[record.id]['settings']"
-                placeholder="Select a Program"
-                style="width: 400px"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                :tree-data="functionsWithProgram"
-                tree-default-expand-all
-                label-in-value
-              />
-            </div>
-          </span>
-          <template v-else-if="formId">Cascade to: <b>{{ record.settingLabel }}</b></template>
-        </div>
-      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'settings'">
+          <div v-if="record.code === 'implementing' || record.code === 'supporting'">
+            <span v-if="record.id in editableData">
+              <div v-if="formId === 'aapcr'">
+                <a-select v-model:value="editableData[record.id]['settings']" placeholder="Select"
+                          label-in-value style="width: 400px">
+                <a-select-option v-for="data in functions" :value="data.id.toString()" :key="data.id" :label="data.name">
+                  {{ data.name }}
+                </a-select-option>
+              </a-select>
+              </div>
+              <div v-else-if="formId === 'vpopcr'">
+                <a-tree-select
+                  v-model:value="editableData[record.id]['settings']"
+                  placeholder="Select a Program"
+                  style="width: 400px"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="functionsWithProgram"
+                  tree-default-expand-all
+                  label-in-value
+                />
+              </div>
+            </span>
+            <template v-else-if="formId">Cascade to: <b>{{ record.settingLabel }}</b></template>
+          </div>
+        </template>
 
-      <template #operation="{ record }" >
-        <div v-if="formId">
-          <span v-if="record.id in editableData">
-            <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
-              <a-button type="primary" shape="round" size="small" >
-                {{ record.settings ? "Update" : "Save" }}
-              </a-button>
-            </a-popconfirm>
-            <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
-          </span>
-            <span v-else>
-            <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
-          </span>
-        </div>
+        <template v-if="column.key === 'operation'">
+          <div v-if="formId">
+            <span v-if="record.id in editableData">
+              <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
+                <a-button type="primary" shape="round" size="small" >
+                  {{ record.settings ? "Update" : "Save" }}
+                </a-button>
+              </a-popconfirm>
+              <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
+            </span>
+              <span v-else>
+              <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
+            </span>
+          </div>
+        </template>
       </template>
     </a-table>
   </div>
@@ -59,15 +61,15 @@
 <script>
 import { defineComponent, reactive, ref, onMounted, computed } from "vue"
 import { useStore } from "vuex"
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep } from 'lodash'
 import { Modal } from "ant-design-vue"
 import { useExtras } from "@/services/functions/extras";
 import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 const columns = [
   { title: 'Field', dataIndex: 'field_name', key: 'field_name' },
-  { title: 'Settings', dataIndex: 'settings', slots: { customRender: 'settings' } },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Settings', dataIndex: 'settings', key: 'settings' },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 export default defineComponent({

@@ -4,30 +4,32 @@
 
     <a-table class="mt-4" :columns="columns" :data-source="functions" row-key="id" :pagination="false"
              :show-header="false" bordered>
-      <template #settings="{ record }">
-        <span v-if="record.id in editableData">
-          <a-select v-model:value="editableData[record.id]['defaultProgram']" placeholder="Select"
-                    label-in-value style="width: 400px">
-            <a-select-option v-for="data in filteredPrograms(record.id)" :value="data.id.toString()" :key="data.id" :label="data.name">
-              {{ data.name }}
-            </a-select-option>
-          </a-select>
-        </span>
-        <template v-else>Default Program: <b>{{ record.settingLabel }}</b></template>
-      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'settings'">
+          <span v-if="record.id in editableData">
+            <a-select v-model:value="editableData[record.id]['defaultProgram']" placeholder="Select"
+                      label-in-value style="width: 400px">
+              <a-select-option v-for="data in filteredPrograms(record.id)" :value="data.id.toString()" :key="data.id" :label="data.name">
+                {{ data.name }}
+              </a-select-option>
+            </a-select>
+          </span>
+          <template v-else>Default Program: <b>{{ record.settingLabel }}</b></template>
+        </template>
 
-      <template #operation="{ record }" >
-        <span v-if="record.id in editableData">
-          <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
-            <a-button type="primary" shape="round" size="small" >
-              {{ record.settings ? "Update" : "Save" }}
-            </a-button>
-          </a-popconfirm>
-          <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
-        </span>
-        <span v-else>
-          <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
-        </span>
+        <template v-if="column.key === 'operation'">
+          <span v-if="record.id in editableData">
+            <a-popconfirm title="Are you sure you want to proceed?" @confirm="save(record)">
+              <a-button type="primary" shape="round" size="small" >
+                {{ record.settings ? "Update" : "Save" }}
+              </a-button>
+            </a-popconfirm>
+            <a-button class="ml-2" shape="round" size="small" @click="cancel(record.id)">Cancel</a-button>
+          </span>
+          <span v-else>
+            <a type="primary" @click="edit(record.id)" v-if="isCreate">Edit</a>
+          </span>
+        </template>
       </template>
     </a-table>
   </div>
@@ -35,12 +37,12 @@
 <script>
 import { defineComponent, reactive, onMounted, computed } from "vue";
 import { useStore } from "vuex"
-import { cloneDeep } from "lodash-es";
+import { cloneDeep } from "lodash";
 
 const columns = [
   { title: 'Field', dataIndex: 'name', key: 'name' },
-  { title: 'Settings', dataIndex: 'settings', slots: { customRender: 'settings' } },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Settings', dataIndex: 'settings', key: 'settings' },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 export default defineComponent({

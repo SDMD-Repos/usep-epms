@@ -341,7 +341,7 @@ class VpopcrController extends Controller
         $detail->allocated_budget = $data['budget'];
         $detail->targets_basis = $data['targetsBasis'];
         $detail->category_id = $data['category'];
-        $detail->sub_category_id = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+        $detail->sub_category_id = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
         $detail->program_id = $data['program'];
         $detail->remarks = $data['remarks'];
         $detail->parent_id = $data['parent_id'];
@@ -437,45 +437,6 @@ class VpopcrController extends Controller
             return response()->json($e->getMessage(), $status);
         }
     }
-
-//    public function unpublish(UploadPdfFile $request)
-//    {
-//        try {
-//            DB::beginTransaction();
-//
-//            $validated = $request->validated();
-//
-//            $files = $validated['files'];
-//            $id = $validated['id'];
-//
-//            $vpopcr = VpOpcr::find($id);
-//
-//            $vpopcr->published_date = NULL;
-//            $vpopcr->updated_at = Carbon::now();
-//            $vpopcr->modify_id = $this->login_user->pmaps_id;
-//            $vpopcr->history = $vpopcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-//
-//            if($vpopcr->save()) {
-//                $model = new VpOpcrFile();
-//
-//                $this->uploadFiles($model, $id, $files);
-//            }else {
-//                DB::rollBack();
-//            }
-//
-//            DB::commit();
-//
-//            return response()->json('VP\'s OPCR was unpublished successfully', 200);
-//        } catch(\Exception $e){
-//            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-//                $status = $e->getCode();
-//            } else {
-//                $status = 400;
-//            }
-//
-//            return response()->json($e->getMessage(), $status);
-//        }
-//    }
 
     public function deactivate(Request $request)
     {

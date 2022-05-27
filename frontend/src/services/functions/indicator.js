@@ -67,7 +67,7 @@ export const useDrawerSettings = () => {
 /* ------------------------------------------ */
 
 const defaultAapcrFormData = {
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
@@ -86,7 +86,7 @@ const defaultAapcrFormData = {
 
 const defaultOpcrVpFormData = () => ({
   program: null,
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
@@ -271,7 +271,7 @@ export const useDefaultFormData = props => {
   }
 
   const assignFormData = newData => {
-    formData.subCategory = newData.subCategory
+    formData.subCategory = newData.subCategory ? newData.subCategory : undefined
     formData.name = newData.name
     formData.isHeader = newData.isHeader
     formData.target = newData.target

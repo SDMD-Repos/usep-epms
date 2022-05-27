@@ -110,7 +110,7 @@ class AapcrController extends Controller
 
         $detail = new AapcrDetail();
 
-        if($values['subCategory']){
+        if(isset($values['subCategory'])){
             $category_id = SubCategory::find($values['subCategory']['value']);
         }else{
             $category_id = Program::find($values['program']);
@@ -118,7 +118,7 @@ class AapcrController extends Controller
 
         $detail->aapcr_id = $aapcrId;
         $detail->category_id = $category_id->category->id;
-        $detail->sub_category_id = $values['subCategory'] ? $values['subCategory']['value'] : $values['subCategory'];
+        $detail->sub_category_id = isset($values['subCategory']) ? $values['subCategory']['value'] : null;
         $detail->program_id = $values['program'];
         $detail->pi_name = $values['name'];
         $detail->is_header = $values['isHeader'];
@@ -475,7 +475,7 @@ class AapcrController extends Controller
             $detail = AapcrDetail::find($data['id']);
 
             if($detail) {
-                if($data['subCategory']){
+                if(isset($data['subCategory'])){
                     $category_id = SubCategory::find($data['subCategory']['value']);
                 }else{
                     $category_id = Program::find($data['program']);
@@ -485,7 +485,7 @@ class AapcrController extends Controller
 
                 $isHeader = $data['isHeader'] ? 1 : 0;
 
-                $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+                $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
 
                 $cascadingLevel = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
 
@@ -563,20 +563,6 @@ class AapcrController extends Controller
                     ]);
                 }
 
-                /*$this->updateOffices([
-                    'model' => $officeModel,
-                    'detailId' => $data['id'],
-                    'offices' => $data['implementing'],
-                    'type' => 'implementing',
-                ]);
-
-                $this->updateOffices([
-                    'model' => $officeModel,
-                    'detailId' => $data['id'],
-                    'offices' => $data['supporting'],
-                    'type' => 'supporting',
-                ]);*/
-
                 if(isset($data['children']) && count($data['children'])) {
 
                     foreach ($data['children'] as $child) {
@@ -599,7 +585,6 @@ class AapcrController extends Controller
         $ids = array();
 
         foreach ($budgets as $budget) {
-
             $programBudget = AapcrProgramBudget::withTrashed()->where([
                 'aapcr_id' => $aapcrId,
                 'program_id' => $budget['mainCategory']['key']
@@ -616,9 +601,7 @@ class AapcrController extends Controller
 
                 if(!$newBudget->save()){
                     DB::rollBack();
-                }else{
-                    array_push($ids, $newBudget->id);
-                }
+                }else{ $ids[] = $newBudget->id; }
             }else{
                 $history = "";
 
@@ -642,7 +625,7 @@ class AapcrController extends Controller
                     DB::rollBack();
                 }
 
-                array_push($ids, $programBudget->id);
+                $ids[] = $programBudget->id;
             }
         }
 
