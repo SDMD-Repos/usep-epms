@@ -10,7 +10,7 @@ class FormAccess extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'form_id', 'pmaps_id', 'office_id', 'staff_id',
+        'form_id', 'pmaps_id', 'pmaps_name', 'office_id', 'staff_id',
         'create_at', 'create_id', 'updated_at', 'modify_id', 'deleted_at'
     ];
 

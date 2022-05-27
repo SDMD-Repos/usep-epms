@@ -63,7 +63,7 @@ export async function deleteProgram(id) {
     .catch(err => console.log(err))
 }
 
-export async function getOtherPrograms(year,form_id) {
+export async function getOtherPrograms(year, form_id) {
   return apiClient
     .get('/settings/get-other-programs/' + year + '/' + form_id)
     .then(response => {
@@ -92,7 +92,7 @@ export async function deleteOtherProgram(id) {
 
 export async function getSubCategories(year, isPrevious) {
   return apiClient
-    .get('/settings/get-sub-categories/' + year + '/'+ isPrevious)
+    .get('/settings/get-sub-categories/' + year + '/' + isPrevious)
     .then(response => {
       return response.data
     })
@@ -107,7 +107,6 @@ export async function createSubCategory(data) {
     })
     .catch(err => console.log(err))
 }
-
 
 export async function deleteSubCategory(id) {
   return apiClient
@@ -264,7 +263,7 @@ export async function getCascadingLevels() {
 
 export async function getAllFormFields(year, formId) {
   return apiClient
-    .get('/settings/get-all-form-fields/' + year + "/" + formId)
+    .get('/settings/get-all-form-fields/' + year + '/' + formId)
     .then(response => {
       return response.data
     })
@@ -283,6 +282,15 @@ export async function saveFormFieldSettings(data) {
 export async function updateFormFieldSettings(data, id) {
   return apiClient
     .post('/settings/update-form-field-settings/' + id, data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export async function getAllFormsByPermission(allForms) {
+  return apiClient
+    .post('/settings/get-all-spms-forms-permission', allForms)
     .then(response => {
       return response.data
     })
