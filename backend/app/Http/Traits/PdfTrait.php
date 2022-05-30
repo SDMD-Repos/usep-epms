@@ -185,7 +185,7 @@ trait PdfTrait {
 
         $params = [
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
-            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinal' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'totalBudget' => number_format($totalBudget, 0),
             'year' => $aapcr->year,
             'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -359,7 +359,7 @@ trait PdfTrait {
         $params = array(
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
             'public_path' => $publicPath,
-            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinalImage' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'year' => $vpopcr->year,
             'vpOfficeName' => $vpopcr->office_name,
             'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -611,11 +611,13 @@ trait PdfTrait {
         $extension = 'pdf' ;
         $input = public_path() . '/raw/' . $form . '.jasper';
 
+
+
         if(!$isUnpublish) {
             $filename =  $documentName  . "_". date("Ymd");
             $output = base_path('/public/forms/' . $filename);
         } else{
-            $filename =  strtoupper($form) . "_". $id . "_". time();
+            $filename =  $documentName;
             $output = storage_path('app/public/uploads/published/' . $filename);
         }
 
