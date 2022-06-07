@@ -39,7 +39,7 @@
           {{ (record.type === 'pi' && (typeof record.subCategory !== 'undefined' && record.subCategory !== null)) ? record.subCategory.label : ''}}
         </template>
 
-        <template v-if="column.key === 'count' && formId === `opcrvp`">
+        <template v-if="column.key === 'count' && formId === `vpopcr`">
           {{ record.count }}
         </template>
 
@@ -62,7 +62,7 @@
           {{ $filters.numbersWithCommasDecimal(record.budget) }}
         </template>
 
-        <template v-if="column.key === 'cascadingLevel' && formId === `aapcr`">
+        <template v-if="column.key === 'cascadingLevel'">
           <div v-if="!record.isHeader">
             {{ record.cascadingLevel.label.children || record.cascadingLevel.label}}
           </div>
@@ -85,8 +85,8 @@
         </template>
 
         <template v-if="column.key === 'operation'">
-          <EditFilled @click="handleEdit(record)" v-if="allowedAction(record)"/>
-          <a-divider type="vertical" v-if="allowedAction(record)" />
+          <EditFilled @click="handleEdit(record)" />
+          <a-divider type="vertical" />
           <template v-if="record.type === 'pi'">
             <PlusCircleFilled @click="handleAddSub(record)"/>
             <a-divider type="vertical" v-if="allowedAction(record)"/>
@@ -146,7 +146,7 @@ export default defineComponent({
         })
         setAllowedColumns(['subCategory'])
         break;
-      case 'opcrvp':
+      case 'vpopcr':
         filteredSource = computed(()=> {
           const source = props.itemSource.filter(i => i.category === props.functionId)
           source.forEach((x, y) => {
@@ -180,7 +180,7 @@ export default defineComponent({
 
     const allowedAction = data => {
       let allow = false
-      if (props.formId === 'aapcr' || (props.formId === 'opcrvp' && !data.isCascaded) || props.formId === 'opcrtemplate') {
+      if (props.formId === 'aapcr' || (props.formId === 'vpopcr' && !data.isCascaded) || props.formId === 'opcrtemplate') {
         allow = true
       }
       return allow

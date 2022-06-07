@@ -75,6 +75,11 @@ class VpOpcrDetail extends Model
         return $this->belongsTo('App\AapcrDetail', 'aapcr_detail_id');
     }
 
+    public function cascadingLevel()
+    {
+        return $this->belongsTo('App\CascadingLevel');
+    }
+
     public static function boot() {
         parent::boot();
 

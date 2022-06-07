@@ -2,62 +2,69 @@
     <div>
       <a-spin :spinning="loading">
         <a-row type="flex">
-          <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Office/College:</b></a-col>
-          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
-            <a-tree-select
-              v-model:value="officeId"
-              style="width: 100%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="offices"
-              placeholder="Select Office/College"
-              tree-node-filter-prop="title"
-              show-search
-              allow-clear
-              label-in-value
-              @change="getPersonnelList"
-            />
+          <a-col :span="12">
+            <a-row type="flex">
+              <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Office/College:</b></a-col>
+              <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
+                <a-tree-select
+                  v-model:value="officeId"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="offices"
+                  placeholder="Select Office/College"
+                  tree-node-filter-prop="title"
+                  show-search
+                  allow-clear
+                  label-in-value
+                  @change="getPersonnelList"
+                />
+              </a-col>
+            </a-row>
+            <a-row type="flex" class="mt-3">
+              <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Personnel: </b></a-col>
+              <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
+                <a-tree-select
+                  v-model:value="personnelId"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="memberList"
+                  placeholder="Select Personnel"
+                  tree-node-filter-prop="title"
+                  show-search
+                  allow-clear
+                  label-in-value
+                  @change="getAccessList"
+                />
+              </a-col>
+            </a-row>
           </a-col>
-        </a-row>
-        <a-row type="flex" class="mt-3">
-          <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Personnel: </b></a-col>
-          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
-            <a-tree-select
-              v-model:value="personnelId"
-              style="width: 100%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="memberList"
-              placeholder="Select Personnel"
-              tree-node-filter-prop="title"
-              show-search
-              allow-clear
-              label-in-value
-              @change="getAccessList"
-            />
+
+          <a-col :span="12">
+            <div v-if="data.length">
+              <a-tree
+                v-model:checkedKeys="checkedKeys"
+                :show-line="true"
+                :show-icon="false"
+                :tree-data="data"
+                :field-names="fieldNames"
+                checkable
+                default-expand-all
+                @check="onCheck"
+              >
+                <template #switcherIcon="{ switcherCls }"><down-outlined :class="switcherCls" /></template>
+
+                <template #title="{ permission_name}">
+                  <span>{{ permission_name }}</span>
+                </template>
+              </a-tree>
+            </div>
           </a-col>
         </a-row>
 
-        <div class="mt-4" v-if="data.length">
-          <!-- <a-table  class="ant-table-striped"  :default-expand-all-rows="true" row-key="id" :columns="columns" :data-source="data"
-              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false" /> -->
-          <a-tree
-          :show-line="true"
-          :show-icon="false"
-          checkable
-          :tree-data="data"
-          v-model:checkedKeys="checkedKeys"
-          @check="onCheck"
-          :field-names="fieldNames"
-        >
-         <template #title="{ permission_name}">
-             <span>{{ permission_name }}</span>
-           </template>
-        </a-tree>
-        </div>
-
-        <div class="mt-4"></div>
-        <a-row type="flex" justify="center" align="middle">
-          <a-button v-if="updateBtn && savebtn" type="primary" @click="onSave" >Save</a-button>
-          <a-button v-else-if="!updateBtn && savebtn" type="primary" @click="onUpdate" >Update</a-button>
+        <div class="mt-5"></div>
+        <a-row type="flex" justify="center">
+          <a-button v-if="updateBtn && saveBtn" type="primary" @click="onSave" >Save</a-button>
+          <a-button v-else-if="!updateBtn && saveBtn" type="primary" @click="onUpdate" >Update</a-button>
         </a-row>
       </a-spin>
     </div>
@@ -65,6 +72,7 @@
 <script>
 import { defineComponent, onMounted, ref, computed } from 'vue';
 import { useStore } from 'vuex'
+import { DownOutlined } from '@ant-design/icons-vue';
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
 
@@ -78,6 +86,7 @@ const columns = [
 
 export default defineComponent({
   name:"AccessRightsTable",
+  components: { DownOutlined },
   setup() {
     const store = useStore()
 
@@ -87,7 +96,7 @@ export default defineComponent({
     const accessList = ref([])
     const checkedKeys = ref([])
     const updateBtn = ref(true)
-    const savebtn = ref(false)
+    const saveBtn = ref(false)
 
     let formLoading = ref(false)
 
@@ -112,8 +121,6 @@ export default defineComponent({
       store.dispatch('system/FETCH_PERMISSION')
     })
 
-
-
     const getPersonnelList = officeId => {
       memberList.value = []
       personnelId.value = []
@@ -137,7 +144,7 @@ export default defineComponent({
       checkedKeys.value = []
       if (personnelId) {
         formLoading.value = true
-         savebtn.value = true
+        saveBtn.value = true
         const id = personnelId.value
         getAccessByUser(id).then(response => {
           if (response.status) {
@@ -152,7 +159,7 @@ export default defineComponent({
           formLoading.value = false
         })
       }else{
-        savebtn.value = false
+        saveBtn.value = false
       }
     }
 
@@ -164,6 +171,8 @@ export default defineComponent({
 
       store.dispatch('system/SAVE_PERMISSION',{ payload: params })
     }
+
+
     const onUpdate = () => {
       let params = {
         personnelId: personnelId.value.value,
@@ -196,6 +205,7 @@ export default defineComponent({
       formLoading,
       accessList,
       updateBtn,
+      saveBtn,
       loading,
 
       getPersonnelList,
@@ -203,7 +213,6 @@ export default defineComponent({
       onSave,
       getAccessList,
       onUpdate,
-      savebtn,
       onCheck,
     };
   },

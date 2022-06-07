@@ -1,15 +1,15 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrvpForm from '@/services/api/mainForms/opcrvp'
+import * as vpOpcrForm from '@/services/api/mainForms/vpopcr'
 import * as system from '@/services/api/system/permission'
 
 const mapApiProviders = {
-  save: opcrvpForm.save,
-  getList: opcrvpForm.fetchVpOpcrs,
-  publish: opcrvpForm.publish,
-  unpublish: opcrvpForm.unpublish,
-  deactivate: opcrvpForm.deactivate,
-  update: opcrvpForm.update,
+  save: vpOpcrForm.save,
+  getList: vpOpcrForm.fetchVpOpcrs,
+  publish: vpOpcrForm.publish,
+  unpublish: vpOpcrForm.unpublish,
+  deactivate: vpOpcrForm.deactivate,
+  update: vpOpcrForm.update,
   permission: system.checkAllowForm,
 }
 

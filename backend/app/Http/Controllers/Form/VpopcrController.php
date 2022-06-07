@@ -124,6 +124,7 @@ class VpopcrController extends Controller
                         'measures' => $extracted['measures'],
                         'budget' => $data->allocated_budget,
                         'targetsBasis' => $data->targets_basis,
+                        'cascadingLevel' => $extracted['cascadingLevel'],
                         'implementing' => $offices['implementing'],
                         'supporting' => $offices['supporting'] ?? [],
                         'remarks' => $data->other_remarks,
@@ -159,6 +160,7 @@ class VpopcrController extends Controller
                                         'measures' => [],
                                         'budget' => 0.00,
                                         'targetsBasis' => '',
+                                        'cascadingLevel' => '',
                                         'implementing' => [],
                                         'supporting' => [],
                                         'remarks' => '',
@@ -340,6 +342,7 @@ class VpopcrController extends Controller
         $detail->target = $data['target'];
         $detail->allocated_budget = $data['budget'];
         $detail->targets_basis = $data['targetsBasis'];
+        $detail->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $detail->category_id = $data['category'];
         $detail->sub_category_id = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
         $detail->program_id = $data['program'];
@@ -640,6 +643,7 @@ class VpopcrController extends Controller
             'measures' => $extracted['measures'],
             'budget' => $data->allocated_budget,
             'targetsBasis' => $data->targets_basis,
+            'cascadingLevel' => $extracted['cascadingLevel'],
             'implementing' => $offices['implementing'] ?? [],
             'supporting' => $offices['supporting'] ?? [],
             'remarks' => $data->remarks,
@@ -854,7 +858,7 @@ class VpopcrController extends Controller
         $isHeader = $data['isHeader'] ? 1 : 0;
 
         if (!$data['isCascaded']) {
-            $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+            $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
 
             $updated->sub_category_id = $subCategory;
             $updated->program_id = $data['program'];
@@ -864,6 +868,7 @@ class VpopcrController extends Controller
         $updated->pi_name = $data['name'];
         $updated->target = $data['target'];
         $updated->targets_basis = $data['targetsBasis'];
+        $updated->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $updated->allocated_budget = $data['budget'];
         $updated->remarks = $data['remarks'];
         $updated->modify_id = $this->login_user->pmaps_id;

@@ -2,7 +2,7 @@
   <div>
     <a-card>
       <aapcr-form v-if="formId === `aapcr`" :form-id="formId" />
-      <opcr-vp-form v-if="formId === `opcrvp`" :form-id="formId" />
+      <opcr-vp-form v-if="formId === `vpopcr`" :form-id="formId" />
       <opcr-form v-if="formId === `opcr`" :form-id="formId" />
       <opcr-template-form v-if="formId === `opcrtemplate`" :form-id="formId" />
     </a-card>

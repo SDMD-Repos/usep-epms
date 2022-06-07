@@ -59,7 +59,7 @@ import { useRouter, useRoute } from "vue-router";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
-import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/opcrvp'
+import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/vpopcr'
 import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 
@@ -88,8 +88,8 @@ export default defineComponent({
     } = useFormOperations(props)
 
     // COMPUTED
-    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
-    const accessOfficeId = computed(() => store.getters['opcrvp/form'].accessOfficeId)
+    const hasVpopcrAccess = computed(() => store.getters['vpopcr/form'].hasVpopcrAccess)
+    const accessOfficeId = computed(() => store.getters['vpopcr/form'].accessOfficeId)
 
     let vpOfficesList =  computed(() => {
       let res = store.getters['external/external'].vpOffices
@@ -101,7 +101,7 @@ export default defineComponent({
 
     const categories = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => {
-      return store.getters['formManager/manager'].loading || store.getters['opcrvp/form'].loading
+      return store.getters['formManager/manager'].loading || store.getters['vpopcr/form'].loading
     })
 
     const spinningTip = computed(() => {
@@ -121,7 +121,7 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
 
       if(vpOpcrId.value) {
@@ -137,14 +137,14 @@ export default defineComponent({
 
     // METHODS
     const onLoad = async () => {
-      await store.commit('opcrvp/SET_STATE', { dataSource: [] })
+      await store.commit('vpopcr/SET_STATE', { dataSource: [] })
       await store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
     }
 
     const checkFormDetails = () => {
       allowEdit.value = false
       if(typeof vpOffice.value !== 'undefined') {
-        store.commit('opcrvp/SET_STATE', {
+        store.commit('vpopcr/SET_STATE', {
           loading: true,
           dataSource: [],
         })
@@ -156,7 +156,8 @@ export default defineComponent({
                 title: () => 'The selected office has an existing OPCR for the year ' + year.value,
                 content: () => 'Please check the list or select a different year/office to create a new OPCR',
               })
-              store.commit('opcrvp/SET_STATE', { loading: false })
+              store.commit('vpopcr/SET_STATE', { loading: false })
+              resetFormFields()
             } else {
               /*if(counter.value) {
                 Modal.confirm({
@@ -179,19 +180,19 @@ export default defineComponent({
           }
         })
       }else {
-        store.commit('opcrvp/SET_STATE', { dataSource: [] })
+        store.commit('vpopcr/SET_STATE', { dataSource: [] })
       }
     }
 
     const loadAapcrIndicators = () => {
       allowEdit.value = false
-      store.commit('opcrvp/SET_STATE', {
+      store.commit('vpopcr/SET_STATE', {
         loading: true,
       })
       getAapcrDetailsByOffice(vpOffice.value.key, year.value).then(response => {
         if(response) {
           if(response.aapcrId) {
-            store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
+            store.commit('vpopcr/SET_STATE', { dataSource: response.dataSource })
 
             allowEdit.value = true
             aapcrId.value = response.aapcrId
@@ -203,9 +204,11 @@ export default defineComponent({
               title: () => 'There is no published AAPCR for the year ' + year.value,
               content: () => '',
             })
+
+            resetFormFields()
           }
         }
-        store.commit('opcrvp/SET_STATE', {
+        store.commit('vpopcr/SET_STATE', {
           loading: false,
         })
       })
@@ -230,14 +233,14 @@ export default defineComponent({
     }
 
     const getVpOpcrDetails = () => {
-      store.commit('opcrvp/SET_STATE', { loading: true })
+      store.commit('vpopcr/SET_STATE', { loading: true })
       fetchFormDetails(vpOpcrId.value).then(async response => {
         if(response.aapcrId) {
           allowEdit.value = true
 
           await onLoad()
 
-          store.commit('opcrvp/SET_STATE', { dataSource: response.dataSource })
+          store.commit('vpopcr/SET_STATE', { dataSource: response.dataSource })
 
           year.value = response.year
           vpOffice.value = response.vpOffice
@@ -248,7 +251,7 @@ export default defineComponent({
 
           await initializeVPForm()
         }
-        store.commit('opcrvp/SET_STATE', { loading: false })
+        store.commit('vpopcr/SET_STATE', { loading: false })
       })
     }
 
@@ -290,7 +293,7 @@ export default defineComponent({
           isFinalized: isFinal,
           aapcrId: aapcrId.value,
         }
-        store.dispatch('opcrvp/SAVE', { payload: details })
+        store.dispatch('vpopcr/SAVE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })
@@ -301,7 +304,7 @@ export default defineComponent({
           deletedIds: deletedItems.value,
           vpOpcrId: vpOpcrId.value,
         }
-        store.dispatch('opcrvp/UPDATE', { payload: details })
+        store.dispatch('vpopcr/UPDATE', { payload: details })
           .then(() => {
             router.push({ name: 'form.list', params: { formId: props.formId } })
           })

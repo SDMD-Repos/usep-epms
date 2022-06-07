@@ -6,85 +6,98 @@
     <a-form ref="opcrVpForm" name="opcr_vp_indicator_form" :model="form"
             layout="horizontal" :hide-required-mark="true" :label-col="formItemLayout.labelCol"
             :wrapper-col="formItemLayout.wrapperCol" @finish="onFinish">
-      <a-form-item name="type" label="Type">
-        <a-radio-group :options="typeOptions" v-model:value="config.type" disabled/>
-      </a-form-item>
 
-      <div v-if="config.type === 'sub'">
-        <a-row type="flex">
-          <a-col :span="3" :offset="3">
-            <label>Parent PI: </label>
-          </a-col>
-          <a-col :span="14">
-            <p class="withNewLine">{{ config.parentDetails.name }}</p>
-          </a-col>
-        </a-row>
-        <br>
-      </div>
+      <template v-if="!config.isCascaded || typeof config.isCascaded === 'undefined'">
+        <a-form-item name="type" label="Type">
+          <a-radio-group :options="typeOptions" v-model:value="config.type" disabled/>
+        </a-form-item>
 
-      <a-form-item name="program" :rules="rules.program">
-        <template #label>
-          <span class="required-indicator">Program</span>
-        </template>
-        <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
-                  :disabled="config.type === 'sub'" />
-      </a-form-item>
+        <div v-if="config.type === 'sub'">
+          <a-row type="flex">
+            <a-col :span="3" :offset="3">
+              <label>Parent PI: </label>
+            </a-col>
+            <a-col :span="14">
+              <p class="withNewLine">{{ config.parentDetails.name }}</p>
+            </a-col>
+          </a-row>
+          <br>
+        </div>
 
-      <a-form-item name="subCategory" label="Sub Category">
-        <a-tree-select
-          v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
-          :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id',}"
-          allow-clear tree-default-expand-all label-in-value
-          :disabled="config.type === 'sub'"
-          @change="changeNullValue($event, 'subCategory')"
-        ></a-tree-select>
-      </a-form-item>
+        <a-form-item name="program" :rules="rules.program">
+          <template #label>
+            <span class="required-indicator">Program</span>
+          </template>
+          <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
+                    :disabled="config.type === 'sub'" />
+        </a-form-item>
 
-      <a-form-item name="name" :rules="rules.name">
-        <template #label>
-          <span class="required-indicator">Performance Indicator</span>
-        </template>
-        <a-textarea v-model:value="form.name" auto-size/>
-      </a-form-item>
+        <a-form-item name="subCategory" label="Sub Category">
+          <a-tree-select
+            v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
+            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            :tree-data="subCategories" :field-names="{ label: 'name', value: 'id' }"
+            :disabled="config.type === 'sub'"
+            allow-clear tree-default-expand-all label-in-value
+            @change="changeNullValue($event, 'subCategory')"
+          ></a-tree-select>
+        </a-form-item>
 
-      <a-form-item name="isHeader" label="Header PI?">
-        <template v-if="!form.isHeader && config.type !== 'sub'">
-          <a-tooltip placement="right" :title="tooltipHeaderText">
-            <a-switch v-model:checked="form.isHeader" :disabled="config.type === 'sub'" @change="toggleIsHeader"/>
-          </a-tooltip>
-        </template>
-        <a-switch v-else v-model:checked="form.isHeader" :disabled="config.type === 'sub'" @change="toggleIsHeader"/>
-      </a-form-item>
+        <a-form-item name="name" :rules="rules.name">
+          <template #label>
+            <span class="required-indicator">Performance Indicator</span>
+          </template>
+          <a-textarea v-model:value="form.name" auto-size/>
+        </a-form-item>
+
+        <a-form-item name="isHeader" label="Header PI?">
+          <template v-if="!form.isHeader && config.type !== 'sub'">
+            <a-tooltip placement="right" :title="tooltipHeaderText">
+              <a-switch v-model:checked="form.isHeader" :disabled="config.type === 'sub'" @change="toggleIsHeader"/>
+            </a-tooltip>
+          </template>
+          <a-switch v-else v-model:checked="form.isHeader" :disabled="config.type === 'sub'" @change="toggleIsHeader"/>
+        </a-form-item>
+      </template>
 
       <template v-if="!form.isHeader">
-        <a-form-item name="target" :rules="rules.target">
-          <template #label><span class="required-indicator">Target</span></template>
+        <template v-if="!config.isCascaded || typeof config.isCascaded === 'undefined'">
+          <a-form-item name="target" :rules="rules.target">
+            <template #label><span class="required-indicator">Target</span></template>
 
-          <a-input v-model:value="form.target"/>
-        </a-form-item>
+            <a-input v-model:value="form.target"/>
+          </a-form-item>
 
-        <a-form-item name="measures" :rules="rules.measures">
-          <template #label><span class="required-indicator">Measures</span></template>
+          <a-form-item name="measures" :rules="rules.measures">
+            <template #label><span class="required-indicator">Measures</span></template>
 
-          <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                    style="width: 100%" :options="measuresList" label-in-value allow-clear />
-        </a-form-item>
+            <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
+                      style="width: 100%" :options="measuresList" label-in-value allow-clear />
+          </a-form-item>
 
-        <a-form-item name="budget" label="Allocated Budget" >
-          <a-input-number v-model:value="form.budget" :min="0" style="width: 50%" :step="0.01"
-                          :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                          :parser="value => value.replace(/\$\s?|(,*)/g, '')" />
-        </a-form-item>
+          <a-form-item name="budget" label="Allocated Budget" >
+            <a-input-number v-model:value="form.budget" :min="0" style="width: 50%" :step="0.01"
+                            :formatter="value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                            :parser="value => value.replace(/\$\s?|(,*)/g, '')" />
+          </a-form-item>
 
-        <a-form-item name="targetsBasis" :rules="rules.targetsBasis">
-          <template #label><span class="required-indicator">Targets Basis</span></template>
+          <a-form-item name="targetsBasis" :rules="rules.targetsBasis">
+            <template #label><span class="required-indicator">Targets Basis</span></template>
 
-          <a-auto-complete
-            v-model:value="form.targetsBasis" :options="targetsBasisList" :filter-option="filterBasisOption"
-            :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
-          />
-        </a-form-item>
+            <a-auto-complete
+              v-model:value="form.targetsBasis" :options="targetsBasisList" :filter-option="filterBasisOption"
+              :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
+            />
+          </a-form-item>
+
+          <a-form-item name="cascadingLevel" :rules="rules.cascadingLevel">
+            <template #label><span class="required-indicator">Cascading Level</span></template>
+
+            <a-select v-model:value="form.cascadingLevel" placeholder="Select" style="width: 100%"
+                      label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
+                      :options="cascadingList" />
+          </a-form-item>
+        </template>
 
         <a-form-item :name="['options', 'implementing']" ref="implementing" :rules="rules.implementing" :auto-link="false">
           <template #label><span class="required-indicator">Implementing Office</span></template>
@@ -197,7 +210,7 @@
           </template>
         </div>
 
-        <a-form-item name="remarks" label="Remarks">
+        <a-form-item name="remarks" label="Remarks" v-if="!config.isCascaded || typeof config.isCascaded === 'undefined'">
           <a-textarea v-model:value="form.remarks" auto-size />
         </a-form-item>
       </template>
@@ -271,6 +284,11 @@ export default defineComponent({
     const measuresList  = computed(() => {
       const list = store.state.formManager.measures
       return list.map(i => ({ value: i.key, label: i.name }))
+    })
+
+    const cascadingList  = computed(() => {
+      const list = store.state.formManager.cascadingLevels
+      return list.map(i => ({ value: i.code, label: i.name }))
     })
 
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
@@ -352,7 +370,7 @@ export default defineComponent({
 
       SHOW_PARENT, cachedOffice,
 
-      programsByFunction, functionsWithProgram, subCategories, measuresList, officesList,
+      programsByFunction, functionsWithProgram, subCategories, measuresList, cascadingList, officesList,
 
       typeOptions, formItemLayout, tooltipHeaderText,
 
