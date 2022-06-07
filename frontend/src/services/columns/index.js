@@ -117,7 +117,6 @@ export const formTemplateTableColumns = [
     dataIndex: 'subCategory',
     className: 'column-sub-category',
     width: 280,
-    slots: { customRender: 'subCategory' },
   },
   {
     title: 'Performance Indicator',
@@ -132,7 +131,6 @@ export const formTemplateTableColumns = [
     dataIndex: 'isHeader',
     className: 'column-is-header',
     width: 100,
-    slots: { customRender: 'isHeader' },
   },
   {
     title: 'Success Indicators',
@@ -148,9 +146,6 @@ export const formTemplateTableColumns = [
             dataIndex: 'target',
             className: 'column-target-year',
             width: 225,
-            slots: {
-              title: 'targetYearColumn',
-            },
           },
         ],
       },
@@ -160,7 +155,6 @@ export const formTemplateTableColumns = [
         dataIndex: 'measures',
         className: 'column-measures',
         width: 145,
-        slots: { customRender: 'measures' },
       },
     ],
   },
@@ -170,7 +164,6 @@ export const formTemplateTableColumns = [
     fixed: 'right',
     className: 'column-action',
     width: 100,
-    slots: { customRender: 'action' },
   },
 ]
 

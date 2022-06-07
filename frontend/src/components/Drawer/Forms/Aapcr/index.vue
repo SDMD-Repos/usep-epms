@@ -83,7 +83,7 @@
         </a-form-item>
 
         <a-form-item v-bind="validateInfos.cascadingLevel">
-          <template #label><span class="required-indicator">Casading Level</span></template>
+          <template #label><span class="required-indicator">Cascading Level</span></template>
 
           <a-select v-model:value="form.cascadingLevel" placeholder="Select" style="width: 100%"
                     label-in-value :disabled="config.type === 'sub' && !config.parentDetails.isHeader"
@@ -251,7 +251,7 @@ export default defineComponent({
 
     const cascadingList  = computed(() => {
       const list = store.state.formManager.cascadingLevels
-      return list.map(i => ({ value: i.id, label: i.name }))
+      return list.map(i => ({ value: i.code, label: i.name }))
     })
 
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)

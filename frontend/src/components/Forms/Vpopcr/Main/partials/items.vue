@@ -67,7 +67,7 @@ export default defineComponent({
       let columns = JSON.parse(JSON.stringify(formTableColumns))
       const remarksIndex = columns.findIndex(i => i.key === 'remarks')
       columns[remarksIndex].title = "Remarks"
-      const deleteKeys = ['subCategory', 'cascadingLevel']
+      const deleteKeys = ['subCategory']
       columns = [...columns.filter(i => deleteKeys.indexOf(i.key) === -1)]
       const addendum = {
         title: '#',
@@ -115,6 +115,7 @@ export default defineComponent({
         measures: typeof data.measures !== 'undefined' ? data.measures : [],
         budget: typeof data.budget !== 'undefined' ? data.budget : null,
         targetsBasis: typeof data.targetsBasis !== 'undefined' ? data.targetsBasis : '',
+        cascadingLevel: typeof data.cascadingLevel !== 'undefined' ? data.cascadingLevel : null,
         implementing: typeof data.implementing !== 'undefined' ? data.implementing : [],
         supporting: typeof data.supporting != 'undefined' ? data.supporting : [],
         remarks: typeof data.remarks != 'undefined' ? data.remarks : '',
@@ -159,9 +160,9 @@ export default defineComponent({
       formData.subCategory = newData.subCategory ? newData.subCategory : undefined
       formData.program = newData.program
       if (!newData.isHeader) {
-
         formData.measures = newData.measures
         formData.targetsBasis = newData.targetsBasis
+        formData.cascadingLevel = newData.cascadingLevel
         formData.implementing = newData.implementing
         formData.supporting = newData.supporting
       }
@@ -195,7 +196,7 @@ export default defineComponent({
       }
       assignFormData(editData)
 
-      openDrawer({ action: 'Update', updateId: updateId, type: data.type, parentDetails: parentDetails })
+      openDrawer({ action: 'Update', updateId: updateId, type: data.type, isCascaded: data.isCascaded, parentDetails: parentDetails })
     }
 
     const updateTableItem = async data => {

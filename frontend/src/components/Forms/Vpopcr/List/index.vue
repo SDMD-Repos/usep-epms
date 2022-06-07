@@ -21,7 +21,7 @@ import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
-import { renderPdf, updateFile } from '@/services/api/mainForms/opcrvp'
+import { renderPdf, updateFile } from '@/services/api/mainForms/vpopcr'
 import FormListTable from '@/components/Tables/Forms/List'
 import { useUnpublish } from '@/services/functions/formListActions'
 import { usePermission } from '@/services/functions/permission'
@@ -51,9 +51,9 @@ export default defineComponent({
     const { isUploadedViewed, viewedForm, viewUploadedList, onCloseList, uploadedListState, viewUnpublishedForms } = useViewPublishedFiles()
 
     // COMPUTED
-    const list = computed(() => store.getters['opcrvp/form'].list)
-    const loading = computed(() => store.getters['opcrvp/form'].loading)
-    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+    const list = computed(() => store.getters['vpopcr/form'].list)
+    const loading = computed(() => store.getters['vpopcr/form'].loading)
+    const hasVpopcrAccess = computed(() => store.getters['vpopcr/form'].hasVpopcrAccess)
 
     const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
 
@@ -64,8 +64,8 @@ export default defineComponent({
 
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
-      store.dispatch('opcrvp/FETCH_LIST')
+      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('vpopcr/FETCH_LIST')
     })
 
     // METHODS
@@ -96,7 +96,7 @@ export default defineComponent({
         year: data.year,
         officeId: data.office_id,
       }
-      store.dispatch('opcrvp/PUBLISH', { payload: payload })
+      store.dispatch('vpopcr/PUBLISH', { payload: payload })
     }
 
     const viewPdf = params => {
@@ -107,7 +107,7 @@ export default defineComponent({
       const documentName = data.office_name || data.file_name
 
       if(!fromUnpublished) {
-        store.commit('opcrvp/SET_STATE', { loading: true })
+        store.commit('vpopcr/SET_STATE', { loading: true })
 
         renderer = renderPdf
       }else {
@@ -128,7 +128,7 @@ export default defineComponent({
           window.open(route.href, "_blank")
         }
         if(!fromUnpublished) {
-          store.commit('opcrvp/SET_STATE', { loading: false })
+          store.commit('vpopcr/SET_STATE', { loading: false })
         }else {
           message.destroy()
         }
@@ -142,17 +142,17 @@ export default defineComponent({
       })
       formData.append('id', cachedId.value)
       if(!isConfirmDeleteFile.value) {
-        await store.dispatch('opcrvp/UNPUBLISH', { payload: formData })
+        await store.dispatch('vpopcr/UNPUBLISH', { payload: formData })
         await cancelUpload()
       }else {
-        store.commit('opcrvp/SET_STATE', { loading: true })
+        store.commit('vpopcr/SET_STATE', { loading: true })
 
         await cancelUpload()
         await onCloseList()
 
         await updateFile(formData).then(response => {
           if(response) {
-            store.dispatch('opcrvp/FETCH_LIST').then(() => {
+            store.dispatch('vpopcr/FETCH_LIST').then(() => {
               const { data } = response
               viewUploadedList(data) // open List of Uploaded Files Modal
             })
@@ -160,7 +160,7 @@ export default defineComponent({
               message: 'Success',
               description: 'File was deleted successfully',
               })
-            store.commit('opcrvp/SET_STATE', { loading: false })
+            store.commit('vpopcr/SET_STATE', { loading: false })
           }
         })
       }

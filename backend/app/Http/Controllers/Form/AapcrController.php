@@ -131,7 +131,7 @@ class AapcrController extends Controller
             $detail->other_remarks = $values['remarks'];
         }
 
-        $detail->parent_id = isset($values['detailId']) ? $values['detailId'] : null;
+        $detail->parent_id = $values['detailId'] ?? null;
         $detail->create_id = $this->login_user->pmaps_id;
         $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
