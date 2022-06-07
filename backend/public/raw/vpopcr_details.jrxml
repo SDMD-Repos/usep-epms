@@ -134,9 +134,9 @@
 	<field name="function" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
 	<field name="subCategory" class="java.lang.String"/>
-	<field name="parentSubCategory" class="java.lang.Integer"/>
+	<field name="parentSubCategory" class="java.lang.String"/>
 	<field name="pi_name" class="java.lang.String"/>
-	<field name="target" class="java.lang.Integer"/>
+	<field name="target" class="java.lang.String"/>
 	<field name="measures" class="java.lang.String"/>
 	<field name="allocatedBudget" class="java.lang.String"/>
 	<field name="targetsBasis" class="java.lang.String"/>
@@ -190,7 +190,7 @@
 					</box>
 					<text><![CDATA[]]></text>
 				</staticText>
-				<textField>
+				<textField isBlankWhenNull="true">
 					<reportElement x="0" y="0" width="227" height="11" uuid="7565def3-0324-4e89-ad0d-528f0d7f3932">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -314,8 +314,8 @@
 					</box>
 					<text><![CDATA[]]></text>
 				</staticText>
-				<textField>
-					<reportElement style="SubCategoryStyle" x="0" y="1" width="227" height="8" uuid="10bddbfc-0a43-45f1-8a99-5ba6ed4c4431">
+				<textField isBlankWhenNull="true">
+					<reportElement style="SubCategoryStyle" x="1" y="1" width="227" height="8" uuid="10bddbfc-0a43-45f1-8a99-5ba6ed4c4431">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</reportElement>

@@ -10,7 +10,6 @@
 import { defineComponent, ref, onMounted, computed } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish } from '@/services/functions/formListActions'
 import FormListTable from '@/components/Tables/Forms/List'
@@ -65,8 +64,6 @@ export default defineComponent({
     }
 
     return {
-      moment,
-
       documentName,
 
       columns: listTableColumns,

@@ -1,17 +1,18 @@
 <template>
   <a-table :columns="columns" :data-source="subCategoryList" bordered>
-    <template #operation="{ record }">
-      <a-popconfirm
-        title="Are you sure you want to delete this?"
-        @confirm="onDelete(record.key)"
-        ok-text="Yes"
-        cancel-text="No"
-        v-if="isDelete"
-      >
-        <template #icon><warning-outlined /></template>
-        <a type="primary">Delete</a>
-      </a-popconfirm>
-      <span v-else></span>
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'operation'">
+        <a-popconfirm
+          title="Are you sure you want to delete this?"
+          @confirm="onDelete(record.key)"
+          ok-text="Yes"
+          cancel-text="No"
+          v-if="isDelete"
+        >
+          <template #icon><warning-outlined /></template>
+          <a type="primary">Delete</a>
+        </a-popconfirm>
+      </template>
     </template>
   </a-table>
 </template>
@@ -23,7 +24,7 @@ import { WarningOutlined } from '@ant-design/icons-vue'
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Function', dataIndex: 'category.name', key: 'function' },
-  { title: 'Action', dataIndex: 'operation', slots: { customRender: 'operation' } },
+  { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
 export default defineComponent({

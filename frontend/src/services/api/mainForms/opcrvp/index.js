@@ -47,12 +47,7 @@ export function publish(data) {
 
 export function unpublish(data) {
   return apiClient
-    .post('/forms/opcrvp/unpublish', data,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+    .post('/forms/opcrvp/unpublish', data)
     .then(response => {
       return response.data
     })

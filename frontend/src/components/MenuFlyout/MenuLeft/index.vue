@@ -161,7 +161,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import _ from 'lodash'
+import find from 'lodash/find'
 import { getMenuData } from '@/services/menu'
 import { UserOutlined } from '@ant-design/icons-vue'
 import SubMenu from './partials/submenu'
@@ -226,7 +226,7 @@ export default {
           return flattenedItems
         }, [])
       const selectedItem =
-        _.find(flattenItems(menuData.value, 'children'), ['url', pathname.value]) || {}
+        find(flattenItems(menuData.value, 'children'), ['url', pathname.value]) || {}
       const selectedSubmenu = menuData.value.reduce((key, parent) => {
         if (Array.isArray(parent.children)) {
           parent.children.map(child => {

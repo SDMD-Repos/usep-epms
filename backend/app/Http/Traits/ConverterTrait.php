@@ -119,7 +119,7 @@ trait ConverterTrait {
                 $officeId = (int)$datum->personnel_id !== 0 ? (int)$datum->personnel_id : $datum->personnel_id;
                 $officeName = $datum->personnel_name;
             }else{
-                $officeId = $datum->office_id;
+                $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
                 $officeName = $datum->office_name;
             }
 
@@ -198,7 +198,7 @@ trait ConverterTrait {
 
                 $basisObj->value = $targetsBasis;
 
-                array_push($this->targetsBasisList, $basisObj);
+                $this->targetsBasisList[] = $basisObj;
             }
         }
     }
@@ -228,7 +228,7 @@ trait ConverterTrait {
                 $record->key = $measure->id;
                 $record->label = $measure->name;
 
-                array_push($measures, $record);
+                $measures[] = $record;
             }
         }
 

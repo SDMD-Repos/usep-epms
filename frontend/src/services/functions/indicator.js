@@ -43,6 +43,7 @@ export const useDrawerSettings = () => {
           modalTitle: 'Update Performance Indicator',
           updateId: params.updateId,
           type: params.type,
+          isCascaded: params.isCascaded,
           parentDetails: params.parentDetails,
         }
         return false
@@ -67,7 +68,7 @@ export const useDrawerSettings = () => {
 /* ------------------------------------------ */
 
 const defaultAapcrFormData = {
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
@@ -86,13 +87,14 @@ const defaultAapcrFormData = {
 
 const defaultOpcrVpFormData = () => ({
   program: null,
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
   measures: [],
   budget: null,
   targetsBasis: '',
+  cascadingLevel: null,
   implementing: [],
   supporting: [],
   options: {
@@ -121,7 +123,7 @@ const defaultOpcrFormData = {
 }
 
 const defaultOpcrTemplateData = {
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
@@ -136,7 +138,7 @@ export const useDefaultFormData = props => {
     case 'aapcr':
       formData = reactive({ ...defaultAapcrFormData })
       break
-    case 'opcrvp':
+    case 'vpopcr':
       formData = reactive(defaultOpcrVpFormData())
       break
     case 'opcr':
@@ -186,7 +188,7 @@ export const useDefaultFormData = props => {
         ],
       })
       break;
-    case 'opcrvp':
+    case 'vpopcr':
     case 'opcr':
       let programValidator = async (rule, value) => {
         const { parentDetails } = props.config.value
@@ -226,6 +228,7 @@ export const useDefaultFormData = props => {
         target: [{ validator: validateNonHeader, trigger: 'blur'}],
         measures: [{ validator: validateNonHeader, trigger: 'blur'}],
         targetsBasis: [{ validator: validateNonHeader, trigger: 'blur' }],
+        cascadingLevel: [{ validator: validateNonHeader, trigger: 'blur'}],
         implementing: [
           { validator: validateOfficesForVP, trigger: 'blur'},
           { type: 'array' },
@@ -253,9 +256,10 @@ export const useDefaultFormData = props => {
 
     switch (formId) {
       case 'aapcr':
-      case 'opcrvp':
+      case 'vpopcr':
         formData.budget = null
         formData.targetsBasis = ''
+        formData.cascadingLevel = null
         formData.implementing = []
         formData.supporting = []
         formData.options.implementing = []
@@ -271,7 +275,7 @@ export const useDefaultFormData = props => {
   }
 
   const assignFormData = newData => {
-    formData.subCategory = newData.subCategory
+    formData.subCategory = newData.subCategory ? newData.subCategory : undefined
     formData.name = newData.name
     formData.isHeader = newData.isHeader
     formData.target = newData.target
@@ -286,7 +290,10 @@ export const useDefaultFormData = props => {
       case 'aapcr':
         formData.cascadingLevel = newData.cascadingLevel
         break
-      case 'opcrvp':
+      case 'vpopcr':
+        formData.cascadingLevel = newData.cascadingLevel
+        formData.program = newData.program
+        break
       case 'opcr':
         formData.program = newData.program
         break

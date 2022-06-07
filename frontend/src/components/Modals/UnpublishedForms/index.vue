@@ -6,18 +6,20 @@
     <a-table :columns="columns" :data-source="list" size="small" row-key="id" bordered>
 
       <!-- Custom column render-->
-      <template #count="{ index }">
-        {{ index + 1 }}
-      </template>
+      <template #bodyCell="{ column, record, index }">
+        <template v-if="column.key === 'count'">
+          {{ index + 1 }}
+        </template>
 
-      <template #details="{ record }">
-        Unpublished {{ record.changed_date_disp }} by {{ record.requested_by }}
-      </template>
+        <template v-if="column.key === 'details'">
+          Unpublished {{ record.changed_date_disp }} by {{ record.requested_by }}
+        </template>
 
-      <template #operation="{ record }">
-        <a-tooltip title="View PDF">
-          <a-button type="link" @click="viewFile(record)">View</a-button>
-        </a-tooltip>
+        <template v-if="column.key === 'operation'">
+          <a-tooltip title="View PDF">
+            <a-button type="link" @click="viewFile(record)">View</a-button>
+          </a-tooltip>
+        </template>
       </template>
     </a-table>
   </a-modal>
@@ -29,7 +31,7 @@ const unplishedFormsColumns = [
   {
     title: '#',
     width: 50,
-    slots: { customRender: 'count' },
+    key: 'count',
   },
   {
     title: 'Reason',
@@ -38,12 +40,12 @@ const unplishedFormsColumns = [
   },
   {
     title: 'Details',
-    slots: { customRender: 'details' },
+    key: 'details',
   },
   {
     title: 'Action',
     width: 50,
-    slots: { customRender: 'operation' },
+    key: 'operation',
   },
 ]
 

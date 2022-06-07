@@ -7,6 +7,7 @@ use App\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateRequestStatus;
 use App\Http\Traits\PdfTrait;
+use App\VpOpcr;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -70,12 +71,19 @@ class RequestsController extends Controller
 
             if($status === 'verified'){
                 $model = null;
-
                 switch ($original['form_type']) {
                     case 'aapcr':
                         $model = new Aapcr();
                         $filename = $this->viewAapcrPdf($original['form_id'], 1);
                         $request->file_name = $filename;
+                        break;
+                    case 'vpopcr':
+                        $model = new VpOpcr();
+                        $filename = $this->viewVpOpcrPdf($original['form_id'], 1);
+                        $request->file_name = $filename;
+                        break;
+                    default:
+                        break;
                 }
 
                 $this->unpublishedForm($model, $original['form_id'], $request->requested_by);

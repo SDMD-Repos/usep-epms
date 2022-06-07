@@ -185,7 +185,7 @@ trait PdfTrait {
 
         $params = [
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
-            'notFinal' => !$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinal' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$aapcr->published_date || !$aapcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'totalBudget' => number_format($totalBudget, 0),
             'year' => $aapcr->year,
             'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -302,8 +302,8 @@ trait PdfTrait {
             if($isParent) {
                 $isExists = 0;
 
-                foreach($parentIds as $id) {
-                    if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
+                foreach($parentIds as $parentId) {
+                    if($parentId['id'] === $parentDetails->id && $detail->category_id === $parentId['index']) {
                         $isExists = 1;
                     }
                 }
@@ -311,6 +311,8 @@ trait PdfTrait {
                 if(!$isExists) {
                     if($parentDetails->category_id !== $detail->category_id){
                         $parentDetails->category_id = $detail->category_id;
+
+                        $parentDetails->program = null;
 
                         $parentDetails->sub_category = null;
                     }else{
@@ -357,7 +359,7 @@ trait PdfTrait {
         $params = array(
             'usepLogo' => $publicPath."/logos/USeP_Logo.png",
             'public_path' => $publicPath,
-            'notFinalImage' => !$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : "",
+            'notFinalImage' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
             'year' => $vpopcr->year,
             'vpOfficeName' => $vpopcr->office_name,
             'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -395,7 +397,7 @@ trait PdfTrait {
 
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-        $program = $detail->program->name;
+        $program = $detail->program ? $detail->program->name : null;
 
         $measures = '' ;
 
@@ -454,7 +456,7 @@ trait PdfTrait {
                 return $x['programName'] === ucwords($compare['progName']);
             }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
 
-            if(!$ifSaved) {
+            if(!$ifSaved && $detail->program) {
                 $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
                 $this->vpProgramDataSet[] = array(
@@ -609,11 +611,13 @@ trait PdfTrait {
         $extension = 'pdf' ;
         $input = public_path() . '/raw/' . $form . '.jasper';
 
+
+
         if(!$isUnpublish) {
             $filename =  $documentName  . "_". date("Ymd");
             $output = base_path('/public/forms/' . $filename);
         } else{
-            $filename =  strtoupper($form) . "_". $id . "_". time();
+            $filename =  $documentName;
             $output = storage_path('app/public/uploads/published/' . $filename);
         }
 

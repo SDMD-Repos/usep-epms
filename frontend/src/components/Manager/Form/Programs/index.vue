@@ -58,7 +58,6 @@ import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
 import { usePermission } from '@/services/functions/permission'
 
-
 export default defineComponent({
   name: "ProgramsManager",
   components: {
@@ -71,7 +70,7 @@ export default defineComponent({
     const functions = computed(() => store.getters['formManager/functions'])
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousPrograms = computed(() => store.getters['formManager/manager'].previousPrograms)
-  
+
     const formRef = ref()
     const isPreviousViewed = ref(false)
     const formState = reactive({
@@ -80,6 +79,7 @@ export default defineComponent({
       category_id: undefined,
       percentage: null,
     })
+
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -113,20 +113,19 @@ export default defineComponent({
         },
       ],
     }
+
     const normalizer = {
       title: 'name',
       value: 'id',
-    }
-   const permission ={
-                        listCreate: ["manager","m-form", "mf-programs","mfp-create"],
-                        listDelete: ["manager","m-form", "mf-programs","mfp-delete"],
-                      }
-     const {
-          // DATA
-        isCreate,isDelete,
-          // METHODS
-      } = usePermission(permission)
 
+    }
+
+    const permission = {
+      listCreate: ["manager","m-form", "mf-programs","mfp-create"],
+      listDelete: ["manager","m-form", "mf-programs","mfp-delete"],
+    }
+
+    const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
     onMounted(() => {
@@ -137,7 +136,7 @@ export default defineComponent({
     })
 
     // METHODS
- 
+
     const fetchData = async selectedYear => {
       if(isCreate.value){
          resetForm()

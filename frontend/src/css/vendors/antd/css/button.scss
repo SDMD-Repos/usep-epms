@@ -22,6 +22,9 @@
   }
   &-background {
     &-ghost {
+      border-color: $primary !important;
+      color: $primary !important;
+
       &:hover,
       &:active,
       &:focus {

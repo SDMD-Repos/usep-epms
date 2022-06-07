@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Form;
 use App\Aapcr;
 use App\AapcrDetail;
 use App\FormField;
+use App\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
+use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateVpOpcr;
 use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
@@ -122,6 +124,7 @@ class VpopcrController extends Controller
                         'measures' => $extracted['measures'],
                         'budget' => $data->allocated_budget,
                         'targetsBasis' => $data->targets_basis,
+                        'cascadingLevel' => $extracted['cascadingLevel'],
                         'implementing' => $offices['implementing'],
                         'supporting' => $offices['supporting'] ?? [],
                         'remarks' => $data->other_remarks,
@@ -157,6 +160,7 @@ class VpopcrController extends Controller
                                         'measures' => [],
                                         'budget' => 0.00,
                                         'targetsBasis' => '',
+                                        'cascadingLevel' => '',
                                         'implementing' => [],
                                         'supporting' => [],
                                         'remarks' => '',
@@ -338,8 +342,9 @@ class VpopcrController extends Controller
         $detail->target = $data['target'];
         $detail->allocated_budget = $data['budget'];
         $detail->targets_basis = $data['targetsBasis'];
+        $detail->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $detail->category_id = $data['category'];
-        $detail->sub_category_id = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+        $detail->sub_category_id = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
         $detail->program_id = $data['program'];
         $detail->remarks = $data['remarks'];
         $detail->parent_id = $data['parent_id'];
@@ -395,35 +400,37 @@ class VpopcrController extends Controller
         }
     }
 
-    public function unpublish(UploadPdfFile $request)
+    public function unpublish(UnpublishForm $request)
     {
         try {
-            DB::beginTransaction();
-
             $validated = $request->validated();
 
-            $files = $validated['files'];
+            $remarks = $validated['remarks'];
             $id = $validated['id'];
+            $officeName = $validated['officeName'];
 
-            $vpopcr = VpOpcr::find($id);
+            DB::beginTransaction();
 
-            $vpopcr->published_date = NULL;
-            $vpopcr->updated_at = Carbon::now();
-            $vpopcr->modify_id = $this->login_user->pmaps_id;
-            $vpopcr->history = $vpopcr->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $unpublished = new FormUnpublishStatus();
 
-            if($vpopcr->save()) {
-                $model = new VpOpcrFile();
+            $unpublished->form_type = 'vpopcr';
+            $unpublished->form_id = $id;
+            $unpublished->document_name = $officeName;
+            $unpublished->remarks = $remarks;
+            $unpublished->status = 'pending';
+            $unpublished->requested_date = Carbon::now();
+            $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->create_id = $this->login_user->pmaps_id;
+            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-                $this->uploadFiles($model, $id, $files);
-            }else {
+            if(!$unpublished->save()) {
                 DB::rollBack();
             }
 
             DB::commit();
 
-            return response()->json('VP\'s OPCR was unpublished successfully', 200);
-        } catch(\Exception $e){
+            return response()->json('OPCR VP was unpublished successfully', 200);
+        }catch(\Exception $e){
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -636,6 +643,7 @@ class VpopcrController extends Controller
             'measures' => $extracted['measures'],
             'budget' => $data->allocated_budget,
             'targetsBasis' => $data->targets_basis,
+            'cascadingLevel' => $extracted['cascadingLevel'],
             'implementing' => $offices['implementing'] ?? [],
             'supporting' => $offices['supporting'] ?? [],
             'remarks' => $data->remarks,
@@ -850,7 +858,7 @@ class VpopcrController extends Controller
         $isHeader = $data['isHeader'] ? 1 : 0;
 
         if (!$data['isCascaded']) {
-            $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+            $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
 
             $updated->sub_category_id = $subCategory;
             $updated->program_id = $data['program'];
@@ -860,6 +868,7 @@ class VpopcrController extends Controller
         $updated->pi_name = $data['name'];
         $updated->target = $data['target'];
         $updated->targets_basis = $data['targetsBasis'];
+        $updated->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $updated->allocated_budget = $data['budget'];
         $updated->remarks = $data['remarks'];
         $updated->modify_id = $this->login_user->pmaps_id;

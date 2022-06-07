@@ -34,6 +34,7 @@ const mapApiProviders = {
   getAllFormFields: manager.getAllFormFields,
   saveFormFieldSettings: manager.saveFormFieldSettings,
   updateFormFieldSettings: manager.updateFormFieldSettings,
+  getAllFormsByPermission: manager.getAllFormsByPermission,
 }
 
 export default {
@@ -59,6 +60,7 @@ export default {
     groups: [],
     formFields: [],
     loading: false,
+    formsByPermission: [],
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -78,9 +80,9 @@ export default {
       getFunctions(year).then(response => {
         if (response) {
           const { categories } = response
-          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+          if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousFunctions: categories })
-          }else {
+          } else {
             commit('SET_STATE', { functions: categories })
           }
         }
@@ -97,12 +99,12 @@ export default {
       const createFunction = mapApiProviders.createFunction
       createFunction(payload).then(response => {
         if (response) {
-          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Function created successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -115,12 +117,12 @@ export default {
       const deleteFunction = mapApiProviders.deleteFunction
       deleteFunction(id).then(response => {
         if (response) {
-          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Function deleted successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -132,12 +134,12 @@ export default {
       const updateFunctionProgram = mapApiProviders.updateFunctionProgram
       updateFunctionProgram(defaultProgram, id).then(response => {
         if (response) {
-          dispatch('FETCH_FUNCTIONS', { payload: { year: year }})
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Settings was saved successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -153,9 +155,9 @@ export default {
       getPrograms(year).then(response => {
         if (response) {
           const { programs } = response
-          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+          if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousPrograms: programs })
-          }else{
+          } else {
             commit('SET_STATE', {
               programs: programs,
             })
@@ -180,7 +182,7 @@ export default {
       const createProgram = mapApiProviders.createProgram
       createProgram(data).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS', { payload : { year: payload.year }})
+          dispatch('FETCH_PROGRAMS', { payload: { year: payload.year } })
           notification.success({
             message: 'Success',
             description: 'Program created successfully',
@@ -200,7 +202,7 @@ export default {
       const deleteProgram = mapApiProviders.deleteProgram
       deleteProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS', { payload : { year: year }})
+          dispatch('FETCH_PROGRAMS', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',
@@ -226,7 +228,9 @@ export default {
       const createOtherProgram = mapApiProviders.createOtherProgram
       createOtherProgram(data).then(response => {
         if (response) {
-          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: payload.year, formId: payload.formId }})
+          dispatch('FETCH_OTHER_PROGRAMS', {
+            payload: { year: payload.year, formId: payload.formId },
+          })
           notification.success({
             message: 'Success',
             description: 'Program created successfully',
@@ -238,19 +242,19 @@ export default {
       })
     },
     FETCH_OTHER_PROGRAMS({ commit }, { payload }) {
-      const { year,formId } = payload
+      const { year, formId } = payload
 
       commit('SET_STATE', {
         loading: true,
       })
 
       const getOtherPrograms = mapApiProviders.getOtherPrograms
-      getOtherPrograms(year,formId).then(response => {
+      getOtherPrograms(year, formId).then(response => {
         if (response) {
           const { otherPrograms } = response
-          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+          if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousOtherPrograms: otherPrograms })
-          }else{
+          } else {
             commit('SET_STATE', {
               otherPrograms: otherPrograms,
             })
@@ -262,7 +266,7 @@ export default {
       })
     },
     DELETE_OTHER_PROGRAM({ commit, dispatch }, { payload }) {
-      const { id, year, formId} = payload
+      const { id, year, formId } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -270,7 +274,7 @@ export default {
       const deleteOtherProgram = mapApiProviders.deleteOtherProgram
       deleteOtherProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_OTHER_PROGRAMS', { payload : { year: year, formId: formId }})
+          dispatch('FETCH_OTHER_PROGRAMS', { payload: { year: year, formId: formId } })
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',
@@ -281,10 +285,10 @@ export default {
         })
       })
     },
-     FETCH_SUB_CATEGORIES({ commit },{ payload }) {
+    FETCH_SUB_CATEGORIES({ commit }, { payload }) {
       const { year } = payload
 
-      const isPrevious = (typeof payload.isPrevious !== 'undefined' && payload.isPrevious)
+      const isPrevious = typeof payload.isPrevious !== 'undefined' && payload.isPrevious
 
       commit('SET_STATE', { loading: true })
 
@@ -292,9 +296,9 @@ export default {
       getSubCategories(year, !isPrevious).then(response => {
         if (response) {
           const { subCategories } = response
-          if(isPrevious) {
+          if (isPrevious) {
             commit('SET_STATE', { prevSubCategories: subCategories })
-          }else{
+          } else {
             commit('SET_STATE', {
               subCategories: subCategories,
             })
@@ -304,7 +308,7 @@ export default {
       })
     },
     CREATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
-      const { year, category_id, parentId, name} = payload
+      const { year, category_id, parentId, name } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -312,13 +316,13 @@ export default {
         name: name,
         category_id: category_id,
         parentId: parentId,
-        year : year,
+        year: year,
       }
 
       const createSubCategory = mapApiProviders.createSubCategory
       createSubCategory(data).then(response => {
         if (response) {
-          dispatch('FETCH_SUB_CATEGORIES', { payload : { year: year }})
+          dispatch('FETCH_SUB_CATEGORIES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Sub category created successfully',
@@ -330,7 +334,7 @@ export default {
       })
     },
     DELETE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
-    const { id, year } = payload
+      const { id, year } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -338,7 +342,7 @@ export default {
       const deleteSubCategory = mapApiProviders.deleteSubCategory
       deleteSubCategory(id).then(response => {
         if (response) {
-          dispatch('FETCH_SUB_CATEGORIES', { payload : { year: year }})
+          dispatch('FETCH_SUB_CATEGORIES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Sub category deleted successfully',
@@ -360,9 +364,9 @@ export default {
       getMeasures(year).then(response => {
         if (response) {
           const { measures } = response
-          if(typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+          if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
             commit('SET_STATE', { previousMeasures: measures })
-          }else {
+          } else {
             commit('SET_STATE', { measures: measures })
           }
         }
@@ -385,12 +389,12 @@ export default {
       const createMeasure = mapApiProviders.createMeasure
       createMeasure(data).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload : { year: year }})
+          dispatch('FETCH_MEASURES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Measure created successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -409,12 +413,12 @@ export default {
       const updateMeasure = mapApiProviders.updateMeasure
       updateMeasure(data, id).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload : { year: year }})
+          dispatch('FETCH_MEASURES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Measure updated successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -428,12 +432,12 @@ export default {
       const deleteMeasure = mapApiProviders.deleteMeasure
       deleteMeasure(id).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload : { year: year }})
+          dispatch('FETCH_MEASURES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Measure deleted successfully',
           })
-        }else {
+        } else {
           commit('SET_STATE', { loading: false })
         }
       })
@@ -698,7 +702,7 @@ export default {
             description: 'Settings was saved successfully',
           })
         }
-        dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId }})
+        dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId } })
         commit('SET_STATE', {
           loading: false,
         })
@@ -713,7 +717,7 @@ export default {
       const updateFormFieldSettings = mapApiProviders.updateFormFieldSettings
       updateFormFieldSettings(payload, settingId).then(response => {
         if (response) {
-          dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId }})
+          dispatch('FETCH_FORM_FIELDS', { payload: { year: year, formId: formId } })
           notification.success({
             message: 'Success',
             description: 'Settings was updated successfully',
@@ -724,7 +728,28 @@ export default {
         })
       })
     },
+    FETCH_ALL_FORMS_BY_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      const { allForms } = payload
+
+      const getAllFormsByPermission = mapApiProviders.getAllFormsByPermission
+      getAllFormsByPermission(allForms).then(response => {
+        if (response) {
+          const { forms } = response
+          commit('SET_STATE', {
+            formsByPermission: forms,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
   },
+
   getters: {
     functions: state => state.functions,
     subCategories: state => state.subCategories,

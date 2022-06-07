@@ -20,7 +20,6 @@ import { defineComponent, ref, onMounted, computed } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { message } from 'ant-design-vue'
-import moment from 'moment'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish, useViewPublishedFiles } from '@/services/functions/formListActions'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
@@ -121,8 +120,6 @@ export default defineComponent({
     }
 
     return {
-      moment,
-
       documentName,
 
       columns: listTableColumns, list, loading, hasAapcrAccess, aapcrFormPermission,

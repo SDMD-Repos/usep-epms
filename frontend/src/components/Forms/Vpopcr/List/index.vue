@@ -2,40 +2,36 @@
   <div  v-if="hasVpopcrAccess || opcrvpFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="unpublish" @view-uploaded-list="viewUploadedList" />
-
-<!--    <upload-publish-modal
-      :is-upload-open="isUploadOpen" :ok-publish-text="okPublishText"
-      :modal-note="noteInModal" :list="fileList" :is-uploading="loading"
-      @add-to-list="addUploadItem" @remove-file="removeFile" @upload="uploadFile" @cancel-upload="handleCancelUpload"/>-->
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-uploaded-list="viewUploadedList" @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel"/>
 
     <unpublished-forms-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
-      @close-list-modal="closeListModal" @view-file="viewPdf" />
+      @close-list-modal="onCloseList" @view-file="viewPdf" />
+
+    <unpublish-remarks-modal
+      :is-unpublish="isUnpublish" :form-id="formId"
+      @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
   </div>
-   <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 
 <script>
-import { computed, defineComponent, ref, onMounted } from "vue"
+import { defineComponent, ref, onMounted, onBeforeMount, computed } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
-// import { useUploadFile } from '@/services/functions/upload'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
-import { renderPdf, viewUploadedFile, updateFile } from '@/services/api/mainForms/opcrvp'
+import { renderPdf, updateFile } from '@/services/api/mainForms/vpopcr'
 import FormListTable from '@/components/Tables/Forms/List'
-// import UploadPublishModal from '@/components/Modals/UploadPublish'
-import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
-import { message, notification } from "ant-design-vue"
+import { useUnpublish } from '@/services/functions/formListActions'
 import { usePermission } from '@/services/functions/permission'
+import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
+import UnpublishRemarksModal from '@/components/Modals/Remarks'
+import { getUnpublishedFormData } from '@/services/api/system/requests'
+import { message, notification } from "ant-design-vue"
 
 export default defineComponent({
-  components: {
-    FormListTable,
-    // UploadPublishModal,
-    UnpublishedFormsModal,
-  },
+  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
   props: {
     formId: { type: String, default: '' },
   },
@@ -48,30 +44,28 @@ export default defineComponent({
     // DATA
     let columns = ref([])
 
-    /*const {
-      // DATA
-      isUploadOpen, cachedId, okPublishText, noteInModal, fileList, isConfirmDeleteFile,
-      // METHODS
-      unpublish, addUploadItem, removeFile, cancelUpload, openUploadOnDelete,
-    } = useUploadFile()*/
+    const { unpublishedData, isUnpublish,
+      openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
+    } = useUnpublish()
 
-    const { isUploadedViewed, viewedForm,
-      viewUploadedList, onCloseList, uploadedListState } = useViewPublishedFiles()
+    const { isUploadedViewed, viewedForm, viewUploadedList, onCloseList, uploadedListState, viewUnpublishedForms } = useViewPublishedFiles()
 
     // COMPUTED
-    const list = computed(() => store.getters['opcrvp/form'].list)
-    const loading = computed(() => store.getters['opcrvp/form'].loading)
-    const hasVpopcrAccess = computed(() => store.getters['opcrvp/form'].hasVpopcrAccess)
+    const list = computed(() => store.getters['vpopcr/form'].list)
+    const loading = computed(() => store.getters['vpopcr/form'].loading)
+    const hasVpopcrAccess = computed(() => store.getters['vpopcr/form'].hasVpopcrAccess)
 
     const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
 
     const { opcrvpFormPermission } = usePermission(permission)
 
+    // EVENTS
+    onBeforeMount(() => { renderColumns() })
+
     onMounted(() => {
-      renderColumns()
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcrvp/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
-      store.dispatch('opcrvp/FETCH_LIST')
+      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('vpopcr/FETCH_LIST')
     })
 
     // METHODS
@@ -102,11 +96,7 @@ export default defineComponent({
         year: data.year,
         officeId: data.office_id,
       }
-      store.dispatch('opcrvp/PUBLISH', { payload: payload })
-    }
-
-    const unpublish = () => {
-
+      store.dispatch('vpopcr/PUBLISH', { payload: payload })
     }
 
     const viewPdf = params => {
@@ -117,13 +107,13 @@ export default defineComponent({
       const documentName = data.office_name || data.file_name
 
       if(!fromUnpublished) {
-        store.commit('opcrvp/SET_STATE', { loading: true })
+        store.commit('vpopcr/SET_STATE', { loading: true })
 
         renderer = renderPdf
       }else {
         message.loading('Loading...')
 
-        renderer = viewUploadedFile
+        renderer = getUnpublishedFormData
       }
 
       renderer(data.id).then(response => {
@@ -138,7 +128,7 @@ export default defineComponent({
           window.open(route.href, "_blank")
         }
         if(!fromUnpublished) {
-          store.commit('opcrvp/SET_STATE', { loading: false })
+          store.commit('vpopcr/SET_STATE', { loading: false })
         }else {
           message.destroy()
         }
@@ -152,17 +142,17 @@ export default defineComponent({
       })
       formData.append('id', cachedId.value)
       if(!isConfirmDeleteFile.value) {
-        await store.dispatch('opcrvp/UNPUBLISH', { payload: formData })
+        await store.dispatch('vpopcr/UNPUBLISH', { payload: formData })
         await cancelUpload()
       }else {
-        store.commit('opcrvp/SET_STATE', { loading: true })
+        store.commit('vpopcr/SET_STATE', { loading: true })
 
         await cancelUpload()
         await onCloseList()
 
         await updateFile(formData).then(response => {
           if(response) {
-            store.dispatch('opcrvp/FETCH_LIST').then(() => {
+            store.dispatch('vpopcr/FETCH_LIST').then(() => {
               const { data } = response
               viewUploadedList(data) // open List of Uploaded Files Modal
             })
@@ -170,7 +160,7 @@ export default defineComponent({
               message: 'Success',
               description: 'File was deleted successfully',
               })
-            store.commit('opcrvp/SET_STATE', { loading: false })
+            store.commit('vpopcr/SET_STATE', { loading: false })
           }
         })
       }
@@ -204,13 +194,14 @@ export default defineComponent({
       fileList,*/
 
       isUploadedViewed,
+      viewUnpublishedForms,
       viewedForm,
       hasVpopcrAccess,
       opcrvpFormPermission,
 
+      renderPdf,
       updateForm,
       publish,
-      unpublish,
       viewPdf,
       uploadFile,
       handleCancelUpload,
@@ -221,6 +212,11 @@ export default defineComponent({
       removeFile,
       cancelUpload,
       openUploadOnDelete,*/
+
+      // useUnpublish
+      unpublishedData, isUnpublish,
+
+      openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
 
       viewUploadedList,
       onCloseList,

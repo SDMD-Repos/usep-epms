@@ -81,6 +81,8 @@ Route::group([
     Route::get('/get-all-form-fields/{year}/{formId}', 'SettingController@getAllFormFields');
     Route::post('/save-form-field-settings', 'SettingController@saveFormFieldSettings');
     Route::post('/update-form-field-settings/{id}', 'SettingController@updateFormFieldSettings');
+
+    Route::post('/get-all-spms-forms-permission', 'SettingController@getAllFormsByPermission');
 });
 
 Route::group([
@@ -128,40 +130,21 @@ Route::group([
     Route::group([
         'prefix' => 'ocpcr'
     ], function() {
-        Route::get('/check-saved/{officeId}/{year}', 'Form\VpopcrController@checkSaved');
-        Route::get('/check-saved-template/{year}', 'Form\OcpcrController@checkSaved');
+        # TEMPLATE
+        Route::get('/check-saved-template/{year}', 'Form\OCpcrController@checkSavedTemplate');
+        Route::get('/view-template/{id}', 'Form\OCpcrController@viewTemplate');
+        Route::get('/template-list', 'Form\OCpcrController@getAllOpcrTemplate');
+
+        Route::post('/save-template', 'Form\OCpcrController@saveTemplate');
+        Route::post('/publish-template', 'Form\OCpcrController@publishTemplate');
+        Route::post('/deactivate-template', 'Form\OCpcrController@deactivateTemplate');
+        Route::post('/update-template/{id}', 'Form\OCpcrController@updateTemplate');
+        Route::post('/unpublish-template', 'Form\OCpcrController@unpublishTemplate');
+
+        # MAIN FORM
+        Route::get('/check-saved/{year}', 'Form\OCpcrController@checkSaved');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
-        Route::post('/save', 'Form\VpopcrController@save');
-        Route::get('/list', 'Form\VpopcrController@getAllVpOpcrs');
-        Route::post('/publish', 'Form\VpopcrController@publish');
-        Route::post('/deactivate', 'Form\VpopcrController@deactivate');
-        Route::get('/view/{id}', 'Form\VpopcrController@view');
-        Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
-        Route::post('/update/{id}', 'Form\VpopcrController@update');
     });
-
-    Route::group([
-        'prefix' => 'opcr'
-    ], function() {
-
-        //GET
-
-        //TEMPLATE
-        Route::get('/check-saved-template/{year}', 'Form\OpcrController@checkSavedTemplate');
-        Route::get('/view-template/{id}', 'Form\OpcrController@viewTemplate');
-        Route::get('/template-list', 'Form\OpcrController@getAllOpcrTemplate');
-        //OPCR
-        Route::get('/check-saved/{year}', 'Form\OpcrController@checkSaved');
-
-        //POST
-        Route::post('/save-template', 'Form\OpcrController@saveTemplate');
-        Route::post('/publish-template', 'Form\OpcrController@publishTemplate');
-        Route::post('/deactivate-template', 'Form\OpcrController@deactivateTemplate');
-        Route::post('/update-template/{id}', 'Form\OpcrController@updateTemplate');
-        Route::post('/unpublish-template', 'Form\OpcrController@unpublishTemplate');
-
-    });
-
 });
 
 Route::group([
@@ -202,5 +185,5 @@ Route::group([
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
     Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');
 
-    Route::get('/get-form-access-by-office/{id}', 'SystemAdmin\PermissionController@getFormAccessByOffice');
+
 });

@@ -65,13 +65,13 @@ export const getMenuData = [
     children: [
       {
         title: 'Form',
-        key: 'opcrVpForm',
-        url: '/form/opcrvp',
+        key: 'vpOpcrForm',
+        url: '/form/vpopcr',
       },
       {
         title: 'List',
         key: 'opcrVpList',
-        url: '/list/opcrvp',
+        url: '/list/vpopcr',
       },
     ],
   },
