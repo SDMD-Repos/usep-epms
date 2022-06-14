@@ -6,11 +6,13 @@ use App\CascadingLevel;
 use App\Category;
 use App\Form;
 use App\FormAccess;
+use App\FormCategory;
 use App\FormField;
 use App\FormFieldSetting;
 use App\Group;
 use App\GroupMember;
 use App\Http\Requests\StoreCategory;
+use App\Http\Requests\StoreFormCategory;
 use App\Http\Requests\StoreFormFieldSetting;
 use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
@@ -59,9 +61,17 @@ class SettingController extends Controller
 
     }
 
-    public function getFunctions($year)
+    public function getFunctions($year, $formId=null)
     {
-        $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
+        if($formId) {
+            $categories = Category::select("*", "id as key")->where('year', $year)
+                ->with(['formCategory' => function($query) use ($formId) {
+                    $query->where('form_id', $formId)->where('display_name', '<>', NULL);
+                }])
+                ->orderBy('order', 'ASC')->get();
+        } else {
+            $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
+        }
 
         foreach ($categories as $key => $category) {
             $categories[$key]['header'] = $this->integerToRomanNumeral($category->order) . ". " . mb_strtoupper($category->name);
@@ -1204,11 +1214,108 @@ class SettingController extends Controller
 
     public function getAllFormsByPermission(Request $data)
     {
-
-        
         $forms = Form::select('*')->whereIn('id', $data)->orderBy('ordering', 'asc')->get();
 
         return response()->json(['forms' => $forms], 200);
     }
 
+    public function saveFormCategory(StoreFormCategory $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            $formId = $validated['formId'];
+            $categoryId = $validated['categoryId'];
+            $displayName = $validated['name'];
+
+            $successMessage = '';
+
+            DB::beginTransaction();
+
+            $formCategory = FormCategory::where('form_id', $formId)->where('category_id', $categoryId)->first();
+
+            if ($formCategory) {
+                $original = $formCategory->getOriginal();
+
+                $formCategory->display_name = $displayName;
+
+                $formCategory->modify_id = $this->login_user->pmaps_id;
+                $formCategory->updated_at = Carbon::now();
+
+                $history = '';
+
+                if($formCategory->isDirty('display_name')){
+                    $history .= "Updated Display Name from '".$original['display_name']."' to '".$displayName."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                }
+
+                $formCategory->history = $formCategory->history . $history;
+
+                $successMessage = 'Form Category was updated successfully';
+
+            } else {
+                $formCategory = new FormCategory();
+
+                $formCategory->form_id = $formId;
+                $formCategory->category_id = $categoryId;
+                $formCategory->display_name = $displayName;
+                $formCategory->create_id = $this->login_user->pmaps_id;
+                $formCategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                $successMessage = 'Form Category was saved successfully';
+            }
+
+            if(!$formCategory->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => $successMessage
+            ], 200);
+
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function deleteFormCategory($id)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            $formCategory = FormCategory::find($id);
+
+            $formCategory->modify_id = $this->login_user->pmaps_id;
+            $formCategory->updated_at = Carbon::now();
+            $formCategory->history = $formCategory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if (!$formCategory->save()) {
+                DB::rollBack();
+            } else {
+                if (!$formCategory->delete()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json('Form Category deleted successfully', 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
 }

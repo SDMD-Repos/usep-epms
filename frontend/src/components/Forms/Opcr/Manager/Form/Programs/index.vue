@@ -47,7 +47,7 @@
 
       <previous-list :visible="isPreviousViewed" :year="year" :list="allPreviousPrograms"
                      @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
-    
+
     </a-spin>
   </div>
   </div>
@@ -72,7 +72,6 @@ export default defineComponent({
     formId: { type: String, default: null },
   },
   setup(props) {
-    const PAGE_TITLE = "OPCR Programs"
     const store = useStore()
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
@@ -152,12 +151,11 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       if(opcrFormPermission.value){
           fetchAllPrograms(year.value)
       }
-     
+
     })
 
     // METHODS

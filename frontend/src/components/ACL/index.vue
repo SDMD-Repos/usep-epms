@@ -5,11 +5,9 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, inject, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { notification } from 'ant-design-vue'
-import router from '@/router'
 
 export default {
   name: 'VbACL',
@@ -30,12 +28,14 @@ export default {
     const show = ref(false)
     const role = computed(() => store.getters['user/user'].role)
 
+    const _notification = inject('a-notification')
+
     const athorize = () => {
       const authorized = props.roles.includes(role.value)
       show.value = authorized
       if (!authorized && props.redirect) {
         const url = typeof props.redirect === 'boolean' ? defaultRedirect : props.redirect
-        notification.warning({
+        _notification.warning({
           message: 'Unauthorized Access',
           description: `You have no rights to access this page. <br /> Redirected to ${url}`,
         })

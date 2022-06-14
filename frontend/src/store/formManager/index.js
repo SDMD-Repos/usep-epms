@@ -1,4 +1,5 @@
 import * as manager from '@/services/api/manager'
+import { postRequest, deleteRequest } from '@/services/api/mainForms/ocpcr'
 import { notification } from 'ant-design-vue'
 
 const mapApiProviders = {
@@ -37,6 +38,8 @@ const mapApiProviders = {
   getAllFormsByPermission: manager.getAllFormsByPermission,
 }
 
+const baseUrl = '/settings'
+
 export default {
   namespaced: true,
   state: {
@@ -72,12 +75,14 @@ export default {
   actions: {
     FETCH_FUNCTIONS({ commit }, { payload }) {
       const { year } = payload
+      const formId = typeof payload.formId !== 'undefined' ? payload.formId : null
+
       commit('SET_STATE', {
         loading: true,
       })
 
       const getFunctions = mapApiProviders.getFunctions
-      getFunctions(year).then(response => {
+      getFunctions(year, formId).then(response => {
         if (response) {
           const { categories } = response
           if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
@@ -741,6 +746,45 @@ export default {
           const { forms } = response
           commit('SET_STATE', {
             formsByPermission: forms,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+
+    SAVE_FORM_CATEGORY({ commit, dispatch }, { payload }) {
+      const { year, formId } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      postRequest(baseUrl + '/save-form-category', payload).then(response => {
+        if (response) {
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year, formId: formId } })
+          notification.success({
+            message: 'Success',
+            description: response.message,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    DELETE_FORM_CATEGORY({ commit, dispatch }, { payload }) {
+      const { year, formId, id } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      deleteRequest(baseUrl + '/delete-form-category/' + id).then(response => {
+        if (response) {
+          dispatch('FETCH_FUNCTIONS', { payload: { year: year, formId: formId } })
+          notification.success({
+            message: 'Success',
+            description: 'Display Name was cleared successfully',
           })
         }
         commit('SET_STATE', {

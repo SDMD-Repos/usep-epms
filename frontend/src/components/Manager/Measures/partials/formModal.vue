@@ -46,9 +46,8 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, reactive, ref, watch } from 'vue'
+import { defineComponent, reactive, ref, watch, inject } from 'vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
-import { message } from "ant-design-vue"
 
 export default defineComponent({
   name: 'MeasuresFormModal',
@@ -95,6 +94,9 @@ export default defineComponent({
   },
   emits: ['close-modal', 'change-action', 'submit-form'],
   setup(props, { emit }) {
+
+    const _message = inject('a-message')
+
     // DATA
     let isVisible = ref()
     let form = ref()
@@ -128,7 +130,7 @@ export default defineComponent({
       props.validate()
         .then(() => {
           if (form.value.items.length < 1) {
-            message.error('Please add at least three (3) scales')
+            _message.error('Please add at least three (3) scales')
           } else {
             Object.assign(scales, scalesIntial())
             emit('submit-form')

@@ -16,19 +16,18 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, onBeforeMount, computed } from "vue"
+import { defineComponent, ref, onMounted, onBeforeMount, inject, computed } from "vue"
 import { useStore } from "vuex"
 import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
-import { renderPdf, updateFile } from '@/services/api/mainForms/vpopcr'
+import { renderPdf } from '@/services/api/mainForms/vpopcr'
 import FormListTable from '@/components/Tables/Forms/List'
 import { useUnpublish } from '@/services/functions/formListActions'
 import { usePermission } from '@/services/functions/permission'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
-import { message, notification } from "ant-design-vue"
 
 export default defineComponent({
   components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
@@ -40,6 +39,8 @@ export default defineComponent({
 
     const store = useStore()
     const router = useRouter()
+
+    const _message = inject('a-message')
 
     // DATA
     let columns = ref([])
@@ -111,7 +112,7 @@ export default defineComponent({
 
         renderer = renderPdf
       }else {
-        message.loading('Loading...')
+        _message.loading('Loading...')
 
         renderer = getUnpublishedFormData
       }
@@ -130,55 +131,9 @@ export default defineComponent({
         if(!fromUnpublished) {
           store.commit('vpopcr/SET_STATE', { loading: false })
         }else {
-          message.destroy()
+          _message.destroy()
         }
       })
-    }
-
-    const uploadFile = async () => {
-      const formData = new FormData()
-      fileList.value.forEach(file => {
-        formData.append('files[]', file)
-      })
-      formData.append('id', cachedId.value)
-      if(!isConfirmDeleteFile.value) {
-        await store.dispatch('vpopcr/UNPUBLISH', { payload: formData })
-        await cancelUpload()
-      }else {
-        store.commit('vpopcr/SET_STATE', { loading: true })
-
-        await cancelUpload()
-        await onCloseList()
-
-        await updateFile(formData).then(response => {
-          if(response) {
-            store.dispatch('vpopcr/FETCH_LIST').then(() => {
-              const { data } = response
-              viewUploadedList(data) // open List of Uploaded Files Modal
-            })
-            notification.success({
-              message: 'Success',
-              description: 'File was deleted successfully',
-              })
-            store.commit('vpopcr/SET_STATE', { loading: false })
-          }
-        })
-      }
-    }
-
-    const handleCancelUpload = () => {
-      if(isConfirmDeleteFile.value) {
-        uploadedListState(true)
-      }
-      cancelUpload()
-    }
-
-    const closeListModal = () => {
-      if(!isConfirmDeleteFile.value) {
-        onCloseList()
-      } else {
-        uploadedListState(false)
-      }
     }
 
     return {
@@ -186,12 +141,6 @@ export default defineComponent({
 
       list,
       loading,
-
-      /*isUploadOpen,
-      okPublishText,
-      noteInModal,
-      cachedId,
-      fileList,*/
 
       isUploadedViewed,
       viewUnpublishedForms,
@@ -203,15 +152,6 @@ export default defineComponent({
       updateForm,
       publish,
       viewPdf,
-      uploadFile,
-      handleCancelUpload,
-      closeListModal,
-
-      /*unpublish,
-      addUploadItem,
-      removeFile,
-      cancelUpload,
-      openUploadOnDelete,*/
 
       // useUnpublish
       unpublishedData, isUnpublish,

@@ -40,10 +40,13 @@ Route::group([
     'prefix' => 'settings',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('/get-all-functions/{year}', 'SettingController@getFunctions');
+    Route::get('/get-all-functions/{year}/{formId}', 'SettingController@getFunctions');
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
+
     Route::post('/update-function-default-program/{id}', 'SettingController@updateProgramFunction');
+    Route::post('/save-form-category', 'SettingController@saveFormCategory');
+    Route::post('/delete-form-category/{id}', 'SettingController@deleteFormCategory');
 
     Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');

@@ -1,15 +1,17 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrTemplateForm from '@/services/api/mainForms/opcr/template'
+import * as opcrTemplateForm from '@/services/api/mainForms/ocpcr/template'
+import { getRequest } from '@/services/api/mainForms/ocpcr'
 
 const mapApiProviders = {
   save: opcrTemplateForm.save,
-  getList: opcrTemplateForm.fetchOpcrTemplates,
   publish: opcrTemplateForm.publish,
   unpublish: opcrTemplateForm.unpublish,
   deactivate: opcrTemplateForm.deactivate,
   update: opcrTemplateForm.update,
 }
+
+const baseUrl = '/forms/ocpcr'
 
 export default {
   namespaced: true,
@@ -54,8 +56,7 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const getList = mapApiProviders.getList
-      getList().then(response => {
+      getRequest(baseUrl + '/template-list').then(response => {
         if (response) {
           const { list } = response
           commit('SET_STATE', {

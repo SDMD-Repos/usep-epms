@@ -16,10 +16,9 @@
    <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue"
+import { defineComponent, ref, onMounted, inject, computed } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { message } from 'ant-design-vue'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish, useViewPublishedFiles } from '@/services/functions/formListActions'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
@@ -40,6 +39,8 @@ export default defineComponent({
 
     const store = useStore()
     const router = useRouter()
+
+    const _message = inject('a-message')
 
     // DATA
     const documentName = ref(null)
@@ -95,7 +96,7 @@ export default defineComponent({
 
         renderer = fetchPdfData
       }else {
-        message.loading('Loading...')
+        _message.loading('Loading...')
 
         renderer = getUnpublishedFormData
       }
@@ -114,7 +115,7 @@ export default defineComponent({
         if(!fromUnpublished) {
           store.commit('aapcr/SET_STATE', { loading: false })
         }else {
-          message.destroy()
+          _message.destroy()
         }
       })
     }

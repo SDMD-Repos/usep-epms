@@ -72,7 +72,19 @@
             <template #label><span class="required-indicator">Measures</span></template>
 
             <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                      style="width: 100%" :options="measuresList" label-in-value allow-clear />
+                      style="width: 100%" :options="measuresList" label-in-value allow-clear >
+              <template #option="{ label, items }">
+                {{ label }} &nbsp;&nbsp;
+                <a-tooltip placement="right">
+                  <template #title>
+                    <template v-for="item in items" :key="item.id">
+                      <div>{{ item.rate }} - {{ item.description }}</div>
+                    </template>
+                  </template>
+                  <info-circle-filled :style="{ fontSize: '12px'}"/>
+                </a-tooltip>
+              </template>
+            </a-select>
           </a-form-item>
 
           <a-form-item name="budget" label="Allocated Budget" >
@@ -238,17 +250,17 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch, computed } from 'vue'
+import { defineComponent, ref, watch, inject, computed } from 'vue'
 import { useStore } from "vuex";
 import { cloneDeep } from 'lodash'
-import { message, TreeSelect } from "ant-design-vue"
-import { CheckOutlined, EditOutlined, DeleteFilled } from "@ant-design/icons-vue"
+import { TreeSelect } from "ant-design-vue"
+import { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
 import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 export default defineComponent({
   name: 'VpOpcrFormDrawer',
-  components: { CheckOutlined, EditOutlined, DeleteFilled },
+  components: { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
@@ -260,6 +272,8 @@ export default defineComponent({
   emits: ['close-drawer', 'toggle-is-header', 'add-table-item', 'update-table-item', 'update-cascade-to'],
   setup(props, { emit }) {
     const store = useStore()
+
+    const _message = inject('a-message')
 
     // DATA
     const opcrVpForm = ref()
@@ -283,7 +297,7 @@ export default defineComponent({
 
     const measuresList  = computed(() => {
       const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name }))
+      return list.map(i => ({ value: i.key, label: i.name, items: i.items }))
     })
 
     const cascadingList  = computed(() => {
@@ -349,7 +363,7 @@ export default defineComponent({
         })
         msgContent = 'Updated!'
       }
-      await message.success(msgContent, 2)
+      await _message.success(msgContent, 2)
       await changeSubmitStatus()
     }
 

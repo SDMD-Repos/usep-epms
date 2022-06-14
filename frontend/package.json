@@ -1,5 +1,5 @@
 {
-  "name": "visual-builder-vue",
+  "name": "oneusep-epms",
   "version": "0.9.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "vb-seed": "node ./scripts/generate.js --config=config-seed.json"
   },
   "dependencies": {
-    "ant-design-vue": "^3.2.4",
+    "ant-design-vue": "^3.2.6",
     "axios": "^0.21.1",
     "axios-mock-adapter": "^1.19.0",
     "bootstrap": "^4.5.3",

@@ -12,16 +12,16 @@
 import { defineComponent, ref, watch, onMounted } from "vue"
 import { useRoute } from 'vue-router'
 import AapcrForm from '@/components/Forms/Aapcr/Main'
-import OpcrTemplateForm from "@/components/Forms/OpcrTemplate/Main";
 import OpcrVpForm from '@/components/Forms/Vpopcr/Main'
 import OpcrForm from '@/components/Forms/Opcr/Main'
+import OpcrTemplateForm from "@/components/Forms/Opcr/Template/Main";
 
 export default defineComponent({
   components: {
-    OpcrTemplateForm,
     AapcrForm,
     OpcrVpForm,
     OpcrForm,
+    OpcrTemplateForm,
   },
   setup() {
     const formId = ref(null)

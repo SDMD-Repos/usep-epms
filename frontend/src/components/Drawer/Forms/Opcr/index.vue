@@ -23,19 +23,15 @@
         <template #label>
           <span class="required-indicator">Program</span>
         </template>
-        <a-select v-model:value="form.program" placeholder="Select" :disabled="config.type === 'sub'"
-                  @blur="validate('program', { trigger: 'blur' }).catch(() => {})">
-          <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
-            {{ y.name }}
-          </a-select-option>
-        </a-select>
+        <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
+                  :disabled="config.type === 'sub'" />
       </a-form-item>
 
       <a-form-item label="Sub Category" v-bind="validateInfos.subCategory">
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :replace-fields="{ title: 'name', value: 'id',}"
+          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id'}"
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
@@ -71,11 +67,19 @@
           <template #label><span class="required-indicator">Measures</span></template>
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                    style="width: 100%" label-in-value allow-clear
+                    style="width: 100%" label-in-value allow-clear :options="measuresList"
                     @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
-            <a-select-option v-for="measure in measuresList" :value="measure.id" :key="measure.id">
-              {{ measure.name }}
-            </a-select-option>
+            <template #option="{ label, items }">
+              {{ label }} &nbsp;&nbsp;
+              <a-tooltip placement="right">
+                <template #title>
+                  <template v-for="item in items" :key="item.id">
+                    <div>{{ item.rate }} - {{ item.description }}</div>
+                  </template>
+                </template>
+                <info-circle-filled :style="{ fontSize: '12px'}"/>
+              </a-tooltip>
+            </template>
           </a-select>
         </a-form-item>
 
@@ -128,11 +132,6 @@
                 <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
               </a-col>
               <a-col :span="8">
-                <!--                <a-select v-model:value="form.implementing[index].cascadeTo" style="width: 100%">-->
-                <!--                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">-->
-                <!--                    {{ category.name }}-->
-                <!--                  </a-select-option>-->
-                <!--                </a-select>-->
                 <a-tree-select
                   v-model:value="form.implementing[index].cascadeTo"
                   style="width: 100%"
@@ -181,11 +180,6 @@
                 <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
               </a-col>
               <a-col :span="8">
-                <!--                <a-select v-model:value="form.supporting[index].cascadeTo" style="width: 100%">-->
-                <!--                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">-->
-                <!--                    {{ category.name }}-->
-                <!--                  </a-select-option>-->
-                <!--                </a-select>-->
                 <a-tree-select
                   v-model:value="form.supporting[index].cascadeTo"
                   style="width: 100%"
@@ -228,15 +222,15 @@
   </a-drawer>
 </template>
 <script>
-import { computed, defineComponent, ref, watch, onMounted } from 'vue'
+import { defineComponent, ref, watch, onMounted, inject, computed } from 'vue'
 import { useStore } from 'vuex'
-import { message, TreeSelect } from "ant-design-vue"
-import { CheckOutlined, DeleteFilled, EditOutlined } from "@ant-design/icons-vue"
+import { TreeSelect } from "ant-design-vue"
+import { CheckOutlined, DeleteFilled, EditOutlined, InfoCircleFilled } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
 
 export default defineComponent({
   name: "OpcrVpFormDrawer",
-  components: { CheckOutlined, EditOutlined, DeleteFilled },
+  components: { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
@@ -251,6 +245,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore()
 
+    const _message = inject('a-message')
+
     // DATA
     const config = ref({})
     const isSubmmitting = ref(false)
@@ -261,8 +257,8 @@ export default defineComponent({
 
     // COMPUTED
     const programsByFunction = computed( () => {
-      const programs = store.getters['formManager/manager'].programs
-      return programs.filter(i => i.category_id === props.drawerId)
+      const list = store.getters['formManager/manager'].programs
+      return list.filter(i => i.category_id === props.drawerId).map(v => ({ value: v.id, label: v.name }))
     })
 
     const programsWithFunction = computed( () => {
@@ -284,9 +280,12 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => store.getters['formManager/manager'].measures)
+    const measuresList  = computed(() => {
+      const list = store.state.formManager.measures
+      return list.map(i => ({ value: i.key, label: i.name, items: i.items }))
+    })
+
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
-    const programs  = computed(() => store.getters['formManager/manager'].programs)
 
     watch(() => [props.drawerConfig, props.formObject], ([drawerConfig, formObject]) => {
       config.value = drawerConfig
@@ -350,7 +349,7 @@ export default defineComponent({
         await emit('update-table-item', { updateData: form, updateId: config.value.updateId })
         msgContent = 'Updated!'
       }
-      await message.success(msgContent, 2)
+      await _message.success(msgContent, 2)
       isSubmmitting.value = !isSubmmitting.value
     }
 

@@ -24,7 +24,7 @@
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id',}"
+          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id'}"
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
@@ -62,7 +62,19 @@
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
                     style="width: 100%" label-in-value allow-clear
                     :options="measuresList"
-                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" />
+                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
+            <template #option="{ label, items }">
+              {{ label }} &nbsp;&nbsp;
+              <a-tooltip placement="right">
+                <template #title>
+                  <template v-for="item in items" :key="item.id">
+                    <div>{{ item.rate }} - {{ item.description }}</div>
+                  </template>
+                </template>
+                <info-circle-filled :style="{ fontSize: '12px'}"/>
+              </a-tooltip>
+            </template>
+          </a-select>
         </a-form-item>
 
         <a-form-item label="Allocated Budget" v-bind="validateInfos.budget" >
@@ -207,15 +219,15 @@
   </a-drawer>
 </template>
 <script>
-import { defineComponent, ref, watch, computed, onMounted } from 'vue'
+import { defineComponent, ref, watch, onMounted, inject, computed } from 'vue'
 import { useStore } from 'vuex'
-import { TreeSelect, message } from 'ant-design-vue'
-import { CheckOutlined, EditOutlined, DeleteFilled } from '@ant-design/icons-vue'
+import { TreeSelect } from 'ant-design-vue'
+import { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
 
 export default defineComponent({
   name: "AapcrFormDrawer",
-  components: { CheckOutlined, EditOutlined, DeleteFilled },
+  components: { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
@@ -229,6 +241,8 @@ export default defineComponent({
   emits: ['close-drawer', 'toggle-is-header', 'add-table-item', 'update-table-item'],
   setup(props, { emit }) {
     const store = useStore()
+
+    const _message = inject('a-message')
 
     // DATA
     const config = ref({})
@@ -246,7 +260,7 @@ export default defineComponent({
 
     const measuresList  = computed(() => {
       const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name }))
+      return list.map(i => ({ value: i.key, label: i.name, items: i.items }))
     })
 
     const cascadingList  = computed(() => {
@@ -320,7 +334,7 @@ export default defineComponent({
         await emit('update-table-item', { updateData: form, updateId: config.value.updateId })
         msgContent = 'Updated!'
       }
-      await message.success(msgContent, 2)
+      await _message.success(msgContent, 2)
       isSubmmitting.value = !isSubmmitting.value
     }
 

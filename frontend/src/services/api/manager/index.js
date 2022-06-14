@@ -1,8 +1,8 @@
 import apiClient from '@/services/axios'
 
-export async function getFunctions(year) {
+export async function getFunctions(year, formId) {
   return apiClient
-    .get('/settings/get-all-functions/' + year)
+    .get('/settings/get-all-functions/' + year + '/' + formId)
     .then(response => {
       return response.data
     })

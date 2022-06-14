@@ -105,9 +105,11 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from 'vue'
-import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
+import { defineComponent, ref, inject, computed } from 'vue'
+import { Modal } from 'ant-design-vue'
+import {
+  CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined,
+} from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: "IndicatorListTable",
@@ -125,6 +127,7 @@ export default defineComponent({
   },
   emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
+    const _message = inject('a-message')
 
     // DATA
     const categoryBudget = ref(null)
@@ -195,7 +198,7 @@ export default defineComponent({
       }else {
         await emit('add-budget-list-item', { mainCategory: props.mainCategory, categoryBudget: categoryBudget.value })
         await resetBudget()
-        message.success('Saved!', 2)
+        _message.success('Saved!', 2)
       }
     }
 
