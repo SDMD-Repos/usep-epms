@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
-             :scroll="{ x: 'calc(2600px + 50%)', y: 600 }">
+             :scroll="{ x: scrollX, y: 600 }">
       <template #title>
         <a-button type="primary" :disabled="disabledNew === false ? disabledNew : !allowEdit" @click="openDrawer('Add')">New</a-button>
       </template>
@@ -35,11 +35,11 @@
       </template>
 
       <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'subCategory' && allowedColumns.subCategory">
+        <template v-if="column.key === 'subCategory'">
           {{ (record.type === 'pi' && (typeof record.subCategory !== 'undefined' && record.subCategory !== null)) ? record.subCategory.label : ''}}
         </template>
 
-        <template v-if="column.key === 'count' && formId === `vpopcr`">
+        <template v-if="column.key === 'count'">
           {{ record.count }}
         </template>
 
@@ -51,14 +51,21 @@
         </template>
 
         <template v-if="column.key === 'measures'">
-          <ul class="form-ul-list">
+          <ul class="form-ul-list" role="list">
             <li v-for="measure in record.measures" :key="measure.key">
-              {{ measure.label.children || measure.label }}
+              <span v-if="!measure.option.displayAsItems && !measure.option.display_as_items">
+                {{ measure.label.children || measure.label }}
+              </span>
+              <span v-else >
+                <template v-for="item in measure.option.items" :key="item.id">
+                  <span>{{ item.rate }} - {{ item.description }}</span> <br />
+                </template>
+              </span>
             </li>
           </ul>
         </template>
 
-        <template v-if="column.key === 'budget' && formId !== `opcrtemplate`">
+        <template v-if="column.key === 'budget'">
           {{ $filters.numbersWithCommasDecimal(record.budget) }}
         </template>
 
@@ -68,7 +75,7 @@
           </div>
         </template>
 
-        <template v-if="column.key === 'implementing' && formId !== `opcrtemplate`">
+        <template v-if="column.key === 'implementing'">
           <ul class="form-ul-list">
             <li v-for="office in record.implementing" :key="office.key">
               {{ office.label }}
@@ -76,7 +83,7 @@
           </ul>
         </template>
 
-        <template v-if="column.key === 'supporting' && formId !== `opcrtemplate`">
+        <template v-if="column.key === 'supporting'">
           <ul class="form-ul-list">
             <li v-for="office in record.supporting" :key="office.key">
               {{ office.label }}
@@ -105,9 +112,11 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, computed } from 'vue'
-import { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
+import { defineComponent, ref, inject, computed } from 'vue'
+import { Modal } from 'ant-design-vue'
+import {
+  CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined,
+} from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: "IndicatorListTable",
@@ -125,26 +134,19 @@ export default defineComponent({
   },
   emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
+    const _message = inject('a-message')
 
     // DATA
     const categoryBudget = ref(null)
+    const scrollX = ref('calc(2600px + 50%)')
     let filteredSource
-    let allowedColumns = {}
-
-    const setAllowedColumns = (data) => {
-      data.forEach(function (value){
-        allowedColumns[value] = true
-      })
-    }
 
     //COMPUTED
     switch (props.formId) {
       case 'aapcr':
-      case 'opcrtemplate':
         filteredSource = computed(()=> {
           return props.itemSource.filter(i => i.program === props.mainCategory.key)
         })
-        setAllowedColumns(['subCategory'])
         break;
       case 'vpopcr':
         filteredSource = computed(()=> {
@@ -154,6 +156,16 @@ export default defineComponent({
           })
           return source
         })
+        break;
+      case 'opcrtemplate':
+        filteredSource = computed(()=> {
+          const source = props.itemSource.filter(i => i.program === props.mainCategory.key)
+          source.forEach((x, y) => {
+            source[y].count = y + 1
+          })
+          return source
+        })
+        scrollX.value = 'calc(1400px + 50%)'
         break;
     }
 
@@ -195,7 +207,7 @@ export default defineComponent({
       }else {
         await emit('add-budget-list-item', { mainCategory: props.mainCategory, categoryBudget: categoryBudget.value })
         await resetBudget()
-        message.success('Saved!', 2)
+        _message.success('Saved!', 2)
       }
     }
 
@@ -204,6 +216,7 @@ export default defineComponent({
     }
 
     return {
+      scrollX,
       categoryBudget,
 
       filteredSource,
@@ -215,7 +228,6 @@ export default defineComponent({
       handleDelete,
       allowedAction,
       saveProgramBudget,
-      allowedColumns,
     }
   },
 })

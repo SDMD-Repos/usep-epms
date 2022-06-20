@@ -118,7 +118,7 @@ export default {
           dispatch('FETCH_LIST')
           notification.success({
             message: 'Success',
-            description: 'VP\'s OPCR was unpublished successfully',
+            description: 'The request to unpublish the form has been sent successfully',
           })
         }
         commit('SET_STATE', {

@@ -85,9 +85,9 @@ export const getMenuData = [
         key: 'opcrManager',
         children: [
           {
-            title: 'Programs',
-            key: 'opcrProgram',
-            url: '/manager/opcr',
+            title: 'Form',
+            key: 'opcrFormManager',
+            url: '/opcr/manager',
             level: 3,
           },
         ],

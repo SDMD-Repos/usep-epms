@@ -8,9 +8,9 @@
   </a-modal>
 </template>
 <script>
-import {createVNode, defineComponent, reactive, ref, toRefs, watch} from "vue"
-import {Modal} from "ant-design-vue";
-import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
+import { createVNode, defineComponent, reactive, ref, toRefs, watch } from "vue"
+import { Modal } from "ant-design-vue";
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },

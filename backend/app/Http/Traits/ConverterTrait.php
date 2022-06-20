@@ -227,6 +227,7 @@ trait ConverterTrait {
 
                 $record->key = $measure->id;
                 $record->label = $measure->name;
+                $record->option = $measure;
 
                 $measures[] = $record;
             }

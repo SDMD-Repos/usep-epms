@@ -567,7 +567,17 @@ trait PdfTrait {
         $measures = array();
 
         foreach($details as $PIMeasure) {
-            $measures[] = $PIMeasure->name;
+            $name = $PIMeasure->name;
+            $itemNames = [];
+            if($PIMeasure->display_as_items) {
+                foreach($PIMeasure->items as $item) {
+                    $itemNames[] = $item->rate . " - " . $item->description;
+                }
+
+                $name = "\n" . implode("\n", $itemNames);
+            }
+
+            $measures[] = $name;
         }
 
         return $measures;

@@ -1,14 +1,14 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrForm from '@/services/api/mainForms/opcr'
+import * as ocpcrForm from '@/services/api/mainForms/ocpcr'
 
 const mapApiProviders = {
-  save: opcrForm.save,
-  getList: opcrForm.fetchOpcrTemplates,
-  publish: opcrForm.publish,
-  unpublish: opcrForm.unpublish,
-  deactivate: opcrForm.deactivate,
-  update: opcrForm.update,
+  save: ocpcrForm.save,
+  getList: ocpcrForm.fetchOpcrTemplates,
+  publish: ocpcrForm.publish,
+  unpublish: ocpcrForm.unpublish,
+  deactivate: ocpcrForm.deactivate,
+  update: ocpcrForm.update,
 }
 
 export default {

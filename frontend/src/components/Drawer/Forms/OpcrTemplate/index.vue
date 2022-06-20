@@ -27,7 +27,7 @@
         <a-tree-select
           v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          :tree-data="subCategories" :replace-fields="{ title: 'name', value: 'id',}"
+          :tree-data="subCategories" :field-names="{ label: 'name', value: 'id'}"
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
@@ -63,11 +63,19 @@
           <template #label><span class="required-indicator">Measures</span></template>
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                    style="width: 100%" label-in-value allow-clear
-                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
-            <a-select-option v-for="measure in measuresList" :value="measure.id.toString()" :key="measure.id">
-              {{ measure.name }}
-            </a-select-option>
+                    style="width: 100%" label-in-value allow-clear :options="measuresList"
+                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})">
+            <template #option="{ label, items }">
+              {{ label }} &nbsp;&nbsp;
+              <a-tooltip placement="right">
+                <template #title>
+                  <template v-for="item in items" :key="item.id">
+                    <div>{{ item.rate }} - {{ item.description }}</div>
+                  </template>
+                </template>
+                <info-circle-filled :style="{ fontSize: '12px'}"/>
+              </a-tooltip>
+            </template>
           </a-select>
         </a-form-item>
       </template>
@@ -92,14 +100,15 @@
   </a-drawer>
 </template>
 <script>
-import { defineComponent, ref, watch, computed, onMounted  } from 'vue'
+import { defineComponent, ref, watch, onMounted, inject, computed  } from 'vue'
 import { useStore } from 'vuex'
-import { TreeSelect, message } from 'ant-design-vue'
+import { TreeSelect } from 'ant-design-vue'
+import { InfoCircleFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
 
 export default defineComponent({
   name: "OpcrTemplateFormDrawer",
-  components: { },
+  components: { InfoCircleFilled },
   props: {
     drawerConfig: { type: Object, default: () => { return {} }},
     formObject: { type: Object, default: () => { return {} }},
@@ -113,6 +122,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore()
 
+    const _message = inject('a-message')
+
     // DATA
     const config = ref({})
     const isSubmmiting = ref(false)
@@ -120,9 +131,7 @@ export default defineComponent({
 
     // STATIC DATA
     const SHOW_PARENT = TreeSelect.SHOW_PARENT
-    const typeOptions = [{ label: 'PI', value: 'pi'}, { label: 'Sub PI', value: 'sub' }]
-    const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span: 14 }}
-    const tooltipHeaderText = 'Check to disable the editing of Target to Other Remarks'
+    const tooltipHeaderText = 'Check to disable the editing of Target and Measures'
 
     // COMPUTED
     const subCategories = computed(() => {
@@ -130,7 +139,10 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === parseInt(props.drawerId) && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => store.getters['formManager/manager'].measures)
+    const measuresList  = computed(() => {
+      const list = store.state.formManager.measures
+      return list.map(i => ({ value: i.key, label: i.name, displayAsItems: i.display_as_items, items: i.items }))
+    })
 
     // EVENTS
     watch(() => [props.drawerConfig, props.formObject] , ([drawerConfig, formObject]) => {
@@ -144,7 +156,7 @@ export default defineComponent({
 
     const {
       // DATA
-      storedOffices,
+      storedOffices, typeOptions, formItemLayout,
       // METHODS
       changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
     } = useFormFields(form)
@@ -196,7 +208,7 @@ export default defineComponent({
         await emit('update-table-item', { updateData: form, updateId: config.value.updateId })
         msgContent = 'Updated!'
       }
-      await message.success(msgContent, 2)
+      await _message.success(msgContent, 2)
       isSubmmiting.value = !isSubmmiting.value
     }
 

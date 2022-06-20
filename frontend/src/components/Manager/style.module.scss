@@ -1,0 +1,12 @@
+.ant-table-striped :deep(.table-striped) td {
+  background-color: #fafafa;
+}
+.display-as-items-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+th.column-display-as-items,
+td.column-display-as-items {
+  text-align: center !important;
+}

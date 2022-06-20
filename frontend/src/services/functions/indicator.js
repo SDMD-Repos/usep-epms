@@ -106,7 +106,7 @@ const defaultOpcrVpFormData = () => ({
 
 const defaultOpcrFormData = {
   program: null,
-  subCategory: null,
+  subCategory: undefined,
   name: '',
   isHeader: false,
   target: '',
