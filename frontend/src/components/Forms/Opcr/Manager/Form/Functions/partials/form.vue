@@ -56,13 +56,6 @@ export default defineComponent({
     const store = useStore()
 
     // DATA
-    const formRef = ref()
-    const formState = reactive({
-      title: '',
-      description: '',
-      modifier: 'public',
-    })
-
     const editableData = reactive({})
 
     // COMPUTED
@@ -80,6 +73,7 @@ export default defineComponent({
 
     // EVENTS
     watch(() => [props.year], ([year]) => {
+      cancelOnChange()
       fetchFunctions(year)
     })
 
@@ -121,12 +115,19 @@ export default defineComponent({
       delete editableData[key]
     }
 
+    const cancelOnChange = () => {
+      const activeKeys = { ...editableData }
+      for (const e in activeKeys) {
+        delete editableData[e]
+      }
+    }
+
     const clear = data => {
       emit('handle-clear', data)
     }
 
     return {
-      formRef, formState, editableData,
+      editableData,
 
       functions,
 

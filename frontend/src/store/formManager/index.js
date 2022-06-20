@@ -384,9 +384,10 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const { name, year, items } = payload
+      const { name, displayAsItems, year, items } = payload
       const data = {
         name: name,
+        displayAsItems: displayAsItems,
         year: year,
         items: items,
       }
@@ -408,9 +409,10 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const { name, items, deleted, id, year } = payload
+      const { name, displayAsItems, items, deleted, id, year } = payload
       const data = {
         name: name,
+        displayAsItems: displayAsItems,
         items: items,
         deleted: deleted,
       }

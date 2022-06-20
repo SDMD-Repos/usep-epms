@@ -445,7 +445,7 @@ class SettingController extends Controller
 
     public function getMeasures($year)
     {
-        $measures = Measure::select('id', 'name', 'year', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
+        $measures = Measure::select('id', 'name', 'year', 'display_as_items', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
 
         return response()->json([
             'measures' => $measures
@@ -463,6 +463,7 @@ class SettingController extends Controller
             $measure = new Measure;
 
             $measure->name = $validated['name'];
+            $measure->display_as_items = $validated['displayAsItems'];
             $measure->year = $validated['year'];
             $measure->create_id = $this->login_user->pmaps_id;
             $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -511,15 +512,23 @@ class SettingController extends Controller
 
             $measure = Measure::find($id);
 
-            $changes = '';
-            if ($measure->name != $validated['name']) {
-                $changes = " from '" . $measure->name . "' to '" . $validated['name'] . "'";
+            $original = $measure->getOriginal();
+
+            $history = '';
+
+            if($measure->isDirty('name')){
+                $history .= "Updated Name from '".$original['name']."' to '".$validated['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
             }
 
-            $measure->history = $measure->history . "Updated " . Carbon::now() . $changes . " by " . $this->login_user->fullName . "\n";
+            if($measure->isDirty('display_as_items')){
+                $history .= "Updated display_as_items from '".$original['display_as_items']."' to '".$validated['displayAsItems']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
             $measure->name = $validated['name'];
+            $measure->display_as_items = $validated['displayAsItems'];
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
+            $measure->history = $measure->history . $history;
 
             if ($measure->save()) {
                 foreach ($validated['items'] as $item) {
@@ -748,11 +757,6 @@ class SettingController extends Controller
 
             foreach($signatories as $signatory) {
                 $check = Signatory::find($signatory['id']);
-
-//                list($officeName, $officeId) = explode('_', $signatory['officeId']);
-
-
-//                list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
 
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];

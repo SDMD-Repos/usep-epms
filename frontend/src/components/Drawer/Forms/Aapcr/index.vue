@@ -260,7 +260,7 @@ export default defineComponent({
 
     const measuresList  = computed(() => {
       const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name, items: i.items }))
+      return list.map(i => ({ value: i.key, label: i.name, displayAsItems: i.display_as_items, items: i.items }))
     })
 
     const cascadingList  = computed(() => {

@@ -2,7 +2,8 @@
   <div  v-if="hasVpopcrAccess || opcrvpFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks" @view-uploaded-list="viewUploadedList" @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel"/>
+      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
+      @view-uploaded-list="viewUploadedList" @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel"/>
 
     <unpublished-forms-modal
       :modal-state="isUploadedViewed" :form-details="viewedForm"
@@ -30,6 +31,7 @@ import UnpublishRemarksModal from '@/components/Modals/Remarks'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
 
 export default defineComponent({
+  name: "VpOpcrList",
   components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
   props: {
     formId: { type: String, default: '' },
@@ -49,7 +51,7 @@ export default defineComponent({
       openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
     } = useUnpublish()
 
-    const { isUploadedViewed, viewedForm, viewUploadedList, onCloseList, uploadedListState, viewUnpublishedForms } = useViewPublishedFiles()
+    const { isUploadedViewed, viewedForm, viewUploadedList, onCloseList, viewUnpublishedForms } = useViewPublishedFiles()
 
     // COMPUTED
     const list = computed(() => store.getters['vpopcr/form'].list)

@@ -2,7 +2,7 @@
   <div>
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @unpublish="unpublish" @unpublish-template="unpublishTemplate"/>
+      @update-form="updateForm" @publish="publish" @unpublish="unpublish"  />
 
   </div>
 </template>
@@ -15,9 +15,8 @@ import { useUnpublish } from '@/services/functions/formListActions'
 import FormListTable from '@/components/Tables/Forms/List'
 
 export default defineComponent({
-  components: {
-    FormListTable,
-  },
+  name: "OPCRTemplateList",
+  components: { FormListTable },
   props: {
     formId: { type: String, default: '' },
   },
@@ -33,8 +32,6 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['opcrtemplate/form'].list)
     const loading = computed(() => store.getters['opcrtemplate/form'].loading)
-
-    const { unpublish } = useUnpublish()
 
     // EVENTS
     onMounted(() => {
@@ -58,9 +55,9 @@ export default defineComponent({
       store.dispatch('opcrtemplate/PUBLISH', { payload: payload })
     }
 
-    const unpublishTemplate = data => {
-      const id = data
-      store.dispatch('opcrtemplate/UNPUBLISH', { payload: {id: id} })
+    const unpublish = data => {
+      const { id } = data
+      store.dispatch('opcrtemplate/UNPUBLISH', { payload: { id: id } })
     }
 
     return {
@@ -71,7 +68,6 @@ export default defineComponent({
       loading,
 
       unpublish,
-      unpublishTemplate,
 
       updateForm,
       publish,

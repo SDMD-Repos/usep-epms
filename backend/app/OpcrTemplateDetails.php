@@ -37,7 +37,7 @@ class OpcrTemplateDetails extends Model
     public function measures()
     {
         return $this->belongsToMany('App\Measure', 'opcr_template_details_measures', 'detail_id', 'measure_id')
-            ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
+            ->wherePivotNull('deleted_at')->with('items')->orderBy('id', 'ASC');
     }
 
     public function mainDetails()
