@@ -165,7 +165,8 @@ Route::group([
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
-    Route::get('/allow-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowForm');
+    Route::get('/check-form-access/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormAccess');
+    Route::get('/get-user-offices-by-permission/{formId}', 'SystemAdmin\PermissionController@getUserOfficesByPermission');
 
     Route::group([
         'prefix' => 'requests'

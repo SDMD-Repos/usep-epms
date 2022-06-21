@@ -81,9 +81,9 @@ export function getAllPermissionList(year) {
       .catch(err => console.log(err))
   }
 
-  export function checkAllowForm(pmaps_id,form_id) {
+  export function checkFormAccess(pmapsId, formId) {
     return apiClient
-      .get('/system/allow-form/'+pmaps_id+'/'+form_id)
+      .get('/system/check-form-access/' + pmapsId + '/' + formId)
       .then(response => {
         return response.data
       })
@@ -92,4 +92,3 @@ export function getAllPermissionList(year) {
 
 
 
-  

@@ -67,7 +67,7 @@ export default defineComponent({
 
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId:'vpopcr' }})
       store.dispatch('vpopcr/FETCH_LIST')
     })
 

@@ -94,7 +94,7 @@ export default defineComponent({
     let vpOfficesList =  computed(() => {
       let res = store.getters['external/external'].vpOffices
       if(hasVpopcrAccess.value){
-        res = store.getters['external/external'].vpOffices.filter(office=> office.value === parseInt(accessOfficeId.value) )
+        res = res.filter(office=> office.value === parseInt(accessOfficeId.value) )
       }
       return res
     })
@@ -121,7 +121,7 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmaps_id: store.state.user.pmapsId, form_id:'vpopcr' }})
+      store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
 
       if(vpOpcrId.value) {

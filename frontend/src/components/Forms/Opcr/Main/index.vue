@@ -12,6 +12,20 @@
         </a-col>
       </a-row>
 
+      <div class="w-100 mt-2"></div>
+
+      <a-row type="flex">
+        <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Office name :</b></a-col>
+        <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
+          <a-select v-model:value="officeId" placeholder="Select Office" style="width: 100%" :options="personnelOffices"
+                    option-label-prop="title" allow-clear label-in-value :disabled="editMode" @change="checkFormDetails()">
+            <template #option="{ title }">
+              {{ title }}
+            </template>
+          </a-select>
+        </a-col>
+      </a-row>
+
       <div class="mt-4">
         <a-collapse v-model:activeKey="activeKey" accordion>
           <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" >
@@ -68,8 +82,8 @@ export default defineComponent({
     // DATA
     const activeKey = ref('0')
     const opcrTemplateId = ref(null)
-    const formId = 'opcr'
     const isCheckingForm = ref(false)
+    const officeId = ref()
 
     const {
       // DATA
@@ -80,6 +94,8 @@ export default defineComponent({
 
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
+    // const assignedPersonnel = computed(() => store.getters['opcr/form'].assignedPersonnel)
+
     const loading = computed(() => {
       return store.getters['formManager/manager'].loading || store.getters['opcr/form'].loading
     })
@@ -97,7 +113,7 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.commit('opcr/SET_STATE', { dataSource: [] })
+      store.dispatch('opcr/GET_USER_OFFICES_BY_PERMISSION', { payload: { formId: props.formId }})
       resetFormFields()
 
       opcrTemplateId.value = typeof route.params.opcrTemplateId !== 'undefined' ? route.params.opcrTemplateId : null
@@ -145,9 +161,8 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value, formId: props.formId }})
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: formId }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: props.formId }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
     }
 
@@ -156,7 +171,6 @@ export default defineComponent({
         functions: [],
         subCategories: [],
         measures: [],
-        cascadingLevels: [],
         programs: [],
         formFields: [],
       })

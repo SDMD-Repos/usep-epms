@@ -11,12 +11,15 @@ const mapApiProviders = {
   update: ocpcrForm.update,
 }
 
+const { getRequest } = ocpcrForm
+
 export default {
   namespaced: true,
   state: {
     loading: false,
     list: [],
     dataSource: [],
+    assignedPersonnel: null,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -60,11 +63,9 @@ export default {
           const { list } = response
           commit('SET_STATE', {
             list: list,
+            loading: false,
           })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     SAVE({ commit, dispatch }, { payload }) {
@@ -192,6 +193,21 @@ export default {
       commit('DELETE_STATE_ITEM', {
         type: 'dataSource',
         key: payload.key,
+      })
+    },
+    GET_USER_OFFICES_BY_PERMISSION({ commit }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const { formId } = payload
+
+      getRequest('/system/get-user-offices-by-permission/' + formId).then(response => {
+        if (response) {
+
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
       })
     },
   },
