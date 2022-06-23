@@ -176,7 +176,7 @@ export default defineComponent({
         }else{
           Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Head',
+          content: () => 'Please select an Office Head',
           })
         }
           editBtn.value = false;

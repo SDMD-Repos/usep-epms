@@ -16,7 +16,9 @@
               allow-clear
               label-in-value
               @change="getOfficeEmployee"
+              v-if="opcrFormPermission"
               />
+               <span v-else>{{ officeDetails.office_name ? officeDetails.office_name : "Not Set"}}</span>
         </a-col>
         </a-row>
         <a-row type="flex" class="mt-3">
@@ -78,7 +80,7 @@
 </template>
 
 <script>
-import { computed, defineComponent ,ref,onMounted  } from 'vue'
+import {computed, defineComponent, ref, onMounted, watch} from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 
@@ -116,6 +118,16 @@ export default defineComponent({
           // METHODS
       } = usePermission(permission)
 
+      // EVENTS
+      watch(() => [officeDetails.value] , ([officeDetails]) => {
+        if (officeDetails){
+          officeId.value = {
+            "label": officeDetails.office_name,
+            "value": officeDetails.office_id,
+          }
+        }
+      })
+
       const getPersonnelList = officeId => {
        memberList.value = []
           if (officeId) {
@@ -124,7 +136,7 @@ export default defineComponent({
             getPersonnelByOffice(id).then(response => {
               if (response) {
                 const { personnel } = response
-                memberList.value = personnel
+                memberList.value = personnel.filter( data => { console.log(data); return  data.id !== officeDetails.value.staff_id})
               }
               formLoading.value = false
             })
@@ -139,7 +151,7 @@ export default defineComponent({
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberListStaff.value = personnel
+            memberListStaff.value = personnel.filter( data => { return data.id !== officeDetails.value.pmaps_id})
           }
           formLoading.value = false
         })
@@ -152,10 +164,6 @@ export default defineComponent({
 
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'opcr',office_id:officeId}})
         staffId.value = []
-        getPersonnelList(officeId)
-        getStaffList(officeId)
-
-
       }
 
       const onSave = () => {
@@ -170,7 +178,7 @@ export default defineComponent({
         }else{
           Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Head',
+          content: () => 'Please select an Office Head',
           })
         }
           editBtn.value = false;
@@ -179,26 +187,34 @@ export default defineComponent({
       const onCancel = () =>{
           editBtn.value = false;
           officeId.value = []
-          personnelId.value = []
-          staffId.value = []
-          memberList.value = []
-          store.commit('system/SET_STATE',{officeHeadDetailsOPCR:[]})
+          personnelId.value = {
+            "label": officeDetails.value ? officeDetails.value.pmaps_name : "Not Set",
+            "value": officeDetails.value ? officeDetails.value.pmaps_id : "Not Set",
+          }
       }
 
         const onCancelStaff = () =>{
           editBtnStaff.value = false;
-          officeId.value = []
-          personnelId.value = []
-          staffId.value = []
-          memberList.value = []
-          store.commit('system/SET_STATE',{officeHeadDetailsOPCR:[]})
-
+          staffId.value = {
+            "label": officeDetails.value ? officeDetails.value.staff_name : "Not Set",
+            "value": officeDetails.value ? officeDetails.value.id : "Not Set",
+          }
       }
 
       const onEdit = () => {
+        officeId.value = {
+          "label": officeDetails.value.office_name,
+          "value": officeDetails.value.office_id,
+        }
+        getPersonnelList(officeId.value)
         editBtn.value = true;
       }
        const onEditStaff = () => {
+         officeId.value = {
+           "label": officeDetails.value.office_name,
+           "value": officeDetails.value.office_id,
+         }
+         getStaffList(officeId.value)
         editBtnStaff.value = true;
       }
 
@@ -223,6 +239,7 @@ export default defineComponent({
 
 
       onMounted(() => {
+        store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'opcr',office_id:null}})
         store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
         store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', {
                                                           payload: {
