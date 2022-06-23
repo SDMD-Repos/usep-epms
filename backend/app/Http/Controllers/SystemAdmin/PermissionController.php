@@ -214,8 +214,6 @@ class PermissionController extends Controller
                     'pmaps_name' => $pmaps_name,
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
-                    'staff_id' => '',
-                    'staff_name' => '',
                     'create_id'=> $this->login_user->pmaps_id,
 
                 ]

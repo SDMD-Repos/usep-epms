@@ -123,7 +123,7 @@ export default defineComponent({
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberList.value = personnel
+            memberList.value = personnel.filter( data => { console.log(data); return  data.id !== officeDetails.value.staff_id})
           }
           formLoading.value = false
         })
@@ -138,7 +138,7 @@ export default defineComponent({
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberListStaff.value = personnel
+            memberListStaff.value = personnel.filter( data => { return data.id !== officeDetails.value.pmaps_id})
           }
           formLoading.value = false
         })
@@ -157,7 +157,7 @@ export default defineComponent({
       }else{
         Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Head',
+          content: () => 'Please select an Office Head',
         })
       }
     }
@@ -199,6 +199,11 @@ export default defineComponent({
     }
 
     const onEdit = () => {
+      officeId.value = {
+        "label": officeDetails.value.office_name,
+        "value": officeDetails.value.office_id,
+      }
+      getPersonnelList(officeId.value)
       editBtn.value = true;
     }
 
