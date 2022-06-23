@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 trait OfficeTrait {
     use ConverterTrait;
 
-    public function getMainOfficesOnly($officesOnly=0)
+    public function getMainOfficesOnly($officesOnly=0, $returnJson=1 )
     {
         try {
             $values = array();
@@ -42,7 +42,7 @@ trait OfficeTrait {
                     array_push($values, $data);
                 }
 
-                if(empty($params)){
+                if($returnJson){
                     return response()->json([
                         'mainOffices' => $values
                     ], 200);
@@ -57,6 +57,8 @@ trait OfficeTrait {
 
     public function getMainOfficesWithChildren($status, $params=array())
     {
+        $status = count($status) ? $status : request()->all();
+
         $checkable = null;
         $selectable = null;
 

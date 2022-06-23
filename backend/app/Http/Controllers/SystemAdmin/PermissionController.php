@@ -341,44 +341,37 @@ class PermissionController extends Controller
             $permission = false;
             $office_id = 0;
             $accessDetails = null;
+            $officeAccess = null;
 
-            $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
-
-            $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
+            $formAccessDetails  = FormAccess::where(function($q) use ($pmaps_id, $form_id) {
+                $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
+            })->where('form_id', $form_id)->get();
 
             if(count($formAccessDetails)){
                 $permission = true;
                 $office_id = $formAccessDetails[0]->office_id;
                 $accessDetails = $formAccessDetails[0];
+
+                switch ($form_id) {
+                    case 'opcr':
+                        $officeAccess = $formAccessDetails;
+                }
             }
 
-            if(count($formStaffAccessDetails)){
+            /*if(count($formStaffAccessDetails)){
                 $permission = true;
                 $office_id = $formStaffAccessDetails[0]->office_id;
                 $accessDetails = $formStaffAccessDetails[0];
-            }
+            }*/
 
             return response()->json([
                 'permission' => $permission,
                 'office_id'=> $office_id,
                 'access_details' => $accessDetails,
+                'office_access' => $officeAccess,
             ], 200);
         }catch(\Exception $e){
             return response()->json($e->getMessage());
         }
     }
-
-    public function getUserOfficesByPermission($formId)
-    {
-        $loggedId = $this->login_user->pmaps_id;
-
-        $formAccess  = FormAccess::where([
-            ['pmaps_id',$loggedId], ['form_id', $formId]]
-        )->orWhere([
-            ['staff_id',$loggedId], ['form_id',$formId]
-        ])->get();
-
-        dd($formAccess);
-    }
-
 }

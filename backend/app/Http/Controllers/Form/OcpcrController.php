@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Form;
 
-use App\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
-use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateOpcrTemplate;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
@@ -13,8 +11,7 @@ use App\Opcr;
 use App\OpcrTemplate;
 use App\OpcrTemplateDetails;
 use App\OpcrTemplateDetailsMeasures;
-use App\Program;
-use App\SubCategory;
+use App\VpOpcr;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,25 +37,12 @@ class OcpcrController extends Controller
         });
     }
 
-    public function checkSavedTemplate($year)
-    {
-        $hasSaved = OpcrTemplate::where([
-            ['year', $year],
-            ['is_active', 1],
-            ['deleted_at', null],
-        ])->first();
-
-        return response()->json([
-            'hasSaved' => $hasSaved !== null
-        ], 200);
-    }
-
-    public function checkSaved($year)
+    public function checkSaved($officeId, $year)
     {
         $hasSaved = Opcr::where([
             ['year', $year],
+            ['office_id', $officeId],
             ['is_active', 1],
-            ['deleted_at', null],
         ])->first();
 
         return response()->json([
@@ -66,397 +50,113 @@ class OcpcrController extends Controller
         ], 200);
     }
 
-    public function getAllOpcrTemplate()
+    public function getVpOpcrDetails($officeId, $year, $formId)
     {
-        $list = OpcrTemplate::select("*", "id as key")->orderBy('created_at', 'ASC')->get();
+        # Check if all VP's OPCR were all published
+        $mainOffices = $this->getMainOfficesOnly(1, 0);
 
-        return response()->json([
-            'list' => $list
-        ], 200);
-    }
+        $vpOpcrs = [];
 
-    public function viewTemplate($id)
-    {
-        $opcrTemplate = OpcrTemplate::with('detailParents.subDetails')->find($id);
+        foreach ($mainOffices as $mainOffice) {
+            $vpOpcrs[] = $mainOffice->value;
+        }
+
+        $hasUnpublished = VpOpcr::where('year', $year)->whereIn('office_id', $vpOpcrs)->whereNotNull('published_date')->where('is_active', 1)->get();
+
+        if(count($hasUnpublished) !== count($vpOpcrs)) {
+            return response()->json(['error' => "Unable to create this form at this time. Please wait for all VPs to publish their OPCR."], 200);
+        }
+
+        # Parent ID checker
+        $vpOfficeId = $this->getOfficeParentId($officeId, $formId);
+
+        if($formId === 'opcr' && $vpOfficeId === null) {
+            return response()->json(['error' => "Department selected has no VP office assigned. Please contact the administrator"], 200);
+        }
+
+        # Get all indicators from template
+        $template = OpcrTemplate::where([
+            ['year', $year],
+            ['is_active', 1]
+        ])->whereNotNull('published_date')->with('detailParents.subDetails')->first();
 
         $dataSource = [];
 
-        # Loop through OPCRTemplate details
-        foreach($opcrTemplate->detailParents as $detail) {
+        foreach($template->detailParents as $detailParent) {
+            $sub = [];
 
-            $subs = [];
-
-            if(count($detail->subDetails)) {
-                foreach($detail->subDetails as $subPI){
-
-                    $extracted = $this->extractDetails($subPI);
-
-                    $subItem = array(
-                        'key' => $subPI->id,
-                        'id' => $subPI->id,
-                        'type' => 'sub',
-                        'category' => $subPI->category_id,
-                        'subCategory' => $extracted['subCategory'],
-                        'program' => $subPI->program_id,
-                        'name' => $subPI->pi_name,
-                        'isHeader' => (bool)$subPI->is_header,
-                        'target' => $subPI->target,
-                        'measures' => $extracted['measures'],
-                    );
-
-                    array_push($subs, $subItem);
-
+            if(count($detailParent->subDetails)) {
+                foreach($detailParent->subDetails as $subDetail) {
+                    $sub[] = $this->getOpcrDetails($subDetail);
                 }
             }
 
-            $extracted = $this->extractDetails($detail);
-
-            if(!$detail->parent_id){
-                $item = array(
-                    'key' => $detail->id,
-                    'id' => $detail->id,
-                    'type' => 'pi',
-                    'category' => $detail->category_id,
-                    'subCategory' => $extracted['subCategory'],
-                    'program' => $detail->program_id,
-                    'name' => $detail->pi_name,
-                    'isHeader' => (bool)$detail->is_header,
-                    'target' => $detail->target,
-                    'measures' => $extracted['measures'],
-                );
-
-                if(count($subs)) {
-                    $item['children'] = $subs;
-                }
-
-                array_push($dataSource, $item);
-            }
+            $data = $this->getOpcrDetails($detailParent, $sub);
+//            var_dump($data['name']);
+            $dataSource[] = $data;
         }
-        # end OPCRtemplate details loop
+//        dd($dataSource);
 
+        # Get all indicators from VPs' OPCRs
+        /*$getPIs = VpOpcr::where([
+            ['year', $year],
+            ['is_active', 1]
+        ])->whereNotNull('published_date')
+            ->with([
+                'detailsOrdered' => function ($que) use ($officeId, $vpOfficeId) {
+                    $que->whereHas('offices', function ($query) use ($officeId, $vpOfficeId)  {
+                        $query->where(function ($que) use ($officeId, $vpOfficeId) {
+                            $que->where(function($q) use ($vpOfficeId) {
+                                $q->where('office_id', '=', $vpOfficeId)
+                                    ->whereNull('vp_office_id');
+                            })->orWhere('office_id', '=', $officeId);
+                        });
+                    });
+                }, 'detailsOrdered.offices', 'detailsOrdered.measures'
+            ])->get();*/
+
+//        dd($getPIs);
         return response()->json([
             'dataSource' => $dataSource,
-            'year' => $opcrTemplate->year,
-            'isFinalized' => $opcrTemplate->finalized_date !== NULL,
-            'editMode' => true
+            'targetsBasisList' => $this->targetsBasisList,
         ], 200);
     }
 
-    public function saveTemplate(StoreAapcr $request)
+    public function getOpcrDetails($data, $children=[])
     {
+        $offices = $data->offices ? $this->splitPIOffices($data->offices, ['splitOffices' => 1, 'origin' => 'vpopcr-view']) : [];
 
-        try{
-            $validated = $request->validated();
+        $this->getTargetsBasisList($data->targets_basis);
 
-            $dataSource = $validated['dataSource'];
-            $year = $validated['fiscalYear'];
-            $documentName = $validated['documentName'];
-            $isFinalized = $validated['isFinalized'];
+        $extracted = $this->extractDetails($data);
 
-            $finalizedHistory = ($isFinalized ? 'and finalized ' : '');
+        $details = array(
+            'key' => $data->id,
+            'id' => $data->id,
+            'type' => $data->type,
+            'category' => $data->category_id,
+            'subCategory' => $extracted['subCategory'],
+            'program' => $data->program_id,
+            'name' => $data->pi_name,
+            'isHeader' => (bool)$data->is_header,
+            'target' => $data->target,
+            'measures' => $extracted['measures'],
+            'budget' => $data->allocated_budget,
+            'targetsBasis' => $data->targets_basis,
+            'implementing' => $offices['implementing'] ?? [],
+            'supporting' => $offices['supporting'] ?? [],
+            'remarks' => $data->remarks,
+            'deleted' => 0,
+            'isCascaded' => $data->isCascaded,
+            'fromTemplate' => $data->fromTemplate,
+            'wasSaved' => $data->wasSaved
+        );
 
-            $hasSavedOpcrTemplate = OpcrTemplate::where([
-                ['year', $year],
-                ['is_active', 1],
-                ['deleted_at', null],
-            ])->get();
-
-            if(count($hasSavedOpcrTemplate)) {
-                return response()->json('Unable to save this document. A finalized OPCR Template has been created for the year '.$year.'.', 409);
-            }
-
-            DB::beginTransaction();
-
-            $opcrTemplate = new OpcrTemplate();
-
-            $opcrTemplate->year = $year;
-            $opcrTemplate->document_name = $documentName;
-            $opcrTemplate->finalized_date = ($isFinalized ? Carbon::now() : null);
-            $opcrTemplate->create_id = $this->login_user->pmaps_id;
-            $opcrTemplate->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if ($opcrTemplate->save()) {
-                foreach($dataSource as $value) {
-                    $this->saveOpcrTemplateDetails($opcrTemplate->id, $value);
-                }
-            }else{
-                DB::rollBack();
-            }
-
-            DB::commit();
-
-            return response()->json('OPCR Template was saved successfully', 200);
-        }catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
-        }
-    }
-
-    public function saveOpcrTemplateDetails($opcrTemplateId, $values)
-    {
-
-        $detail = new OpcrTemplateDetails();
-
-        $detail->opcr_template_id = $opcrTemplateId;
-        $detail->category_id = $values['category'];
-        $detail->sub_category_id = isset($values['subCategory']) ? $values['subCategory']['value'] : null;
-        $detail->program_id = $values['program'];
-        $detail->pi_name = $values['name'];
-        $detail->is_header = $values['isHeader'];
-
-        if(!$values['isHeader']) {
-            $detail->target = $values['target'];
+        if(count($children)){
+            $details['children'][] = $children;
         }
 
-        $detail->parent_id = isset($values['detailId']) ? $values['detailId'] : null;
-        $detail->create_id = $this->login_user->pmaps_id;
-        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-        if($detail->save()) {
-
-            $this->saveMeasures($detail, $values['measures']);
-
-            if(isset($values['children']) && count($values['children'])) {
-
-                foreach ($values['children'] as $child) {
-                    $child['detailId'] = $detail->id;
-
-                    $this->saveOpcrTemplateDetails($opcrTemplateId, $child);
-                }
-            }
-        }
+        return $details;
     }
 
-    public function deactivateTemplate(Request $request)
-    {
-        $id = $request->id;
-
-        $now = Carbon::now();
-
-        $opcrTemplate = OpcrTemplate::find($id);
-
-        $opcrTemplate->is_active = 0;
-        $opcrTemplate->updated_at = $now;
-        $opcrTemplate->modify_id = $this->login_user->pmaps_id;
-        $opcrTemplate->history = $opcrTemplate->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
-
-        $opcrTemplate->save();
-
-        return response()->json("Successfully deactivated", 200);
-    }
-
-    public function updateTemplate(UpdateOpcrTemplate $request, $id)
-    {
-        try {
-
-            DB::beginTransaction();
-
-            $validated = $request->validated();
-
-            $dataSource = $validated['dataSource'];
-            $year = $validated['fiscalYear'];
-            $isFinalized = $validated['isFinalized'];
-            $documentName = $validated['documentName'];
-            $deletedIds = $validated['deletedIds'];
-
-            $opcrTemplate = OpcrTemplate::find($id);
-
-            $history = "";
-
-            if($isFinalized){
-                if($opcrTemplate->finalized_date !== NULL){
-                    $finalized_date = $opcrTemplate->finalized_date;
-                }else{
-                    $finalized_date = Carbon::now();
-                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-            }
-
-            $original = $opcrTemplate->getOriginal();
-
-            $opcrTemplate->year = $year;
-            $opcrTemplate->document_name = $documentName;
-            $opcrTemplate->finalized_date = $isFinalized ? $finalized_date : null;
-            $opcrTemplate->modify_id = $this->login_user->pmaps_id;
-
-            if($opcrTemplate->isDirty('year')){
-                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-            }
-
-            if($opcrTemplate->isDirty('document_name')){
-                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-            }
-
-            $opcrTemplate->history = $opcrTemplate->history.$history;
-
-            if($opcrTemplate->save()) {
-                foreach($deletedIds as $deletedId){
-                    $deleteOpcrTemplate = OpcrTemplateDetails::find($deletedId);
-
-                    $deleteOpcrTemplate->modify_id = $this->login_user->pmaps_id;
-                    $deleteOpcrTemplate->history = $deleteOpcrTemplate->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
-
-                    if($deleteOpcrTemplate->save()){
-                        if(!$deleteOpcrTemplate->delete()){
-                            DB::rollBack();
-                        }
-                    }else{
-                        DB::rollBack();
-                    }
-                }
-
-                foreach($dataSource as $source){
-                    $this->updateDetails($source, $id);
-                }
-
-                DB::commit();
-
-                return response()->json('OPCR Template was updated successfully', 200);
-            } else {
-                DB::rollBack();
-            }
-
-        } catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
-        }
-    }
-
-    public function updateDetails($data, $opcrTemplateId)
-    {
-        if (strpos((string)$data['id'], 'new') === false) {
-
-            $detail = OpcrTemplateDetails::find($data['id']);
-
-            if($detail) {
-                $original = $detail->getOriginal();
-
-                $isHeader = $data['isHeader'] ? 1 : 0;
-
-                $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
-
-                $detail->category_id = $data['category'];
-                $detail->sub_category_id = $subCategory;
-                $detail->program_id = $data['program'];
-                $detail->pi_name = $data['name'];
-                $detail->is_header = $isHeader;
-                $detail->target = $data['target'];
-
-                $history = '';
-
-                if($detail->isDirty('pi_name')){
-                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                if($detail->isDirty('is_header')){
-                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                if($detail->isDirty('target')){
-                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                if($detail->isDirty('category_id')){
-                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                if($detail->isDirty('sub_category_id')){
-                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                if($detail->isDirty('program_id')){
-                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
-                }
-
-                $detail->history = $detail->history.$history;
-
-                if(!$detail->save()){
-                    DB::rollBack();
-                }
-
-                $this->updateMeasures(new OpcrTemplateDetailsMeasures, $data['id'], $data['measures']);
-
-                if(isset($data['children']) && count($data['children'])) {
-
-                    foreach ($data['children'] as $child) {
-                        $child['detailId'] = $detail->id;
-
-                        $this->updateDetails($child, $opcrTemplateId);
-                    }
-                }
-
-            } else {
-                DB::rollBack();
-            }
-        } else {
-            $this->saveOpcrTemplateDetails($opcrTemplateId, $data);
-        }
-    }
-
-    public function publishTemplate(Request $request)
-    {
-        $id = $request->id;
-        $year = $request->year;
-
-        $hasPublished = OpcrTemplate::where([
-            ['year', $year],
-            ['is_active', 1]
-        ])->whereNotNull('published_date')->first();
-
-        if(!$hasPublished) {
-            $opcrTemplate = OpcrTemplate::find($id);
-
-            $opcrTemplate->published_date = Carbon::now();
-            $opcrTemplate->updated_at = Carbon::now();
-            $opcrTemplate->modify_id = $this->login_user->pmaps_id;
-            $opcrTemplate->history = $opcrTemplate->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            $opcrTemplate->save();
-
-            return response()->json('Opcr Template was published successfully', 200);
-
-        }else{
-            return response()->json('Cannot publish two or more Opcr Templates in a year', 400);
-        }
-    }
-
-    public function unpublishTemplate(Request $request)
-    {
-        try {
-            $id = $request['id'];
-
-            DB::beginTransaction();
-
-            $opcrTemplate = OpcrTemplate::find($id);
-
-            $opcrTemplate->published_date = null;
-            $opcrTemplate->history = $opcrTemplate->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-            if(!$opcrTemplate->save()) {
-                DB::rollBack();
-            }
-
-            DB::commit();
-
-            return response()->json('OCPR Template was unpublished successfully', 200);
-        }catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
-        }
-    }
 }

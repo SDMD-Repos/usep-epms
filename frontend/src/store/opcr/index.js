@@ -1,6 +1,7 @@
 import { notification } from 'ant-design-vue'
 
 import * as ocpcrForm from '@/services/api/mainForms/ocpcr'
+import { checkFormAccess } from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: ocpcrForm.save,
@@ -11,15 +12,14 @@ const mapApiProviders = {
   update: ocpcrForm.update,
 }
 
-const { getRequest } = ocpcrForm
-
 export default {
   namespaced: true,
   state: {
     loading: false,
     list: [],
     dataSource: [],
-    assignedPersonnel: null,
+    hasOpcrAccess: null,
+    officeAccess: null,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -195,15 +195,20 @@ export default {
         key: payload.key,
       })
     },
-    GET_USER_OFFICES_BY_PERMISSION({ commit }, { payload }) {
+    CHECK_OPCR_PERMISSION({ commit }, { payload }) {
+      const { pmapsId, formId } = payload
       commit('SET_STATE', {
         loading: true,
       })
-      const { formId } = payload
 
-      getRequest('/system/get-user-offices-by-permission/' + formId).then(response => {
+      checkFormAccess(pmapsId, formId).then(response => {
         if (response) {
+          const { permission, office_access } = response
 
+          commit('SET_STATE', {
+            hasOpcrAccess: permission,
+            officeAccess : office_access,
+          })
         }
         commit('SET_STATE', {
           loading: false,

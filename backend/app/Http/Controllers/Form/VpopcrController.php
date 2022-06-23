@@ -763,6 +763,10 @@ class VpopcrController extends Controller
 
                                 $getParentId = $this->saveVpOpcrDetails($id, $source, $newDetail);
                             }
+                        }else {
+                            if(isset($source['isCascaded']) && $source['isCascaded']) {
+                                $this->updateVpOffices($source);
+                            }
                         }
                     }
 
@@ -851,8 +855,6 @@ class VpopcrController extends Controller
 
     public function updateDetails($data, $updated)
     {
-        $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
-
         $original = $updated->getOriginal();
 
         $isHeader = $data['isHeader'] ? 1 : 0;
@@ -906,6 +908,13 @@ class VpopcrController extends Controller
         }
 
         $this->updateMeasures(new VpOpcrDetailMeasure(), $data['id'], $data['measures']);
+
+        $this->updateVpOffices($data);
+    }
+
+    public function updateVpOffices($data)
+    {
+        $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
 
         $officeModel = new VpOpcrDetailOffice();
 

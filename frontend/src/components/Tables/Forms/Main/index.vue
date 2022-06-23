@@ -93,8 +93,8 @@
 
         <template v-if="column.key === 'operation'">
           <EditFilled @click="handleEdit(record)" />
-          <a-divider type="vertical" />
           <template v-if="record.type === 'pi'">
+            <a-divider type="vertical" />
             <PlusCircleFilled @click="handleAddSub(record)"/>
             <a-divider type="vertical" v-if="allowedAction(record)"/>
           </template>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="hasOpcrAccess || opcrFormPermission">
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -17,12 +17,15 @@
       <a-row type="flex">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Office name :</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
-          <a-select v-model:value="officeId" placeholder="Select Office" style="width: 100%" :options="personnelOffices"
-                    option-label-prop="title" allow-clear label-in-value :disabled="editMode" @change="checkFormDetails()">
-            <template #option="{ title }">
-              {{ title }}
-            </template>
-          </a-select>
+          <a-tree-select
+            v-if="userOffices.length && userOffices.length > 1"
+            v-model:value="officeId"
+            style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            :tree-data="userOffices"
+            placeholder="Select office"
+            show-search allow-clear label-in-value tree-default-expand-all
+          />
+          <span v-else-if="userOffices.length">{{ userOffices[0].label.toUpperCase() }}</span>
         </a-col>
       </a-row>
 
@@ -54,16 +57,20 @@
       </div>
     </a-spin>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
+import {defineComponent, ref, onMounted, createVNode, watch, computed, onBeforeMount} from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useFormOperations } from '@/services/functions/indicator'
 import { getRequest } from '@/services/api/mainForms/ocpcr'
+import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
+
+const permission = { listOpcr: [ "form", "f-opcr" ] }
 
 export default defineComponent({
   name: "OpcrForm",
@@ -81,23 +88,24 @@ export default defineComponent({
 
     // DATA
     const activeKey = ref('0')
-    const opcrTemplateId = ref(null)
+    const opcrId = ref(null)
     const isCheckingForm = ref(false)
-    const officeId = ref()
+    const officeId = ref(undefined)
 
     const {
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
-      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem, resetFormFields,
     } = useFormOperations(props)
 
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
-    // const assignedPersonnel = computed(() => store.getters['opcr/form'].assignedPersonnel)
+    const hasOpcrAccess = computed(() => store.getters['opcr/form'].hasOpcrAccess)
+    const officeAccess = computed(() => store.getters['opcr/form'].officeAccess)
 
     const loading = computed(() => {
-      return store.getters['formManager/manager'].loading || store.getters['opcr/form'].loading
+      return store.getters['formManager/manager'].loading || store.getters['opcr/form'].loading || store.getters['external/external'].loading
     })
 
     const spinningTip = computed(() => {
@@ -110,47 +118,84 @@ export default defineComponent({
       return tip
     })
 
+    const userOffices = computed(() => {
+      let offices
+      if(hasOpcrAccess.value) {
+        offices =  officeAccess.value;
+        offices = offices.map(i => ({ value: i.office_id, label: i.office_name }))
+      } else {
+        offices = store.getters['external/external'].mainOfficesChildren
+        offices = offices.map(i => ({ value: i.value, label: i.title, children: i.children }))
+      }
+
+      return offices
+    })
+
+    const { opcrFormPermission } = usePermission(permission)
+
     // EVENTS
-    onMounted(() => {
+    onBeforeMount(() => {
+      store.dispatch('opcr/CHECK_OPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId: props.formId }})
+    })
+
+    onMounted( () => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcr/GET_USER_OFFICES_BY_PERMISSION', { payload: { formId: props.formId }})
+
+      if(opcrFormPermission) {
+        let params = {
+          selectable: { allColleges: false, mains: false },
+          isAcronym: false,
+          isOfficesOnly: true,
+        }
+        store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
+      }
+
       resetFormFields()
 
-      opcrTemplateId.value = typeof route.params.opcrTemplateId !== 'undefined' ? route.params.opcrTemplateId : null
+      opcrId.value = typeof route.params.opcrId !== 'undefined' ? route.params.opcrId : null
 
-      if(opcrTemplateId.value) {
+      if(opcrId.value) {
         getFormDetails()
       } else {
         checkFormAvailability()
       }
     })
 
+    watch( userOffices,  userOffices => {
+      if(userOffices.length === 1) {
+        const { value, label } = userOffices[0]
+        officeId.value = { value: value, label: label }
+      }
+    })
+
+    watch(officeId, officeId => {
+      if(typeof officeId.value !== 'undefined'){ checkFormAvailability() }
+    })
+
     // METHODS
     const checkFormAvailability = () => {
-      resetFormFields()
-
-      if(year.value !== cachedYear.value) {
+      allowEdit.value = false
+      if(typeof officeId.value !== 'undefined') {
         isCheckingForm.value = true
+        store.commit('opcr/SET_STATE', {
+          dataSource: [],
+        })
+        console.log('checkFormAvailability')
 
-        getRequest('/forms/ocpcr/check-saved/' + year.value).then(response => {
+        getRequest('/forms/ocpcr/check-saved/' + officeId.value + '/' + year.value).then(response => {
           if(response) {
             const { hasSaved } = response
-            isCheckingForm.value = false
             if(hasSaved) {
+              console.log('has saved')
               Modal.error({
-                title: () => 'Unable to create an OPCR for the year ' + year.value,
-                content: () => 'Please check the OPCR list or select a different year to create a new OPCR Template',
+                title: () => 'The selected office has an existing OPCR for the year ' + year.value,
+                content: () => 'Please check the list or select a different year/office to create a new OPCR',
               })
-              if (editMode.value) {
-                year.value = cachedYear.value
-              } else {
-                allowEdit.value = false
-              }
-            } else {
-              if (!editMode.value) {
-                allowEdit.value = true
-                initializeFormFields()
-              }
+              isCheckingForm.value = false
+              resetFormFields()
+            }else {
+              allowEdit.value = true
+              loadCascadedIndicators()
             }
           }
         })
@@ -166,13 +211,28 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
     }
 
-    const resetFormFields = () => {
-      store.commit('formManager/SET_STATE', {
-        functions: [],
-        subCategories: [],
-        measures: [],
-        programs: [],
-        formFields: [],
+    const loadCascadedIndicators = () => {
+      allowEdit.value = false
+      store.commit('vpopcr/SET_STATE', {
+        loading: true,
+      })
+      const url = 'forms/ocpcr/get-vp-opcr-details/' + officeId.value.value + '/' + year.value + '/' + props.formId
+      getRequest(url).then(response => {
+        if(response && typeof response.error === 'undefined') {
+          store.commit('opcr/SET_STATE', { dataSource: response.dataSource })
+
+          allowEdit.value = true
+          targetsBasisList.value = response.targetsBasisList
+        }else {
+          console.log(response)
+          Modal.warning({
+            title: () => 'Error',
+            content: () => response.error,
+          })
+        }
+        store.commit('vpopcr/SET_STATE', {
+          loading: false,
+        })
       })
     }
 
@@ -260,11 +320,16 @@ export default defineComponent({
       isFinalized,
       allowEdit,
       isCheckingForm,
+      officeId,
 
       years,
       categories,
+      hasOpcrAccess,
       loading,
       spinningTip,
+      userOffices,
+
+      opcrFormPermission,
 
       validateForm,
       checkFormAvailability,

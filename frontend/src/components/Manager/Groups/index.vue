@@ -90,16 +90,12 @@ export default defineComponent({
       deleted: [],
     })
 
-    const permission ={
-                        listCreate: ["manager", "m-group", "mg-create"],
-                        listDelete: ["manager", "m-group", "mg-delete"],
-                        listEdit: ["manager", "m-group", "mg-edit"],
-                      }
-     const {
-          // DATA
-        isCreate,isDelete,isEdit,
-          // METHODS
-      } = usePermission(permission)
+    const permission = {
+      listCreate: ["manager", "m-group", "mg-create"],
+      listDelete: ["manager", "m-group", "mg-delete"],
+      listEdit: ["manager", "m-group", "mg-edit"],
+    }
+     const { isCreate,isDelete,isEdit } = usePermission(permission)
 
 
     let checkIfEmpty = async (rule, value) => {
@@ -129,8 +125,6 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-
-
       store.dispatch('formManager/FETCH_GROUPS')
 
       let params = {
