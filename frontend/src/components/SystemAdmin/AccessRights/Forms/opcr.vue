@@ -66,7 +66,7 @@
            </a-col>
           </a-row>
            <div class="mt-4"></div>
-              <a-row type="flex" justify="center"  class="mt-3" v-if="opcrHeadPermission && officeDetails.pmaps_id ===  loginId ">
+              <a-row type="flex" justify="center"  class="mt-3" v-if="opcrHeadPermission && (officeDetails && officeDetails.pmaps_id ===  loginId) ">
                   <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
               <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onSaveStaff">Save</a-button>
               <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onCancelStaff">Cancel</a-button>
@@ -97,7 +97,6 @@ export default defineComponent({
       const opcrHeadPermission = computed(() => store.getters['system/permission'].opcrHeadPermission)
 
       const officeId = ref(undefined)
-      const headId = ref(undefined)
       const staffId = ref(undefined)
       const personnelId = ref(undefined)
       const loginId = store.state.user.pmapsId
@@ -120,10 +119,18 @@ export default defineComponent({
 
       // EVENTS
       watch(() => [officeDetails.value] , ([officeDetails]) => {
-        if (officeDetails){
+        if (officeDetails && Object.keys(officeDetails).length > 0){
           officeId.value = {
             "label": officeDetails.office_name,
             "value": officeDetails.office_id,
+          }
+          personnelId.value = {
+            "label": officeDetails.pmaps_name,
+            "value": officeDetails.pmaps_id,
+          }
+          staffId.value = {
+            "label": officeDetails.staff_name,
+            "value": officeDetails.staff_id,
           }
         }
       })
@@ -136,7 +143,11 @@ export default defineComponent({
             getPersonnelByOffice(id).then(response => {
               if (response) {
                 const { personnel } = response
-                memberList.value = personnel.filter( data => { console.log(data); return  data.id !== officeDetails.value.staff_id})
+                let obj = personnel
+                if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.staff_id){
+                  obj = personnel.filter( data => { return  data.id !== officeDetails.value.staff_id})
+                }
+                memberList.value = obj
               }
               formLoading.value = false
             })
@@ -151,7 +162,11 @@ export default defineComponent({
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberListStaff.value = personnel.filter( data => { return data.id !== officeDetails.value.pmaps_id})
+            let obj = personnel
+            if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.pmaps_id){
+              obj = personnel.filter( data => { return  data.id !== officeDetails.value.pmaps_id})
+            }
+            memberListStaff.value = obj
           }
           formLoading.value = false
         })
@@ -202,19 +217,15 @@ export default defineComponent({
       }
 
       const onEdit = () => {
-        officeId.value = {
-          "label": officeDetails.value.office_name,
-          "value": officeDetails.value.office_id,
+        if (officeId.value && Object.keys(officeId.value).length > 0){
+          getPersonnelList(officeId.value)
         }
-        getPersonnelList(officeId.value)
         editBtn.value = true;
       }
        const onEditStaff = () => {
-         officeId.value = {
-           "label": officeDetails.value.office_name,
-           "value": officeDetails.value.office_id,
+         if (officeId.value && Object.keys(officeId.value).length > 0){
+           getStaffList(officeId.value)
          }
-         getStaffList(officeId.value)
         editBtnStaff.value = true;
       }
 
@@ -252,7 +263,6 @@ export default defineComponent({
 
     return  {
       officeId,
-      headId,
       staffId,
       memberList,
       vpOfficesList,

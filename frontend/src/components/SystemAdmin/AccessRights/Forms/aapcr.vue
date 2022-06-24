@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, ref, computed } from 'vue'
+import {defineComponent, onMounted, ref, computed, watch} from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import { getPersonnelByOffice } from '@/services/api/hris';
@@ -106,6 +106,24 @@ export default defineComponent({
 
     const { aapcrFormPermission } = usePermission(permission)
 
+    // EVENTS
+    watch(() => [officeDetails.value] , ([officeDetails]) => {
+      if (officeDetails && Object.keys(officeDetails).length > 0){
+        officeId.value = {
+          "label": officeDetails.office_name,
+          "value": officeDetails.office_id,
+        }
+        personnelId.value = {
+          "label": officeDetails.pmaps_name,
+          "value": officeDetails.pmaps_id,
+        }
+        staffId.value = {
+          "label": officeDetails.staff_name,
+          "value": officeDetails.staff_id,
+        }
+      }
+    })
+
     onMounted(() => {
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION',
@@ -116,29 +134,36 @@ export default defineComponent({
 
     const getPersonnelList = officeId => {
       memberList.value = []
-      personnelId.value = []
       if (officeId) {
         formLoading.value = true
         const id = officeId.value
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberList.value = personnel.filter( data => { console.log(data); return  data.id !== officeDetails.value.staff_id})
+            let obj = personnel
+            if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.staff_id){
+              obj = personnel.filter( data => { return  data.id !== officeDetails.value.staff_id})
+            }
+            memberList.value = obj
           }
           formLoading.value = false
         })
       }
     }
 
-    const getStaffList =  staffOfficeId => {
+    const getStaffList =  officeId => {
       memberListStaff.value = []
-      if (staffOfficeId) {
+      if (officeId) {
         formLoading.value = true
-        const id = staffOfficeId
+        const id = officeId.value
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberListStaff.value = personnel.filter( data => { return data.id !== officeDetails.value.pmaps_id})
+            let obj = personnel
+            if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.pmaps_id){
+              obj = personnel.filter( data => { return  data.id !== officeDetails.value.pmaps_id})
+            }
+            memberListStaff.value = obj
           }
           formLoading.value = false
         })
@@ -164,20 +189,12 @@ export default defineComponent({
 
     const onCancel = () => {
       editBtn.value = false;
-      officeId.value = []
-      personnelId.value = []
-      staffId.value = []
-      memberList.value = []
-      store.commit('system/SET_STATE',{ officeHeadDetailsVPOPCR: [] })
+
     }
 
     const onCancelStaff = () => {
       editBtnStaff.value = false;
-      officeId.value = []
-      personnelId.value = []
-      staffId.value = []
-      memberList.value = []
-      store.commit('system/SET_STATE',{ officeHeadDetailsVPOPCR: [] })
+
     }
 
     const onSaveStaff = () => {
@@ -199,17 +216,16 @@ export default defineComponent({
     }
 
     const onEdit = () => {
-      officeId.value = {
-        "label": officeDetails.value.office_name,
-        "value": officeDetails.value.office_id,
+      if (officeId.value && Object.keys(officeId.value).length > 0){
+        getPersonnelList(officeId.value)
       }
-      getPersonnelList(officeId.value)
       editBtn.value = true;
     }
 
     const onEditStaff = () => {
-      getStaffList(officeDetails.value.office_id)
-
+      if (officeId.value && Object.keys(officeId.value).length > 0){
+        getStaffList(officeId.value)
+      }
       editBtnStaff.value = true;
     }
 
