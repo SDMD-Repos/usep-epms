@@ -217,6 +217,7 @@ export default defineComponent({
       const onEdit = () => {
         if (officeId.value && Object.keys(officeId.value).length > 0){
           getPersonnelList(officeId.value)
+          personnelId.value = officeDetails.value && Object.keys(officeDetails.value).length > 0 ? { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name} : undefined
         }
         editBtn.value = true;
       }

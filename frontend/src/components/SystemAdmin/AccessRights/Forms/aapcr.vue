@@ -228,7 +228,7 @@ export default defineComponent({
     const onEdit = () => {
       if (officeId.value && Object.keys(officeId.value).length > 0){
         getPersonnelList(officeId.value)
-        personnelId.value = { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name}
+        personnelId.value = officeDetails.value && Object.keys(officeDetails.value).length > 0 ? { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name} : undefined
       }
       editBtn.value = true;
     }
@@ -236,7 +236,6 @@ export default defineComponent({
     const onEditStaff = () => {
       if (officeId.value && Object.keys(officeId.value).length > 0){
         getStaffList(officeId.value)
-        // staffId.value = { "value": officeDetails.value.staff_id, "label": officeDetails.value.staff_name}
       }
       editBtnStaff.value = true;
     }
