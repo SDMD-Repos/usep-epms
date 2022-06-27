@@ -175,13 +175,17 @@ export default defineComponent({
       }
     }
     const onSave = () => {
+      if (parseInt(personnelId.value.value) === parseInt(officeDetails.value.pmaps_id)){
+        editBtn.value = false;
+        return
+      }
       let params = {
         pmaps_id: personnelId.value,
         form_id: 'aapcr',
         office_id: officeId.value,
       }
-      if(personnelId.value){
 
+      if(personnelId.value){
         store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
         editBtn.value = false;
       }else{
@@ -199,8 +203,8 @@ export default defineComponent({
     }
 
     const onCancelStaff = () => {
+      staffId.value = { "value": officeDetails.value.staff_id, "label": officeDetails.value.staff_name}
       editBtnStaff.value = false;
-
     }
 
     const onSaveStaff = () => {
@@ -232,6 +236,7 @@ export default defineComponent({
     const onEditStaff = () => {
       if (officeId.value && Object.keys(officeId.value).length > 0){
         getStaffList(officeId.value)
+        // staffId.value = { "value": officeDetails.value.staff_id, "label": officeDetails.value.staff_name}
       }
       editBtnStaff.value = true;
     }
