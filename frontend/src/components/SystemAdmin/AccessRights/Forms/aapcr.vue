@@ -56,7 +56,7 @@
                 label-in-value
                 v-if="editBtnStaff"
               />
-            <span v-else>{{ officeDetails && officeDetails.staff_name ? officeDetails.staff_name : "Not Set" }}</span>
+            <span v-else>{{ officeDetails && officeDetails.staff_name && officeId.value === officeDetails.office_id ? officeDetails.staff_name : "Not Set" }}</span>
           </a-col>
         </a-row>
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
@@ -148,6 +148,11 @@ export default defineComponent({
           }
           formLoading.value = false
         })
+
+        if (officeDetails.value.office_id != officeId.value){
+          personnelId.value = undefined
+          staffId.value = undefined
+        }
       }
     }
 
@@ -188,6 +193,7 @@ export default defineComponent({
     }
 
     const onCancel = () => {
+      officeId.value = { "value" : officeDetails.value.office_id, "label": officeDetails.value.office_name }
       editBtn.value = false;
 
     }
@@ -201,7 +207,7 @@ export default defineComponent({
       let params = {
         pmaps_id: staffId.value,
         form_id: 'aapcr',
-        office_id:  {"value":officeDetails.value.office_id},
+        office_id:  {"value":officeDetails.value.office_id, "label":officeDetails.value.office_name},
       }
 
       if(staffId.value){
@@ -218,6 +224,7 @@ export default defineComponent({
     const onEdit = () => {
       if (officeId.value && Object.keys(officeId.value).length > 0){
         getPersonnelList(officeId.value)
+        personnelId.value = { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name}
       }
       editBtn.value = true;
     }
