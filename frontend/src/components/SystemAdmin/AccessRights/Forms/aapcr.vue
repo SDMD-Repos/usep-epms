@@ -175,7 +175,7 @@ export default defineComponent({
       }
     }
     const onSave = () => {
-      if (parseInt(personnelId.value.value) === parseInt(officeDetails.value.pmaps_id)){
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && (String(personnelId.value.value) === String(officeDetails.value.pmaps_id))){
         editBtn.value = false;
         return
       }

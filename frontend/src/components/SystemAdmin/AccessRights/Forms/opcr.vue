@@ -182,6 +182,10 @@ export default defineComponent({
       }
 
       const onSave = () => {
+        if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && (String(personnelId.value.value) === String(officeDetails.value.pmaps_id))){
+          editBtn.value = false;
+          return
+        }
         let params = {
           office_id: officeId.value,
           pmaps_id: personnelId.value,
@@ -201,7 +205,6 @@ export default defineComponent({
 
       const onCancel = () =>{
           editBtn.value = false;
-          officeId.value = []
           personnelId.value = {
             "label": officeDetails.value ? officeDetails.value.pmaps_name : "Not Set",
             "value": officeDetails.value ? officeDetails.value.pmaps_id : "Not Set",
@@ -219,6 +222,7 @@ export default defineComponent({
       const onEdit = () => {
         if (officeId.value && Object.keys(officeId.value).length > 0){
           getPersonnelList(officeId.value)
+          personnelId.value = officeDetails.value && Object.keys(officeDetails.value).length > 0 ? { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name} : undefined
         }
         editBtn.value = true;
       }

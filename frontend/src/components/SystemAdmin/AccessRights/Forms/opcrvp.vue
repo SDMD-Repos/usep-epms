@@ -181,6 +181,10 @@ export default defineComponent({
       }
 
       const onSave = () => {
+        if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && (String(personnelId.value.value) === String(officeDetails.value.pmaps_id))){
+          editBtn.value = false;
+          return
+        }
         let params = {
           office_id: officeId.value,
           pmaps_id: personnelId.value,
