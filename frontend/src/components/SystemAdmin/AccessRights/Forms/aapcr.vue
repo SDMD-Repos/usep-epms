@@ -33,9 +33,9 @@
 
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrFormPermission">
            <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-             <a-button v-if="editBtn" style="width: 100px;" type="primary" class="mr-3" @click="onSave" > Save</a-button>
-             <a-button v-if="editBtn" style="width: 100px;" type="primary" @click="onCancel">Cancel</a-button>
-             <a-button v-else style="width: 100px;" type="primary" class="mr-3" @click="onEdit" >Edit</a-button>
+             <a-button v-if="editBtn" style="width: 100px;" type="primary" size="small" class="mr-3" @click="onSave" > Save</a-button>
+             <a-button v-if="editBtn" style="width: 100px;" type="primary" size="small" @click="onCancel">Cancel</a-button>
+             <a-button v-else style="width: 100px;" type="primary" size="small" class="mr-3" @click="onEdit" >Edit</a-button>
            </a-col>
         </a-row>
 
@@ -61,9 +61,9 @@
         </a-row>
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
           <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-            <a-button style="width: 90px;" type="primary" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
-            <a-button style="width: 100px;" type="primary" class="mr-3" @click="onCancelStaff" v-if="editBtnStaff" >Cancel</a-button>
-            <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
+            <a-button style="width: 90px;" type="primary" size="small" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
+            <a-button style="width: 100px;" type="primary" size="small" class="mr-3" @click="onCancelStaff" v-if="editBtnStaff" >Cancel</a-button>
+            <a-button style="width: 100px;" type="primary" size="small" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
           </a-col>
         </a-row>
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
@@ -90,15 +90,15 @@ export default defineComponent({
 
     const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
 
-    const officeId = ref(undefined)
+    const officeId = ref({"label": "", "value": ""})
 
     const editBtn = ref(false)
     const editBtnStaff = ref(false)
 
     const memberList = ref([])
     const memberListStaff = ref([])
-    const personnelId = ref(undefined)
-    const staffId = ref(undefined)
+    const personnelId = ref({"label": "", "value": ""})
+    const staffId = ref({"label": "", "value": ""})
 
     let formLoading = ref(false)
 
@@ -110,6 +110,8 @@ export default defineComponent({
     watch(() => [officeDetails.value] , ([officeDetails]) => {
       if (officeDetails && Object.keys(officeDetails).length > 0){
         officeId.value = {
+          "disabled": undefined,
+          "halfChecked": undefined,
           "label": officeDetails.office_name,
           "value": officeDetails.office_id,
         }
@@ -150,8 +152,8 @@ export default defineComponent({
         })
 
         if (officeDetails.value.office_id != officeId.value){
-          personnelId.value = undefined
-          staffId.value = undefined
+          personnelId.value = {"label": "", "value": ""}
+          staffId.value = {"label": "", "value": ""}
         }
       }
     }

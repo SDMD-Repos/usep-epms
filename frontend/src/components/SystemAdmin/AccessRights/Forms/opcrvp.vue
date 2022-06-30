@@ -42,9 +42,9 @@
           <div class="mt-4"></div>
           <a-row type="flex" justify="center"  class="mt-3"  v-if="opcrvpFormPermission" >
            <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-                <a-button style="width: 90px;"   type="primary"  class="mr-3" v-if="editBtn" @click="onSave">Save</a-button>
-                <a-button style="width: 90px;"  type="primary" class="mr-3"  v-if="editBtn" @click="onCancel">Cancel</a-button>
-                <a-button style="width: 90px;"  type="primary" class="mr-3"  v-else @click="onEdit">Edit</a-button>
+                <a-button style="width: 90px;"   type="primary" size="small"  class="mr-3" v-if="editBtn" @click="onSave">Save</a-button>
+                <a-button style="width: 90px;"  type="primary" size="small" class="mr-3"  v-if="editBtn" @click="onCancel">Cancel</a-button>
+                <a-button style="width: 90px;"  type="primary" size="small" class="mr-3"  v-else @click="onEdit">Edit</a-button>
                 </a-col>
           </a-row>
           <a-row type="flex" class="mt-3">
@@ -68,9 +68,9 @@
            <div class="mt-4"></div>
               <a-row type="flex" justify="center"  class="mt-3" v-if="vpopcrHeadPermission && (officeDetails && officeDetails.pmaps_id ===  loginId) ">
                   <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-              <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onSaveStaff">Save</a-button>
-              <a-button style="width: 90px;" type="primary" class="mr-3" v-if="editBtnStaff" @click="onCancelStaff">Cancel</a-button>
-              <a-button style="width: 90px;" type="primary" class="mr-3" v-else @click="onEditStaff">Edit</a-button>
+              <a-button style="width: 90px;" type="primary" size="small" class="mr-3" v-if="editBtnStaff" @click="onSaveStaff">Save</a-button>
+              <a-button style="width: 90px;" type="primary" size="small" class="mr-3" v-if="editBtnStaff" @click="onCancelStaff">Cancel</a-button>
+              <a-button style="width: 90px;" type="primary" size="small" class="mr-3" v-else @click="onEditStaff">Edit</a-button>
               </a-col>
               </a-row>
                <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
