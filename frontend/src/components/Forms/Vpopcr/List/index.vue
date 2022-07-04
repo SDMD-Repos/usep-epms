@@ -54,9 +54,10 @@ export default defineComponent({
     const { isUploadedViewed, viewedForm, viewUploadedList, onCloseList, viewUnpublishedForms } = useViewPublishedFiles()
 
     // COMPUTED
-    const list = computed(() => store.getters['vpopcr/form'].list)
-    const loading = computed(() => store.getters['vpopcr/form'].loading)
     const hasVpopcrAccess = computed(() => store.getters['vpopcr/form'].hasVpopcrAccess)
+    const accessOfficeId = computed(() => store.getters['vpopcr/form'].accessOfficeId)
+    const list = computed(() => opcrvpFormPermission.value ? store.getters['vpopcr/form'].list : store.getters['vpopcr/form'].list ? store.getters['vpopcr/form'].list.filter(datum => datum.office_id === parseInt(accessOfficeId.value)) : [])
+    const loading = computed(() => store.getters['vpopcr/form'].loading)
 
     const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
 
@@ -157,7 +158,7 @@ export default defineComponent({
 
       // useUnpublish
       unpublishedData, isUnpublish,
-
+      accessOfficeId,
       openUnpublishRemarks, changeRemarksState, unpublish, onUnpublishCancel,
 
       viewUploadedList,
