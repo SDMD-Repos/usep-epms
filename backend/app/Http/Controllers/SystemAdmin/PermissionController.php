@@ -214,10 +214,9 @@ class PermissionController extends Controller
                     'pmaps_name' => $pmaps_name,
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
+                    'create_id'=> $this->login_user->pmaps_id,
                     'staff_id' => '',
                     'staff_name' => '',
-                    'create_id'=> $this->login_user->pmaps_id,
-
                 ]
             );
 
@@ -256,14 +255,14 @@ class PermissionController extends Controller
     }
 
     function fetchOfficeHead($form_id,$office_id=""){
-
         try{
-
             $condition  = ['form_id' => $form_id];
             if($form_id==='vpopcr'|| $form_id==='opcr' ){
-                $condition['office_id'] = $office_id;
+                if ($office_id)
+                    $condition['office_id'] = $office_id;
+                else
+                    $condition['pmaps_id'] = $this->login_user->pmaps_id;
             }
-
             $officeHeadDetails  = FormAccess::where($condition)->first();
 
             return response()->json([
