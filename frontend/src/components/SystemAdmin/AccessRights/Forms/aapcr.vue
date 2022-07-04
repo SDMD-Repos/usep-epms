@@ -110,10 +110,8 @@ export default defineComponent({
     watch(() => [officeDetails.value] , ([officeDetails]) => {
       if (officeDetails && Object.keys(officeDetails).length > 0){
         officeId.value = {
-          "disabled": undefined,
-          "halfChecked": undefined,
           "label": officeDetails.office_name,
-          "value": officeDetails.office_id,
+          "value": parseInt(officeDetails.office_id),
         }
         personnelId.value = {
           "label": officeDetails.pmaps_name,
@@ -199,13 +197,13 @@ export default defineComponent({
     }
 
     const onCancel = () => {
-      officeId.value = { "value" : officeDetails.value.office_id, "label": officeDetails.value.office_name }
+      officeId.value = { "value" : parseInt(officeDetails.value.office_id), "label": officeDetails.value.office_name }
       editBtn.value = false;
 
     }
 
     const onCancelStaff = () => {
-      staffId.value = { "value": officeDetails.value.staff_id, "label": officeDetails.value.staff_name}
+      staffId.value = { "value": parseInt(officeDetails.value.staff_id), "label": officeDetails.value.staff_name}
       editBtnStaff.value = false;
     }
 
@@ -213,7 +211,7 @@ export default defineComponent({
       let params = {
         pmaps_id: staffId.value,
         form_id: 'aapcr',
-        office_id:  {"value":officeDetails.value.office_id, "label":officeDetails.value.office_name},
+        office_id:  {"value": parseInt(officeDetails.value.office_id), "label":officeDetails.value.office_name},
       }
 
       if(staffId.value){
