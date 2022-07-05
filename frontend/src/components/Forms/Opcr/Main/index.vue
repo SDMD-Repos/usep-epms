@@ -70,7 +70,7 @@ import { getRequest } from '@/services/api/mainForms/ocpcr'
 import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 
-const permission = { listOpcr: [ "form", "f-opcr" ] }
+const permission = { listOpcr: [ "form", "f-opcr", "fo-formlist" ] }
 
 export default defineComponent({
   name: "OpcrForm",
@@ -154,10 +154,12 @@ export default defineComponent({
 
       opcrId.value = typeof route.params.opcrId !== 'undefined' ? route.params.opcrId : null
 
-      if(opcrId.value) {
-        getFormDetails()
-      } else {
-        checkFormAvailability()
+      if (hasOpcrAccess.value || opcrFormPermission.value){
+        if(opcrId.value) {
+          getFormDetails()
+        } else {
+          checkFormAvailability()
+        }
       }
     })
 
