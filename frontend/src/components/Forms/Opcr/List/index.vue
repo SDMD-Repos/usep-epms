@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div  v-if="hasOpcrAccess || opcrFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @unpublish="unpublish" @unpublish-template="unpublishTemplate"/>
 
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue"
@@ -13,8 +14,10 @@ import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish } from '@/services/functions/formListActions'
 import FormListTable from '@/components/Tables/Forms/List'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
+  name: "OpcrList",
   components: {
     FormListTable,
   },
@@ -29,11 +32,13 @@ export default defineComponent({
 
     // DATA
     const documentName = ref(null)
+    const permission = { listOpcr: [ "form", "f-opcr", "fo-formlist"] }
+    const { opcrFormPermission } = usePermission(permission)
 
     // COMPUTED
     const list = computed(() => store.getters['opcrtemplate/form'].list)
     const loading = computed(() => store.getters['opcrtemplate/form'].loading)
-
+    const hasOpcrAccess = computed(() => store.getters['opcr/form'].hasOpcrAccess)
     const { unpublish } = useUnpublish()
 
     // EVENTS
@@ -76,6 +81,8 @@ export default defineComponent({
       updateForm,
       publish,
 
+      hasOpcrAccess,
+      opcrFormPermission,
     }
   },
 })

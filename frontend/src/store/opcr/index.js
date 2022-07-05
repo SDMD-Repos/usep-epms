@@ -1,14 +1,15 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrForm from '@/services/api/mainForms/opcr'
+import * as ocpcrForm from '@/services/api/mainForms/ocpcr'
+import { checkFormAccess } from '@/services/api/system/permission'
 
 const mapApiProviders = {
-  save: opcrForm.save,
-  getList: opcrForm.fetchOpcrTemplates,
-  publish: opcrForm.publish,
-  unpublish: opcrForm.unpublish,
-  deactivate: opcrForm.deactivate,
-  update: opcrForm.update,
+  save: ocpcrForm.save,
+  getList: ocpcrForm.fetchOpcrTemplates,
+  publish: ocpcrForm.publish,
+  unpublish: ocpcrForm.unpublish,
+  deactivate: ocpcrForm.deactivate,
+  update: ocpcrForm.update,
 }
 
 export default {
@@ -17,6 +18,8 @@ export default {
     loading: false,
     list: [],
     dataSource: [],
+    hasOpcrAccess: null,
+    officeAccess: null,
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -60,11 +63,9 @@ export default {
           const { list } = response
           commit('SET_STATE', {
             list: list,
+            loading: false,
           })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     SAVE({ commit, dispatch }, { payload }) {
@@ -192,6 +193,26 @@ export default {
       commit('DELETE_STATE_ITEM', {
         type: 'dataSource',
         key: payload.key,
+      })
+    },
+    CHECK_OPCR_PERMISSION({ commit }, { payload }) {
+      const { pmapsId, formId } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      checkFormAccess(pmapsId, formId).then(response => {
+        if (response) {
+          const { permission, office_access } = response
+
+          commit('SET_STATE', {
+            hasOpcrAccess: permission,
+            officeAccess : office_access,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
       })
     },
   },

@@ -5,7 +5,6 @@ export const usePermission = permission => {
   const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr } = permission
 
   const accessLists = computed(() => store.getters['user/access'])
-  const forms = computed(() => store.getters['formManager/manager'].forms)
   const store = useStore()
 
   const createPermission = accessLists.value.filter(value => {

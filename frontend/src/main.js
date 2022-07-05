@@ -10,9 +10,9 @@ import { filters } from './filters'
 
 import {
   Avatar, TreeSelect, InputNumber, Button, Layout, Table, Radio, Dropdown, Menu, Input,
-  Badge, Slider, Form, Tooltip, Select, Switch,
+  Badge, Slider, Form, Tooltip, Select, Switch, Descriptions,
   Spin, Checkbox, Tabs, Drawer, Divider, AutoComplete, Collapse, Card, List,
-  Tree, Row, Col, Modal, Popconfirm, ConfigProvider, message,
+  Tree, Row, Col, Modal, Popconfirm, ConfigProvider, message, notification,
 } from 'ant-design-vue'
 
 const app = createApp(App)
@@ -48,11 +48,14 @@ const app = createApp(App)
   .use(InputNumber)
   .use(Drawer)
   .use(Switch)
+  .use(Descriptions)
   .use(AutoComplete)
   .use(Collapse)
   .use(ConfigProvider)
 
 app.config.globalProperties.$filters = filters
-app.config.globalProperties.$message = message
+app.provide('a-message', message)
+app.provide('a-notification', notification)
 
 app.mount('#app')
+

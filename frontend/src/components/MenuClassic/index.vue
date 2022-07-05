@@ -9,7 +9,7 @@
       :closable="false"
       :visible="settings.isMobileMenuOpen"
       placement="left"
-      :wrap-class-name="$style.mobileMenu"
+      :class="$style.mobileMenu"
       @close="toggleMobileMenu"
     >
       <menu-left />

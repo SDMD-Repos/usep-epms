@@ -5,12 +5,16 @@
            :mask-closable="false"
            :ok-text="okText"
            :ok-button-props="{disabled: !isEdit && !isCreate}"
+           width="35%"
            @ok="okAction"
            @cancel="onClose">
     <a-form :label-col="labelCol"
             :wrapper-col="wrapperCol">
       <a-form-item label="Name" v-bind="validateInfos.name">
         <a-input v-model:value="form.name" :disabled="actionType === 'view'" />
+      </a-form-item>
+      <a-form-item label="Display as items?">
+        <a-switch v-model:checked="form.displayAsItems" :disabled="actionType === 'view'" />
       </a-form-item>
       <label>Scales</label>
       <a-input-group size="default">
@@ -46,9 +50,8 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, reactive, ref, watch } from 'vue'
+import { defineComponent, reactive, ref, watch, inject } from 'vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
-import { message } from "ant-design-vue"
 
 export default defineComponent({
   name: 'MeasuresFormModal',
@@ -75,6 +78,7 @@ export default defineComponent({
         return {
           id: null,
           name: '',
+          displayAsItems: false,
           items: [],
           deleted: [],
         }
@@ -95,11 +99,14 @@ export default defineComponent({
   },
   emits: ['close-modal', 'change-action', 'submit-form'],
   setup(props, { emit }) {
+
+    const _message = inject('a-message')
+
     // DATA
     let isVisible = ref()
     let form = ref()
 
-    const labelCol = { span: 3 }
+    const labelCol = { span: 6 }
     const wrapperCol = { span: 16 }
 
     const scalesIntial = () => ({
@@ -128,7 +135,7 @@ export default defineComponent({
       props.validate()
         .then(() => {
           if (form.value.items.length < 1) {
-            message.error('Please add at least three (3) scales')
+            _message.error('Please add at least three (3) scales')
           } else {
             Object.assign(scales, scalesIntial())
             emit('submit-form')

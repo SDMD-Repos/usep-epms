@@ -40,10 +40,13 @@ Route::group([
     'prefix' => 'settings',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('/get-all-functions/{year}', 'SettingController@getFunctions');
+    Route::get('/get-all-functions/{year}/{formId}', 'SettingController@getFunctions');
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
+
     Route::post('/update-function-default-program/{id}', 'SettingController@updateProgramFunction');
+    Route::post('/save-form-category', 'SettingController@saveFormCategory');
+    Route::post('/delete-form-category/{id}', 'SettingController@deleteFormCategory');
 
     Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
@@ -131,18 +134,18 @@ Route::group([
         'prefix' => 'ocpcr'
     ], function() {
         # TEMPLATE
-        Route::get('/check-saved-template/{year}', 'Form\OCpcrController@checkSavedTemplate');
-        Route::get('/view-template/{id}', 'Form\OCpcrController@viewTemplate');
-        Route::get('/template-list', 'Form\OCpcrController@getAllOpcrTemplate');
+        Route::get('/check-saved-template/{year}', 'Form\OpcrTemplateController@checkSavedTemplate');
+        Route::get('/view-template/{id}', 'Form\OpcrTemplateController@viewTemplate');
+        Route::get('/template-list', 'Form\OpcrTemplateController@getAllOpcrTemplate');
 
-        Route::post('/save-template', 'Form\OCpcrController@saveTemplate');
-        Route::post('/publish-template', 'Form\OCpcrController@publishTemplate');
-        Route::post('/deactivate-template', 'Form\OCpcrController@deactivateTemplate');
-        Route::post('/update-template/{id}', 'Form\OCpcrController@updateTemplate');
-        Route::post('/unpublish-template', 'Form\OCpcrController@unpublishTemplate');
+        Route::post('/save-template', 'Form\OpcrTemplateController@saveTemplate');
+        Route::post('/publish-template', 'Form\OpcrTemplateController@publishTemplate');
+        Route::post('/deactivate-template', 'Form\OpcrTemplateController@deactivateTemplate');
+        Route::post('/update-template/{id}', 'Form\OpcrTemplateController@updateTemplate');
+        Route::post('/unpublish-template', 'Form\OpcrTemplateController@unpublishTemplate');
 
         # MAIN FORM
-        Route::get('/check-saved/{year}', 'Form\OCpcrController@checkSaved');
+        Route::get('/check-saved/{officeId}/{year}', 'Form\OcpcrController@checkSaved');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
     });
 });
@@ -162,7 +165,7 @@ Route::group([
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
-    Route::get('/allow-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowForm');
+    Route::get('/check-form-access/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormAccess');
 
     Route::group([
         'prefix' => 'requests'

@@ -5,22 +5,19 @@ namespace App\Http\Controllers\Form;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateOpcrTemplate;
-use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\FormTrait;
-use App\OpcrTemplate;
+use App\Http\Traits\OfficeTrait;
 use App\Opcr;
+use App\OpcrTemplate;
 use App\OpcrTemplateDetails;
 use App\OpcrTemplateDetailsMeasures;
-use App\Program;
-use App\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class OpcrController extends Controller
+class OpcrTemplateController extends Controller
 {
-    //
     use OfficeTrait, FormTrait;
 
     private $login_user;
@@ -37,26 +34,11 @@ class OpcrController extends Controller
 
             return $next($request);
         });
-
-
     }
 
     public function checkSavedTemplate($year)
     {
         $hasSaved = OpcrTemplate::where([
-            ['year', $year],
-            ['is_active', 1],
-            ['deleted_at', null],
-        ])->first();
-
-        return response()->json([
-            'hasSaved' => $hasSaved !== null
-        ], 200);
-    }
-
-    public function checkSaved($year)
-    {
-        $hasSaved = Opcr::where([
             ['year', $year],
             ['is_active', 1],
             ['deleted_at', null],
@@ -96,6 +78,7 @@ class OpcrController extends Controller
                         'key' => $subPI->id,
                         'id' => $subPI->id,
                         'type' => 'sub',
+                        'category' => $subPI->category_id,
                         'subCategory' => $extracted['subCategory'],
                         'program' => $subPI->program_id,
                         'name' => $subPI->pi_name,
@@ -116,6 +99,7 @@ class OpcrController extends Controller
                     'key' => $detail->id,
                     'id' => $detail->id,
                     'type' => 'pi',
+                    'category' => $detail->category_id,
                     'subCategory' => $extracted['subCategory'],
                     'program' => $detail->program_id,
                     'name' => $detail->pi_name,
@@ -201,15 +185,9 @@ class OpcrController extends Controller
 
         $detail = new OpcrTemplateDetails();
 
-        if($values['subCategory']){
-            $category_id = SubCategory::find($values['subCategory']['value']);
-        }else{
-            $category_id = Program::find($values['program']);
-        }
-
         $detail->opcr_template_id = $opcrTemplateId;
-        $detail->category_id = $category_id->category->id;
-        $detail->sub_category_id = $values['subCategory'] ? $values['subCategory']['value'] : $values['subCategory'];
+        $detail->category_id = $values['category'];
+        $detail->sub_category_id = isset($values['subCategory']) ? $values['subCategory']['value'] : null;
         $detail->program_id = $values['program'];
         $detail->pi_name = $values['name'];
         $detail->is_header = $values['isHeader'];
@@ -344,19 +322,13 @@ class OpcrController extends Controller
             $detail = OpcrTemplateDetails::find($data['id']);
 
             if($detail) {
-                if($data['subCategory']){
-                    $category_id = SubCategory::find($data['subCategory']['value']);
-                }else{
-                    $category_id = Program::find($data['program']);
-                }
-
                 $original = $detail->getOriginal();
 
                 $isHeader = $data['isHeader'] ? 1 : 0;
 
-                $subCategory = $data['subCategory'] ? $data['subCategory']['value'] : $data['subCategory'];
+                $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
 
-                $detail->category_id = $category_id->category->id;
+                $detail->category_id = $data['category'];
                 $detail->sub_category_id = $subCategory;
                 $detail->program_id = $data['program'];
                 $detail->pi_name = $data['name'];
@@ -445,11 +417,19 @@ class OpcrController extends Controller
     {
         try {
             $id = $request['id'];
+
+            DB::beginTransaction();
+
             $opcrTemplate = OpcrTemplate::find($id);
 
             $opcrTemplate->published_date = null;
             $opcrTemplate->history = $opcrTemplate->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-            $opcrTemplate->save();
+
+            if(!$opcrTemplate->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
 
             return response()->json('OCPR Template was unpublished successfully', 200);
         }catch(\Exception $e){
@@ -462,5 +442,4 @@ class OpcrController extends Controller
             return response()->json($e->getMessage(), $status);
         }
     }
-
 }

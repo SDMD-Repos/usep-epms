@@ -214,10 +214,9 @@ class PermissionController extends Controller
                     'pmaps_name' => $pmaps_name,
                     'office_id'=>$office_id,
                     'office_name'=>$office_name,
+                    'create_id'=> $this->login_user->pmaps_id,
                     'staff_id' => '',
                     'staff_name' => '',
-                    'create_id'=> $this->login_user->pmaps_id,
-
                 ]
             );
 
@@ -256,14 +255,14 @@ class PermissionController extends Controller
     }
 
     function fetchOfficeHead($form_id,$office_id=""){
-
         try{
-
             $condition  = ['form_id' => $form_id];
             if($form_id==='vpopcr'|| $form_id==='opcr' ){
-                $condition['office_id'] = $office_id;
+                if ($office_id)
+                    $condition['office_id'] = $office_id;
+                else
+                    $condition['pmaps_id'] = $this->login_user->pmaps_id;
             }
-
             $officeHeadDetails  = FormAccess::where($condition)->first();
 
             return response()->json([
@@ -335,33 +334,43 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-    function allowForm($pmaps_id,$form_id){
+    function checkFormAccess($pmaps_id, $form_id){
 
         try{
             $permission = false;
             $office_id = 0;
-            $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
+            $accessDetails = null;
+            $officeAccess = null;
 
-            $formStaffAccessDetails  = FormAccess::where([['staff_id',$pmaps_id],['form_id',$form_id]])->get();
+            $formAccessDetails  = FormAccess::where(function($q) use ($pmaps_id, $form_id) {
+                $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
+            })->where('form_id', $form_id)->get();
 
             if(count($formAccessDetails)){
                 $permission = true;
                 $office_id = $formAccessDetails[0]->office_id;
+                $accessDetails = $formAccessDetails[0];
+
+                switch ($form_id) {
+                    case 'opcr':
+                        $officeAccess = $formAccessDetails;
+                }
             }
 
-            if(count($formStaffAccessDetails)){
+            /*if(count($formStaffAccessDetails)){
                 $permission = true;
                 $office_id = $formStaffAccessDetails[0]->office_id;
-            }
+                $accessDetails = $formStaffAccessDetails[0];
+            }*/
 
             return response()->json([
                 'permission' => $permission,
                 'office_id'=> $office_id,
-
+                'access_details' => $accessDetails,
+                'office_access' => $officeAccess,
             ], 200);
         }catch(\Exception $e){
             return response()->json($e->getMessage());
         }
     }
-
 }

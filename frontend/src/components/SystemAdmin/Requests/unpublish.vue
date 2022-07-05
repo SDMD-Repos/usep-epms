@@ -6,15 +6,16 @@
       <a-select-option value="verified">Verified</a-select-option>
     </a-select>
     <a-table class="mt-4" :columns="columns" :data-source="unpublishList" :loading="loading">
-      <template #count="{ index }">
-        <span>{{ index + 1}}</span>
-      </template>
+      <template #bodyCell="{ column, record, index }">
+        <template v-if="column.key === 'count'">
+          <span>{{ index + 1}}</span>
+        </template>
 
-      <template #formType="{ record }">
-        {{ record.form.abbreviation }}
-      </template>
+        <template v-if="column.key === 'formType'">
+          {{ record.form.abbreviation }}
+        </template>
 
-      <template #status="{ record }">
+        <template v-if="column.key === 'status'">
         <span :class="getRequestStatusClass(record.status)" class="font-size-12 badge mr-2"
               :style="record.status === 'pending' ? { cursor: 'pointer'} : {}">
           <a-popconfirm
@@ -29,23 +30,24 @@
           </a-popconfirm>
           <span v-else>{{ record.status }}</span>
         </span>
-      </template>
+        </template>
 
-      <template #details="{ record }">
-        <a-tooltip placement="top">
-          <template #title>
+        <template v-if="column.key === 'operation'">
+          <a-tooltip placement="top">
+            <template #title>
             <span>
               <b> Requested: </b> <br />
               {{ dayjs(record.requested_date).format(dateFormat) }} by {{ record.requested_by }}
             </span>
-            <span v-if="record.status !== 'pending'">
+              <span v-if="record.status !== 'pending'">
               <br />
               <b> {{ record.status === 'verified' ? 'Verified: ' : 'Declined: ' }} </b> <br />
               {{ dayjs(record.changed_date).format(dateFormat) }} by {{ record.changed_by }}
             </span>
-          </template>
-          <InfoCircleOutlined :style="{ fontSize: '18px' }"/>
-        </a-tooltip>
+            </template>
+            <InfoCircleOutlined :style="{ fontSize: '18px' }"/>
+          </a-tooltip>
+        </template>
       </template>
     </a-table>
   </div>
@@ -60,12 +62,10 @@ const columns = [
   {
     title: '#',
     key: 'count',
-    slots: { customRender: 'count' },
   },
   {
     title: 'Form Type',
     key: 'formType',
-    slots: { customRender: 'formType' },
   },
   {
     title: 'Document Name',
@@ -80,14 +80,12 @@ const columns = [
   {
     title: 'Status',
     key: 'status',
-    slots: { customRender: 'status' },
   },
   {
     title: 'Details',
     key: 'operation',
     className: 'column-action',
     width: 100,
-    slots: { customRender: 'details' },
   },
 ]
 export default defineComponent({

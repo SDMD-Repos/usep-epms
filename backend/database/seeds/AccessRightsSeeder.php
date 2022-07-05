@@ -22,7 +22,6 @@ class AccessRightsSeeder extends Seeder
                 'permission_name' => 'Manager',
                 'create_id' => 'admin',
             ],
-           
         ]);
 
         DB::table('access_rights')->insert([
@@ -44,11 +43,8 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","manager")->first()->id,
                 'create_id' => 'admin',
             ],
-          
-           
         ]);
 
-      
 
         DB::table('access_rights')->insert([
             [
@@ -77,7 +73,6 @@ class AccessRightsSeeder extends Seeder
             ],
         ]);
 
-  
 
         DB::table('access_rights')->insert([
             [
@@ -161,7 +156,6 @@ class AccessRightsSeeder extends Seeder
 
         ]);
 
-      
 
         DB::table('access_rights')->insert([
             [
@@ -182,32 +176,53 @@ class AccessRightsSeeder extends Seeder
         DB::table('access_rights')->insert([
             [
                 'permission_id' => 'f-aapcr',
-                'permission_name' => 'Access Forms and Lists in AAPCR',
+                'permission_name' => 'Access Form and List modules in AAPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'f-opcrvp',
-                'permission_name' => 'Access Forms and Lists in OPCR (VP)',
+                'permission_name' => 'Access Form and List modules in OPCR (VP)',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'f-opcr',
-                'permission_name' => 'Access Forms and Lists in OPCR',
+                'permission_name' => 'OPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'f-cpcr',
-                'permission_name' => 'Access Forms and Lists in CPCR',
+                'permission_name' => 'Access Form and List modules in CPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
                 'create_id' => 'admin',
             ],
             [
                 'permission_id' => 'f-ipcr',
-                'permission_name' => 'Access Forms and Lists in IPCR',
+                'permission_name' => 'Access Form and List modules in IPCR',
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","form")->first()->id,
+                'create_id' => 'admin',
+            ],
+        ]);
+
+        DB::table('access_rights')->insert([
+            [
+                'permission_id' => 'fo-formlist',
+                'permission_name' => 'Access Form and List modules',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","f-opcr")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'fo-manager',
+                'permission_name' => 'Access Manager module',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","f-opcr")->first()->id,
+                'create_id' => 'admin',
+            ],
+            [
+                'permission_id' => 'fo-template',
+                'permission_name' => 'Access Template Form and List modules',
+                'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","f-opcr")->first()->id,
                 'create_id' => 'admin',
             ],
         ]);
@@ -278,7 +293,6 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","ap-form")->first()->id,
                 'create_id' => 'admin',
             ],
-           
 
         ]);
     }

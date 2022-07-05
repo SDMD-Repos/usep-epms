@@ -1,15 +1,17 @@
 import { notification } from 'ant-design-vue'
 
-import * as opcrTemplateForm from '@/services/api/mainForms/opcr/template'
+import * as opcrTemplateForm from '@/services/api/mainForms/ocpcr/template'
+import { getRequest, postRequest } from '@/services/api/mainForms/ocpcr'
 
 const mapApiProviders = {
   save: opcrTemplateForm.save,
-  getList: opcrTemplateForm.fetchOpcrTemplates,
   publish: opcrTemplateForm.publish,
   unpublish: opcrTemplateForm.unpublish,
   deactivate: opcrTemplateForm.deactivate,
   update: opcrTemplateForm.update,
 }
+
+const baseUrl = '/forms/ocpcr'
 
 export default {
   namespaced: true,
@@ -54,8 +56,7 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const getList = mapApiProviders.getList
-      getList().then(response => {
+      getRequest(baseUrl + '/template-list').then(response => {
         if (response) {
           const { list } = response
           commit('SET_STATE', {
@@ -72,8 +73,7 @@ export default {
         loading: true,
       })
 
-      const save = mapApiProviders.save
-      save(payload).then(response => {
+      postRequest(baseUrl + '/save-template', payload).then(response => {
         if (response) {
           // dispatch('FETCH_LIST')
           notification.success({
@@ -86,12 +86,30 @@ export default {
         })
       })
     },
+    UPDATE({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const id = payload.opcrTemplateId
+      postRequest(baseUrl + '/update-template/' + id, payload).then(response => {
+        if (response) {
+          dispatch('FETCH_LIST')
+          notification.success({
+            message: 'Success',
+            description: 'OPCR Template was updated successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
     PUBLISH({ commit, dispatch }, { payload }) {
       commit('SET_STATE', {
         loading: true,
       })
-      const publish = mapApiProviders.publish
-      publish(payload).then(response => {
+
+      postRequest(baseUrl + '/publish-template', payload).then(response => {
         if (response) {
           dispatch('FETCH_LIST')
           notification.success({
@@ -108,13 +126,13 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const unpublish = mapApiProviders.unpublish
-      unpublish(payload).then(response => {
+
+      postRequest("/forms/ocpcr/unpublish-template", payload).then(response => {
         if (response) {
           dispatch('FETCH_LIST')
           notification.success({
             message: 'Success',
-            description: 'OPCR Template was unpublished successfully',
+            description: response,
           })
         }
         commit('SET_STATE', {
@@ -133,25 +151,6 @@ export default {
           notification.success({
             message: 'Success',
             description: 'OPCR Template was deactivated successfully',
-          })
-        }
-        commit('SET_STATE', {
-          loading: false,
-        })
-      })
-    },
-    UPDATE({ commit, dispatch }, { payload }) {
-      commit('SET_STATE', {
-        loading: true,
-      })
-      const id = payload.opcrTemplateId
-      const update = mapApiProviders.update
-      update(id, payload).then(response => {
-        if (response) {
-          dispatch('FETCH_LIST')
-          notification.success({
-            message: 'Success',
-            description: 'OPCR Template was updated successfully',
           })
         }
         commit('SET_STATE', {

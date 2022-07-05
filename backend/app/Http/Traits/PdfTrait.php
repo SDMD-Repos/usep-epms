@@ -450,22 +450,20 @@ trait PdfTrait {
             $data['children'] = null;
         }
 
-        if($detail->category->order != 1 || ($detail->category->order === 1 && $detail->sub_category_id !== NULL)){
+        # OVER-ALL RATING DETAILS
+        $ifSaved = $this->array_any(function($x, $compare){
+            return $x['programName'] === ucwords($compare['progName']);
+        }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
 
-            $ifSaved = $this->array_any(function($x, $compare){
-                return $x['programName'] === ucwords($compare['progName']);
-            }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
+        if(!$ifSaved && $detail->program) {
+            $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
-            if(!$ifSaved && $detail->program) {
-                $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
-
-                $this->vpProgramDataSet[] = array(
-                    'categoryName' => $categoryName,
-                    'categoryPercentage' => $detail->category->percentage,
-                    'programName' => ucwords($detail->program->name),
-                    'programPercentage' => $detail->program->percentage
-                );
-            }
+            $this->vpProgramDataSet[] = array(
+                'categoryName' => $categoryName,
+                'categoryPercentage' => $detail->category->percentage,
+                'programName' => ucwords($detail->program->name),
+                'programPercentage' => $detail->program->percentage
+            );
         }
 
         return $data;
@@ -567,7 +565,17 @@ trait PdfTrait {
         $measures = array();
 
         foreach($details as $PIMeasure) {
-            $measures[] = $PIMeasure->name;
+            $name = $PIMeasure->name;
+            $itemNames = [];
+            if($PIMeasure->display_as_items) {
+                foreach($PIMeasure->items as $item) {
+                    $itemNames[] = $item->rate . " - " . $item->description;
+                }
+
+                $name = "\n" . implode("\n", $itemNames);
+            }
+
+            $measures[] = $name;
         }
 
         return $measures;
