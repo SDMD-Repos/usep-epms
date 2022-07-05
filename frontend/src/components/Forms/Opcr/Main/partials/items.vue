@@ -1,15 +1,16 @@
 <template>
   <div>
-
-    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
+    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value
+              :options="programsByFunction" @change="loadPIs" />
+<!--    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
       <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
         {{ y.name }}
       </a-select-option>
-    </a-select>
+    </a-select>-->
 
     <div class="mt-4">
       <indicator-table :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
-                       :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
+                       :main-category="mainCategory" :form-table-columns="modifiedTableColumns" :allow-edit="displayIndicatorList"
                        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
                        @delete-item="deleteItem"/>
 
@@ -21,11 +22,11 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, createVNode, computed } from "vue"
+import { defineComponent, ref, watch, reactive, createVNode, onBeforeMount, computed } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import { formTemplateTableColumns } from "@/services/columns"
+import { formTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import OpcrTemplateFormDrawer from '@/components/Drawer/Forms/Opcr'
@@ -49,6 +50,7 @@ export default defineComponent({
     const store = useStore()
 
     // DATA
+    const modifiedTableColumns = ref()
     const mainCategory = ref(undefined)
     const displayIndicatorList = ref(false)
     const count = ref(0)
@@ -62,7 +64,11 @@ export default defineComponent({
       const otherProgramData = otherPrograms.value && typeof otherPrograms.value != 'undefined' ? otherPrograms.value : []
       return programData.concat(otherProgramData)
     })
-    const programsByFunction = computed( () => { return allPrograms.value.filter(i => i.category_id === parseInt(props.functionId)) })
+
+    const programsByFunction = computed( () => {
+      // const list = store.getters['formManager/manager'].programs
+      return allPrograms.value.filter(i => i.category_id === props.functionId).map(v => ({ value: v.id, label: v.name }))
+    })
 
     const {
       drawerConfig,
@@ -71,6 +77,10 @@ export default defineComponent({
     const { formData, rules, resetFormAsHeader, assignFormData } = useDefaultFormData(props)
 
     // EVENTS
+    onBeforeMount(() => {
+      modifyColumns()
+    })
+
     watch(() => props.counter, counter => {
       count.value = counter
     })
@@ -78,6 +88,23 @@ export default defineComponent({
     const { resetFields, validate, validateInfos } = useForm(formData, rules)
 
     // METHODS
+    const modifyColumns = () => {
+      let columns = JSON.parse(JSON.stringify(formTableColumns))
+      const remarksIndex = columns.findIndex(i => i.key === 'remarks')
+      columns[remarksIndex].title = "Other Remarks (MoV)"
+      const deleteKeys = ['cascadingLevel']
+      columns = [...columns.filter(i => deleteKeys.indexOf(i.key) === -1)]
+      const addendum = {
+        title: '#',
+        key: 'count',
+        dataIndex: 'count',
+        className: 'column-count',
+        width: 60,
+      }
+      columns.splice(0, 0, addendum)
+      modifiedTableColumns.value = columns
+    }
+
     const loadPIs = e => {
       if (e !== '' && typeof e !== 'undefined') {
         displayIndicatorList.value = true
@@ -237,7 +264,7 @@ export default defineComponent({
     }
 
     return {
-      formTemplateTableColumns,
+      modifiedTableColumns,
       mainCategory,
       displayIndicatorList,
 

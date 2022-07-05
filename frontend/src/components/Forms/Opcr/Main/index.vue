@@ -125,7 +125,9 @@ export default defineComponent({
         offices = offices.map(i => ({ value: i.office_id, label: i.office_name }))
       } else {
         offices = store.getters['external/external'].mainOfficesChildren
-        offices = offices.map(i => ({ value: i.value, label: i.title, children: i.children }))
+        offices = offices.map(i => (
+            { value: i.value, label: i.title, children: i.children, selectable: i.selectable,
+          }))
       }
 
       return offices
@@ -185,13 +187,12 @@ export default defineComponent({
         getRequest('/forms/ocpcr/check-saved/' + officeId.value + '/' + year.value).then(response => {
           if(response) {
             const { hasSaved } = response
+            isCheckingForm.value = false
             if(hasSaved) {
-              console.log('has saved')
               Modal.error({
                 title: () => 'The selected office has an existing OPCR for the year ' + year.value,
                 content: () => 'Please check the list or select a different year/office to create a new OPCR',
               })
-              isCheckingForm.value = false
               resetFormFields()
             }else {
               allowEdit.value = true
@@ -213,7 +214,7 @@ export default defineComponent({
 
     const loadCascadedIndicators = () => {
       allowEdit.value = false
-      store.commit('vpopcr/SET_STATE', {
+      store.commit('opcr/SET_STATE', {
         loading: true,
       })
       const url = 'forms/ocpcr/get-vp-opcr-details/' + officeId.value.value + '/' + year.value + '/' + props.formId
@@ -223,6 +224,8 @@ export default defineComponent({
 
           allowEdit.value = true
           targetsBasisList.value = response.targetsBasisList
+
+          initializeFormFields()
         }else {
           console.log(response)
           Modal.warning({
@@ -230,7 +233,7 @@ export default defineComponent({
             content: () => response.error,
           })
         }
-        store.commit('vpopcr/SET_STATE', {
+        store.commit('opcr/SET_STATE', {
           loading: false,
         })
       })

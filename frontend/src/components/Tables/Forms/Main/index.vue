@@ -92,12 +92,12 @@
         </template>
 
         <template v-if="column.key === 'operation'">
-          <EditFilled @click="handleEdit(record)" />
+          <EditFilled v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" @click="handleEdit(record)" />
           <template v-if="record.type === 'pi'">
-            <a-divider type="vertical" />
+            <a-divider v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" type="vertical" />
             <PlusCircleFilled @click="handleAddSub(record)"/>
-            <a-divider type="vertical" v-if="allowedAction(record)"/>
           </template>
+          <a-divider type="vertical" v-if="allowedAction(record)"/>
           <a-popconfirm
             title="Are you sure you want to delete this?"
             @confirm="handleDelete(record)"
@@ -158,6 +158,7 @@ export default defineComponent({
         })
         break;
       case 'opcrtemplate':
+      case 'opcr':
         filteredSource = computed(()=> {
           const source = props.itemSource.filter(i => i.program === props.mainCategory.key)
           source.forEach((x, y) => {

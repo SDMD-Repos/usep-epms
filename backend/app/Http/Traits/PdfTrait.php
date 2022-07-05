@@ -327,8 +327,7 @@ trait PdfTrait {
                     ];
                 } else {
                     foreach($dataSource as $key => $source) {
-                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['categoryId']) {
-
+                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['category_id']) {
                             $dataSource[$key]['children'][] = $data;
                         }
                     }

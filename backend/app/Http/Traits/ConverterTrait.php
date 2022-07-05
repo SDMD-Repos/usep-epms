@@ -105,6 +105,7 @@ trait ConverterTrait {
         if(isset($conditions['origin'])) {
             switch ($conditions['origin']) {
                 case 'vpopcr':
+                case 'opcr':
                     $officeList = $data->offices;
                     break;
             }

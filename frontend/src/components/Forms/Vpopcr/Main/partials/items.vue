@@ -12,7 +12,6 @@
 </template>
 <script>
 import { defineComponent, ref, reactive, watch, onBeforeMount, createVNode, computed } from "vue"
-import { useStore } from 'vuex'
 import { cloneDeep } from 'lodash'
 import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
@@ -36,8 +35,6 @@ export default defineComponent({
   },
   emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item'],
   setup(props, { emit }) {
-    const store = useStore()
-
     // DATA
     const modifiedTableColumns = ref()
     const count = ref(0)
