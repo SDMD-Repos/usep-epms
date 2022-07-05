@@ -25,6 +25,7 @@ class StoreMeasure extends FormRequest
     {
         return [
             'name' => 'required',
+            'displayAsItems' => 'boolean',
             'items' => 'required',
             'year' => ''
         ];

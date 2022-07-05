@@ -4,7 +4,7 @@
       <a-row type="flex">
         <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
         <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
-          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability" :disabled="!!isUpdateMode">
+          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability" :disabled="editMode">
             <template v-for="(y, i) in years" :key="i">
               <a-select-option :value="y"> {{ y }} </a-select-option>
             </template>
@@ -14,11 +14,15 @@
 
       <div class="mt-4">
         <a-collapse v-model:activeKey="activeKey" accordion>
-          <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`" :header="category.name">
+          <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`">
+            <template #header>
+              {{ !category.form_category ? category.name : category.form_category.display_name }}
+            </template>
+
             <indicator-component v-if="allowEdit"
-                                 :function-id="category.id" :form-id="formId" :item-source="dataSource" :targets-basis-list="targetsBasisList"
+                                 :function-id="category.id" :form-id="formId" :item-source="dataSource"
                                  :categories="categories" :year="year" :counter="counter"
-                                 @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
+                                 @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
                                  @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
           </a-collapse-panel>
         </a-collapse>
@@ -27,7 +31,7 @@
       <div class="mt-4" v-if="allowEdit">
         <a-row type="flex" justify="center" align="middle">
           <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
-            <a-button type="primary" ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
+            <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
           </a-col>
           <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
             <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
@@ -44,7 +48,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useFormOperations } from '@/services/functions/indicator'
-import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/opcr/template'
+import { getRequest } from '@/services/api/mainForms/ocpcr'
 import IndicatorComponent from './partials/items'
 
 export default defineComponent({
@@ -64,15 +68,13 @@ export default defineComponent({
     // DATA
     const activeKey = ref('0')
     const opcrTemplateId = ref(null)
-    const formId = 'opcr'
     const isCheckingForm = ref(false)
-    const isUpdateMode = ref(typeof route.params.update !== 'undefined' && route.params.update)
 
     const {
       // DATA
-      dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
+      dataSource, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
-      updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
+      updateDataSource, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
     } = useFormOperations(props)
 
     // COMPUTED
@@ -112,7 +114,7 @@ export default defineComponent({
 
       if(year.value !== cachedYear.value) {
         isCheckingForm.value = true
-        checkSavedForm(year.value).then(response => {
+        getRequest('/forms/ocpcr/check-saved-template/' + year.value).then(response => {
           if(response) {
             const { hasSaved } = response
             isCheckingForm.value = false
@@ -138,14 +140,11 @@ export default defineComponent({
     }
 
     const initializeFormFields = async () => {
-
-      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value }})
+      await store.dispatch('formManager/FETCH_FUNCTIONS', { payload : { year: year.value, formId: 'opcr' }})
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: formId }})
-      await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: props.formId }})
     }
 
     const resetFormFields = () => {
@@ -153,9 +152,7 @@ export default defineComponent({
         functions: [],
         subCategories: [],
         measures: [],
-        cascadingLevels: [],
         programs: [],
-        formFields: [],
       })
     }
 
@@ -163,7 +160,7 @@ export default defineComponent({
       store.commit('opcrtemplate/SET_STATE', {
         loading: true,
       })
-      fetchFormDetails(opcrTemplateId.value).then(response => {
+      getRequest("/forms/ocpcr/view-template/" + opcrTemplateId.value).then(response => {
         if(response) {
           allowEdit.value = true
           store.commit('opcrtemplate/SET_STATE', {
@@ -172,7 +169,6 @@ export default defineComponent({
 
           year.value = response.year
           cachedYear.value = response.year
-          targetsBasisList.value = response.targetsBasisList
           isFinalized.value = response.isFinalized
           editMode.value = true
           initializeFormFields()
@@ -254,17 +250,14 @@ export default defineComponent({
 
       // useFormOperations
       dataSource,
-      targetsBasisList,
       counter,
       deletedItems,
 
       updateDataSource,
-      addTargetsBasisItem,
       updateSourceCount,
       deleteSourceItem,
       updateSourceItem,
       addDeletedItem,
-      isUpdateMode,
 
     }
   },

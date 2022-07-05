@@ -22,8 +22,8 @@
 import { computed, defineComponent, onMounted, ref  } from 'vue';
 import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/AccessRights/Forms/aapcr'
-import FormAdminOpcr from '@/components/SystemAdmin/AccessRights/Forms/opcr'
 import FormAdminOpcrVp from '@/components/SystemAdmin/AccessRights/Forms/opcrvp'
+import FormAdminOpcr from '@/components/SystemAdmin/AccessRights/Forms/opcr'
 
 import { usePermission } from '@/services/functions/permission'
 

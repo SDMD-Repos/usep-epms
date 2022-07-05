@@ -1,7 +1,7 @@
 import { notification } from 'ant-design-vue'
 
 import * as vpOpcrForm from '@/services/api/mainForms/vpopcr'
-import * as system from '@/services/api/system/permission'
+import { checkFormAccess } from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: vpOpcrForm.save,
@@ -10,7 +10,6 @@ const mapApiProviders = {
   unpublish: vpOpcrForm.unpublish,
   deactivate: vpOpcrForm.deactivate,
   update: vpOpcrForm.update,
-  permission: system.checkAllowForm,
 }
 
 export default {
@@ -118,7 +117,7 @@ export default {
           dispatch('FETCH_LIST')
           notification.success({
             message: 'Success',
-            description: 'VP\'s OPCR was unpublished successfully',
+            description: 'The request to unpublish the form has been sent successfully',
           })
         }
         commit('SET_STATE', {
@@ -199,14 +198,14 @@ export default {
       })
     },
     CHECK_VPOPCR_PERMISSION({ commit }, { payload }) {
-      const { pmaps_id,form_id } = payload
+      const { pmapsId, formId } = payload
       commit('SET_STATE', {
         loading: true,
       })
-      const permission = mapApiProviders.permission
-      permission(pmaps_id,form_id).then(response => {
+
+      checkFormAccess(pmapsId, formId).then(response => {
         if (response) {
-          const { permission,office_id } = response
+          const { permission, office_id } = response
 
           commit('SET_STATE', {
             hasVpopcrAccess: permission,

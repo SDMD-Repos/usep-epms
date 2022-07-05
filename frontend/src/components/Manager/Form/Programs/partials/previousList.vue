@@ -15,10 +15,10 @@
   </a-modal>
 </template>
 <script>
-import {computed, createVNode, defineComponent, onMounted, reactive, ref, toRefs, watch} from "vue"
-import {Modal} from "ant-design-vue";
-import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
-import {useStore} from "vuex";
+import { computed, createVNode, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue"
+import { Modal } from "ant-design-vue";
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+import { useStore } from "vuex";
 
 
 

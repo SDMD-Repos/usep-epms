@@ -40,10 +40,13 @@ Route::group([
     'prefix' => 'settings',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('/get-all-functions/{year}', 'SettingController@getFunctions');
+    Route::get('/get-all-functions/{year}/{formId}', 'SettingController@getFunctions');
     Route::post('/create-function', 'SettingController@createFunction');
     Route::post('/delete-category/{id}', 'SettingController@deleteCategory');
+
     Route::post('/update-function-default-program/{id}', 'SettingController@updateProgramFunction');
+    Route::post('/save-form-category', 'SettingController@saveFormCategory');
+    Route::post('/delete-form-category/{id}', 'SettingController@deleteFormCategory');
 
     Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
@@ -162,7 +165,8 @@ Route::group([
     Route::post('/save-office-staff','SystemAdmin\PermissionController@saveOfficeStaff');
     Route::post('/check-access', 'SystemAdmin\PermissionController@checkAccessByPermissions');
     Route::get('/check-form-head/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormHead');
-    Route::get('/allow-form/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@allowForm');
+    Route::get('/check-form-access/{pmaps_id}/{form_id}', 'SystemAdmin\PermissionController@checkFormAccess');
+    Route::get('/get-user-offices-by-permission/{formId}', 'SystemAdmin\PermissionController@getUserOfficesByPermission');
 
     Route::group([
         'prefix' => 'requests'

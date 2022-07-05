@@ -65,6 +65,7 @@ import { usePermission } from '@/services/functions/permission'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Display as Items', dataIndex: 'displayAsItems', key: 'displayAsItems' },
   { title: 'Date Created', dataIndex: 'created_at', key: 'created_at' },
   { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
@@ -94,6 +95,7 @@ export default defineComponent({
       id: null,
       year: year.value,
       name: '',
+      displayAsItems: false,
       items: [],
       deleted: [],
     })
@@ -111,7 +113,6 @@ export default defineComponent({
     const measuresList = computed(() => store.getters['formManager/manager'].measures)
     const previousMeasures = computed(() => store.getters['formManager/manager'].previousMeasures)
     const loading = computed(() => store.getters['formManager/manager'].loading)
-
 
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
@@ -149,6 +150,7 @@ export default defineComponent({
       if (measureId) {
         formState.id = record.id
         formState.name = record.name
+        formState.displayAsItems = !!record.display_as_items
         formState.items = record.items
         formState.year = record.year
       }
@@ -215,6 +217,7 @@ export default defineComponent({
       saveKeys.forEach(item => {
         const data = {
           name: item.name,
+          displayAsItems: item.display_as_items,
           year: year.value,
           items: item.items,
         }

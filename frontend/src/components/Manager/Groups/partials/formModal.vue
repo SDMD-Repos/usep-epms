@@ -129,9 +129,8 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, computed, watch, ref, reactive } from 'vue'
+import { defineComponent, watch, ref, reactive, inject, computed } from 'vue'
 import { UserAddOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
 import { getPersonnelByOffice } from '@/services/api/hris'
 
 export default defineComponent({
@@ -190,6 +189,9 @@ export default defineComponent({
   },
   emits: ['change-action', 'close-modal', 'submit-form'],
   setup(props, { emit }) {
+
+    const _message = inject('a-message')
+
     // COMPUTED
     const years = computed(() => {
       const now = new Date().getFullYear()
@@ -240,7 +242,7 @@ export default defineComponent({
       props.validate()
         .then(() => {
           if (form.value.members.length < 1) {
-            message.error('The member\'s list should not be empty')
+            _message.error('The member\'s list should not be empty')
           } else {
             Object.assign(member, memberIntial())
             emit('submit-form')
@@ -296,9 +298,9 @@ export default defineComponent({
         form.value.members.push(details)
         member.id = undefined
       } else if (isChair && !ifExists) {
-        message.error('This name is already selected as Officer-in-Charge')
+        _message.error('This name is already selected as Officer-in-Charge')
       } else {
-        message.error('Name was already on the list. Please choose a different name', 3)
+        _message.error('Name was already on the list. Please choose a different name', 3)
       }
     }
 

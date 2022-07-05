@@ -1,5 +1,6 @@
 <template>
   <a-modal v-model:visible="isVisible" :title="`${year-1} measures`" ok-text="Add to list"
+           width="35%"
            @ok="addPreviousMeasures" @cancel="closeModal">
     <a-table class="ant-table-striped" :columns="columns" :data-source="list" size="small" bordered
              :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" :pagination="false"
@@ -18,21 +19,35 @@
           </template>
         </a-list>
       </template>
+
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'displayAsItems'">
+          <check-circle-filled v-if="record.display_as_items" class="display-as-items-icon" />
+          <close-circle-outlined v-else class="display-as-items-icon"/>
+        </template>
+      </template>
     </a-table>
   </a-modal>
 </template>
 <script>
 import { defineComponent, ref, watch, reactive, toRefs, createVNode } from "vue"
-import {/*DownCircleFilled,*/ ExclamationCircleOutlined/*, UpCircleFilled*/} from '@ant-design/icons-vue'
+import { ExclamationCircleOutlined, CheckCircleFilled, CloseCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue";
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
+  {
+    title: 'Display as Items',
+    dataIndex: 'display_as_items',
+    key: 'displayAsItems',
+    width: 50,
+    className: 'column-display-as-items',
+  },
 ]
 
 export default defineComponent({
   name: "MeasuresPreviousList",
-  // components: { DownCircleFilled, UpCircleFilled },
+  components: { CheckCircleFilled, CloseCircleOutlined },
   props: {
     visible: Boolean,
     year: { type: Number, default: new Date().getFullYear() },
@@ -86,12 +101,6 @@ export default defineComponent({
   },
 })
 </script>
-<style scoped>
-.ant-table-striped :deep(.table-striped) td {
-  background-color: #fafafa;
-}
-.expand-icon-antd {
-  font-size: 18px;
-  cursor: pointer;
-}
+<style lang="scss">
+@import "@/components/Manager/style.module.scss";
 </style>

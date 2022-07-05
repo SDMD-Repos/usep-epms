@@ -32,4 +32,13 @@ class Category extends Model
     {
         return $this->hasMany('App\AapcrDetailOffice', 'cascade_to');
     }
+
+    /**
+     * The category that belong to the forms
+     */
+    public function formCategory()
+    {
+        return $this->hasOne('App\FormCategory');
+    }
+
 }

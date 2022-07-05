@@ -1,11 +1,7 @@
 <template>
   <div>
-
-    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" label-in-value @change="loadPIs">
-      <a-select-option v-for="(y, i) in programsByFunction" :value="y.id" :key="i">
-        {{ y.name }}
-      </a-select-option>
-    </a-select>
+    <a-select v-model:value="mainCategory" placeholder="Select" style="width: 350px" :options="programsByFunction"
+              label-in-value @change="loadPIs" />
 
     <div class="mt-4">
       <indicator-table :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
@@ -13,15 +9,16 @@
                        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
                        @delete-item="deleteItem"/>
 
-      <opcr-template-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
-                         :validate="validate" :validate-infos="validateInfos"
-                         @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
-                         @close-drawer="closeDrawer" />
+      <opcr-template-form-drawer
+        :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
+        :validate="validate" :validate-infos="validateInfos"
+        @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
+        @close-drawer="closeDrawer" />
     </div>
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, computed, createVNode } from "vue"
+import { defineComponent, ref, watch, reactive, createVNode, computed } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
@@ -43,8 +40,7 @@ export default defineComponent({
     formId: { type: String, default: "" },
     counter: { type: Number, default: 0 },
   },
-  emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
-    'update-source-item'],
+  emits: ['update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item', 'update-source-item'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -52,17 +48,20 @@ export default defineComponent({
     const mainCategory = ref(undefined)
     const displayIndicatorList = ref(false)
     const count = ref(0)
-    const dataSource = computed(()=> { return props.itemSource })
 
     // COMPUTED
+    const dataSource = computed(()=> { return props.itemSource })
     const programs = computed(() => store.getters['formManager/manager'].programs)
     const otherPrograms = computed(() => store.getters['formManager/manager'].otherPrograms)
+    const programsByFunction = computed( () => {
+      return allPrograms.value.filter(i => i.category_id === parseInt(props.functionId)).map(v => ({ value: v.id, label: v.name }))
+    })
+
     const allPrograms = computed(() => {
       const programData = programs.value && typeof programs.value != 'undefined' ? programs.value : []
       const otherProgramData = otherPrograms.value && typeof otherPrograms.value != 'undefined' ? otherPrograms.value : []
       return programData.concat(otherProgramData)
     })
-    const programsByFunction = computed( () => { return allPrograms.value.filter(i => i.category_id === parseInt(props.functionId)) })
 
     const {
       drawerConfig,
@@ -84,31 +83,13 @@ export default defineComponent({
       }
     }
 
-    const isTargetsExists = find => {
-      let isExists = false
-      props.targetsBasisList.forEach(data => {
-        if(isExists) {
-          return
-        }
-        isExists = data.value === find
-      })
-
-      return isExists
-    }
-
     const addTableItem = async data => {
-      if (!data.value.isHeader) {
-        const { targetsBasis } = data.value
-        if (targetsBasis !== '' && typeof targetsBasis !== 'undefined' && !isTargetsExists(targetsBasis)) {
-          await emit('add-targets-basis-item', targetsBasis)
-        }
-      }
-
       const key = 'new_' + count.value
       const newData = {
         key: key,
         id: key,
         type: drawerConfig.value.type,
+        category: props.functionId,
         subCategory: data.value.subCategory,
         program: mainCategory.value.key,
         name: data.value.name,
@@ -182,13 +163,13 @@ export default defineComponent({
           }
         })
       }
+
       assignFormData(editData)
 
       openDrawer({ action: 'Update', updateId: updateId, type: data.type, parentDetails: parentDetails })
     }
 
     const updateTableItem = async data => {
-
       const { parentDetails } = drawerConfig.value
       await emit('update-source-item', {
         updateData: data.updateData,

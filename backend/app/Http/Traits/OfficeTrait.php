@@ -309,7 +309,7 @@ trait OfficeTrait {
         ], 200);
     }
 
-    public function getUserOffices($form)
+    /*public function getUserOffices($form)
     {
         try{
             $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
@@ -325,7 +325,7 @@ trait OfficeTrait {
                 foreach($data as $datum) {
                     $isCollege = filter_var($datum->isCollege, FILTER_VALIDATE_BOOLEAN);
 
-                    $add = ($form === 'cpcr' && !$isCollege) || ($form === 'opcr' && $isCollege) ? false : true;
+                    $add = !(($form === 'cpcr' && !$isCollege) || ($form === 'opcr' && $isCollege));
 
                     if($add) {
                         $ifExists = $this->array_any(function($x, $compare){
@@ -340,7 +340,7 @@ trait OfficeTrait {
                             $newOffice->title = $datum->DepartmentName;
                             $newOffice->acronym = $datum->Acronym;
 
-                            array_push($personnelOffices, $newOffice);
+                            $personnelOffices[] = $newOffice;
                         }
                     }
                 }
@@ -355,7 +355,7 @@ trait OfficeTrait {
             ], 400);
         }
 
-    }
+    }*/
 
     public function getOfficeParentId($officeId, $form)
     {
