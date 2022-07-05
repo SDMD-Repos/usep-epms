@@ -15,7 +15,7 @@ class CreateCascadingLevelsTable extends Migration
     {
         Schema::create('cascading_levels', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->string('code', 25);
+            $table->string('code', 25)->unique();
             $table->string('name', 100);
             $table->integer('ordering');
             $table->timestamp('created_at')->useCurrent();
