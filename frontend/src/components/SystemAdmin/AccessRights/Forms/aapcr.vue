@@ -7,7 +7,7 @@
           <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
             <a-tree-select v-if="editBtn" v-model:value="officeId" style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                            placeholder="Select Office/College" :tree-data="offices" tree-node-filter-prop="title"
-                           show-search allow-clear label-in-value @change="getPersonnelList" />
+                           tree-default-expand-all show-search allow-clear label-in-value @change="getPersonnelList" />
             <span v-else>{{officeDetails ? officeDetails.office_name  : "Not Set"}}</span>
           </a-col>
         </a-row>
@@ -122,9 +122,11 @@ export default defineComponent({
           "value": officeDetails.staff_id,
         }
       }
+      formLoading.value = false
     })
 
     onMounted(() => {
+      formLoading.value = true
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION',
         { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' },
@@ -186,7 +188,8 @@ export default defineComponent({
       }
 
       if(personnelId.value){
-        store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
+        formLoading.value = true
+        store.dispatch('system/SAVE_FORM_HEAD',{ payload: params })
         editBtn.value = false;
       }else{
         Modal.error({
@@ -215,6 +218,7 @@ export default defineComponent({
       }
 
       if(staffId.value){
+        formLoading.value = true
         store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
         editBtnStaff.value = false;
       }else{

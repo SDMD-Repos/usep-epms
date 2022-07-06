@@ -133,6 +133,7 @@ export default defineComponent({
             "value": officeDetails.staff_id,
           }
         }
+        formLoading.value = false
       })
 
       const getPersonnelList = officeId => {
@@ -174,10 +175,10 @@ export default defineComponent({
     }
 
       const getOfficeEmployee = officeId => {
+        formLoading.value = true
         store.commit('system/SET_STATE',{officeHeadDetailsVPOPCR:[]})
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'vpopcr',office_id:officeId}})
         staffId.value = []
-
       }
 
       const onSave = () => {
@@ -192,6 +193,7 @@ export default defineComponent({
 
         }
         if(personnelId.value){
+          formLoading.value = true
           store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
         }else{
           Modal.error({
@@ -240,8 +242,8 @@ export default defineComponent({
         }
 
         if(staffId.value){
-            store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
-
+          formLoading.value = true
+          store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
         }else{
             Modal.error({
               title: () => 'Unable to proceed',
@@ -253,6 +255,7 @@ export default defineComponent({
 
 
       onMounted( () => {
+        formLoading.value = true
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'vpopcr',office_id:null}})
         store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
         store.dispatch('system/CHECK_VPOPCR_HEAD_PERMISSION', {

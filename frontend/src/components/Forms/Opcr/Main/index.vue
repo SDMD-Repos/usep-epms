@@ -153,13 +153,10 @@ export default defineComponent({
       resetFormFields()
 
       opcrId.value = typeof route.params.opcrId !== 'undefined' ? route.params.opcrId : null
-
-      if (hasOpcrAccess.value || opcrFormPermission.value){
-        if(opcrId.value) {
-          getFormDetails()
-        } else {
-          checkFormAvailability()
-        }
+      if(opcrId.value) {
+        getFormDetails()
+      } else {
+        checkFormAvailability()
       }
     })
 

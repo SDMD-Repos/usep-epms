@@ -12,6 +12,7 @@
               placeholder="Select Office/College"
               tree-node-filter-prop="title"
               :tree-data="vpOfficesList"
+              tree-default-expand-all
               show-search
               allow-clear
               label-in-value
@@ -133,6 +134,7 @@ export default defineComponent({
             "value": officeDetails.staff_id,
           }
         }
+        formLoading.value = false
       })
 
       const getPersonnelList = officeId => {
@@ -174,7 +176,7 @@ export default defineComponent({
     }
 
       const getOfficeEmployee = officeId => {
-
+        formLoading.value = true
         store.commit('system/SET_STATE',{officeHeadDetailsOPCR:[]})
 
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'opcr',office_id:officeId}})
@@ -193,6 +195,7 @@ export default defineComponent({
 
         }
         if(personnelId.value){
+          formLoading.value = true
           store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
         }else{
           Modal.error({
@@ -241,6 +244,7 @@ export default defineComponent({
         }
 
         if(staffId.value){
+            formLoading.value = true
             store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
 
         }else{
@@ -254,6 +258,7 @@ export default defineComponent({
 
 
       onMounted(() => {
+        formLoading.value = true
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'opcr',office_id:null}})
         store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
         store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', {
