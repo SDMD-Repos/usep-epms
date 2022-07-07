@@ -88,9 +88,18 @@ const router = createRouter({
           name: 'systemAdminPermission',
           props: true,
           meta: {
-            title: 'Access Rights',
+            title: 'Manager',
           },
           component: () => import('./views/system/access/manager'),
+        },
+        {
+          path: '/system/admin/formaccess',
+          name: 'systemAdminFormAccess',
+          props: true,
+          meta: {
+            title: 'Forms',
+          },
+          component: () => import('./views/system/access/forms'),
         },
         {
           path: '/system/admin/requests',

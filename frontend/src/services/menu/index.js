@@ -164,7 +164,18 @@ export const getMenuData = [
     title: 'Access Rights',
     key: 'systemAdmin',
     icon: 'fe fe-lock',
-    url: '/system/admin/permisson',
+    children: [
+      {
+        title: 'Manager',
+        key: 'systemAdminManager',
+        url: '/system/admin/permisson',
+      },
+      {
+        title: 'Form',
+        key: 'systemAdminForm',
+        url: '/system/admin/formaccess',
+      },
+    ],
   },
   {
     title: 'Requests',
