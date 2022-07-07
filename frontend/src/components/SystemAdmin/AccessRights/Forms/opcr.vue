@@ -260,7 +260,7 @@ export default defineComponent({
       onMounted(() => {
         formLoading.value = true
         store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'opcr',office_id:null}})
-        store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
+        store.dispatch('external/FETCH_VP_OFFICES_CHILDREN', { payload: { officesOnly: 1 } })
         store.dispatch('system/CHECK_OPCR_HEAD_PERMISSION', {
                                                           payload: {
                                                                     pmaps_id: store.state.user.pmapsId,
