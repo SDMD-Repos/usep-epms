@@ -84,7 +84,7 @@ export default defineComponent({
   components: {},
   setup() {
     const store = useStore()
-    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const offices = computed(() => store.getters['external/external'].mainOffices)
     const loading = computed(() => store.getters['external/external'].loading)
     const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
 
@@ -127,6 +127,7 @@ export default defineComponent({
 
     onMounted(() => {
       formLoading.value = true
+      store.dispatch('external/FETCH_MAIN_OFFICES_ONLY')
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION',
         { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' },
@@ -151,7 +152,7 @@ export default defineComponent({
           formLoading.value = false
         })
 
-        if (officeDetails.value.office_id != officeId.value){
+        if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.office_id != officeId.value){
           personnelId.value = {"label": "", "value": ""}
           staffId.value = {"label": "", "value": ""}
         }
@@ -200,13 +201,15 @@ export default defineComponent({
     }
 
     const onCancel = () => {
-      officeId.value = { "value" : parseInt(officeDetails.value.office_id), "label": officeDetails.value.office_name }
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0)
+        officeId.value = { "value" : parseInt(officeDetails.value.office_id), "label": officeDetails.value.office_name }
       editBtn.value = false;
 
     }
 
     const onCancelStaff = () => {
-      staffId.value = { "value": parseInt(officeDetails.value.staff_id), "label": officeDetails.value.staff_name}
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0)
+        staffId.value = { "value": parseInt(officeDetails.value.staff_id), "label": officeDetails.value.staff_name}
       editBtnStaff.value = false;
     }
 
@@ -230,7 +233,7 @@ export default defineComponent({
     }
 
     const onEdit = () => {
-      if (officeId.value && Object.keys(officeId.value).length > 0){
+      if (officeId.value && Object.keys(officeId.value).length > 0 && officeId.value.value !== ""){
         getPersonnelList(officeId.value)
         personnelId.value = officeDetails.value && Object.keys(officeDetails.value).length > 0 ? { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name} : undefined
       }
@@ -238,7 +241,7 @@ export default defineComponent({
     }
 
     const onEditStaff = () => {
-      if (officeId.value && Object.keys(officeId.value).length > 0){
+      if (officeId.value && Object.keys(officeId.value).length > 0 && officeId.value.value !== ""){
         getStaffList(officeId.value)
       }
       editBtnStaff.value = true;

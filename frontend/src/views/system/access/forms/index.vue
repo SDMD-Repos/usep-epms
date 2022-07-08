@@ -1,13 +1,13 @@
 <template>
  <a-card>
    <a-collapse v-model:activeKey="activeKey">
-     <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
+     <a-collapse-panel key="1" header="AAPCR" v-if="aapcrFormPermission || aapcrHeadPermission">
        <form-admin/>
      </a-collapse-panel>
-     <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !opcrvpFormPermission && !vpopcrHeadPermission">
+     <a-collapse-panel key="2" header="OPCR (VPs)" v-if=" opcrvpFormPermission || vpopcrHeadPermission">
        <form-admin-opcr-vp/>
      </a-collapse-panel>
-     <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
+     <a-collapse-panel key="3" header="OPCR" v-if="opcrFormPermission || opcrHeadPermission">
        <form-admin-opcr/>
      </a-collapse-panel>
      <a-collapse-panel key="4" header="CPCR">
@@ -31,7 +31,7 @@ export default defineComponent({
     components: { FormAdmin, FormAdminOpcr, FormAdminOpcrVp },
     setup() {
       const store = useStore()
-      const activeKey = ref([]);
+      const activeKey = ref(['1','2','3','4']);
       const aapcrFormId = 'aapcr'
       const opcrFormId = 'opcr'
       const vpopcrFormId = 'vpopcr'
