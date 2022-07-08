@@ -171,6 +171,7 @@ export default defineComponent({
       }
 
       store.dispatch('system/SAVE_PERMISSION',{ payload: params })
+      updateBtn.value = false
     }
 
 

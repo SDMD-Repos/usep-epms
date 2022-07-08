@@ -56,7 +56,7 @@
                 label-in-value
                 v-if="editBtnStaff"
               />
-            <span v-else>{{ officeDetails && officeDetails.staff_name && officeId.value === officeDetails.office_id ? officeDetails.staff_name : "Not Set" }}</span>
+            <span v-else>{{ officeDetails && officeDetails.staff_name && officeId.value === parseInt(officeDetails.office_id) ? officeDetails.staff_name : "Not Set" }}</span>
           </a-col>
         </a-row>
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">

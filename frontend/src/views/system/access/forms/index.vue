@@ -1,21 +1,20 @@
 <template>
-
- <a-collapse v-model:activeKey="activeKey">
-    <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
-         <form-admin/>
-    </a-collapse-panel>
-    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !opcrvpFormPermission && !vpopcrHeadPermission">
-      <form-admin-opcr-vp/>
-    </a-collapse-panel>
-    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
-      <form-admin-opcr/>
-    </a-collapse-panel>
-    <a-collapse-panel key="4" header="CPCR">
-      <p>CPCR</p>
-    </a-collapse-panel>
-
-  </a-collapse>
-
+ <a-card>
+   <a-collapse v-model:activeKey="activeKey">
+     <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
+       <form-admin/>
+     </a-collapse-panel>
+     <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !opcrvpFormPermission && !vpopcrHeadPermission">
+       <form-admin-opcr-vp/>
+     </a-collapse-panel>
+     <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
+       <form-admin-opcr/>
+     </a-collapse-panel>
+     <a-collapse-panel key="4" header="CPCR">
+       <p>CPCR</p>
+     </a-collapse-panel>
+   </a-collapse>
+ </a-card>
 </template>
 
 <script>
