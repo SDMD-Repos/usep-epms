@@ -15,7 +15,7 @@
               :rules="rules"
               v-if="isCreate">
         <div class="row">
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref='name' label="Sub Category Name" name="name">
               <a-select v-model:value="formState.name"  v-if="checked"  >
                 <a-select-option v-for="previous in prevSubCategories"
@@ -29,7 +29,7 @@
             </a-form-item>
           </div>
 
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref="category_id" label="Functions" name="category_id">
               <a-select v-model:value="formState.category_id" @change="onFunctionsChange">
                 <a-select-option v-for="func in functions"
@@ -42,7 +42,7 @@
             </a-form-item>
           </div>
 
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref='parentId' label="Parent Sub Category" name="parentId">
               <a-tree-select
                 v-model:value="formState.parentId"
@@ -54,6 +54,11 @@
                 tree-default-expand-all
               >
               </a-tree-select>
+            </a-form-item>
+          </div>
+          <div class="col-lg-3">
+            <a-form-item ref='ordering' label="Ordering" name="ordering">
+              <a-input v-model:value="formState.name"/>
             </a-form-item>
           </div>
         </div>
@@ -120,6 +125,7 @@ export default defineComponent({
       name: '',
       category_id: undefined,
       parentId: null,
+      ordering: undefined,
       year : year.value,
     })
     const rules = {
@@ -131,6 +137,13 @@ export default defineComponent({
         },
       ],
       category_id: [
+        {
+          required: true,
+          message: 'This field is required',
+          trigger: 'blur',
+        },
+      ],
+      ordering: [
         {
           required: true,
           message: 'This field is required',
