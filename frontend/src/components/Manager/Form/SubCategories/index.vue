@@ -58,7 +58,7 @@
           </div>
           <div class="col-lg-3">
             <a-form-item ref='ordering' label="Ordering" name="ordering">
-              <a-input v-model:value="formState.name"/>
+              <a-input v-model:value="formState.ordering"/>
             </a-form-item>
           </div>
         </div>
@@ -76,7 +76,7 @@
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted} from 'vue'
+import {computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted, watch} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -125,7 +125,7 @@ export default defineComponent({
       name: '',
       category_id: undefined,
       parentId: null,
-      ordering: undefined,
+      ordering: null,
       year : year.value,
     })
     const rules = {
@@ -164,6 +164,21 @@ export default defineComponent({
     const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
+
+    watch(() => [formState.category_id,formState.parentId] , ([category_id,parentId]) => {
+      if (category_id){
+        let filteredParentSubCategories = subCategories.value.filter(datum => (datum.category_id === parseInt(category_id) && !datum.parent_id))
+        let filteredParentSubCategoriesCount = filteredParentSubCategories && Object.keys(filteredParentSubCategories).length ? filteredParentSubCategories.length : 1
+        if (parentId){
+          let filteredChildSubCategories = subCategories.value.filter(datum => (datum.category_id === parseInt(category_id) && datum.parent_id))
+
+          let filteredChildSubCategoriesCount = filteredChildSubCategories && Object.keys(filteredChildSubCategories).length ? filteredChildSubCategories.length : 1
+          filteredParentSubCategoriesCount = filteredParentSubCategoriesCount + "." + filteredChildSubCategoriesCount
+        }
+        formState.ordering = filteredParentSubCategoriesCount
+      }
+    })
+
     onMounted(() => {
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
