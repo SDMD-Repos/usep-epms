@@ -57,8 +57,14 @@
             </a-form-item>
           </div>
           <div class="col-lg-3">
+<!--            <a-form-item ref='ordering' label="Ordering" name="ordering">-->
+<!--              <a-input v-model:value="formState.ordering"/>-->
+<!--            </a-form-item>-->
             <a-form-item ref='ordering' label="Ordering" name="ordering">
-              <a-input v-model:value="formState.ordering"/>
+              <a-input-group compact>
+                <a-input :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
+                <a-input v-model:value="frmOrderingChild" style="width: 20%" />
+              </a-input-group>
             </a-form-item>
           </div>
         </div>
@@ -121,6 +127,10 @@ export default defineComponent({
 
     // DATA
     const formRef = ref()
+    const frmOrdering = ref();
+    const frmOrderingChild = ref();
+    const orderingDisabled = ref(false);
+
     const formState = reactive({
       name: '',
       category_id: undefined,
@@ -164,9 +174,10 @@ export default defineComponent({
     const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
-    watch(() => formState.ordering , ordering => {
-
+    watch(() => [frmOrdering.value,frmOrderingChild.value] , ([frmOrdering,frmOrderingChild]) => {
+      formState.ordering = frmOrderingChild ? (frmOrdering + "." + frmOrderingChild) : frmOrdering
     })
+
     watch(() => [formState.category_id,formState.parentId] , ([category_id,parentId]) => {
       if (category_id){
         let order = 1
@@ -177,21 +188,18 @@ export default defineComponent({
               order = filteredParentSubCategories[i].ordering
             }
           }
-          order++
+          frmOrdering.value = ++order
         }
         if (parentId){
-          order--
+          frmOrdering.value = --order
+          orderingDisabled.value = true
           let filteredSubCategories = filteredParentSubCategories.filter(datum => datum.id === parseInt(parentId))
           if (filteredSubCategories && Object.keys(filteredSubCategories).length > 0){
-            if (filteredSubCategories[0].children && Object.keys(filteredSubCategories[0].children).length > 0){
-              order = order + "." + (filteredSubCategories[0].children.length + 1)
-            }else{
-              order = order + ".1"
-            }
+            frmOrderingChild.value = filteredSubCategories[0].children && Object.keys(filteredSubCategories[0].children).length > 0 ? (filteredSubCategories[0].children.length + 1) : 1
           }
+        }else{
+          orderingDisabled.value = false
         }
-        formState.ordering = order
-
       }
     })
 
@@ -278,6 +286,10 @@ export default defineComponent({
       onSubmit,
       resetForm,
       changePreviousModal,
+
+      frmOrdering,
+      frmOrderingChild,
+      orderingDisabled,
     };
   },
 });
