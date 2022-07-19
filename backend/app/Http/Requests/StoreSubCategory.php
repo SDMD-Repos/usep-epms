@@ -34,6 +34,12 @@ class StoreSubCategory extends FormRequest
             ],
             'category_id' => 'required',
             'parentId' => '',
+            'ordering' => [
+                'required',
+                Rule::unique('sub_categories')->where('year',$this->year)->whereNull('deleted_at')->where(function ($query) {
+                    return $query->where('ordering', $this->ordering)->where('category_id', $this->category_id);
+                })
+            ],
             'year'=>'',
             'prev'=>'',
         ];
@@ -50,6 +56,8 @@ class StoreSubCategory extends FormRequest
             'name.max' => 'This field may not be greater than :max characters',
             'name.unique' => 'The Sub Category name has already been used.',
             'category_id.required' => 'This field is required',
+            'ordering.required' => 'This field is required',
+            'ordering.unique' => 'The Ordering for this Category has already been used.',
         ];
     }
 

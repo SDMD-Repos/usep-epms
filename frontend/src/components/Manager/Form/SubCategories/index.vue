@@ -164,18 +164,34 @@ export default defineComponent({
     const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
+    watch(() => formState.ordering , ordering => {
 
+    })
     watch(() => [formState.category_id,formState.parentId] , ([category_id,parentId]) => {
       if (category_id){
+        let order = 1
         let filteredParentSubCategories = subCategories.value.filter(datum => (datum.category_id === parseInt(category_id) && !datum.parent_id))
-        let filteredParentSubCategoriesCount = filteredParentSubCategories && Object.keys(filteredParentSubCategories).length ? filteredParentSubCategories.length : 1
-        if (parentId){
-          let filteredChildSubCategories = subCategories.value.filter(datum => (datum.category_id === parseInt(category_id) && datum.parent_id))
-
-          let filteredChildSubCategoriesCount = filteredChildSubCategories && Object.keys(filteredChildSubCategories).length ? filteredChildSubCategories.length : 1
-          filteredParentSubCategoriesCount = filteredParentSubCategoriesCount + "." + filteredChildSubCategoriesCount
+        if (filteredParentSubCategories && Object.keys(filteredParentSubCategories).length){
+          for (let i=0; i < filteredParentSubCategories.length; i++){
+            if (filteredParentSubCategories[i].ordering > order){
+              order = filteredParentSubCategories[i].ordering
+            }
+          }
+          order++
         }
-        formState.ordering = filteredParentSubCategoriesCount
+        if (parentId){
+          order--
+          let filteredSubCategories = filteredParentSubCategories.filter(datum => datum.id === parseInt(parentId))
+          if (filteredSubCategories && Object.keys(filteredSubCategories).length > 0){
+            if (filteredSubCategories[0].children && Object.keys(filteredSubCategories[0].children).length > 0){
+              order = order + "." + (filteredSubCategories[0].children.length + 1)
+            }else{
+              order = order + ".1"
+            }
+          }
+        }
+        formState.ordering = order
+
       }
     })
 
