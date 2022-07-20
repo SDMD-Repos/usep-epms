@@ -216,6 +216,7 @@ class SettingController extends Controller
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
+            $subcategory->ordering = $validated['ordering'];
             $subcategory->year = $validated['year'];
             $subcategory->create_id = $this->login_user->pmaps_id;
             $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";

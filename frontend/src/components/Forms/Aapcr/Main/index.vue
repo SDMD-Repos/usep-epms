@@ -117,12 +117,10 @@ export default defineComponent({
       resetFormFields()
 
       aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
-      if(hasAapcrAccess.value || aapcrFormPermission.value){
-        if(aapcrId.value) {
-          getFormDetails()
-        } else {
-          checkFormAvailability()
-        }
+      if(aapcrId.value) {
+        getFormDetails()
+      } else {
+        checkFormAvailability()
       }
     })
 

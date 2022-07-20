@@ -313,7 +313,7 @@ export default {
       })
     },
     CREATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
-      const { year, category_id, parentId, name } = payload
+      const { year, category_id, parentId, ordering, name } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -321,6 +321,7 @@ export default {
         name: name,
         category_id: category_id,
         parentId: parentId,
+        ordering: ordering,
         year: year,
       }
 

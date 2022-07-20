@@ -15,7 +15,7 @@
               :rules="rules"
               v-if="isCreate">
         <div class="row">
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref='name' label="Sub Category Name" name="name">
               <a-select v-model:value="formState.name"  v-if="checked"  >
                 <a-select-option v-for="previous in prevSubCategories"
@@ -29,7 +29,7 @@
             </a-form-item>
           </div>
 
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref="category_id" label="Functions" name="category_id">
               <a-select v-model:value="formState.category_id" @change="onFunctionsChange">
                 <a-select-option v-for="func in functions"
@@ -42,7 +42,7 @@
             </a-form-item>
           </div>
 
-          <div class="col-lg-4">
+          <div class="col-lg-3">
             <a-form-item ref='parentId' label="Parent Sub Category" name="parentId">
               <a-tree-select
                 v-model:value="formState.parentId"
@@ -54,6 +54,17 @@
                 tree-default-expand-all
               >
               </a-tree-select>
+            </a-form-item>
+          </div>
+          <div class="col-lg-3">
+<!--            <a-form-item ref='ordering' label="Ordering" name="ordering">-->
+<!--              <a-input v-model:value="formState.ordering"/>-->
+<!--            </a-form-item>-->
+            <a-form-item ref='ordering' label="Ordering" name="ordering">
+              <a-input-group compact>
+                <a-input-number :min="1" :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
+                <a-input-number :min="1" :disabled="orderingChildDisabled" v-model:value="frmOrderingChild" style="width: 20%" />
+              </a-input-group>
             </a-form-item>
           </div>
         </div>
@@ -71,7 +82,7 @@
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted} from 'vue'
+import {computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted, watch} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -119,10 +130,16 @@ export default defineComponent({
 
     // DATA
     const formRef = ref()
+    const frmOrdering = ref();
+    const frmOrderingChild = ref();
+    const orderingDisabled = ref(false);
+    const orderingChildDisabled = ref(false);
+
     const formState = reactive({
       name: '',
       category_id: undefined,
       parentId: null,
+      ordering: null,
       year : year.value,
     })
     const rules = {
@@ -134,6 +151,13 @@ export default defineComponent({
         },
       ],
       category_id: [
+        {
+          required: true,
+          message: 'This field is required',
+          trigger: 'blur',
+        },
+      ],
+      ordering: [
         {
           required: true,
           message: 'This field is required',
@@ -154,6 +178,38 @@ export default defineComponent({
     const { isCreate,isDelete } = usePermission(permission)
 
     // EVENTS
+    watch(() => [frmOrdering.value,frmOrderingChild.value] , ([frmOrdering,frmOrderingChild]) => {
+      formState.ordering = frmOrderingChild ? (frmOrdering + "." + frmOrderingChild) : frmOrdering
+    })
+
+    watch(() => [formState.category_id,formState.parentId] , ([category_id,parentId]) => {
+      if (category_id){
+        let order = 1
+        let filteredParentSubCategories = subCategories.value.filter(datum => (datum.category_id === parseInt(category_id) && !datum.parent_id))
+        if (filteredParentSubCategories && Object.keys(filteredParentSubCategories).length){
+          for (let i=0; i < filteredParentSubCategories.length; i++){
+            if (filteredParentSubCategories[i].ordering > order){
+              order = filteredParentSubCategories[i].ordering
+            }
+          }
+          order++
+        }
+        frmOrdering.value = order
+        if (parentId){
+          frmOrdering.value = --order
+          orderingDisabled.value = true
+          let filteredSubCategories = filteredParentSubCategories.filter(datum => datum.id === parseInt(parentId))
+          if (filteredSubCategories && Object.keys(filteredSubCategories).length > 0){
+            frmOrderingChild.value = filteredSubCategories[0].children && Object.keys(filteredSubCategories[0].children).length > 0 ? (filteredSubCategories[0].children.length + 1) : 1
+          }
+        }else{
+          orderingDisabled.value = false
+          orderingChildDisabled.value = true
+          frmOrderingChild.value = null
+        }
+      }
+    })
+
     onMounted(() => {
       store.commit('formManager/SET_STATE', { prevSubCategories: [] })
       fetchData(year.value)
@@ -202,7 +258,11 @@ export default defineComponent({
     };
 
     const resetForm = () => {
-      formRef.value.resetFields();
+      formRef.value.resetFields()
+      orderingDisabled.value = false
+      orderingChildDisabled.value = false
+      frmOrdering.value = null
+      frmOrderingChild.value = null
     }
 
     const changePreviousModal = () => {
@@ -237,6 +297,11 @@ export default defineComponent({
       onSubmit,
       resetForm,
       changePreviousModal,
+
+      frmOrdering,
+      frmOrderingChild,
+      orderingDisabled,
+      orderingChildDisabled,
     };
   },
 });

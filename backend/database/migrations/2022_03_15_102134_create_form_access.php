@@ -19,9 +19,9 @@ class CreateFormAccess extends Migration
             $table->string('pmaps_id')->nullable();
             $table->string('pmaps_name', 100);
             $table->string('office_id', 15)->nullable();
-            $table->string('office_name', 50)->nullable();
+            $table->string('office_name', 100)->nullable();
             $table->string('staff_id')->nullable();
-            $table->string('staff_name', 50)->nullable();
+            $table->string('staff_name', 100)->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->string('create_id', 35);
             $table->timestamp('updated_at')->nullable();

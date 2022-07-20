@@ -7,7 +7,7 @@
           <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
             <a-tree-select v-if="editBtn" v-model:value="officeId" style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                            placeholder="Select Office/College" :tree-data="offices" tree-node-filter-prop="title"
-                           show-search allow-clear label-in-value @change="getPersonnelList" />
+                           tree-default-expand-all show-search allow-clear label-in-value @change="getPersonnelList" />
             <span v-else>{{officeDetails ? officeDetails.office_name  : "Not Set"}}</span>
           </a-col>
         </a-row>
@@ -33,9 +33,9 @@
 
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrFormPermission">
            <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-             <a-button v-if="editBtn" style="width: 100px;" type="primary" class="mr-3" size="small" @click="onSave" > Save</a-button>
+             <a-button v-if="editBtn" style="width: 100px;" type="primary" size="small" class="mr-3" @click="onSave" > Save</a-button>
              <a-button v-if="editBtn" style="width: 100px;" type="primary" size="small" @click="onCancel">Cancel</a-button>
-             <a-button v-else style="width: 100px;" type="primary" class="mr-3" size="small" @click="onEdit" >Edit</a-button>
+             <a-button v-else style="width: 100px;" type="primary" size="small" class="mr-3" @click="onEdit" >Edit</a-button>
            </a-col>
         </a-row>
 
@@ -56,14 +56,14 @@
                 label-in-value
                 v-if="editBtnStaff"
               />
-            <span v-else>{{ officeDetails && officeDetails.staff_name ? officeDetails.staff_name : "Not Set" }}</span>
+            <span v-else>{{ officeDetails && officeDetails.staff_name && officeId.value === parseInt(officeDetails.office_id) ? officeDetails.staff_name : "Not Set" }}</span>
           </a-col>
         </a-row>
         <a-row type="flex" justify="center" class="mt-3" v-if="aapcrHeadPermission">
           <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 8, offset: 1 }">
-            <a-button style="width: 100px;" type="primary" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
-            <a-button style="width: 100px;" type="primary" class="mr-3" @click="onCancelStaff" v-if="editBtnStaff" >Cancel</a-button>
-            <a-button style="width: 100px;" type="primary" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
+            <a-button style="width: 90px;" type="primary" size="small" class="mr-3" @click="onSaveStaff" v-if="editBtnStaff" >Save</a-button>
+            <a-button style="width: 100px;" type="primary" size="small" class="mr-3" @click="onCancelStaff" v-if="editBtnStaff" >Cancel</a-button>
+            <a-button style="width: 100px;" type="primary" size="small" class="mr-3" @click="onEditStaff" v-else >Edit Staff</a-button>
           </a-col>
         </a-row>
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"></a-col>
@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, ref, computed } from 'vue'
+import {defineComponent, onMounted, ref, computed, watch} from 'vue'
 import { useStore } from 'vuex'
 import { Modal } from 'ant-design-vue'
 import { getPersonnelByOffice } from '@/services/api/hris';
@@ -84,21 +84,21 @@ export default defineComponent({
   components: {},
   setup() {
     const store = useStore()
-    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const offices = computed(() => store.getters['external/external'].mainOffices)
     const loading = computed(() => store.getters['external/external'].loading)
     const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
 
     const aapcrHeadPermission = computed(() => store.getters['system/permission'].aapcrHeadPermission)
 
-    const officeId = ref(undefined)
+    const officeId = ref({"label": "", "value": ""})
 
     const editBtn = ref(false)
     const editBtnStaff = ref(false)
 
     const memberList = ref([])
     const memberListStaff = ref([])
-    const personnelId = ref(undefined)
-    const staffId = ref(undefined)
+    const personnelId = ref({"label": "", "value": ""})
+    const staffId = ref({"label": "", "value": ""})
 
     let formLoading = ref(false)
 
@@ -106,7 +106,28 @@ export default defineComponent({
 
     const { aapcrFormPermission } = usePermission(permission)
 
+    // EVENTS
+    watch(() => [officeDetails.value] , ([officeDetails]) => {
+      if (officeDetails && Object.keys(officeDetails).length > 0){
+        officeId.value = {
+          "label": officeDetails.office_name,
+          "value": parseInt(officeDetails.office_id),
+        }
+        personnelId.value = {
+          "label": officeDetails.pmaps_name,
+          "value": officeDetails.pmaps_id,
+        }
+        staffId.value = {
+          "label": officeDetails.staff_name,
+          "value": officeDetails.staff_id,
+        }
+      }
+      formLoading.value = false
+    })
+
     onMounted(() => {
+      formLoading.value = true
+      store.dispatch('external/FETCH_MAIN_OFFICES_ONLY')
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION',
         { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' },
@@ -116,77 +137,91 @@ export default defineComponent({
 
     const getPersonnelList = officeId => {
       memberList.value = []
-      personnelId.value = []
       if (officeId) {
         formLoading.value = true
         const id = officeId.value
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberList.value = personnel
+            let obj = personnel
+            if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.staff_id){
+              obj = personnel.filter( data => { return  data.id !== officeDetails.value.staff_id})
+            }
+            memberList.value = obj
           }
           formLoading.value = false
         })
+
+        if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.office_id != officeId.value){
+          personnelId.value = {"label": "", "value": ""}
+          staffId.value = {"label": "", "value": ""}
+        }
       }
     }
 
-    const getStaffList =  staffOfficeId => {
+    const getStaffList =  officeId => {
       memberListStaff.value = []
-      if (staffOfficeId) {
+      if (officeId) {
         formLoading.value = true
-        const id = staffOfficeId
+        const id = officeId.value
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
-            memberListStaff.value = personnel
+            let obj = personnel
+            if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && officeDetails.value.pmaps_id){
+              obj = personnel.filter( data => { return  data.id !== officeDetails.value.pmaps_id})
+            }
+            memberListStaff.value = obj
           }
           formLoading.value = false
         })
       }
     }
     const onSave = () => {
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0 && (String(personnelId.value.value) === String(officeDetails.value.pmaps_id))){
+        editBtn.value = false;
+        return
+      }
       let params = {
         pmaps_id: personnelId.value,
         form_id: 'aapcr',
         office_id: officeId.value,
       }
+
       if(personnelId.value){
-        store.dispatch('system/SAVE_FORM_HEAD',{ payload: params });
+        formLoading.value = true
+        store.dispatch('system/SAVE_FORM_HEAD',{ payload: params })
         editBtn.value = false;
       }else{
         Modal.error({
           title: () => 'Unable to proceed',
-          content: () => 'Please select a Office Head',
+          content: () => 'Please select an Office Head',
         })
       }
     }
 
     const onCancel = () => {
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0)
+        officeId.value = { "value" : parseInt(officeDetails.value.office_id), "label": officeDetails.value.office_name }
       editBtn.value = false;
-      officeId.value = []
-      personnelId.value = []
-      staffId.value = []
-      memberList.value = []
-      store.commit('system/SET_STATE',{ officeHeadDetailsVPOPCR: [] })
+
     }
 
     const onCancelStaff = () => {
+      if (officeDetails.value && Object.keys(officeDetails.value).length > 0)
+        staffId.value = { "value": parseInt(officeDetails.value.staff_id), "label": officeDetails.value.staff_name}
       editBtnStaff.value = false;
-      officeId.value = []
-      personnelId.value = []
-      staffId.value = []
-      memberList.value = []
-      store.commit('system/SET_STATE',{ officeHeadDetailsVPOPCR: [] })
     }
 
     const onSaveStaff = () => {
       let params = {
         pmaps_id: staffId.value,
         form_id: 'aapcr',
-        office_id:  {"value":officeDetails.value.office_id},
+        office_id:  {"value": parseInt(officeDetails.value.office_id), "label":officeDetails.value.office_name},
       }
 
       if(staffId.value){
+        formLoading.value = true
         store.dispatch('system/SAVE_FORM_STAFF',{ payload: params });
         editBtnStaff.value = false;
       }else{
@@ -198,12 +233,17 @@ export default defineComponent({
     }
 
     const onEdit = () => {
+      if (officeId.value && Object.keys(officeId.value).length > 0 && officeId.value.value !== ""){
+        getPersonnelList(officeId.value)
+        personnelId.value = officeDetails.value && Object.keys(officeDetails.value).length > 0 ? { "value": officeDetails.value.pmaps_id, "label": officeDetails.value.pmaps_name} : undefined
+      }
       editBtn.value = true;
     }
 
     const onEditStaff = () => {
-      getStaffList(officeDetails.value.office_id)
-
+      if (officeId.value && Object.keys(officeId.value).length > 0 && officeId.value.value !== ""){
+        getStaffList(officeId.value)
+      }
       editBtnStaff.value = true;
     }
 

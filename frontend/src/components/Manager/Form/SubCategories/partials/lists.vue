@@ -24,6 +24,7 @@ import { WarningOutlined } from '@ant-design/icons-vue'
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Function', dataIndex: ['category', 'name'], key: 'function' },
+  { title: 'Ordering', dataIndex: 'ordering', key: 'ordering' },
   { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 

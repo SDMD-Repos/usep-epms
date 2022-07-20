@@ -123,7 +123,6 @@ export default defineComponent({
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
-
       if(vpOpcrId.value) {
         getVpOpcrDetails()
       } else {
