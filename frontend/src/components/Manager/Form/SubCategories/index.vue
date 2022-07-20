@@ -188,8 +188,9 @@ export default defineComponent({
               order = filteredParentSubCategories[i].ordering
             }
           }
-          frmOrdering.value = ++order
+          order++
         }
+        frmOrdering.value = order
         if (parentId){
           frmOrdering.value = --order
           orderingDisabled.value = true
@@ -199,6 +200,7 @@ export default defineComponent({
           }
         }else{
           orderingDisabled.value = false
+          frmOrderingChild.value = null
         }
       }
     })
@@ -252,6 +254,9 @@ export default defineComponent({
 
     const resetForm = () => {
       formRef.value.resetFields();
+      orderingDisabled.value = false
+      frmOrdering.value = null
+      frmOrderingChild.value = null
     }
 
     const changePreviousModal = () => {
