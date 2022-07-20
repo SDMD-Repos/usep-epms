@@ -62,8 +62,8 @@
 <!--            </a-form-item>-->
             <a-form-item ref='ordering' label="Ordering" name="ordering">
               <a-input-group compact>
-                <a-input :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
-                <a-input v-model:value="frmOrderingChild" style="width: 20%" />
+                <a-input-number :min="1" :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
+                <a-input-number :min="1" :disabled="orderingChildDisabled" v-model:value="frmOrderingChild" style="width: 20%" />
               </a-input-group>
             </a-form-item>
           </div>
@@ -130,6 +130,7 @@ export default defineComponent({
     const frmOrdering = ref();
     const frmOrderingChild = ref();
     const orderingDisabled = ref(false);
+    const orderingChildDisabled = ref(false);
 
     const formState = reactive({
       name: '',
@@ -200,6 +201,7 @@ export default defineComponent({
           }
         }else{
           orderingDisabled.value = false
+          orderingChildDisabled.value = true
           frmOrderingChild.value = null
         }
       }
@@ -253,8 +255,9 @@ export default defineComponent({
     };
 
     const resetForm = () => {
-      formRef.value.resetFields();
+      formRef.value.resetFields()
       orderingDisabled.value = false
+      orderingChildDisabled.value = false
       frmOrdering.value = null
       frmOrderingChild.value = null
     }
@@ -295,6 +298,7 @@ export default defineComponent({
       frmOrdering,
       frmOrderingChild,
       orderingDisabled,
+      orderingChildDisabled,
     };
   },
 });
