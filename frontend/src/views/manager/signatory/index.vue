@@ -1,19 +1,21 @@
 <template>
-  <a-card v-if="userForms.length">
-    <a-tabs v-model:activeKey="activeKey" :animated="false">
-      <template v-for="(form, index) in userForms" :key="index">
-        <a-tab-pane :tab="form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.form.id" /></a-tab-pane>
-      </template>
-    </a-tabs>
-  </a-card>
-  <a-card v-else-if="formsByPermission.length ">
-    <a-tabs v-model:activeKey="activeKey" :animated="false">
-      <template v-for="(form, index) in formsByPermission" :key="index">
-        <a-tab-pane :tab="form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.id" /></a-tab-pane>
-      </template>
-    </a-tabs>
-  </a-card>
-  <div v-else><span v-if="!loading">You have no permission to access this page</span></div>
+  <a-spin :spinning="loading" tip="Fetching data in HRIS...">
+    <a-card v-if="userForms.length">
+      <a-tabs v-model:activeKey="activeKey" :animated="false">
+        <template v-for="(form, index) in userForms" :key="index">
+          <a-tab-pane :tab="form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.form.id" /></a-tab-pane>
+        </template>
+      </a-tabs>
+    </a-card>
+    <a-card v-else-if="formsByPermission.length ">
+      <a-tabs v-model:activeKey="activeKey" :animated="false">
+        <template v-for="(form, index) in formsByPermission" :key="index">
+          <a-tab-pane :tab="form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="form.id" /></a-tab-pane>
+        </template>
+      </a-tabs>
+    </a-card>
+    <div v-else><span>You have no permission to access this page</span></div>
+  </a-spin>
 </template>
 <script>
 import SignatoryForm from '@/components/Manager/Signatory/Main'
@@ -29,11 +31,16 @@ export default defineComponent({
     // COMPUTED
     const userForms = computed(() => store.getters['formManager/manager'].userFormAccess)
     const formsByPermission = computed(() => store.getters['formManager/manager'].formsByPermission)
-    const loading = computed(() => store.getters['formManager/manager'].loading)
+    const loading = computed(() => {
+      return store.getters['external/external'].loading || store.getters['formManager/manager'].loading
+    })
 
     const permission = {
       listAapcr: [ "form", "f-aapcr" ],
       listOpcrvp: ["form","f-opcrvp"],
+      listOpcr: ["form","f-opcr"],
+      listCpcr: ["form","f-cpcr"],
+      listIpcr: ["form","f-ipcr"],
     }
 
     const { allForms } = usePermission(permission)
@@ -48,7 +55,6 @@ export default defineComponent({
     onMounted( () => {
       store.dispatch('formManager/FETCH_ALL_FORMS_BY_PERMISSION', { payload: { allForms : allForms } })
     })
-
 
     return {
       activeKey: ref(0),

@@ -222,7 +222,7 @@ trait OfficeTrait {
         }
     }
 
-    public function getPersonnelByOffice($id, $withHeader=0, $update=0)
+    public function getPersonnelByOffice($id, $permanentOnly=0, $withHeader=0, $returnJson=1)
     {
         try {
 
@@ -235,6 +235,12 @@ trait OfficeTrait {
 
             $lists = json_decode($response->body());
 
+            if($permanentOnly) {
+                $lists = array_filter($lists, function($x) {
+                    return $x->isPermanent === true;
+                });
+            }
+
             $obj = new \stdClass();
 
             if($withHeader) {
@@ -242,9 +248,10 @@ trait OfficeTrait {
                 $obj->value = "all";
                 $obj->title = "All Personnel";
                 $obj->isPersonnel = 1;
+                $obj->isPermanent = false;
                 $obj->children = [];
 
-                array_push($personnel, $obj);
+                $personnel[] = $obj;
             }
 
             if(count($lists)){
@@ -261,17 +268,18 @@ trait OfficeTrait {
                     $obj->value = $list->PmapsID;
                     $obj->title = ucwords($fullName);
                     $obj->position = $list->Position;
+                    $obj->isPermanent = $list->isPermanent;
                     $obj->isPersonnel = 1;
 
                     if($withHeader) {
-                        array_push($personnel[0]->children, $obj);
+                        $personnel[0]->children[] = $obj;
                     }else {
-                        array_push($personnel, $obj);
+                        $personnel[] = $obj;
                     }
                 }
             }
 
-            if(!$update){
+            if($returnJson){
                 return response()->json([
                     'personnel' => $personnel
                 ], 200);

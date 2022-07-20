@@ -66,12 +66,11 @@ trait ConverterTrait {
 
                 if (count($children)) {
                     $arr[$i]->children = $children;
-                    $arr[$i]->selectable = false;
                 }
 
                 $arr[$i]->isOpen = false;
 
-                array_push($out, $arr[$i]);
+                $out[] = $arr[$i];
             }
         }
 
@@ -84,7 +83,7 @@ trait ConverterTrait {
 
         foreach($parents as $key => $parent) {
 
-            array_push($this->parentSubCategories, $parent->name);
+            $this->parentSubCategories[] = $parent->name;
 
             if($parent->parent_id !== NULL) {
                 $count++;
@@ -155,7 +154,7 @@ trait ConverterTrait {
             }
 
             $offices[$officeType][$counter] = array(
-                'label' => $officeName,
+                'title' => $officeName,
                 'value' => $officeId,
                 'cascadeTo' => $cascadeTo,
 //                'ipcrPeriod' => $ipcrPeriod

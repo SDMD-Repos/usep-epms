@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 export const usePermission = permission => {
-  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr } = permission
+  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr } = permission
 
   const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()
@@ -31,12 +31,22 @@ export const usePermission = permission => {
     return listOpcr ? listOpcr.includes(value.permission_id) : 0
   })
 
+  const cpcrPermission = accessLists.value.filter(value => {
+    return listCpcr ? listCpcr.includes(value.permission_id) : 0
+  })
+
+  const ipcrPermission = accessLists.value.filter(value => {
+    return listIpcr ? listIpcr.includes(value.permission_id) : 0
+  })
+
   const isCreate = ref(false)
   const isDelete = ref(false)
   const isEdit = ref(false)
   const aapcrFormPermission = ref(false)
   const opcrvpFormPermission = ref(false)
   const opcrFormPermission = ref(false)
+  const cpcrFormPermission = ref(false)
+  const ipcrFormPermission = ref(false)
   const aapcrTab = ref('')
   const opcrvpTab = ref('')
   const currentForms = ref([])
@@ -64,7 +74,18 @@ export const usePermission = permission => {
   }
 
   if (opcrPermission.length > 0) {
+    currentForms.value.push('opcr')
     opcrFormPermission.value = true
+  }
+
+  if (cpcrPermission.length > 0) {
+    currentForms.value.push('cpcr')
+    cpcrFormPermission.value = true
+  }
+
+  if (ipcrPermission.length > 0) {
+    currentForms.value.push('ipcr')
+    ipcrFormPermission.value = true
   }
 
   const allForms = currentForms.value
@@ -75,6 +96,8 @@ export const usePermission = permission => {
     aapcrFormPermission,
     opcrvpFormPermission,
     opcrFormPermission,
+    cpcrFormPermission,
+    ipcrFormPermission,
     aapcrTab,
     opcrvpTab,
     allForms,

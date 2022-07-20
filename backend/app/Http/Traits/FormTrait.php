@@ -57,7 +57,7 @@ trait FormTrait {
                     $newOffice->vp_office_id = $office['pId'];
                     $office_name = $office['acronym'];
                 }else{
-                    $office_name = $office['label'];
+                    $office_name = $office['title'];
                 }
 
                 $newOffice->office_id = $office['value'];
@@ -193,7 +193,7 @@ trait FormTrait {
 
                         $office_name = $office['acronym'];
                     }else{
-                        $office_name = $office['label'];
+                        $office_name = $office['title'];
                     }
 
                     $newOffice->office_id = $office['value'];

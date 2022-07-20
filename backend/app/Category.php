@@ -41,4 +41,12 @@ class Category extends Model
         return $this->hasOne('App\FormCategory');
     }
 
+    /**
+     * The default program of the category
+     */
+    public function defaultProgram()
+    {
+        return $this->belongsTo('App\Program', 'default_program_id', 'id');
+    }
+
 }

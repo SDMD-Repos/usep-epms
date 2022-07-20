@@ -26,6 +26,7 @@ class UpdateRequestStatus extends FormRequest
         return [
             'id' => 'required',
             'status' => 'required',
+            'fileName' => 'required_if:status,pending'
         ];
     }
 }

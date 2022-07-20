@@ -22,8 +22,8 @@
             title="Choose an action"
             ok-text="Verify"
             cancel-text="Decline"
-            @confirm="changeRequest(record.id, 'verified')"
-            @cancel="changeRequest(record.id, 'declined')"
+            @confirm="changeRequest(record, 'verified')"
+            @cancel="changeRequest(record, 'declined')"
             v-if="record.status === 'pending'"
           >
             {{ record.status }}
@@ -123,10 +123,10 @@ export default defineComponent({
       }
     }
 
-    const changeRequest = (id, status) => {
+    const changeRequest = (data, status) => {
       store.dispatch('requests/UPDATE_REQUEST_STATUS', {
         payload: {
-          id: id, status: status, origin: null,
+          id: data.id, status: status, fileName: data.file_name,
           callback: { dispatch: 'requests/FETCH_UNPUBLISH_LIST', payload: { payload: { status: 'pending' }} },
         },
       })

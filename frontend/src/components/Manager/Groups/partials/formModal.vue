@@ -270,7 +270,7 @@ export default defineComponent({
       if (typeof data !== 'undefined') {
         const id = data.value
         formLoading.value = true
-        await getPersonnelByOffice(id).then(response => {
+        await getPersonnelByOffice(id, 1).then(response => {
           if (response) {
             const { personnel } = response
             formLoading.value = false

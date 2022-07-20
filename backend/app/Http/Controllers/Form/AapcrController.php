@@ -197,6 +197,10 @@ class AapcrController extends Controller
             $aapcr->modify_id = $this->login_user->pmaps_id;
             $aapcr->history = $aapcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
+            $filename = $this->viewAapcrPdf($id, 1);
+
+            $aapcr->published_file = $filename;
+
             $aapcr->save();
 
             return response()->json('AAPCR was published successfully', 200);
@@ -214,6 +218,7 @@ class AapcrController extends Controller
             $remarks = $validated['remarks'];
             $id = $validated['id'];
             $document_name = $validated['documentName'];
+            $fileName = $validated['fileName'];
 
             DB::beginTransaction();
 
@@ -226,6 +231,7 @@ class AapcrController extends Controller
             $unpublished->status = 'pending';
             $unpublished->requested_date = Carbon::now();
             $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->file_name = $fileName;
             $unpublished->create_id = $this->login_user->pmaps_id;
             $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 

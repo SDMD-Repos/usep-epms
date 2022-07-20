@@ -537,9 +537,6 @@ export default {
             description: 'Your changes were saved successfully',
           })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     UPDATE_POSITION_SIGNATORIES({ commit, dispatch }, { payload }) {
@@ -556,9 +553,6 @@ export default {
             description: 'Signatory updated successfully',
           })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     DELETE_POSITION_SIGNATORY({ commit, dispatch }, { payload }) {

@@ -59,7 +59,18 @@ class VpopcrController extends Controller
                         });
                 });
             });
-        }, 'detailsOrdered.offices', 'detailsOrdered.measures'])->first();
+        }, 'detailsOrdered.offices' => function ($queryOffice) use ($vpId) {
+            $queryOffice->where(function($officeQ) use ($vpId) {
+                $officeQ->where('vp_office_id', '=', $vpId)
+                    ->orWhere('office_id', '=', $vpId)
+                    ->orWhere(function($groupOfcWhere) use ($vpId) {
+                        $groupOfcWhere->where('is_group', 1)
+                            ->whereHas('group', function($joinOfcQuery) use ($vpId) {
+                                $joinOfcQuery->where('supervising_id', '=', $vpId);
+                            });
+                    });
+            });
+        }, 'detailsOrdered.measures'])->first();
 
         $dataSource = [];
 
@@ -74,6 +85,8 @@ class VpopcrController extends Controller
 
                 $programId = $data->program_id;
 
+                $programLabel = $data->program_id ? $data->program->name : null;
+
                 $extracted = $this->extractDetails($data);
 
                 $subCategory = $extracted['subCategory'];
@@ -87,7 +100,6 @@ class VpopcrController extends Controller
                 foreach($data->offices as $dataOffice) {
                     if(($dataOffice['vp_office_id'] === $vpId || $dataOffice['office_id'] === $vpId ||
                         ($dataOffice['is_group'] && $dataOffice->group->supervising_id === (int)$vpId))) {
-
 //                        $filteredOffices[] = $dataOffice;
 
                         $isCategoryExists = array_filter($tempCategoryList, function($x) use ($dataOffice){
@@ -108,6 +120,7 @@ class VpopcrController extends Controller
                     if($data->category_id !== $detailIndex){
                         $subCategory = null;
                         $programId = $categoryList->default_program_id;
+                        $programLabel = $categoryList->default_program_id ? $categoryList->defaultProgram->name : null;
                     }
 
                     $this->getTargetsBasisList($data->targets_basis);
@@ -118,6 +131,7 @@ class VpopcrController extends Controller
                         'category' => $detailIndex,
                         'subCategory' => $subCategory,
                         'program' => $programId,
+                        'programLabel' => $programLabel,
                         'name' => $data->pi_name,
                         'isHeader' => false,
                         'target' => $data->target,
@@ -125,7 +139,7 @@ class VpopcrController extends Controller
                         'budget' => $data->allocated_budget,
                         'targetsBasis' => $data->targets_basis,
                         'cascadingLevel' => $extracted['cascadingLevel'],
-                        'implementing' => $offices['implementing'],
+                        'implementing' => $offices['implementing'] ?? [],
                         'supporting' => $offices['supporting'] ?? [],
                         'remarks' => $data->other_remarks,
                         'deleted' => 0,
@@ -154,6 +168,7 @@ class VpopcrController extends Controller
                                         'category' => $detailIndex,
                                         'subCategory' => $subCategory,
                                         'program' => $programId,
+                                        'programLabel' => $programLabel,
                                         'name' => $parent->pi_name,
                                         'isHeader' => true,
                                         'target' => '',
@@ -478,7 +493,13 @@ class VpopcrController extends Controller
 
         $parentIds = []; // To store parent PIs' id for tracking purposes
 
-        foreach($vpOpcr->detailParents as $detail) {
+        $details = $vpOpcr->details()->where('parent_id', NULL)
+            ->orderBy('category_id', 'ASC')
+            ->orderByRaw('-program_id DESC')
+            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderBy('created_at', 'ASC')->get();
+
+        foreach($details as $detail) {
             $stored = 0;
 
             $isParent = 0;
@@ -499,7 +520,6 @@ class VpopcrController extends Controller
                 $aapcrDetail = $detail->aapcrDetail;
 
                 if($aapcrDetail->parent_id && $detail->from_aapcr) {
-
                     if(!$detail->aapcrDetail->parent->is_header) {
                         $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
                             $query->where(function($q) use ($officeId) {
@@ -550,10 +570,14 @@ class VpopcrController extends Controller
 
                     if($parentDetails->category_id !== $detail->category_id){
                         $parentDetails->category_id = $detail->category_id;
+/*if($detail->id === 306) {
+    dd($detail->program_id);
+}*/
+                        $parentDetails->program_id = $detail->program_id;
 
-                        $parentDetails->sub_category = null;
+                        $parentDetails->sub_category_id = null;
                     }else{
-                        $parentDetails->sub_category = $subCategory;
+                        $parentDetails->sub_category_id = $detail->sub_category_id;
                     }
 
                     $data['type'] = 'sub';
@@ -637,6 +661,7 @@ class VpopcrController extends Controller
             'category' => $data->category_id,
             'subCategory' => $extracted['subCategory'],
             'program' => $data->program_id,
+            'programLabel' =>  $data->program_id ? $data->program->name : null,
             'name' => $data->pi_name,
             'isHeader' => (bool)$data->is_header,
             'target' => $data->target,
@@ -703,9 +728,10 @@ class VpopcrController extends Controller
                         DB::rollBack();
                     }
                 }
-
+//dd($dataSource);
                 foreach($dataSource as $source) {
                     $getParentId = null;
+                    var_dump($source['id']);
 
                     $isNew = strpos($source['id'], 'new') !== false;
 

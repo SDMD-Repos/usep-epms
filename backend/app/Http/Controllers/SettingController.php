@@ -663,6 +663,12 @@ class SettingController extends Controller
             ])->get();
         }
 
+        foreach($signatories as $i => $signatory) {
+            $offices = $this->getPersonnelByOffice($signatory->office_id, 1, 0, 0);
+
+            $signatories[$i]['memberList'] = $offices;
+        }
+
         return response()->json([
             'signatories' => $signatories
         ], 200);

@@ -111,8 +111,8 @@
           </a-form-item>
         </template>
 
-        <a-form-item :name="['options', 'implementing']" ref="implementing" :rules="rules.implementing" :auto-link="false">
-          <template #label><span class="required-indicator">Implementing Office</span></template>
+        <a-form-item label="Implementing Office" :name="['options', 'implementing']" ref="implementing" :rules="rules.implementing" :auto-link="false">
+<!--          <template #label><span class="required-indicator">Implementing Office</span></template>-->
           <a-row :gutter="0">
             <a-col :span="22">
               <a-tree-select
@@ -146,7 +146,7 @@
             <a-form-item :name="['implementing', index, 'cascadeTo']" :rules="rules.cascadeTo">
               <template #label>
                 <span class="officeName">
-                  {{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }}
+                  {{ typeof office.acronym !== 'undefined' ? office.acronym : office.title }}
                 </span>
               </template>
               <a-row :gutter="0">
@@ -201,7 +201,7 @@
         <div v-if="form.supporting.length">
           <template v-for="(o, i) in form.supporting" :key="i">
             <a-form-item :name="['supporting', i, 'cascadeTo']" :rules="rules.cascadeTo">
-              <template #label>{{ typeof o.acronym !== 'undefined' ? o.acronym : o.label }}</template>
+              <template #label>{{ typeof o.acronym !== 'undefined' ? o.acronym : o.title }}</template>
               <a-row :gutter="0">
                 <a-col :span="18" :offset="1">
                   <a-tree-select

@@ -13,4 +13,9 @@ class Program extends Model
     {
         return $this->belongsTo('App\Category','category_id');
     }
+
+    public function defaultCategory()
+    {
+        return $this->hasMany('App\Category','default_program_id', 'id');
+    }
 }

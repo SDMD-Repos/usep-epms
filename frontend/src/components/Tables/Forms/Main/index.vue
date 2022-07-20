@@ -35,12 +35,16 @@
       </template>
 
       <template #bodyCell="{ column, record }">
-        <template v-if="column.key === 'subCategory'">
-          {{ (record.type === 'pi' && (typeof record.subCategory !== 'undefined' && record.subCategory !== null)) ? record.subCategory.label : ''}}
-        </template>
-
         <template v-if="column.key === 'count'">
           {{ record.count }}
+        </template>
+
+        <template v-if="column.key === 'program'">
+          {{ (record.type === 'pi' && (typeof record.program !== 'undefined' && record.program !== null)) ? record.programLabel : ''}}
+        </template>
+
+        <template v-if="column.key === 'subCategory'">
+          {{ (record.type === 'pi' && (typeof record.subCategory !== 'undefined' && record.subCategory !== null)) ? record.subCategory.label : ''}}
         </template>
 
         <template v-if="column.key === 'isHeader'">
@@ -78,7 +82,7 @@
         <template v-if="column.key === 'implementing'">
           <ul class="form-ul-list">
             <li v-for="office in record.implementing" :key="office.key">
-              {{ office.label }}
+              {{ office.title }}
             </li>
           </ul>
         </template>
@@ -86,7 +90,7 @@
         <template v-if="column.key === 'supporting'">
           <ul class="form-ul-list">
             <li v-for="office in record.supporting" :key="office.key">
-              {{ office.label }}
+              {{ office.title }}
             </li>
           </ul>
         </template>

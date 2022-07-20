@@ -158,7 +158,7 @@ export default defineComponent({
       // DATA
       storedOffices, typeOptions, formItemLayout,
       // METHODS
-      changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption,
     } = useFormFields(form)
 
     // METHODS
@@ -228,10 +228,6 @@ export default defineComponent({
       // useFormFields
       changeNullValue,
       filterBasisOption,
-      onOfficeChange,
-      saveOfficeList,
-      updateOfficeList,
-      deleteOfficeItem,
 
       toggleIsHeader,
       resetFormData,

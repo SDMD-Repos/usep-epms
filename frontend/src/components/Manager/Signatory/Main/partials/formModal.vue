@@ -5,63 +5,75 @@
            @ok="onOkClick" @cancel="onCancel">
     <a-spin :spinning="formLoading">
       <a-form ref="signatoryRef" layout="vertical" :model="form">
-        <template v-for="(data, index) in form.signatories" :key="index">
-          <a-divider v-if="index" style="margin-top: 10px"/>
-          <a-form-item :name="['signatories', index, 'isCustom']">
-            <a-checkbox v-model:checked="data.isCustom" @change="handleCustomChange(index)">
-              Custom
-            </a-checkbox>
-          </a-form-item>
+        <template v-if="form.signatories.length">
+          <template v-for="(data, index) in form.signatories" :key="index">
+            <a-divider v-if="index" style="margin-top: 10px"/>
+            <a-form-item :name="['signatories', index, 'isCustom']">
+              <a-checkbox v-model:checked="data.isCustom" @change="handleCustomChange(index)">
+                Custom
+              </a-checkbox>
+            </a-form-item>
 
-          <a-form-item :name="['signatories', index, 'officeId']"
-                       :rules="!data.isCustom ? rules.officeId : rules.officeIdInput">
-            <a-tree-select
-              v-model:value="data.officeId"
-              v-if="!data.isCustom"
-              style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="officeList" placeholder="Select office"
-              tree-node-filter-prop="title"
-              show-search allow-clear label-in-value
-              @change="getPersonnelList($event, index)"
-            />
-            <a-input v-else
-                     v-model:value="data.officeId"
-                     style="width: 100%"
-                     placeholder="Office Name" />
-          </a-form-item>
-          <a-form-item :name="['signatories', index, 'personnelId']"
-                       :rules="!data.isCustom ? rules.personnelId : rules.personnelIdInput">
-            <a-tree-select
-              v-if="!data.isCustom"
-              v-model:value="data.personnelId"
-              style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="memberList" placeholder="Select Personnel"
-              tree-node-filter-prop="title"
-              show-search allow-clear label-in-value
-              @change="(value, label, extra) => { getPersonnelPosition(value, label, extra, index) }"
-            />
-            <a-input v-else
-                     v-model:value="data.personnelId"
-                     style="width: 100%"
-                     placeholder="Personnel Name"/>
-          </a-form-item>
-          <a-form-item :name="['signatories', index, 'position']"
-                       :rules="!data.isCustom ? rules.position : rules.positionInput">
-            <a-select v-if="!data.isCustom"
-                      ref="positionField"
-                      v-model:value="data.position"
-                      :options="positionList" placeholder="Select Personnel's Position"
-                      style="width: 100%" show-search allow-clear />
-            <a-input v-else
-                     v-model:value="data.position"
-                     style="width: 100%"
-                     placeholder="Personnel's Position"/>
-          </a-form-item>
-          <template v-if="allowMultiple">
-            <div class="pull-right signatory-icon" style="margin-top: -10px; padding-bottom: 10px">
-              <plus-circle-outlined v-if="(index+1) === form.signatories.length" @click="addRow" class="mr-2"/>
-              <minus-circle-outlined v-if="form.signatories.length > 1 && data.id === 'new'" @click="deleteRow" />
-            </div>
+            <a-form-item :name="['signatories', index, 'officeId']"
+                         :rules="!data.isCustom ? rules.officeId : rules.officeIdInput">
+              <a-tree-select
+                v-model:value="data.officeId"
+                v-if="!data.isCustom"
+                style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                :tree-data="officeList" placeholder="Select office"
+                tree-node-filter-prop="title"
+                show-search allow-clear label-in-value
+                @change="getPersonnelList($event, index)"
+              />
+              <a-input v-else
+                       v-model:value="data.officeId"
+                       style="width: 100%"
+                       placeholder="Office Name" />
+            </a-form-item>
+            <a-form-item :name="['signatories', index, 'personnelId']"
+                         :rules="!data.isCustom ? rules.personnelId : rules.personnelIdInput">
+              <a-tree-select
+                v-if="!data.isCustom"
+                v-model:value="data.personnelId"
+                style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                :tree-data="data.memberList" placeholder="Select Personnel"
+                tree-node-filter-prop="title"
+                show-search allow-clear label-in-value
+                @change="(value, label, extra) => { getPersonnelPosition(value, label, extra, index) }"
+              />
+              <a-input v-else
+                       v-model:value="data.personnelId"
+                       style="width: 100%"
+                       placeholder="Personnel Name"/>
+            </a-form-item>
+            <a-form-item :name="['signatories', index, 'position']"
+                         :rules="!data.isCustom ? rules.position : rules.positionInput">
+              <a-select v-if="!data.isCustom"
+                        ref="positionField"
+                        v-model:value="data.position"
+                        :options="positionList" placeholder="Select Personnel's Position"
+                        style="width: 100%" show-search allow-clear />
+              <a-input v-else
+                       v-model:value="data.position"
+                       style="width: 100%"
+                       placeholder="Personnel's Position"/>
+            </a-form-item>
+            <template v-if="allowMultiple">
+              <div class="pull-right signatory-icon mt-3" style="margin-top: -10px; padding-bottom: 10px">
+              <span v-if="(index+1) === form.signatories.length">
+                <a-button type="primary" shape="round" size="small" @click="addRow" class="mr-2">
+                  <template #icon><plus-outlined /></template>
+                  Add
+                </a-button>
+              </span>
+                <span v-if="form.signatories.length > 1 && data.id === 'new'">
+                <a-button type="dashed" shape="round" size="small" @click="deleteRow">
+                  <template #icon><minus-outlined /></template>
+                  Remove
+                </a-button>
+              </span>
+              </div>
+            </template>
           </template>
         </template>
       </a-form>
@@ -73,13 +85,13 @@ import { defineComponent, ref, watch, toRaw, computed, createVNode } from "vue"
 import { useStore } from 'vuex'
 import { getPersonnelByOffice } from '@/services/api/hris'
 import { Modal } from "ant-design-vue"
-import { ExclamationCircleOutlined, PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons-vue"
+import { ExclamationCircleOutlined, PlusOutlined, MinusOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
   name: "SignatoryFormModal",
   components: {
-    PlusCircleOutlined,
-    MinusCircleOutlined,
+    PlusOutlined,
+    MinusOutlined,
   },
   props: {
     visible: Boolean,
@@ -88,6 +100,7 @@ export default defineComponent({
     details: { type: Object, default: () => { return {} } },
     actionType: { type: String, default: '' },
     officeList: { type: Array, default: () => { return [] } },
+    memberList: { type: Array, default: () => { return [] } },
     positionList: { type: Array, default: () => { return [] } },
     formState: { type: Object, default: () => { return {} } },
   },
@@ -102,7 +115,7 @@ export default defineComponent({
 
     const positionField = ref()
 
-    const memberList = ref([])
+    const listMembers = ref([])
     const labelCol = { style: { width: '150px' } }
     const wrapperCol = { span: 16 }
 
@@ -140,12 +153,16 @@ export default defineComponent({
 
     // COMPUTED
     const allowMultiple = computed(() => {
-      return props.details.formId === 'cpcr' && props.details.typeId === 'reviewed_by'
+      return props.details.formId === 'cpcr' && props.details.typeId === 1
     })
 
     // EVENTS
     watch(() => props.visible , visible => {
       isVisible.value = visible
+    })
+
+    watch(props.memberList, list => {
+      listMembers.value = list
     })
 
     watch(() =>  props.formState, formState => {
@@ -162,14 +179,15 @@ export default defineComponent({
     const getPersonnelList = (officeId, index) => {
       form.value.signatories[index].personnelId = undefined
       form.value.signatories[index].position = undefined
-      memberList.value = []
+      // listMembers.value[index] = []
+
       if (officeId && !form.value.isCustom) {
         formLoading.value = true
         const id = officeId.value
-        getPersonnelByOffice(id).then(response => {
+        getPersonnelByOffice(id, 1).then(response => {
           if (response) {
             const { personnel } = response
-            memberList.value = personnel
+            form.value.signatories[index].memberList = personnel
           }
           formLoading.value = false
         })
@@ -242,7 +260,7 @@ export default defineComponent({
       form,
       positionField,
       formLoading,
-      memberList,
+      listMembers,
       labelCol,
       wrapperCol,
 
@@ -264,6 +282,6 @@ export default defineComponent({
 </script>
 <style scoped>
 .signatory-icon {
-  font-size: 20px;
+  /*font-size: 20px;*/
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="columns" :data-source="dataList" :loading="loading" bordered>
+  <a-table :columns="columns" :data-source="dataList" :loading="{ spinning: loading, tip: loadingTip }" bordered>
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'dateCreated'">
         {{ dayjs(record.created_at).format(dateFormat) }}
@@ -64,7 +64,7 @@
   </a-table>
 </template>
 <script>
-import { defineComponent, createVNode, computed } from "vue"
+import { defineComponent, createVNode, ref, computed } from "vue"
 import { useStore } from 'vuex'
 import dayjs from 'dayjs'
 import {
@@ -90,11 +90,14 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore()
 
+    const loadingTip = ref("")
+
     // COMPUTED
     const dateFormat = computed(() => store.getters.mainStore.dateFormat)
 
     // METHODS
     const handleUpdate = id => {
+      loadingTip.value = 'Please wait...'
       emit('update-form', id)
     }
 
@@ -109,6 +112,7 @@ export default defineComponent({
           const payload = {
             id: id,
           }
+          loadingTip.value = 'Please wait...'
           store.dispatch(props.form + '/DEACTIVATE', { payload: payload })
         },
         onCancel() {},
@@ -123,6 +127,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
+          loadingTip.value = 'Publishing document. Please wait...'
           emit('publish', data)
         },
         onCancel() {},
@@ -130,6 +135,7 @@ export default defineComponent({
     }
 
     const viewPdf = data => {
+      loadingTip.value = 'Please wait...'
       emit('view-pdf', { data: data })
     }
 
@@ -141,6 +147,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
+          loadingTip.value = 'Please wait...'
           emit('unpublish', data)
         },
         onCancel() {},
@@ -155,6 +162,7 @@ export default defineComponent({
         okText: 'Yes',
         cancelText: 'No',
         onOk() {
+          loadingTip.value = 'Please wait...'
           emit('cancel-unpublish-request', { data: data, form: props.form } )
         },
         onCancel() {},
@@ -166,6 +174,8 @@ export default defineComponent({
     }
 
     return {
+      loadingTip,
+
       dayjs,
       dateFormat,
 

@@ -64,16 +64,23 @@ export default defineComponent({
       let columns = JSON.parse(JSON.stringify(formTableColumns))
       const remarksIndex = columns.findIndex(i => i.key === 'remarks')
       columns[remarksIndex].title = "Remarks"
-      const deleteKeys = ['subCategory']
-      columns = [...columns.filter(i => deleteKeys.indexOf(i.key) === -1)]
-      const addendum = {
-        title: '#',
-        key: 'count',
-        dataIndex: 'count',
-        className: 'column-count',
-        width: 60,
-      }
-      columns.splice(0, 0, addendum)
+      const addendum = [
+        {
+          title: '#',
+          key: 'count',
+          dataIndex: 'count',
+          className: 'column-count',
+          width: 60,
+        },
+        {
+          title: 'Program',
+          key: 'program',
+          dataIndex: 'program',
+          className: 'column-program',
+          width: 280,
+        },
+      ]
+      columns.splice(0, 0, ...addendum)
       modifiedTableColumns.value = columns
     }
 

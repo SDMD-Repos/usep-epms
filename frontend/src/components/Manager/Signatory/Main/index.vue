@@ -1,37 +1,34 @@
 <template>
   <div>
-    <a-spin :spinning="loading" tip="Fetching data in HRIS...">
-      <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSignatories">
-        <template v-for="(y, i) in yearList" :key="i">
-          <a-select-option :value="y">
-            {{ y }}
+    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSignatories">
+      <template v-for="(y, i) in yearList" :key="i">
+        <a-select-option :value="y">
+          {{ y }}
+        </a-select-option>
+      </template>
+    </a-select>
+    <div class="mt-2" v-if="formId === 'vpopcr'">
+      <a-select v-model:value="selectedOffice" placeholder="Select office" style="width: 450px" @change="fetchSignatories">
+        <template v-for="(y, i) in vpOfficesList" :key="i">
+          <a-select-option :value="y.value" >
+            {{ y.title }}
           </a-select-option>
         </template>
       </a-select>
-      <div class="mt-2" v-if="formId === 'vpopcr'">
-        <a-select v-model:value="selectedOffice" placeholder="Select office" style="width: 450px" @change="fetchSignatories">
-          <template v-for="(y, i) in vpOfficesList" :key="i">
-            <a-select-option :value="y.value" >
-              {{ y.title }}
-            </a-select-option>
+    </div>
+    <div class="mt-4">
+      <a-collapse v-model:activeKey="activeKey">
+        <a-collapse-panel v-for="(type, key) in signatoryTypes" :header="type.name" :key="`${key}`">
+          <signatory-list :year="year"
+                          :form-id="formId"
+                          :list="filterBySignatory(type.id)" />
+          <template #extra v-if="formId !== 'vpopcr' || (formId === 'vpopcr' && typeof selectedOffice !== 'undefined')">
+            <user-add-outlined v-if="!filterBySignatory(type.id).length" @click="openModal($event, 'create', type.id)"/>
+            <edit-outlined v-else @click="openModal($event, 'update', type.id)" />
           </template>
-        </a-select>
-      </div>
-      <div class="mt-4">
-        <a-collapse v-model:activeKey="activeKey">
-          <a-collapse-panel v-for="(type, key) in signatoryTypes" :header="type.name" :key="`${key}`">
-            <signatory-list :year="year"
-                            :form-id="formId"
-                            :list="filterBySignatory(type.id)"
-                            :loading="loading" />
-            <template #extra v-if="formId !== 'vpopcr' || (formId === 'vpopcr' && typeof selectedOffice !== 'undefined')">
-              <user-add-outlined v-if="!filterBySignatory(type.id).length" @click="openModal($event, 'create', type.id)"/>
-              <edit-outlined v-else @click="openModal($event, 'update', type.id)" />
-            </template>
-          </a-collapse-panel>
-        </a-collapse>
-      </div>
-    </a-spin>
+        </a-collapse-panel>
+      </a-collapse>
+    </div>
 
     <form-modal
       :visible="isOpenModal" :modal-title="modalTitle" :ok-text="okText" :action-type="action" :office-list="offices"
@@ -41,7 +38,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, onMounted, computed } from 'vue'
+import { defineComponent, ref, watch, reactive, onMounted, onBeforeMount, inject, computed } from 'vue'
 import { useStore } from 'vuex'
 import { UserAddOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue"
@@ -62,6 +59,8 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
 
+    const _message = inject('a-message')
+
     // DATA
     const year = ref(new Date().getFullYear())
     const isOpenModal = ref(false)
@@ -75,6 +74,7 @@ export default defineComponent({
     let modalTitle = ref('')
     let okText = ref('')
     const selectedOffice = ref(undefined)
+    const memberList = ref([])
 
     const signatoryDetails = ref({})
 
@@ -84,7 +84,6 @@ export default defineComponent({
     const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const positionList = computed(() => store.getters['external/external'].positionList)
     const signatoryList = computed(() => store.getters['formManager/manager'].signatories)
-    const loading = computed(() => store.getters['external/external'].loading)
 
     const yearList = computed(() => {
       const now = new Date().getFullYear()
@@ -97,16 +96,19 @@ export default defineComponent({
     })
 
     // EVENTS
-    onMounted(() => {
+    onBeforeMount(async () => {
       let params = {
         selectable: { allColleges: true, mains: true },
         isAcronym: false,
       }
 
-      store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
-      store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
-      store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
-      store.dispatch('external/FETCH_ALL_POSITIONS')
+      await store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
+      await store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
+      await store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
+      await store.dispatch('external/FETCH_ALL_POSITIONS')
+    })
+
+    onMounted(() => {
       fetchSignatories()
     })
 
@@ -141,7 +143,6 @@ export default defineComponent({
 
     const openModal = (event, action, type) => {
       event.stopPropagation()
-      isOpenModal.value = true
       signatoryDetails.value = {
         typeId: type,
         year: year.value,
@@ -157,6 +158,7 @@ export default defineComponent({
           id: 'new',
           officeId: undefined,
           personnelId: undefined,
+          memberList: [],
           position: undefined,
           isCustom: false,
         })
@@ -172,9 +174,12 @@ export default defineComponent({
       formState.signatories.splice(index, 1)
     }
 
-    const populateSignatory = type => {
+    const populateSignatory = async type => {
       const list = filterBySignatory(type)
-      list.forEach(item => {
+
+      _message.loading('Loading...')
+
+      for await ( const item of list) {
         let officeIdValue = item.office_id ? item.office_id : item.office_name
         if (item.office_id) {
           officeIdValue = {
@@ -189,14 +194,20 @@ export default defineComponent({
             label: item.personnel_name,
           }
         }
+
         formState.signatories.push({
           id: item.id,
           officeId: officeIdValue,
           personnelId: personnelIdValue,
+          memberList: item.memberList,
           position: item.position,
           isCustom: !item.office_id && !item.personnel_id,
         })
-      })
+      }
+
+      await _message.destroy()
+
+      isOpenModal.value = true
     }
 
     const changeAction = (event, type) => {
@@ -205,11 +216,13 @@ export default defineComponent({
         okText.value = 'Create'
         action.value = 'create'
         addSignatory()
+        isOpenModal.value = true
       } else if (event === 'update') {
         modalTitle.value = 'Update Signatory'
         okText.value = 'Update'
         action.value = 'update'
         populateSignatory(type)
+
       }
     }
 
@@ -230,6 +243,7 @@ export default defineComponent({
       okText,
       signatoryDetails,
       selectedOffice,
+      memberList,
 
       yearList,
       signatoryTypes,
@@ -237,7 +251,6 @@ export default defineComponent({
       vpOfficesList,
       positionList,
       signatoryList,
-      loading,
 
       fetchSignatories,
       filterBySignatory,

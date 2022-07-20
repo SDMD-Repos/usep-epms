@@ -207,13 +207,7 @@ export const useDefaultFormData = props => {
               if(value.length) {
                 return Promise.reject('Please click the check icon to save the data')
               }else {
-                if(rule.field === 'options.supporting') {
-                  return Promise.resolve()
-                }
-
-                if(!formData.implementing.length) {
-                  return Promise.reject('This field is required')
-                }
+                return Promise.resolve()
               }
             }
           }

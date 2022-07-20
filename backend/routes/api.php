@@ -14,10 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/*Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});*/
-
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -92,6 +88,8 @@ Route::group([
     'prefix' => 'forms',
     'middleware' => 'auth:api'
 ], function() {
+
+    Route::get('/viewSavedPdf/{fileName}', 'AppController@viewSavedPdf');
 
     # AAPCR Controller routes
 
@@ -183,10 +181,8 @@ Route::group([
     Route::post('/get-main-offices-children', 'SettingController@getMainOfficesWithChildren');
     Route::get('/get-vp-offices-children', 'SettingController@getVpOfficeWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
-    Route::get('/get-personnel-by-office/{id}', 'SettingController@getPersonnelByOffice');
+    Route::get('/get-personnel-by-office/{id}/{permanentOnly}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
     Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');
-
-
 });

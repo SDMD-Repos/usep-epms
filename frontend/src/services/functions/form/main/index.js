@@ -37,7 +37,7 @@ export const useFormFields = form => {
     }
   }
 
-  const saveOfficeList = field => {
+  const saveOfficeList = async (field, opposite) => {
     const list = storedOffices.value[field]
 
     if(list.length) {
@@ -50,16 +50,47 @@ export const useFormFields = form => {
             content: () => 'No cascading option set in Form Manager for this field',
           })
         }else {
-          form.value[field] = mappedOfficeList(list, field, parseInt(filtered[0].settings.setting))
-          form.value.options[field] = []
-          storedOffices.value[field] = []
+          let duplicates = ""
+          const findList = form.value[opposite]
 
-          if (cachedOffice.value[field].length) {
-            cachedOffice.value[field] = []
+          for await (const item of list) {
+            if(findDuplicates(findList, item) === true) {
+              if(duplicates !== "") {
+                duplicates += ", "
+              }
+
+              let label = typeof item.acronym !== 'undefined' ? item.acronym : item.title
+
+              duplicates = duplicates + label
+            }
+          }
+
+          if(duplicates !== '') {
+            Modal.error({
+              title: () => 'Error',
+              content: () => "Unable to set " + duplicates + " as Implementing and Supporting",
+            })
+          } else {
+            form.value[field] = mappedOfficeList(list, field, parseInt(filtered[0].settings.setting))
+            form.value.options[field] = []
+            storedOffices.value[field] = []
+
+            if (cachedOffice.value[field].length) {
+              cachedOffice.value[field] = []
+            }
           }
         }
       }
     }
+  }
+
+  const findDuplicates = (arr, item) => {
+    return arr.some(function(e) {
+      if(e.value === item.value || (typeof e.pId !== 'undefined' && e.pId === item.value)
+        || (typeof item.pId !== 'undefined' && e.value === item.pId)) {
+        return true
+      }
+    })
   }
 
   const checkDefaultCascadeTo = params => {
@@ -101,7 +132,7 @@ export const useFormFields = form => {
       const container = {}
       let tempCascadeTo = ''
       container.value = item.value
-      container.label = typeof item.title !== 'undefined' ? item.title : item.label
+      container.title = typeof item.title !== 'undefined' ? item.title : item.label
       if (typeof item.children !== 'undefined') {
         container.children = true
       } else {

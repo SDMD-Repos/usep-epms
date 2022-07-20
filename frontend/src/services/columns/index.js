@@ -94,7 +94,7 @@ export const formTableColumns = [
     ],
   },
   {
-    title: 'Other Remarks',
+    title: 'Other Remarks (MoV)',
     key: 'remarks',
     dataIndex: 'remarks',
     className: 'column-remarks',

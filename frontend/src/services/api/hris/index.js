@@ -27,9 +27,9 @@ export async function getVpOfficeWithChildren() {
     .catch(err => console.log(err))
 }
 
-export async function getPersonnelByOffice(id) {
+export async function getPersonnelByOffice(id, permanentOnly=0) {
   return apiClient
-    .get('/hris/get-personnel-by-office/' + id)
+    .get('/hris/get-personnel-by-office/' + id + '/' + permanentOnly)
     .then(response => {
       return response.data
     })

@@ -110,14 +110,14 @@
               <a-tree-select
                 v-model:value="form.options.implementing"
                 style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="filteredOfficeList"
                 :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing.length > 0"
                 allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'implementing') }" />
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="!form.implementing.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.implementing.length" type="primary" @click="saveOfficeList('implementing')">
+                <a-button v-if="!form.implementing.length" type="primary" @click="saveOfficeList('implementing', 'supporting')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -132,7 +132,7 @@
           <div v-for="(office, index) in form.implementing" :key="index">
             <a-row type="flex" align="middle">
               <a-col :span="5" :offset="3">
-                <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
+                <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.title }} </label>
               </a-col>
               <a-col :span="8">
                 <a-select v-model:value="form.implementing[index].cascadeTo" style="width: 100%">
@@ -155,14 +155,14 @@
               <a-tree-select
                 v-model:value="form.options.supporting"
                 style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
+                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="filteredOfficeList"
                 :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting.length > 0"
                 allow-clear tree-checkable label-in-value
                 @change="(value, label, extra) => { onOfficeChange(value, label, extra, 'supporting') }" />
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="!form.supporting.length ? 'Save List' : 'Edit List'">
-                <a-button v-if="!form.supporting.length" type="primary" @click="saveOfficeList('supporting')">
+                <a-button v-if="!form.supporting.length" type="primary" @click="saveOfficeList('supporting', 'implementing')">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -177,7 +177,7 @@
           <div v-for="(office, index) in form.supporting" :key="index">
             <a-row type="flex" align="middle">
               <a-col :span="5" :offset="3">
-                <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.label }} </label>
+                <label>{{ typeof office.acronym !== 'undefined' ? office.acronym : office.title }} </label>
               </a-col>
               <a-col :span="8">
                 <a-select v-model:value="form.supporting[index].cascadeTo" style="width: 100%">
@@ -222,6 +222,7 @@
 import { defineComponent, ref, watch, onMounted, inject, computed } from 'vue'
 import { useStore } from 'vuex'
 import { TreeSelect } from 'ant-design-vue'
+import { cloneDeep } from 'lodash'
 import { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
 
@@ -268,12 +269,18 @@ export default defineComponent({
       return list.map(i => ({ value: i.code, label: i.name }))
     })
 
-    const officesList  = computed(() => store.getters['external/external'].officesAccountable)
+    const officeList  = computed(() => store.getters['external/external'].officesAccountable)
+
+    const filteredOfficeList = ref([])
 
     // EVENTS
     watch(() => [props.drawerConfig, props.formObject] , ([drawerConfig, formObject]) => {
       config.value = drawerConfig
       form.value = formObject
+    })
+
+    watch(officeList, list => {
+      filteredOfficeList.value = cloneDeep(list)
     })
 
     onMounted(() => {
@@ -347,7 +354,7 @@ export default defineComponent({
       subCategories,
       measuresList,
       cascadingList,
-      officesList,
+      filteredOfficeList,
 
       // useFormFields
       typeOptions,

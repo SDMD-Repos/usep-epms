@@ -14,6 +14,7 @@ export const useUnpublish = () => {
     unpublishedData.value = {
       id: data.id,
       documentName: data.document_name,
+      fileName: data.published_file,
       officeName: data.office_name,
     }
   }
@@ -27,6 +28,7 @@ export const useUnpublish = () => {
     let data = {
       id: unpublishedData.value.id,
       remarks: remarks,
+      fileName: unpublishedData.value.fileName,
       documentName: unpublishedData.value.documentName,
       officeName: unpublishedData.value.officeName,
     }

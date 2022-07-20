@@ -56,7 +56,7 @@ export function deactivate(data) {
 
 export function fetchPdfData(id) {
   return apiClient
-    .get('/forms/aapcr/viewPdf/' + id, { responseType: 'blob' })
+    .get('/forms/aapcr/viewPdf/' + id, {responseType: 'blob'})
     .then(response => {
       return response.data
     })
@@ -75,6 +75,15 @@ export function fetchFormDetails(id) {
 export function update(id, data) {
   return apiClient
     .post('/forms/aapcr/update/' + id, data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export function viewSavedPdf(fileName) {
+  return apiClient
+    .get('/forms/viewSavedPdf/' + fileName, { responseType: 'blob' })
     .then(response => {
       return response.data
     })

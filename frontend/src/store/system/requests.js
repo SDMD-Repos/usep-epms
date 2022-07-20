@@ -47,14 +47,14 @@ export default {
       const params = {
         id: payload.id,
         status: payload.status,
-        origin: payload.origin,
+        fileName: payload.fileName,
       }
 
       const updateRequestStatus = mapApiProviders.updateRequestStatus
       updateRequestStatus(params).then(response => {
         if (response) {
           const { callback } = payload
-          
+
           dispatch(callback.dispatch, callback.payload, { root: true })
 
           notification.success({

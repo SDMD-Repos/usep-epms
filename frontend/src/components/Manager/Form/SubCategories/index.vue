@@ -99,6 +99,9 @@ export default defineComponent({
       })
       parents.forEach(item => {
         item.selectable = true
+        if(typeof item.children !== 'undefined' && item.children.length > 0) {
+          item.children.forEach(i => { i.selectable = false })
+        }
       })
       return parents
     })

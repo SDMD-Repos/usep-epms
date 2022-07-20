@@ -11,6 +11,7 @@ use App\VpOpcr;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use setasign\Fpdi\Fpdi;
 
 class RequestsController extends Controller
 {
@@ -52,6 +53,7 @@ class RequestsController extends Controller
 
             $id = $validated['id'];
             $status = $validated['status'];
+            $fileName = $validated['fileName'] ?? null;
 
             DB::beginTransaction();
 
@@ -60,6 +62,7 @@ class RequestsController extends Controller
             $original = $request->getOriginal();
 
             $request->status = $status;
+            $request->file_name = null;
             $request->changed_date = Carbon::now();
             $request->changed_by = $this->login_user->fullName;
             $request->updated_at = Carbon::now();
@@ -74,8 +77,8 @@ class RequestsController extends Controller
                 switch ($original['form_type']) {
                     case 'aapcr':
                         $model = new Aapcr();
-                        $filename = $this->viewAapcrPdf($original['form_id'], 1);
-                        $request->file_name = $filename;
+                        $this->pdfWatermark($fileName);
+                        $request->file_name = $fileName;
                         break;
                     case 'vpopcr':
                         $model = new VpOpcr();
@@ -108,11 +111,41 @@ class RequestsController extends Controller
         }
     }
 
+    public function pdfWatermark($fileName)
+    {
+        $filePath = storage_path('app/public/uploads/published/' . $fileName);
+
+        $outputFilePath = storage_path('app/public/uploads/unpublished/' . $fileName);
+
+        $watermarkImg = public_path("/logos/WM_Unpublished.png");
+
+        $pdf = new Fpdi();
+
+        if(file_exists($filePath)){
+            $pagecount = $pdf->setSourceFile($filePath);
+        }else{
+            abort(404,'Source PDF not found!');
+        }
+
+        for($i=1;$i<=$pagecount;$i++){
+            $tpl = $pdf->importPage($i);
+            $size = $pdf->getTemplateSize($tpl);
+            $pdf->addPage();
+            $pdf->useTemplate($tpl, 1, 1, $size['width'], $size['height'], TRUE);
+
+            //Put the watermark
+            $pdf->Image($watermarkImg, 35, 15, 0, 0, 'png');
+        }
+
+        $pdf->Output('F', $outputFilePath);
+    }
+
     public function unpublishedForm($model, $id, $user)
     {
         $form = $model::find($id);
 
         $form->published_date = NULL;
+        $form->published_file = NULL;
         $form->updated_at = Carbon::now();
         $form->modify_id = $this->login_user->pmaps_id;
         $form->history = $form->history . "Unpublished " . Carbon::now() . " by " . $user . "\n";
@@ -124,7 +157,7 @@ class RequestsController extends Controller
     {
         $form = FormUnpublishStatus::find($id);
 
-        $storage = storage_path('app/public/uploads/published/' . $form->file_name);
+        $storage = storage_path('app/public/uploads/unpublished/' . $form->file_name);
 
         return response()->download($storage);
     }

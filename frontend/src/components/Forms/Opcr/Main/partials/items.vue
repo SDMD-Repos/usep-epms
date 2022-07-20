@@ -90,8 +90,6 @@ export default defineComponent({
     // METHODS
     const modifyColumns = () => {
       let columns = JSON.parse(JSON.stringify(formTableColumns))
-      const remarksIndex = columns.findIndex(i => i.key === 'remarks')
-      columns[remarksIndex].title = "Other Remarks (MoV)"
       const deleteKeys = ['cascadingLevel']
       columns = [...columns.filter(i => deleteKeys.indexOf(i.key) === -1)]
       const addendum = {

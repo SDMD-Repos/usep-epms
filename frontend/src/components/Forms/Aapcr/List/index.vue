@@ -22,7 +22,7 @@ import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish, useViewPublishedFiles } from '@/services/functions/formListActions'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
-import { fetchPdfData } from '@/services/api/mainForms/aapcr'
+import { fetchPdfData, viewSavedPdf } from '@/services/api/mainForms/aapcr'
 import { usePermission } from '@/services/functions/permission'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
@@ -91,17 +91,19 @@ export default defineComponent({
       let renderer = null
       const documentName = data.document_name || data.file_name
 
-      if(!fromUnpublished) {
+      if(!fromUnpublished && !data.published_date) {
         store.commit('aapcr/SET_STATE', { loading: true })
 
-        renderer = fetchPdfData
+        renderer = fetchPdfData(data.id)
+      }else if(data.published_date){
+        renderer = viewSavedPdf(data.published_file)
       }else {
         _message.loading('Loading...')
 
-        renderer = getUnpublishedFormData
+        renderer = getUnpublishedFormData(data.id)
       }
 
-      renderer(data.id).then(response => {
+      renderer.then(response => {
         if (response) {
           const blob = new Blob([response], { type: 'application/pdf' })
           const fileUrl = window.URL.createObjectURL(blob)
