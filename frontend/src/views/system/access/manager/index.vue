@@ -1,73 +1,75 @@
 <template>
   <div>
-    <a-spin :spinning="loading">
-      <a-row type="flex">
-        <a-col :span="12">
-          <a-row type="flex">
-            <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Office/College:</b></a-col>
-            <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
-              <a-tree-select
-                v-model:value="officeId"
-                style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                :tree-data="offices"
-                placeholder="Select Office/College"
-                tree-node-filter-prop="title"
-                tree-default-expand-all
-                show-search
-                allow-clear
-                label-in-value
-                @change="getPersonnelList"
-              />
-            </a-col>
-          </a-row>
-          <a-row type="flex" class="mt-3">
-            <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Personnel: </b></a-col>
-            <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
-              <a-tree-select
-                v-model:value="personnelId"
-                style="width: 100%"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                :tree-data="memberList"
-                placeholder="Select Personnel"
-                tree-node-filter-prop="title"
-                show-search
-                allow-clear
-                label-in-value
-                @change="getAccessList"
-              />
-            </a-col>
-          </a-row>
-        </a-col>
+    <a-card>
+      <a-spin :spinning="loading">
+        <a-row type="flex">
+          <a-col :span="12">
+            <a-row type="flex">
+              <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Office/College:</b></a-col>
+              <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
+                <a-tree-select
+                  v-model:value="officeId"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="offices"
+                  placeholder="Select Office/College"
+                  tree-node-filter-prop="title"
+                  tree-default-expand-all
+                  show-search
+                  allow-clear
+                  label-in-value
+                  @change="getPersonnelList"
+                />
+              </a-col>
+            </a-row>
+            <a-row type="flex" class="mt-3">
+              <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 3 }"><b>Personnel: </b></a-col>
+              <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 15, offset: 1 }">
+                <a-tree-select
+                  v-model:value="personnelId"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="memberList"
+                  placeholder="Select Personnel"
+                  tree-node-filter-prop="title"
+                  show-search
+                  allow-clear
+                  label-in-value
+                  @change="getAccessList"
+                />
+              </a-col>
+            </a-row>
+          </a-col>
 
-        <a-col :span="12">
-          <div v-if="data.length">
-            <a-tree
-              v-model:checkedKeys="checkedKeys"
-              :show-line="true"
-              :show-icon="false"
-              :tree-data="data"
-              :field-names="fieldNames"
-              checkable
-              default-expand-all
-              @check="onCheck"
-            >
-              <template #switcherIcon="{ switcherCls }"><down-outlined :class="switcherCls" /></template>
+          <a-col :span="12">
+            <div v-if="data.length">
+              <a-tree
+                v-model:checkedKeys="checkedKeys"
+                :show-line="true"
+                :show-icon="false"
+                :tree-data="data"
+                :field-names="fieldNames"
+                checkable
+                default-expand-all
+                @check="onCheck"
+              >
+                <template #switcherIcon="{ switcherCls }"><down-outlined :class="switcherCls" /></template>
 
-              <template #title="{ permission_name}">
-                <span>{{ permission_name }}</span>
-              </template>
-            </a-tree>
-          </div>
-        </a-col>
-      </a-row>
+                <template #title="{ permission_name}">
+                  <span>{{ permission_name }}</span>
+                </template>
+              </a-tree>
+            </div>
+          </a-col>
+        </a-row>
 
-      <div class="mt-5"></div>
-      <a-row type="flex" justify="center">
-        <a-button v-if="updateBtn && saveBtn" type="primary" @click="onSave" >Save</a-button>
-        <a-button v-else-if="!updateBtn && saveBtn" type="primary" @click="onUpdate" >Update</a-button>
-      </a-row>
-    </a-spin>
+        <div class="mt-5"></div>
+        <a-row type="flex" justify="center">
+          <a-button v-if="updateBtn && saveBtn" type="primary" @click="onSave" >Save</a-button>
+          <a-button v-else-if="!updateBtn && saveBtn" type="primary" @click="onUpdate" >Update</a-button>
+        </a-row>
+      </a-spin>
+    </a-card>
   </div>
 </template>
 <script>
