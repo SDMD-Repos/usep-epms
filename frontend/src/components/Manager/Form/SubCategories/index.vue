@@ -196,10 +196,11 @@ export default defineComponent({
         }
         frmOrdering.value = order
         if (parentId){
-          frmOrdering.value = --order
           orderingDisabled.value = true
+          orderingChildDisabled.value = false
           let filteredSubCategories = filteredParentSubCategories.filter(datum => datum.id === parseInt(parentId))
           if (filteredSubCategories && Object.keys(filteredSubCategories).length > 0){
+            frmOrdering.value = filteredSubCategories[0].ordering && Object.keys(filteredSubCategories[0].ordering).length > 0 ? (filteredSubCategories[0].ordering) : 1
             frmOrderingChild.value = filteredSubCategories[0].children && Object.keys(filteredSubCategories[0].children).length > 0 ? (filteredSubCategories[0].children.length + 1) : 1
           }
         }else{
