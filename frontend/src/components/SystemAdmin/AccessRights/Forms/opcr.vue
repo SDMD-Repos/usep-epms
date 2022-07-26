@@ -16,7 +16,7 @@
               show-search
               allow-clear
               label-in-value
-              @change="getOfficeEmployee"
+              @change="getPersonnelList"
               v-if="opcrFormPermission"
               />
                <span v-else>{{ officeDetails.office_name ? officeDetails.office_name : "Not Set"}}</span>
@@ -152,6 +152,9 @@ export default defineComponent({
                 }
                 memberList.value = obj
               }
+              personnelId.value = undefined
+              staffId.value = undefined
+              getOfficeEmployee(officeId)
               formLoading.value = false
             })
           }
@@ -293,7 +296,7 @@ export default defineComponent({
       onEditStaff,
       onCancelStaff,
 
-      getOfficeEmployee,
+      getPersonnelList,
 
       }
     },
