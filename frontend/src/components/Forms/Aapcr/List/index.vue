@@ -1,7 +1,7 @@
 <template>
   <div v-if="hasAapcrAccess || aapcrFormPermission">
     <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading"
+      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has_aapcr_access="hasAapcrAccess"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
       @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
 

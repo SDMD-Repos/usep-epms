@@ -29,42 +29,42 @@
       </template>
 
       <template v-if="column.key === 'operation'">
-        <template v-if="form === 'vpopcr' && !opcrvpFormPermission">
-          <a-tooltip title="View PDF">
-            <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
-          </a-tooltip>
+        <template v-if="(access_office_id === record.office_id) || has_aapcr_access">
+            <template v-if="record.is_active && !record.published_date">
+              <a-tooltip>
+                <template #title><span>Update</span></template>
+                <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
+              </a-tooltip>
+              <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
+            </template>
+            <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
+              <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
+            </a-tooltip>
+            <template v-if="record.finalized_date && !record.published_date && record.is_active">
+              <a-divider type="vertical" />
+              <a-tooltip title="Publish">
+                <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
+              </a-tooltip>
+            </template>
+            <template v-if="record.published_date && record.is_active &&
+                            (record.status && (!record.status.filter(i => i.status === 'pending').length) || form === 'opcrtemplate')"
+            >
+              <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
+              <a-tooltip title="Request to unpublish">
+                <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record)" />
+              </a-tooltip>
+            </template>
+            <template v-if="record.status && record.status.length && record.status.filter(i => i.status === 'verified').length">
+              <a-divider type="vertical" />
+              <a-tooltip title="View Archived">
+                <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUnpublishedForms(record)"/>
+              </a-tooltip>
+            </template>
         </template>
         <template v-else>
-          <template v-if="record.is_active && !record.published_date">
-            <a-tooltip>
-              <template #title><span>Update</span></template>
-              <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
-            </a-tooltip>
-            <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
-          </template>
           <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
             <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
           </a-tooltip>
-          <template v-if="record.finalized_date && !record.published_date && record.is_active">
-            <a-divider type="vertical" />
-            <a-tooltip title="Publish">
-              <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
-            </a-tooltip>
-          </template>
-          <template v-if="record.published_date && record.is_active &&
-                          (record.status && (!record.status.filter(i => i.status === 'pending').length) || form === 'opcrtemplate')"
-          >
-            <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
-            <a-tooltip title="Request to unpublish">
-              <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record)" />
-            </a-tooltip>
-          </template>
-          <template v-if="record.status && record.status.length && record.status.filter(i => i.status === 'verified').length">
-            <a-divider type="vertical" />
-            <a-tooltip title="View Archived">
-              <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUnpublishedForms(record)"/>
-            </a-tooltip>
-          </template>
         </template>
       </template>
     </template>
@@ -90,6 +90,8 @@ export default defineComponent({
     dataList: { type: Array, default: () => { return [] } },
     form: { type: String, default: '' },
     loading: Boolean,
+    access_office_id: { type: Number, default: null },
+    has_aapcr_access: { type: Boolean, default: false },
   },
   emits: [
     'update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms', 'cancel-unpublish-request',
