@@ -140,7 +140,8 @@ export default defineComponent({
       if (officeId) {
         formLoading.value = true
         const id = officeId.value
-        getPersonnelByOffice(id).then(response => {
+        const permanentOnly = 1
+        getPersonnelByOffice(id,permanentOnly).then(response => {
           if (response) {
             const { personnel } = response
             let obj = personnel
