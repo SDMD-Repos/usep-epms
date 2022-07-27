@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="ARManagerPermission">
     <a-card>
       <a-spin :spinning="loading">
         <a-row type="flex">
@@ -71,6 +71,7 @@
       </a-spin>
     </a-card>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, onMounted, ref, computed } from 'vue';
@@ -78,6 +79,7 @@ import { useStore } from 'vuex'
 import { DownOutlined } from '@ant-design/icons-vue';
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
+import { usePermission } from '@/services/functions/permission'
 
 const columns = [
   {
@@ -107,6 +109,10 @@ export default defineComponent({
     const loading = computed(() => store.getters['system/permission'].loading)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const vpOffices = computed(() => store.getters['external/external'].getVpOfficeChildren)
+
+    const permission = { AccessRightsManager: [ "adminPermission", "ap-manager" ] }
+
+    const { ARManagerPermission } = usePermission(permission)
 
     const fieldNames = {
       children: 'children',
@@ -218,6 +224,8 @@ export default defineComponent({
       getAccessList,
       onUpdate,
       onCheck,
+
+      ARManagerPermission,
     };
   },
 });
