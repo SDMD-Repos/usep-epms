@@ -4,7 +4,7 @@
      <a-collapse-panel key="1" header="AAPCR" v-if="aapcrFormPermission || aapcrHeadPermission">
        <form-admin/>
      </a-collapse-panel>
-     <a-collapse-panel key="2" header="OPCR (VPs)" v-if=" opcrvpFormPermission || vpopcrHeadPermission">
+     <a-collapse-panel key="2" header="OPCR (VP)" v-if=" opcrvpFormPermission || vpopcrHeadPermission">
        <form-admin-opcr-vp/>
      </a-collapse-panel>
      <a-collapse-panel key="3" header="OPCR" v-if="opcrFormPermission || opcrHeadPermission">
