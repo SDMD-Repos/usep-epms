@@ -119,6 +119,11 @@ export default defineComponent({
       } = usePermission(permission)
 
       // EVENTS
+
+      watch(() => [vpOfficesList.value] , ([vpOfficesList]) => {
+        formLoading.value = false
+      })
+
       watch(() => [officeDetails.value] , ([officeDetails]) => {
         if (officeDetails && Object.keys(officeDetails).length > 0){
           officeId.value = {

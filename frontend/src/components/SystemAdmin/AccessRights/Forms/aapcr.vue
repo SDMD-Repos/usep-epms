@@ -125,6 +125,10 @@ export default defineComponent({
       formLoading.value = false
     })
 
+    watch(() => [offices.value] , ([offices]) => {
+      formLoading.value = false
+    })
+
     onMounted(() => {
       formLoading.value = true
       store.dispatch('external/FETCH_MAIN_OFFICES_ONLY')
