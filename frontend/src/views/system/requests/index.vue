@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="requestPermission">
     <div class="row">
       <div class="col-xl-12 col-lg-12">
         <div class="card">
@@ -12,16 +12,22 @@
       </div>
     </div>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref } from "vue";
 import UnpublishRequests from '@/components/SystemAdmin/Requests/unpublish'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   components: { UnpublishRequests },
   setup() {
+
+    const permission = { request: [ "adminRequests" ] }
+    const { requestPermission } = usePermission(permission)
     return {
       activeKey: ref('1'),
+      requestPermission,
     }
   },
 })

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="requestPermission">
+  <div>
     <a-select v-model:value="status" style="width: 200px" @change="fetchUnpublishList">
       <a-select-option value="pending">Pending</a-select-option>
       <a-select-option value="declined">Declined</a-select-option>
@@ -51,14 +51,12 @@
       </template>
     </a-table>
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, onMounted, ref, computed } from "vue"
 import { useStore } from 'vuex'
 import dayjs from 'dayjs'
 import { InfoCircleOutlined } from '@ant-design/icons-vue'
-import { usePermission } from '@/services/functions/permission'
 
 const columns = [
   {
@@ -104,10 +102,6 @@ export default defineComponent({
     const unpublishList = computed(() => store.getters['requests/unpublish'])
     const loading = computed(() => store.getters['requests/stateRequests'].loading)
 
-    const permission = { request: [ "adminRequests" ] }
-
-    const { requestPermission } = usePermission(permission)
-
     // EVENTS
     onMounted(() => {
       fetchUnpublishList(status.value)
@@ -151,8 +145,6 @@ export default defineComponent({
       fetchUnpublishList,
       getRequestStatusClass,
       changeRequest,
-
-      requestPermission,
     }
   },
 })
