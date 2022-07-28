@@ -1,7 +1,6 @@
 <template>
-  <div v-if="hasAapcrAccess || aapcrFormPermission">
     <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has_aapcr_access="hasAapcrAccess"
+      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has_aapcr_access="aapcrFormPermission"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
       @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
 
@@ -12,8 +11,6 @@
     <unpublish-remarks-modal
       :is-unpublish="isUnpublish" :form-id="formId"
       @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
-  </div>
-   <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, inject, computed } from "vue"
@@ -48,7 +45,6 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
-    const hasAapcrAccess = computed(() => store.getters['aapcr/form'].hasAapcrAccess)
 
     const { isUploadedViewed, viewedForm,
       viewUnpublishedForms, onCloseList } = useViewPublishedFiles()
@@ -125,7 +121,7 @@ export default defineComponent({
     return {
       documentName,
 
-      columns: listTableColumns, list, loading, hasAapcrAccess, aapcrFormPermission,
+      columns: listTableColumns, list, loading, aapcrFormPermission,
 
       isUploadedViewed, viewedForm,
 
