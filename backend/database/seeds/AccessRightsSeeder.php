@@ -227,7 +227,6 @@ class AccessRightsSeeder extends Seeder
             ],
         ]);
 
-
         DB::table('access_rights')->insert([
             [
                 'permission_id' => 'adminRequests',
@@ -249,10 +248,7 @@ class AccessRightsSeeder extends Seeder
                 'parent_id' =>  DB::table("access_rights")->select("id")->where("permission_id","adminPermission")->first()->id,
                 'create_id' => 'admin',
             ],
-
         ]);
-
-    ]);
 
         DB::table('access_rights')->insert([
             [

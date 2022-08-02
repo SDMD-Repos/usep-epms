@@ -25,12 +25,13 @@ class StoreSubCategory extends FormRequest
     public function rules()
     {
         return [
+            'id'=>'',
             'name' => [
                 'required',
                 'max:100',
                 Rule::unique('sub_categories')->where('year',$this->year)->whereNull('deleted_at')->where(function ($query) {
                     return $query->where('name', $this->name)->where('category_id', $this->category_id);
-                })
+                })->ignore($this->id),
             ],
             'category_id' => 'required',
             'parentId' => '',

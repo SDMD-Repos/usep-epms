@@ -108,6 +108,15 @@ export async function createSubCategory(data) {
     .catch(err => console.log(err))
 }
 
+export async function updateSubCategory(data) {
+  return apiClient
+    .post('/settings/update-sub-category', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 export async function deleteSubCategory(id) {
   return apiClient
     .post('/settings/delete-sub-category/' + id)
