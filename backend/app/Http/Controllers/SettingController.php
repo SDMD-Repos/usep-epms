@@ -253,6 +253,14 @@ class SettingController extends Controller
             DB::beginTransaction();
             $subcategory = SubCategory::find($validated['id']);
             $original = $subcategory->getOriginal();
+            $childSubcategories = SubCategory::where('parent_id', $validated['id'])->get();
+
+            foreach ($childSubcategories as $childSubcategory) {
+                $childSubcategory->ordering = ($childSubcategory->ordering - (int)$childSubcategory->ordering) + $validated['ordering'];
+                if (!$childSubcategory->save()) {
+                    DB::rollBack();
+                }
+            }
 
             if($subcategory->isDirty('ordering')){
                 $history .= "Update Ordering from '".$original['ordering']."' to '".$validated['ordering']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
@@ -260,7 +268,7 @@ class SettingController extends Controller
 
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
-            $subcategory->parent_id = $validated['parent_id'];
+            $subcategory->parent_id = $validated['parentId'];
             $subcategory->ordering = $validated['ordering'];
             $subcategory->year = $validated['year'];
             $subcategory->updated_at = Carbon::now();

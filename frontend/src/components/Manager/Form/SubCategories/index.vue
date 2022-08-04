@@ -62,8 +62,8 @@
 <!--            </a-form-item>-->
             <a-form-item ref='ordering' label="Ordering" name="ordering">
               <a-input-group compact>
-                <a-input-number :min="1" :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
-                <a-input-number :min="1" :disabled="orderingChildDisabled" v-model:value="frmOrderingChild" style="width: 20%" />
+                <a-input-number onpaste="return event.charCode >= 48 && event.charCode <= 57" onkeypress="return event.charCode >= 48 && event.charCode <= 57" :min="1" :disabled="orderingDisabled" v-model:value="frmOrdering" style="width: 20%" /> .
+                <a-input-number onpaste="return event.charCode >= 48 && event.charCode <= 57" onkeypress="return event.charCode >= 48 && event.charCode <= 57" :min="1" :disabled="orderingChildDisabled" v-model:value="frmOrderingChild" style="width: 20%" />
               </a-input-group>
             </a-form-item>
           </div>

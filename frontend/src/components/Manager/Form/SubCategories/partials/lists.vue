@@ -4,7 +4,10 @@
       <template v-if="column.dataIndex === 'ordering'">
         <div class="editable-cell">
           <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
-            <a-input v-model:value="editableData[record.key].ordering" @pressEnter="update(record.key)" />
+            <a-input onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     v-model:value="editableData[record.key].ordering"
+                     @pressEnter="update(record.key)" />
             <check-outlined class="editable-cell-icon-check" @click="update(record.key)" />
           </div>
           <div v-else class="editable-cell-text-wrapper">
@@ -69,12 +72,11 @@ export default defineComponent({
     }
 
     const onUpdate = obj => {
-      console.log(obj)
       store.dispatch('formManager/UPDATE_SUB_CATEGORY', { payload: obj })
     }
 
     const isObjectEmpty = (obj) => {
-      return !!(obj && Object.keys(obj).length === 0)
+      return (typeof obj !== 'undefined' && Object.keys(obj).length === 0)
     }
 
     const getSubcategory = (key) => {
@@ -95,9 +97,12 @@ export default defineComponent({
     };
 
     const update = key => {
-      Object.assign(getSubcategory(key), editableData[key]);
-      delete editableData[key];
-      onUpdate(getSubcategory(key))
+      if (getSubcategory(key).ordering){
+        Object.assign(getSubcategory(key), editableData[key]);
+        delete editableData[key];
+        onUpdate(getSubcategory(key))
+      }
+
     };
 
     return {

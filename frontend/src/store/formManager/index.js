@@ -349,7 +349,7 @@ export default {
         id: id,
         name: name,
         category_id: category_id,
-        parent_id: parent_id,
+        parentId: parent_id,
         ordering: ordering,
         year: year,
       }
