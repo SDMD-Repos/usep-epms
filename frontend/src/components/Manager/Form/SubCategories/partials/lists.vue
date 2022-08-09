@@ -4,7 +4,11 @@
       <template v-if="column.dataIndex === 'ordering'">
         <div class="editable-cell">
           <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
-            <a-input onpaste="return event.charCode >= 48 && event.charCode <= 57"
+            <a-input v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     v-model:value="editableData[record.key].ordering"
+                     @pressEnter="update(record.key)" />
+            <a-input v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                      v-model:value="editableData[record.key].ordering"
                      @pressEnter="update(record.key)" />
@@ -37,7 +41,8 @@ import { defineComponent, computed, reactive, ref } from 'vue';
 import { useStore } from 'vuex'
 // import { WarningOutlined } from '@ant-design/icons-vue'
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash'
+
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Function', dataIndex: ['category', 'name'], key: 'function' },
@@ -63,8 +68,8 @@ export default defineComponent({
   setup(props, { emit } ) {
     const store = useStore()
     const loading = computed( () => store.getters['formManager/manager'].loading)
-
     const editableData = reactive({});
+    const previousInput = ref([]);
 
     // METHODS
     const onDelete = key => {
@@ -76,31 +81,43 @@ export default defineComponent({
     }
 
     const isObjectEmpty = (obj) => {
-      return (typeof obj !== 'undefined' && Object.keys(obj).length === 0)
+      return (obj && Object.keys(obj).length === 0)
     }
 
     const getSubcategory = (key) => {
       let subCat = {}
-      if (!isObjectEmpty(props.subCategoryList))
-        for (let i of props.subCategoryList){
-          if (i.key === key) subCat = i
-          if (!isObjectEmpty(i.children)){
-            for (let ii of i.children){
-              if (ii.key === key) subCat = ii
-            }
+      if (isObjectEmpty(props.subCategoryList))
+        return
+      for (let i of props.subCategoryList){
+        if (i.key === key) subCat = i
+        if (!isObjectEmpty(i.children)){
+          for (let ii of i.children){
+            if (ii.key === key) subCat = ii
           }
         }
+      }
       return subCat
     }
     const edit = key => {
-      editableData[key] = getSubcategory(key);
+      let subCategory = getSubcategory(key)
+      previousInput.value[key] = cloneDeep(subCategory)
+      if (subCategory.parent_id){
+        subCategory.ordering = subCategory.ordering.toString().split('.')[1]
+        editableData[key] = subCategory
+      }
+      else{
+        editableData[key] = subCategory
+      }
     };
 
     const update = key => {
-      if (getSubcategory(key).ordering){
-        Object.assign(getSubcategory(key), editableData[key]);
-        delete editableData[key];
-        onUpdate(getSubcategory(key))
+      let subCategory = getSubcategory(key)
+      if (subCategory.ordering){
+        if (subCategory.parent_id)
+          subCategory.ordering = previousInput.value[key].ordering.toString().split('.')[0] + '.' + subCategory.ordering
+        Object.assign(subCategory, editableData[key])
+        delete editableData[key]
+        onUpdate(subCategory)
       }
 
     };
