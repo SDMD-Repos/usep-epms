@@ -32,9 +32,9 @@
           <a-divider><b>{{ category.name }}</b></a-divider>
           <indicator-component
             :form-id="formId" :function-id="category.key" :item-source="dataSource" :allow-edit="allowEdit" :counter="counter"
-            :categories="categories" :targets-basis-list="targetsBasisList"
+            :categories="categories" :targets-basis-list="targetsBasisList" :is-published="viewOnly"
             @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @update-source-item="updateSourceItem"
-            @delete-source-item="deleteSourceItem" @add-deleted-item="addDeletedItem"/>
+            @delete-source-item="deleteSourceItem" @add-deleted-item="addDeletedItem" @link-parent-indicator="linkParentIndicator" />
         </template>
       </div>
 
@@ -79,12 +79,13 @@ export default defineComponent({
     const vpOffice = ref(undefined)
     const aapcrId = ref(null)
     const vpOpcrId = ref(null)
+    const viewOnly = ref(false)
 
     const {
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear, years, allowEdit,
       // METHOD
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, resetFormFields,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, resetFormFields, linkParentIndicator,
     } = useFormOperations(props)
 
     // COMPUTED
@@ -143,10 +144,10 @@ export default defineComponent({
 
     const checkFormDetails = () => {
       allowEdit.value = false
+      resetFormFields()
       if(typeof vpOffice.value !== 'undefined') {
         store.commit('vpopcr/SET_STATE', {
           loading: true,
-          dataSource: [],
         })
         checkSaved(vpOffice.value.key, year.value).then(response => {
           if(response) {
@@ -179,8 +180,6 @@ export default defineComponent({
             }
           }
         })
-      }else {
-        store.commit('vpopcr/SET_STATE', { dataSource: [] })
       }
     }
 
@@ -192,17 +191,20 @@ export default defineComponent({
       getAapcrDetailsByOffice(vpOffice.value.key, year.value).then(response => {
         if(response) {
           if(response.aapcrId) {
-            store.commit('vpopcr/SET_STATE', { dataSource: response.dataSource })
+            store.commit('vpopcr/SET_STATE', {
+              dataSource: response.dataSource, savedIndicators: response.savedIndicators,
+            })
 
             allowEdit.value = true
             aapcrId.value = response.aapcrId
             targetsBasisList.value = response.targetsBasisList
+            viewOnly.value = !response.isPublished
 
             initializeVPForm()
           }else {
             Modal.warning({
-              title: () => 'There is no published AAPCR for the year ' + year.value,
-              content: () => '',
+              title: () => 'Unable to create this form',
+              content: () => 'There is no finalized or published AAPCR for the year ' + year.value,
             })
 
             resetFormFields()
@@ -224,7 +226,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
 
       let params = {
-        checkable: { allColleges: true, mains: false },
+        checkable: { allColleges: true, mains: true },
         groups: { included: true, officeId: vpOffice.value },
         isAcronym: true,
         currentYear: year.value,
@@ -256,12 +258,18 @@ export default defineComponent({
     }
 
     const validateForm = isFinal => {
-      if(!dataSource.value.length) {
+      if(viewOnly.value && vpOpcrId.value === null) {
+        Modal.error({
+          title: () => 'Unable to save the form',
+          content: () => 'AAPCR ' + year.value + ' has not yet published',
+        })
+      }else if(!dataSource.value.length) {
         Modal.error({
           title: () => 'Unable to save the form',
           content: () => 'No Performance Indicators were added to the list',
         })
       }else {
+
         let title = ''
         if (isFinal) {
           title = 'This will finalize and save your form'
@@ -312,9 +320,9 @@ export default defineComponent({
     }
 
     return {
-      vpOffice, allowEdit,
+      vpOffice, allowEdit, viewOnly,
 
-      vpOfficesList, categories, loading, spinningTip, hasVpopcrAccess,opcrvpFormPermission,
+      vpOfficesList, categories, loading, spinningTip, hasVpopcrAccess, opcrvpFormPermission,
 
       checkFormDetails, validateForm,
 
@@ -322,7 +330,7 @@ export default defineComponent({
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear,
       years,
 
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem,
+      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, linkParentIndicator,
     }
   },
 })

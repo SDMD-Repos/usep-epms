@@ -136,6 +136,8 @@ trait ConverterTrait {
                 $ipcrPeriod = $datum->ipcrPeriod;
             }*/
 
+            $cascadeTo = null;
+
             if(isset($conditions['origin'])) {
                 switch ($conditions['origin']) {
                     case 'vpopcr-view':
@@ -212,6 +214,14 @@ trait ConverterTrait {
             $subCategory->label = $detail->subCategory->name;
         }
 
+        if($detail->program_id) {
+            $program = new \stdClass();
+
+            $program->key = $detail->program_id;
+            $program->value = $detail->program_id;
+            $program->label = $detail->program->name;
+        }
+
         if($detail->cascading_level) {
             $cascadingLevel = new \stdClass();
 
@@ -235,8 +245,9 @@ trait ConverterTrait {
 
         return [
             'subCategory' => $subCategory ?? null,
+            'program' => $program ?? null,
             'cascadingLevel' => $cascadingLevel ?? "",
-            'measures' => $measures
+            'measures' => $measures,
         ];
     }
 

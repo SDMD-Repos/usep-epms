@@ -14,6 +14,7 @@ use App\Http\Requests\UploadPdfFile;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
+use App\Http\Traits\OfficeTrait;
 use App\VpOpcr;
 use App\VpOpcrDetail;
 use App\VpOpcrDetailMeasure;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\DB;
 
 class VpopcrController extends Controller
 {
-    use ConverterTrait, FileTrait, FormTrait;
+    use OfficeTrait, FileTrait, FormTrait;
 
     private $STO = 5;
 
@@ -46,7 +47,9 @@ class VpopcrController extends Controller
         $query = Aapcr::where([
             ['year', $year],
             ['is_active', 1]
-        ])->whereNotNull('published_date')->with(['detailsOrdered' => function ($que) use ($vpId) {
+        ])->where(function($columnQuery) {
+            $columnQuery->whereNotNull('published_date')->orWhereNotNull('finalized_date');
+        })->with(['detailsOrdered' => function ($que) use ($vpId) {
             $que->whereHas('offices', function ($query) use ($vpId) {
                 $query->where(function($q) use ($vpId) {
                     $q->where('vp_office_id', '=', $vpId)
@@ -70,7 +73,8 @@ class VpopcrController extends Controller
                             });
                     });
             });
-        }, 'detailsOrdered.measures'])->first();
+        }, 'detailsOrdered.measures'])
+            ->orderBy('published_date', 'DESC')->orderBy('created_at', 'DESC')->first();
 
         $dataSource = [];
 
@@ -78,9 +82,13 @@ class VpopcrController extends Controller
 
         $parentIds = []; // To store parent PIs' id for tracking purposes
 
+        $detailsOrdered = $query->detailsOrdered;
+
+        $savedIndicators = $this->getSavedIndicators($detailsOrdered);
+
         if ($query) {
             # Loop through PI details
-            foreach($query->detailsOrdered as $data) {
+            foreach($detailsOrdered as $data) {
                 $detail = [];
 
                 $programId = $data->program_id;
@@ -91,7 +99,8 @@ class VpopcrController extends Controller
 
                 $subCategory = $extracted['subCategory'];
 
-                $offices = $this->splitPIOffices($data, ['splitOffices' => 1, 'origin' => 'vpopcr']);
+//                $offices = $this->splitPIOffices($data, ['origin' => 'vpopcr']);
+                $offices = $this->processVpOffices($data, $vpId, 'vpopcr');
 
                 $this->getTargetsBasisList($data->targets_basis);
 
@@ -142,6 +151,7 @@ class VpopcrController extends Controller
                         'implementing' => $offices['implementing'] ?? [],
                         'supporting' => $offices['supporting'] ?? [],
                         'remarks' => $data->other_remarks,
+                        'linkedToChild' => $data->linked_to_child,
                         'deleted' => 0,
                         'isCascaded' => 1
                     );
@@ -180,6 +190,7 @@ class VpopcrController extends Controller
                                         'supporting' => [],
                                         'remarks' => '',
                                         'children' => [],
+                                        'linkedToChild' => 0,
                                         'deleted' => 0,
                                         'isCascaded' => 1
                                     );
@@ -233,6 +244,8 @@ class VpopcrController extends Controller
             'dataSource' => $dataSource,
             'aapcrId' => $query->id ?? null,
             'targetsBasisList' => $this->targetsBasisList,
+            'isPublished' => (bool)$query->published_date,
+            'savedIndicators' => $savedIndicators
         ], 200);
     }
 
@@ -287,7 +300,9 @@ class VpopcrController extends Controller
 
                     $storeHeader = 0;
 
-                    if($source['isHeader'] && !in_array($source['key'], $savedHeaders)) {
+                    if(($source['isHeader'] || (isset($source['linkedToChild']) && $source['linkedToChild']))
+                        && !in_array($source['key'], $savedHeaders)) {
+
                         $storeHeader = 1;
                         $savedHeaders[] = $source['key'];
                     }
@@ -360,10 +375,11 @@ class VpopcrController extends Controller
         $detail->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $detail->category_id = $data['category'];
         $detail->sub_category_id = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
-        $detail->program_id = $data['program'];
+        $detail->program_id = $data['program']['key'] ?? $data['program'];
         $detail->remarks = $data['remarks'];
         $detail->parent_id = $data['parent_id'];
         $detail->from_aapcr = $data['from_aapcr'];
+        $detail->linked_to_child = $data['linkedToChild'] ?? 0;
         $detail->create_id = $this->login_user->pmaps_id;
         $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -510,10 +526,6 @@ class VpopcrController extends Controller
 
             $detail->wasSaved = 1;
 
-            $extracted = $this->extractDetails($detail);
-
-            $subCategory = $extracted['subCategory'];
-
             $data = $this->getVpOpcrDetails($detail, []);
 
             if($detail->aapcr_detail_id) {
@@ -570,9 +582,7 @@ class VpopcrController extends Controller
 
                     if($parentDetails->category_id !== $detail->category_id){
                         $parentDetails->category_id = $detail->category_id;
-/*if($detail->id === 306) {
-    dd($detail->program_id);
-}*/
+
                         $parentDetails->program_id = $detail->program_id;
 
                         $parentDetails->sub_category_id = null;
@@ -660,8 +670,7 @@ class VpopcrController extends Controller
             'type' => $data->type,
             'category' => $data->category_id,
             'subCategory' => $extracted['subCategory'],
-            'program' => $data->program_id,
-            'programLabel' =>  $data->program_id ? $data->program->name : null,
+            'program' => $extracted['program'],
             'name' => $data->pi_name,
             'isHeader' => (bool)$data->is_header,
             'target' => $data->target,
@@ -672,6 +681,7 @@ class VpopcrController extends Controller
             'implementing' => $offices['implementing'] ?? [],
             'supporting' => $offices['supporting'] ?? [],
             'remarks' => $data->remarks,
+            'linkedToChild' => $data->linked_to_child,
             'deleted' => 0,
             'isCascaded' => $data->isCascaded,
             'wasSaved' => $data->wasSaved
@@ -728,10 +738,9 @@ class VpopcrController extends Controller
                         DB::rollBack();
                     }
                 }
-//dd($dataSource);
+
                 foreach($dataSource as $source) {
                     $getParentId = null;
-                    var_dump($source['id']);
 
                     $isNew = strpos($source['id'], 'new') !== false;
 
@@ -790,7 +799,7 @@ class VpopcrController extends Controller
                                 $getParentId = $this->saveVpOpcrDetails($id, $source, $newDetail);
                             }
                         }else {
-                            if(isset($source['isCascaded']) && $source['isCascaded']) {
+                            if((isset($source['isCascaded']) && $source['isCascaded']) && $source['wasSaved']) {
                                 $this->updateVpOffices($source);
                             }
                         }
@@ -889,7 +898,8 @@ class VpopcrController extends Controller
             $subCategory = isset($data['subCategory']) ? $data['subCategory']['value'] : null;
 
             $updated->sub_category_id = $subCategory;
-            $updated->program_id = $data['program'];
+            $updated->program_id = $data['program']['key'] ?? $data['program'];
+
         }
 
         $updated->is_header = $isHeader;
@@ -899,6 +909,7 @@ class VpopcrController extends Controller
         $updated->cascading_level = $data['cascadingLevel'] ? $data['cascadingLevel']['key'] : null;
         $updated->allocated_budget = $data['budget'];
         $updated->remarks = $data['remarks'];
+        $updated->linked_to_child = $data['linkedToChild'];
         $updated->modify_id = $this->login_user->pmaps_id;
 
         $history = '';
@@ -997,5 +1008,14 @@ class VpopcrController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
+    }
+
+    public function getSavedIndicators($indicators)
+    {
+        $detailIds = $indicators->pluck('id');
+
+        $list = VpOpcrDetail::whereIn('aapcr_detail_id', $detailIds)->with(['offices', 'offices.field', 'vpopcr'])->get();
+
+        return $list;
     }
 }

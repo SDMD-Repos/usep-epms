@@ -3,7 +3,7 @@
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
              :scroll="{ x: scrollX, y: 600 }">
       <template #title>
-        <a-button type="primary" :disabled="disabledNew === false ? disabledNew : !allowEdit" @click="openDrawer('Add')">New</a-button>
+        <a-button type="primary" :disabled="newButtonDisabled" @click="openDrawer('Add')">New</a-button>
       </template>
 
       <template #footer v-if="filteredSource && filteredSource.length && formId === `aapcr`">
@@ -40,7 +40,7 @@
         </template>
 
         <template v-if="column.key === 'program'">
-          {{ (record.type === 'pi' && (typeof record.program !== 'undefined' && record.program !== null)) ? record.programLabel : ''}}
+          {{ (record.type === 'pi' && (typeof record.program !== 'undefined' && record.program !== null)) ? record.programLabel || record.program.label : ''}}
         </template>
 
         <template v-if="column.key === 'subCategory'">
@@ -95,11 +95,20 @@
           </ul>
         </template>
 
-        <template v-if="column.key === 'operation'">
+        <template v-if="column.key === 'operation' && ((formId === 'vpopcr' && !viewOnly) || formId !== 'vpopcr')">
           <EditFilled v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" @click="handleEdit(record)" />
           <template v-if="record.type === 'pi'">
             <a-divider v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" type="vertical" />
             <PlusCircleFilled @click="handleAddSub(record)"/>
+          </template>
+          <template v-if="!record.isHeader &&
+                          (typeof record.children !== 'undefined' && record.children.length > 0) &&
+                          (typeof record.isCascaded === 'undefined' || (typeof record.isCascaded !== 'undefined' && !record.isCascaded))" >
+            <a-divider type="vertical"/>
+            <link-outlined :style="{ fontSize: '16px' }" v-if="typeof record.linkedToChild !== 'undefined' && !record.linkedToChild"
+                           @click="handleLink(record)" />
+            <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fa fa-unlink" @click="handleLink(record)"
+               v-else-if="typeof record.linkedToChild !== 'undefined' && record.linkedToChild" />
           </template>
           <a-divider type="vertical" v-if="allowedAction(record)"/>
           <a-popconfirm
@@ -119,12 +128,12 @@
 import { defineComponent, ref, inject, computed } from 'vue'
 import { Modal } from 'ant-design-vue'
 import {
-  CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined,
+  CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined, LinkOutlined,
 } from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: "IndicatorListTable",
-  components: { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined },
+  components: { CheckCircleFilled, CloseCircleFilled, EditFilled, PlusCircleFilled, DeleteFilled, PlusOutlined, LinkOutlined },
   props: {
     year: { type: Number, default: new Date().getFullYear() },
     formId: { type: String, default: "" },
@@ -135,8 +144,9 @@ export default defineComponent({
     disabledNew: { type: Boolean, default: () => { return true }},
     formTableColumns: { type: Array, default: () => { return [] }},
     allowEdit: { type: Boolean, default: false },
+    viewOnly: { type: Boolean, default: false },
   },
-  emits: ['open-drawer', 'delete-item', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
+  emits: ['open-drawer', 'delete-item', 'handle-link-parent', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
     const _message = inject('a-message')
 
@@ -178,6 +188,11 @@ export default defineComponent({
       return props.budgetList.filter(i => i.mainCategory.key === props.mainCategory.key)
     })
 
+    const newButtonDisabled = computed(() => {
+      const { disabledNew, allowEdit, formId, viewOnly } = props
+      return disabledNew === false ? disabledNew : ((formId === 'vpopcr' && viewOnly) || (formId !== 'vpopcr' && !allowEdit)|| !allowEdit)
+    })
+
     //METHODS
     const openDrawer = action => {
       emit('open-drawer', { action: action })
@@ -193,6 +208,10 @@ export default defineComponent({
 
     const handleDelete = data => {
       emit('delete-item', data)
+    }
+
+    const handleLink = data => {
+      emit('handle-link-parent', data)
     }
 
     const allowedAction = data => {
@@ -226,11 +245,13 @@ export default defineComponent({
 
       filteredSource,
       programBudget,
+      newButtonDisabled,
 
       openDrawer,
       handleEdit,
       handleAddSub,
       handleDelete,
+      handleLink,
       allowedAction,
       saveProgramBudget,
     }

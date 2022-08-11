@@ -16,7 +16,7 @@ class VpOpcrDetail extends Model
      */
     public function vpopcr()
     {
-        return $this->belongsTo('App\VpOpcr');
+        return $this->belongsTo('App\VpOpcr', 'vp_opcr_id');
     }
 
     public function mainDetails()

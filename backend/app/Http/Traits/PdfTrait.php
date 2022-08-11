@@ -5,7 +5,6 @@ namespace App\Http\Traits;
 use App\Aapcr;
 use App\AapcrDetail;
 use App\AapcrDetailOffice;
-use App\Http\Classes\Jasperreport;
 use App\Program;
 use App\Signatory;
 use App\VpOpcr;
@@ -192,6 +191,8 @@ trait PdfTrait {
 
                                 $data[$PICount][$subCategoryKey] = $subParent;
                             }
+                        }elseif($countChildSubCategory){
+                            $data[$PICount]['subCategoryParent_1'] = $detailSubCategory->name;
                         }
 
                         $PICount++;
@@ -249,7 +250,7 @@ trait PdfTrait {
     }
 
     // VP's OPCR
-    public function viewVpOpcrPdf($id, $isUnpublish=0)
+    public function viewVpOpcrPdf($id, $isPublish=0)
     {
         try {
             $vpopcr = VpOpcr::find($id);
@@ -389,7 +390,7 @@ trait PdfTrait {
             $params = array(
                 'usepLogo' => $publicPath."/logos/USeP_Logo.png",
                 'public_path' => $publicPath,
-                'notFinalImage' => $isUnpublish ? $publicPath."/logos/unpublished.png" : (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
+                'notFinalImage' => (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
                 'year' => $vpopcr->year,
                 'vpOfficeName' => $vpopcr->office_name,
                 'preparedBy' => strtoupper($signatory['preparedBy']),
@@ -404,10 +405,10 @@ trait PdfTrait {
                 'assessedBy' => 'NAME:',
                 'assessedByPosition' => 'PMT-PMG Member/Secretariat',
             );
-
+//            dd($dataSource);
             $pdfData = [
                 'documentName' => $documentName,
-                'isUnpublish' => $isUnpublish,
+                'isPublish' => $isPublish,
                 'form' => 'vpopcr',
                 'id' => $id,
                 'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
@@ -416,7 +417,7 @@ trait PdfTrait {
 
             $file = $this->renderPDFFile($pdfData);
 
-            if(!$isUnpublish) {
+            if(!$isPublish) {
                 return response()->download($file)->deleteFileAfterSend();
             }else { return $file; }
         } catch(\Exception $e){
@@ -452,14 +453,22 @@ trait PdfTrait {
             $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
         }
 
+        $detailSubCategory = $detail->subCategory;
+
+        $countChildSubCategory = $detail->sub_category_id ? count($detailSubCategory->childSubCategories) : 0;
+
+        $subCategory = (($detail->sub_category_id && !$countChildSubCategory) ? $detailSubCategory->name : NULL);
+
+        $reversedSubCategories = [];
+
         $data = array(
             'id' => $detail->id,
             'category_id' => $detail->category_id,
             'category_order' => $detail->category->order,
             'function' => $function,
             'program' => $program,
-            'subCategory' => $detail->sub_category_id ? $detail->subCategory->name : NULL,
-            'parentSubCategory' => $detail->sub_category_id ? $detail->subCategory->parent_id : NULL,
+            'subCategory' => $subCategory,
+            'parentSubCategory' => $detail->sub_category_id ? $detailSubCategory->parent_id : NULL,
             'pi_name' => $detail->pi_name,
             'target' => $detail->target,
             'measures' => $measures ? implode(", ", $measures) : '',
@@ -469,10 +478,10 @@ trait PdfTrait {
             'supporting' => isset($getOffices['supporting']) ? implode(", ", $getOffices['supporting']) : '',
         );
 
-        if($detail->sub_category_id !== NULL && $detail->subCategory->parent_id !== NULL) {
+        if($detail->sub_category_id !== NULL && $detailSubCategory->parent_id !== NULL  && !$countChildSubCategory) {
             $this->parentSubCategories = [];
 
-            $this->getParentSubCategories($detail->subCategory->parent_id);
+            $this->getParentSubCategories($detailSubCategory->parent_id);
 
             $reversedSubCategories = array_reverse($this->parentSubCategories);
 
@@ -481,6 +490,8 @@ trait PdfTrait {
 
                 $data[$subCategoryKey] = $subParent;
             }
+        }else if($countChildSubCategory){
+            $data['subCategoryParent_1'] = $detailSubCategory->name;
         }
 
         if(count($children)){

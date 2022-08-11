@@ -29,13 +29,12 @@
             <span class="required-indicator">Program</span>
           </template>
           <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
-                    :disabled="config.type === 'sub'" />
+                    label-in-value :disabled="config.type === 'sub'" />
         </a-form-item>
 
         <a-form-item name="subCategory" label="Sub Category">
           <a-tree-select
             v-model:value="form.subCategory" style="width: 100%" placeholder="Select"
-            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
             :tree-data="subCategories" :field-names="{ label: 'name', value: 'id' }"
             :disabled="config.type === 'sub'"
             allow-clear tree-default-expand-all label-in-value
@@ -111,26 +110,25 @@
           </a-form-item>
         </template>
 
-        <a-form-item label="Implementing Office" :name="['options', 'implementing']" ref="implementing" :rules="rules.implementing" :auto-link="false">
-<!--          <template #label><span class="required-indicator">Implementing Office</span></template>-->
+        <a-form-item label="Implementing Office" :name="['options', 'implementing']" ref="implementing"
+                     :rules="rules.implementing" :auto-link="false">
           <a-row :gutter="0">
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.implementing"
                 style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
-                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.implementing.length > 0"
+                :tree-data="officesList" :max-tag-count="6" :disabled="form.implementing.length > 0"
                 allow-clear tree-checkable label-in-value
                 @blur="() => { $refs.implementing.onFieldBlur() }"
                 @change="(value, label, extra) => {
                   $refs.implementing.onFieldChange()
-                  onOfficeChange(value, label, extra, 'implementing')
+                  onOfficeChangeVP(value, label, extra, 'implementing')
                 }" />
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="form.implementing && !form.implementing.length ? 'Save List' : 'Edit List'">
                 <a-button v-if="form.implementing && !form.implementing.length" type="primary"
-                          @click="checkDefaultCascadeTo({ field: 'implementing' })">
+                          @click="checkDefaultCascadeTo({ field: 'implementing', opposite: 'supporting' })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('implementing')">
@@ -154,7 +152,6 @@
                   <a-tree-select
                     v-model:value="office.cascadeTo"
                     style="width: 100%"
-                    :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                     :tree-data="functionsWithProgram"
                     placeholder="Select a Program"
                     tree-default-expand-all
@@ -169,25 +166,26 @@
           </template>
         </div>
 
-        <a-form-item label="Supporting Office" :name="['options', 'supporting']" ref="supporting" :rules="rules.supporting" :auto-link="false">
+        <a-form-item label="Supporting Office" :name="['options', 'supporting']" ref="supporting"
+                     :rules="rules.supporting" :auto-link="false">
           <a-row :gutter="0">
             <a-col :span="22">
               <a-tree-select
                 v-model:value="form.options.supporting"
                 style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officesList"
-                :show-checked-strategy="SHOW_PARENT" :max-tag-count="6" :disabled="form.supporting ? form.supporting.length > 0 : false"
+                :tree-data="officesList" :max-tag-count="6"
+                :disabled="form.supporting ? form.supporting.length > 0 : false"
                 allow-clear tree-checkable label-in-value
                 @blur="() => { $refs.supporting.onFieldBlur() }"
                 @change="(value, label, extra) => {
                   $refs.supporting.onFieldChange()
-                  onOfficeChange(value, label, extra, 'supporting')
+                  onOfficeChangeVP(value, label, extra, 'supporting')
                 }" />
             </a-col>
             <a-col :span="2">
               <a-tooltip :title="form.supporting && !form.supporting.length ? 'Save List' : 'Edit List'">
                 <a-button v-if="form.supporting && !form.supporting.length" type="primary"
-                          @click="checkDefaultCascadeTo({ field: 'supporting' })">
+                          @click="checkDefaultCascadeTo({ field: 'supporting', opposite: 'implementing' })">
                   <template #icon><CheckOutlined /></template>
                 </a-button>
                 <a-button v-else type="primary" @click="updateOfficeList('supporting')">
@@ -207,7 +205,7 @@
                   <a-tree-select
                     v-model:value="o.cascadeTo"
                     style="width: 100%"
-                    :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                    :list-height="233"
                     :tree-data="functionsWithProgram"
                     placeholder="Select a Program"
                     tree-default-expand-all
@@ -253,7 +251,6 @@
 import { defineComponent, ref, watch, inject, computed } from 'vue'
 import { useStore } from "vuex";
 import { cloneDeep } from 'lodash'
-import { TreeSelect } from "ant-design-vue"
 import { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled } from "@ant-design/icons-vue"
 import { useFormFields } from '@/services/functions/form/main'
 import { useModifiedStates } from '@/services/functions/modifiedStates'
@@ -280,9 +277,6 @@ export default defineComponent({
     const config = ref({})
     const form = ref({})
     const isSubmitting = ref(false)
-
-    // STATIC DATA
-    const SHOW_PARENT = TreeSelect.SHOW_PARENT
 
     // COMPUTED
     const programsByFunction = computed( () => {
@@ -319,7 +313,7 @@ export default defineComponent({
       // DATA
       typeOptions, formItemLayout, tooltipHeaderText, storedOffices, cachedOffice,
       // METHODS
-      changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption, onOfficeChangeVP, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
       syncCascadeOption,
     } = useFormFields(form)
 
@@ -382,13 +376,11 @@ export default defineComponent({
     return {
       opcrVpForm, config, form, isSubmitting,
 
-      SHOW_PARENT, cachedOffice,
-
       programsByFunction, functionsWithProgram, subCategories, measuresList, cascadingList, officesList,
 
-      typeOptions, formItemLayout, tooltipHeaderText,
+      typeOptions, formItemLayout, tooltipHeaderText, cachedOffice,
 
-      changeNullValue, filterBasisOption, onOfficeChange, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
+      changeNullValue, filterBasisOption, onOfficeChangeVP, checkDefaultCascadeTo, updateOfficeList, deleteOfficeItem,
       syncCascadeOption,
 
       toggleIsHeader, onFinish, resetFormData,

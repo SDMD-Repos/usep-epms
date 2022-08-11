@@ -58,7 +58,6 @@ class SettingController extends Controller
 
             return $next($request);
         });
-
     }
 
     public function getFunctions($year, $formId=null)
@@ -641,7 +640,7 @@ class SettingController extends Controller
 
     public function getAllSignatoryTypes()
     {
-        $signatoryTypes = SignatoryType::all();
+        $signatoryTypes = SignatoryType::orderBy('ordering', 'ASC')->get();
 
         return response()->json([
             'signatoryTypes' => $signatoryTypes

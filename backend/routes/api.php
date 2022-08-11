@@ -179,7 +179,6 @@ Route::group([
     'middleware' => 'auth:api'
 ], function() {
     Route::post('/get-main-offices-children', 'SettingController@getMainOfficesWithChildren');
-    Route::get('/get-vp-offices-children', 'SettingController@getVpOfficeWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
     Route::get('/get-personnel-by-office/{id}/{permanentOnly}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');

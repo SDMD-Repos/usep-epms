@@ -132,6 +132,7 @@ class AapcrController extends Controller
         }
 
         $detail->parent_id = $values['detailId'] ?? null;
+        $detail->linked_to_child = $values['linkedToChild'] ?? 0;
         $detail->create_id = $this->login_user->pmaps_id;
         $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -366,7 +367,8 @@ class AapcrController extends Controller
                     'cascadingLevel' => $extracted['cascadingLevel'],
                     'implementing' => $implementing,
                     'supporting' => $supporting,
-                    'remarks' => $detail->other_remarks
+                    'remarks' => $detail->other_remarks,
+                    'linkedToChild' => $detail->linked_to_child
                 );
 
                 if(count($subs)) {
@@ -505,6 +507,7 @@ class AapcrController extends Controller
                 $detail->targets_basis = $data['targetsBasis'];
                 $detail->cascading_level = $cascadingLevel;
                 $detail->other_remarks = $data['remarks'];
+                $detail->linked_to_child = $data['linkedToChild'] ?? 0;
                 $detail->modify_id = $this->login_user->pmaps_id;
 
                 $history = '';

@@ -4,10 +4,9 @@ namespace App\Http\Traits;
 
 use App\Group;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 trait OfficeTrait {
-    use ConverterTrait;
+    use ConverterTrait, ThirdPartyApiTrait;
 
     public function getMainOfficesOnly($officesOnly=0, $returnJson=1 )
     {
@@ -21,25 +20,20 @@ trait OfficeTrait {
                 $data->value = "allColleges";
                 $data->title = "All Colleges";
 
-                array_push($values, $data);
+                $values[] = $data;
             }
 
-            $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
-                'token' => config('services.hris.data')
-            ]);
+            $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            $vpoffices = json_decode($response->body());
-
-            if(count($vpoffices)) {
-                foreach ($vpoffices as $vpoffice) {
+            if(count($vpOffices)) {
+                foreach ($vpOffices as $vpOffice) {
 
                     $data = new \stdClass();
 
-//                    $data->id = $vpoffice->id;
-                    $data->value = $vpoffice->id;
-                    $data->title = $vpoffice->Department;
+                    $data->value = $vpOffice->id;
+                    $data->title = $vpOffice->Department;
 
-                    array_push($values, $data);
+                    $values[] = $data;
                 }
 
                 if($returnJson){
@@ -91,22 +85,18 @@ trait OfficeTrait {
 
             $isAcronym = isset($status['isAcronym']) && $status['isAcronym'];
 
-            $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
-                'token' => config('services.hris.data')
-            ]);
+            $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            $vpoffices = json_decode($response->body());
-
-            if(count($vpoffices)) {
-                foreach ($vpoffices as $vpoffice) {
+            if(count($vpOffices)) {
+                foreach ($vpOffices as $vpOffice) {
 
                     $data = new \stdClass();
 
-                    $data->id = $vpoffice->id;
-                    $data->value = $vpoffice->id;
-                    $data->title = $isAcronym ? $vpoffice->Acronym : $vpoffice->Department;
+                    $data->id = $vpOffice->id;
+                    $data->value = $vpOffice->id;
+                    $data->title = $isAcronym ? $vpOffice->Acronym : $vpOffice->Department;
                     $data->cascadeTo = null;
-                    $data->children = $this->getChildOffices($vpoffice->id,1);
+                    $data->children = $this->getChildOffices($vpOffice->id,1);
 
                     if($checkable) {
                         $data->checkable = $checkable['mains'];
@@ -180,18 +170,10 @@ trait OfficeTrait {
     {
         try {
             if($vp_id === 'allColleges'){
-                $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/college', [
-                    'token' => config('services.hris.data')
-                ]);
+                $obj = $this->HRIS_CALL('ALL_COLLEGES');
             }else{
-                $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/structure', [
-                    "department_id" => (int)$vp_id,
-                    "token" => config('services.hris.data')
-                ]);
-
+                $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id ]);
             }
-
-            $obj = json_decode($response->body());
 
             $values = array();
 
@@ -206,7 +188,7 @@ trait OfficeTrait {
                     $data->pId = $vp_id;
                     $data->cascadeTo = null;
 
-                    array_push($values, $data);
+                    $values[] = $data;
                 }
             }
 
@@ -225,15 +207,9 @@ trait OfficeTrait {
     public function getPersonnelByOffice($id, $permanentOnly=0, $withHeader=0, $returnJson=1)
     {
         try {
-
             $personnel = array();
 
-            $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/department', [
-                "department_id" => (int)$id,
-                "token" => config('services.hris.data')
-            ]);
-
-            $lists = json_decode($response->body());
+            $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id ]);
 
             if($permanentOnly) {
                 $lists = array_filter($lists, function($x) {
@@ -295,11 +271,7 @@ trait OfficeTrait {
 
     public function getAllPositions()
     {
-        $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/employee/position/list', [
-            "token" => config('services.hris.data')
-        ]);
-
-        $data = json_decode($response->body());
+        $data = $this->HRIS_CALL('ALL_EMPLOYEE_POSITIONS');
 
         $positionList = [];
 
@@ -310,13 +282,86 @@ trait OfficeTrait {
                 $obj->value = $list->Name;
                 $obj->key = $key;
 
-                array_push($positionList, $obj);
+                $positionList[] = $obj;
             }
         }
 
         return response()->json([
             'positionList' => $positionList
         ], 200);
+    }
+
+    public function processVpOffices($list, $id, $origin)
+    {
+        $offices = array();
+
+        $officeList = $list->offices;
+
+        foreach($officeList as $datum) {
+            $officeType = $datum->field->code;
+
+            $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
+
+            $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
+            $officeName = $datum->office_name;
+
+            if ($datum->is_group) {
+                $officeId = $datum->group->id;
+                $officeName = $datum->group->name;
+            }
+
+            switch ($origin) {
+                case 'vpopcr-view':
+                    $cascadeTo = $datum->category_id;
+
+                    if($datum->program_id) {
+                        $cascadeTo = $datum->program->category_id . '-' . $datum->program_id;
+                    }else if($datum->other_program_id) {
+                        $cascadeTo = $datum->otherProgram->category_id . '-' . $datum->other_program_id . '-opcr';
+                    }
+                    break;
+                default:
+                    $cascadeTo = $datum->cascade_to;
+                    break;
+            }
+
+            if(!$datum->vp_office_id) {
+                $children = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $officeId]);
+
+                foreach ($children as $child) {
+                    $offices[$officeType][$counter] = array(
+                        'title' => $child->Acronym,
+                        'value' => $child->id,
+                        'cascadeTo' => $cascadeTo,
+                        'pId' => $officeId,
+                        'acronym' => $child->Acronym,
+                    );
+                    $counter++;
+                }
+            }else {
+                $offices[$officeType][$counter] = array(
+                    'title' => $officeName,
+                    'value' => $officeId,
+                    'cascadeTo' => $cascadeTo,
+                );
+            }
+
+            if ($datum->is_group) {
+                $offices[$officeType][$counter]['isGroup'] = true;
+            }
+
+            if($datum->vp_office_id){
+                $offices[$officeType][$counter]['pId'] = $datum->vp_office_id;
+
+                $offices[$officeType][$counter]['acronym'] = $datum->office_name; # used for view only PIs
+            }/*else{
+                if (!$datum->is_group && !$datum->vp_office_id) {
+                    $offices[$officeType][$counter]['children'] = true;
+                }
+            }*/
+        }
+
+        return $offices;
     }
 
     /*public function getUserOffices($form)
@@ -372,14 +417,7 @@ trait OfficeTrait {
         $vpOfficeId = 'colleges';
 
         if($form === 'opcr'){
-            $params = array(
-                "token" => config('services.hris.data'),
-                "department_id" => $officeId
-            );
-
-            $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/structure/subdepartment', $params);
-
-            $objs = json_decode($response->body());
+            $objs = $this->HRIS_CALL('GET_SUB_DEPARTMENT_PARENT', ['department_id' => $officeId ]);
 
             if(count($objs)) {
                 foreach ($objs as $obj) {
@@ -389,28 +427,6 @@ trait OfficeTrait {
         }
 
         return $vpOfficeId;
-    }
-
-    public function getVpOfficeWithChildren(){
-
-        $response = HTTP::post('https://hris.usep.edu.ph/hris/api/epms/department', [
-            'token' => config('services.hris.data')
-        ]);
-
-        $vpOffices = json_decode($response->body());
-
-        if ($vpOffices){
-            foreach ($vpOffices as $key => $value){
-                $isUpdate = 1;
-                $vpOffices[$key]->value = $value->id;
-                $vpOffices[$key]->title = $value->Department;
-                $vpOffices[$key]->selectable = false;
-                $vpOffices[$key]->children = $this->getChildOffices($vpOffices[$key]->value, $isUpdate);
-            }
-        }
-        return response()->json([
-            'vpOffices' => $vpOffices
-        ], 200);
     }
 
 }

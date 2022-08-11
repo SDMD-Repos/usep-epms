@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, inject, computed } from 'vue'
 import { useStore } from "vuex"
 
 export const useDrawerSettings = () => {
@@ -311,6 +311,8 @@ export const useDefaultFormData = props => {
 export const useFormOperations = props => {
   const store = useStore()
 
+  const _message = inject('a-message')
+
   const { formId } = props
 
   const targetsBasisList = ref([])
@@ -403,12 +405,22 @@ export const useFormOperations = props => {
     })
   }
 
+  const linkParentIndicator = async data => {
+    const source = reactive(dataSource.value.filter(item => data.key === item.key)[0])
+    source.linkedToChild = !source.linkedToChild
+    let action = 'linked'
+    if(!source.linkedToChild) {
+      action = 'unlinked'
+    }
+    await _message.success("Indicator " + action + " successfully!", 2)
+  }
+
   return {
     dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear,
 
     years,
 
     updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
-    resetFormFields,
+    resetFormFields, linkParentIndicator,
   }
 }

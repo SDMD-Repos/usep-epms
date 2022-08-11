@@ -59,7 +59,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive, ref, onMounted, computed } from "vue"
+import { defineComponent, reactive, ref, onMounted, watch, computed } from "vue"
 import { useStore } from "vuex"
 import { cloneDeep } from 'lodash'
 import { Modal } from "ant-design-vue"
@@ -121,6 +121,10 @@ export default defineComponent({
       onLoad()
     })
 
+    watch(() => props.year, year => {
+      getFormFieldsCascade(formId.value)
+    })
+
     // METHODS
     const onLoad = async () => {
       await getFormFieldsCascade(null)
@@ -166,7 +170,7 @@ export default defineComponent({
             settingId: settings.id,
           }
         }else {
-          editableData[key] = { settings: null }
+          editableData[key] = { settings: undefined }
         }
       }
     }

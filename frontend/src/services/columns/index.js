@@ -71,7 +71,7 @@ export const formTableColumns = [
     key: 'cascadingLevel',
     dataIndex: 'cascadingLevel',
     className: 'column-cascading-level',
-    width: 190,
+    width: 170,
   },
   {
     title: 'Office/s Accountable',
@@ -106,7 +106,7 @@ export const formTableColumns = [
     key: 'operation',
     fixed: 'right',
     className: 'column-action',
-    width: 100,
+    width: 120,
   },
 ]
 

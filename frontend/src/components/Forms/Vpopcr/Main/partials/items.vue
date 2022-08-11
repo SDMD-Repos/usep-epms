@@ -1,8 +1,9 @@
 <template>
   <div>
     <indicator-table :year="year" :form-id="formId" :function-id="functionId" :form-table-columns="modifiedTableColumns"
-                     :item-source="dataSource" :allow-edit="allowEdit"
-                     @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"/>
+                     :item-source="dataSource" :allow-edit="allowEdit" :view-only="isPublished"
+                     @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"
+                     @handle-link-parent="linkIndicator" />
 
     <opcr-vp-form :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :rules="rules" :current-year="year"
                   :targets-basis-list="targetsBasisList"
@@ -32,8 +33,10 @@ export default defineComponent({
     allowEdit: { type: Boolean, default: false },
     targetsBasisList: { type: Array, default: () => { return [] }},
     counter: { type: Number, default: 0 },
+    isPublished: { type: Boolean, default: false },
   },
-  emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item'],
+  emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item',
+    'link-parent-indicator'],
   setup(props, { emit }) {
     // DATA
     const modifiedTableColumns = ref()
@@ -127,6 +130,8 @@ export default defineComponent({
       }
 
       if (drawerConfig.value.type === 'pi') {
+        newData.linkedToChild = false
+
         await emit('update-data-source', { data: newData, isNew: true })
         await params.resetFields
         await resetOfficesFields()
@@ -269,10 +274,14 @@ export default defineComponent({
       formData.supporting = []
     }
 
+    const linkIndicator = data => {
+      emit('link-parent-indicator', data)
+    }
+
     return {
       modifiedTableColumns,
 
-      closeDrawer, addTableItem, handleAddSub, editItem, updateTableItem, deleteItem,
+      closeDrawer, addTableItem, handleAddSub, editItem, updateTableItem, deleteItem, linkIndicator,
 
       // useDrawerSettings
       drawerConfig, openDrawer,

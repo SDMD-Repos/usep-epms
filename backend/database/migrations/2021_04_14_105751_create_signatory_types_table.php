@@ -17,6 +17,7 @@ class CreateSignatoryTypesTable extends Migration
             $table->integer('id')->autoIncrement();
             $table->string('code', 25);
             $table->string('name', 200);
+            $table->smallInteger('ordering');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
             $table->softDeletes();

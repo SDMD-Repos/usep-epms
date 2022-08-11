@@ -15,6 +15,7 @@ export const useFormFields = form => {
 
   // COMPUTED
   const formFields = computed(() => store.getters['formManager/manager'].formFields)
+  const savedIndicators = computed(() => store.getters['vpopcr/form'].savedIndicators)
 
   const changeNullValue = (value, label) => {
     if (typeof value === 'undefined' || value === 0) {
@@ -93,8 +94,8 @@ export const useFormFields = form => {
     })
   }
 
-  const checkDefaultCascadeTo = params => {
-    const { field } = params
+  const checkDefaultCascadeTo = async params => {
+    const { field, opposite } = params
     const list = storedOffices.value[field]
 
     if(list.length) {
@@ -103,8 +104,71 @@ export const useFormFields = form => {
       if(filtered.length) {
         const cascadeTo = filtered[0].settings !== null ? filtered[0].settings.setting : null
 
-        saveOfficeListVP({ list: list, field: field, defaultCascade: cascadeTo })
+        let duplicates = "", assigned = null
+        const findList = form.value[opposite]
+
+        const searchList = savedIndicators.value.filter(i => { return i.pi_name === form.value.name })
+
+        for await (const item of list) {
+          if(findDuplicates(findList, item) === true) {
+            if(duplicates !== "") {
+              duplicates += ", "
+            }
+
+            let label = typeof item.acronym !== 'undefined' ? item.acronym : item.title
+
+            duplicates = duplicates + label
+          }
+
+          if(searchList.length > 0) {
+            searchList.forEach(slist => {
+              const filter = slist.offices.filter(i => { return item.value === parseInt(i.office_id)})
+              if(filter.length > 0) {
+                console.log(filter)
+                assigned = {
+                  office: slist.vpopcr.office_name,
+                  selected: item.acronym || item.title,
+                  assignedField: filter[0].field.field_name,
+                }
+              }
+            })
+          }
+        }
+
+        if(duplicates !== '') {
+          Modal.error({
+            title: () => 'Error',
+            content: () => "Unable to set " + duplicates + " as Implementing and Supporting",
+          })
+        } else if(assigned !== null) {
+          const { office, selected, assignedField } = assigned
+          let splitField = assignedField.split(' ')
+          Modal.error({
+            title: () => 'Error saving data',
+            content: () => office + " already set " + selected + " as " + splitField[0],
+          })
+        } else {
+          saveOfficeListVP({ list: list, field: field, defaultCascade: cascadeTo})
+        }
       }
+    }
+  }
+
+  const onOfficeChangeVP = (value, label, extra, field) => {
+    storedOffices.value[field] = []
+    const { allCheckedNodes } = extra
+    if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
+      allCheckedNodes.forEach(item => {
+        if(item.children.length > 0) {
+          item.children.forEach(i => {
+            const { props } = (typeof i.node !== 'undefined') ? i.node : i
+            storedOffices.value[field].push(props)
+          })
+        }else {
+          const { props } = (typeof item.node !== 'undefined') ? item.node : item
+          storedOffices.value[field].push(props)
+        }
+      })
     }
   }
 
@@ -182,7 +246,7 @@ export const useFormFields = form => {
     typeOptions, formItemLayout, tooltipHeaderText, storedOffices, cachedOffice,
 
     changeNullValue, filterBasisOption, onOfficeChange, saveOfficeList, checkDefaultCascadeTo,
-    updateOfficeList, deleteOfficeItem, syncCascadeOption,
+    onOfficeChangeVP, updateOfficeList, deleteOfficeItem, syncCascadeOption,
   }
 }
 

@@ -7,7 +7,7 @@
       <indicator-table :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
                        :main-category="mainCategory" :form-table-columns="formTableColumns" :allow-edit="displayIndicatorList"
                        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
-                       @delete-item="deleteItem" @add-budget-list-item="addBudgetListItem"/>
+                       @delete-item="deleteItem" @handle-link-parent="linkIndicator" @add-budget-list-item="addBudgetListItem"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
                          :targets-basis-list="targetsBasisList" :categories="categories" :current-year="year"
@@ -18,7 +18,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, computed, createVNode } from "vue"
+import { defineComponent, ref, watch, reactive, createVNode,inject, computed } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
@@ -43,7 +43,7 @@ export default defineComponent({
     counter: { type: Number, default: 0 },
   },
   emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
-    'update-source-item', 'add-budget-list-item'],
+    'update-source-item', 'add-budget-list-item', 'link-parent-indicator'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -119,6 +119,8 @@ export default defineComponent({
       }
 
       if (drawerConfig.value.type === 'pi') {
+        newData.linkedToChild = false
+
         await emit('update-data-source', { data: newData, isNew: true })
         await resetFields()
         if (newData.isHeader) {
@@ -253,6 +255,10 @@ export default defineComponent({
       emit('add-budget-list-item', data)
     }
 
+    const linkIndicator = data => {
+      emit('link-parent-indicator', data)
+    }
+
     return {
       formTableColumns,
       mainCategory,
@@ -279,6 +285,7 @@ export default defineComponent({
       editItem,
       updateTableItem,
       deleteItem,
+      linkIndicator,
       addBudgetListItem,
     }
   },

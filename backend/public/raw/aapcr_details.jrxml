@@ -60,6 +60,10 @@
 		<variableExpression><![CDATA[$F{programBudget}]]></variableExpression>
 		<initialValueExpression><![CDATA[0.00]]></initialValueExpression>
 	</variable>
+	<variable name="parentSubCategoryCount" class="java.lang.Integer" resetType="Group" resetGroup="ParentSubCategoryGroup1" calculation="Sum">
+		<variableExpression><![CDATA[$F{subPICount} == 1 && $F{subCategory} == null ? 1 : 0]]></variableExpression>
+		<initialValueExpression><![CDATA[1]]></initialValueExpression>
+	</variable>
 	<group name="FunctionGroup">
 		<groupExpression><![CDATA[$F{function}]]></groupExpression>
 		<groupHeader>
@@ -262,7 +266,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="DejaVu Sans" size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{subPICount} != 0 ? ("     "+$V{subCategoryCount}+"."+$F{subPICount}+" "+$F{pi_name}) : ($V{subCategoryCount}+". "+$F{pi_name})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{subPICount} != 0 ? ("     "+($F{subCategory} != null ? $V{subCategoryCount} : $V{parentSubCategoryCount})+"."+$F{subPICount}+" "+$F{pi_name}) : ($V{subCategoryCount}+". "+$F{pi_name})]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
 				<reportElement stretchType="ElementGroupHeight" x="227" y="0" width="75" height="13" isPrintWhenDetailOverflows="true" uuid="e919f7bc-0277-487b-959f-6f58b269aec5">

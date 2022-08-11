@@ -18,6 +18,7 @@ export default {
     loading: false,
     list: [],
     dataSource: [],
+    savedIndicators: [],
     hasVpopcrAccess: false,
     accessOfficeId : 0,
   },

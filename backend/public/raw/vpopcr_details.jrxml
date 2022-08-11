@@ -14,8 +14,12 @@
 	</style>
 	<style name="SubCategoryStyle">
 		<conditionalStyle>
-			<conditionExpression><![CDATA[$F{category_order} != 1]]></conditionExpression>
+			<conditionExpression><![CDATA[$F{category_order} != 1 && $F{parentSubCategory} != null]]></conditionExpression>
 			<style mode="Opaque" forecolor="#000000" fill="Solid" hTextAlign="Left" hImageAlign="Left" vTextAlign="Middle" vImageAlign="Middle" pattern="" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isItalic="true"/>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{category_order} != 1 && $F{parentSubCategory} == null]]></conditionExpression>
+			<style mode="Opaque" forecolor="#000000" fill="Solid" hTextAlign="Left" hImageAlign="Left" vTextAlign="Middle" vImageAlign="Middle" pattern="" isBlankWhenNull="true" fontName="DejaVu Sans" fontSize="6" isBold="true" isItalic="true"/>
 		</conditionalStyle>
 		<conditionalStyle>
 			<conditionExpression><![CDATA[$F{category_order} == 1 && $F{parentSubCategory} != null]]></conditionExpression>
@@ -98,7 +102,7 @@
 			<rightPen lineWidth="0.5" lineColor="#000000"/>
 		</box>
 	</style>
-	<style name="Table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+	<style name="Table 2_TD" mode="Transparent" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
 			<topPen lineWidth="0.5" lineColor="#000000"/>
