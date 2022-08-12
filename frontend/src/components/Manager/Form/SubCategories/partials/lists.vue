@@ -4,15 +4,20 @@
       <template v-if="column.dataIndex === 'ordering'">
         <div class="editable-cell">
           <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
-            <a-input v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     v-model:value="editableData[record.key].ordering"
-                     @pressEnter="update(record.key)" />
-            <a-input v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     v-model:value="editableData[record.key].ordering"
-                     @pressEnter="update(record.key)" />
-            <check-outlined class="editable-cell-icon-check" @click="update(record.key)" />
+            <a-input-group compact>
+              <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                              onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                              :min="1" :disabled="true" v-model:value="editableData[record.key].orderingParent" style="width: 20%" /> .
+              <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       v-model:value="editableData[record.key].ordering"
+                       @pressEnter="update(record.key)" />
+              <a-input-number v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       v-model:value="editableData[record.key].ordering"
+                       @pressEnter="update(record.key)" />
+              <check-outlined class="editable-cell-icon-check" @click="update(record.key)" />
+            </a-input-group>
           </div>
           <div v-else class="editable-cell-text-wrapper">
             {{ text || ' ' }}
@@ -102,6 +107,7 @@ export default defineComponent({
       let subCategory = getSubcategory(key)
       previousInput.value[key] = cloneDeep(subCategory)
       if (subCategory.parent_id){
+        subCategory.orderingParent = subCategory.ordering.toString().split('.')[0]
         subCategory.ordering = subCategory.ordering.toString().split('.')[1]
         editableData[key] = subCategory
       }
