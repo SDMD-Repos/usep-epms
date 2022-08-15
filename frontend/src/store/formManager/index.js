@@ -356,8 +356,8 @@ export default {
 
       const updateSubCategory = mapApiProviders.updateSubCategory
       updateSubCategory(data).then(response => {
+        dispatch('FETCH_SUB_CATEGORIES', { payload: { year: year } })
         if (response) {
-          dispatch('FETCH_SUB_CATEGORIES', { payload: { year: year } })
           notification.success({
             message: 'Success',
             description: 'Sub category updated successfully',
