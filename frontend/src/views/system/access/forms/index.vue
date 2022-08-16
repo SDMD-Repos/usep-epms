@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, onMounted, ref  } from 'vue';
+import {computed, defineComponent, onMounted, onUnmounted, ref} from 'vue';
 import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/AccessRights/Forms/aapcr'
 import FormAdminOpcrVp from '@/components/SystemAdmin/AccessRights/Forms/opcrvp'
@@ -51,6 +51,14 @@ export default defineComponent({
           // METHODS
       } = usePermission(permission)
 
+      const resetPermission = () => {
+        aapcrFormPermission.value = false
+        aapcrHeadPermission.value = false
+        opcrvpFormPermission.value = false
+        vpopcrHeadPermission.value = false
+        opcrFormPermission.value = false
+        opcrHeadPermission.value = false
+      }
 
       onMounted(() => {
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION', {
@@ -71,6 +79,10 @@ export default defineComponent({
                                                                     form_id: opcrFormId,
                                                                      },
                                                             })
+      })
+
+      onUnmounted(() => {
+        resetPermission()
       })
 
       return {

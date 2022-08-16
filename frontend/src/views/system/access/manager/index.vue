@@ -133,6 +133,7 @@ export default defineComponent({
     const getPersonnelList = officeId => {
       memberList.value = []
       personnelId.value = []
+      checkedKeys.value = []
       if (officeId) {
         store.dispatch('system/FETCH_PERMISSION')
         formLoading.value = true

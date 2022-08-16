@@ -44,7 +44,7 @@
 <script>
 import { defineComponent, computed, reactive, ref } from 'vue';
 import { useStore } from 'vuex'
-// import { WarningOutlined } from '@ant-design/icons-vue'
+import { WarningOutlined } from '@ant-design/icons-vue'
 import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash'
 
@@ -60,6 +60,7 @@ export default defineComponent({
   components: {
     CheckOutlined,
     EditOutlined,
+    WarningOutlined,
   },
   props: {
     subCategoryList: {
@@ -95,7 +96,7 @@ export default defineComponent({
         return
       for (let i of props.subCategoryList){
         if (i.key === key) subCat = i
-        if (!isObjectEmpty(i.children)){
+        if (isObjectEmpty(i.children) === false){
           for (let ii of i.children){
             if (ii.key === key) subCat = ii
           }
