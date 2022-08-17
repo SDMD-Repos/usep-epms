@@ -4,24 +4,31 @@
       <template v-if="column.dataIndex === 'ordering'">
         <div class="editable-cell">
           <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
-            <a-input-group compact>
-              <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
-                              onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                              :min="1" :disabled="true" v-model:value="editableData[record.key].orderingParent" style="width: 20%" /> .
-              <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
-                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                       v-model:value="editableData[record.key].ordering"
-                       @pressEnter="update(record.key)" />
-              <a-input-number v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
-                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                       v-model:value="editableData[record.key].ordering"
-                       @pressEnter="update(record.key)" />
-              <check-outlined class="editable-cell-icon-check" @click="update(record.key)" />
-            </a-input-group>
+            <div class="row">
+              <div col-lg-4>
+                <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                :min="1" :disabled="true" v-model:value="editableData[record.key].orderingParent" style="width: 50%" />
+              </div>
+              <div col-lg-4>
+                <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                v-model:value="editableData[record.key].ordering"
+                                @pressEnter="update(record.key)" style="width: 50%"/>
+                <a-input-number v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                v-model:value="editableData[record.key].ordering"
+                                @pressEnter="update(record.key)" style="width: 50%"/>
+              </div>
+              <div col-lg-4>
+                <check-outlined class="editable-cell-icon-check" @click="update(record.key)" />
+                <close-outlined class="editable-cell-icon-close" @click="cancelUpdate(record.key)" />
+              </div>
+            </div>
           </div>
           <div v-else class="editable-cell-text-wrapper">
             {{ text || ' ' }}
-            <edit-outlined class="editable-cell-icon" @click="edit(record.key)" />
+            <edit-outlined v-if="isCreate" class="editable-cell-icon" @click="edit(record.key)" />
           </div>
         </div>
       </template>
@@ -45,7 +52,7 @@
 import { defineComponent, computed, reactive, ref } from 'vue';
 import { useStore } from 'vuex'
 import { WarningOutlined } from '@ant-design/icons-vue'
-import { CheckOutlined, EditOutlined } from '@ant-design/icons-vue';
+import { CheckOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash'
 
 const columns = [
@@ -61,6 +68,7 @@ export default defineComponent({
     CheckOutlined,
     EditOutlined,
     WarningOutlined,
+    CloseOutlined,
   },
   props: {
     subCategoryList: {
@@ -68,6 +76,7 @@ export default defineComponent({
       type: Array,
     },
     isDelete : Boolean,
+    isCreate : Boolean,
     allAccess: Boolean,
   },
   emits: ['delete'],
@@ -126,9 +135,10 @@ export default defineComponent({
         delete editableData[key]
         onUpdate(subCategory)
       }
-
     };
-
+    const cancelUpdate = key => {
+      delete editableData[key]
+    }
     return {
       columns,
       loading,
@@ -137,6 +147,7 @@ export default defineComponent({
       editableData,
       edit,
       update,
+      cancelUpdate,
     }
   },
 })
@@ -155,24 +166,27 @@ export default defineComponent({
   }
 
   .editable-cell-icon,
-  .editable-cell-icon-check {
+  .editable-cell-icon-check,.editable-cell-icon-close {
     position: absolute;
-    right: 0;
     width: 20px;
     cursor: pointer;
+    right: 0;
+  }
+
+  .editable-cell-icon-check{
+    margin-right: 25px;
   }
 
   .editable-cell-icon {
     margin-top: 4px;
-    display: none;
   }
 
-  .editable-cell-icon-check {
+  .editable-cell-icon-check,.editable-cell-icon-close {
     line-height: 35px;
   }
 
   .editable-cell-icon:hover,
-  .editable-cell-icon-check:hover {
+  .editable-cell-icon-check:hover,.editable-cell-icon-close:hover {
     color: #108ee9;
   }
 

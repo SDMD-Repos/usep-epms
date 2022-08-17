@@ -84,7 +84,7 @@ export default defineComponent({
   components: {},
   setup() {
     const store = useStore()
-    const offices = computed(() => store.getters['external/external'].mainOffices)
+    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
     const loading = computed(() => store.getters['external/external'].loading)
     const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
 
@@ -107,6 +107,8 @@ export default defineComponent({
     const { aapcrFormPermission } = usePermission(permission)
 
     // EVENTS
+
+
     watch(() => [officeDetails.value] , ([officeDetails]) => {
       if (officeDetails && Object.keys(officeDetails).length > 0){
         officeId.value = {
@@ -131,7 +133,12 @@ export default defineComponent({
 
     onMounted(() => {
       formLoading.value = true
-      store.dispatch('external/FETCH_MAIN_OFFICES_ONLY')
+      let params = {
+        isOfficesOnly: true,
+        selectable: { allColleges: false, mains: true },
+        isAcronym: false,
+      }
+      store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       store.dispatch('system/FETCH_OFFICE_DETAILS',{payload:{form_id:'aapcr',office_id:null}})
       store.dispatch('system/CHECK_APCR_HEAD_PERMISSION',
         { payload: { pmaps_id: store.state.user.pmapsId, form_id:'aapcr' },
