@@ -1,7 +1,7 @@
 <template>
   <div  v-if="hasVpopcrAccess || opcrvpFormPermission">
     <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading" :access_office_id="parseInt(accessOfficeId)"
+      :columns="columns" :data-list="list" :form="formId" :loading="loading" :access-office-id="parseInt(accessOfficeId)"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
       @view-uploaded-list="viewUploadedList" @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel"/>
 

@@ -29,7 +29,7 @@
       </template>
 
       <template v-if="column.key === 'operation'">
-        <template v-if="(access_office_id === record.office_id) || has_aapcr_access">
+        <template v-if="(accessOfficeId === record.office_id) || hasAapcrAccess">
             <template v-if="record.is_active && !record.published_date">
               <a-tooltip>
                 <template #title><span>Update</span></template>
@@ -90,8 +90,8 @@ export default defineComponent({
     dataList: { type: Array, default: () => { return [] } },
     form: { type: String, default: '' },
     loading: Boolean,
-    access_office_id: { type: Number, default: null },
-    has_aapcr_access: { type: Boolean, default: false },
+    accessOfficeId: { type: Number, default: null },
+    hasAapcrAccess: { type: Boolean, default: false },
   },
   emits: [
     'update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms', 'cancel-unpublish-request',
