@@ -8,13 +8,13 @@
               <div col-lg-4>
                 <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
                                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                                :min="1" :disabled="true" v-model:value="editableData[record.key].orderingParent" style="width: 50%" />
+                                :min="1" :disabled="true" v-model:value="editableData[record.key].orderingParent" style="width: 50%;" />
               </div>
               <div col-lg-4>
                 <a-input-number v-if="editableData[record.key].parent_id" onpaste="return event.charCode >= 48 && event.charCode <= 57"
                                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                 v-model:value="editableData[record.key].ordering"
-                                @pressEnter="update(record.key)" style="width: 50%"/>
+                                @pressEnter="update(record.key)" style="width: 50%;"/>
                 <a-input-number v-else onpaste="return event.charCode >= 48 && event.charCode <= 57"
                                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                 v-model:value="editableData[record.key].ordering"
@@ -137,7 +137,13 @@ export default defineComponent({
       }
     };
     const cancelUpdate = key => {
-      delete editableData[key]
+      let subCategory = getSubcategory(key)
+      if (subCategory.ordering){
+        if (subCategory.parent_id)
+          subCategory.ordering = previousInput.value[key].ordering.toString().split('.')[0] + '.' + subCategory.ordering
+        Object.assign(subCategory, editableData[key])
+        delete editableData[key]
+      }
     }
     return {
       columns,

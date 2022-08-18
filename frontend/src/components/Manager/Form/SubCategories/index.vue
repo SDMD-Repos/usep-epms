@@ -236,25 +236,49 @@ export default defineComponent({
     }
 
     const onSubmit = () => {
-      formRef.value
-        .validate()
-        .then(() => {
-          Modal.confirm({
-            title: () => 'Are you sure you want to create this sub category?',
-            icon: () => createVNode(ExclamationCircleOutlined),
-            content: () => '',
-            onOk() {
-              formState.year = year.value
-              formState.parentId = typeof formState.parentId === 'undefined' ? null : formState.parentId
-              store.dispatch('formManager/CREATE_SUB_CATEGORY', { payload: toRaw(formState) })
-              resetForm()
-            },
-            onCancel() {},
+      let isValid = true
+      if (subCategories.value && Object.keys(subCategories.value).length > 0){
+        for (let obj of subCategories.value){
+          if (parseInt(formState.category_id) === obj.category_id && formState.ordering === obj.ordering){
+            isValid = false
+            break
+          }
+          if (obj.children && Object.keys(obj.children).length > 0){
+            for (let cObj of obj.children){
+              if (parseInt(formState.category_id) === cObj.category_id && formState.ordering === cObj.ordering){
+                isValid = false
+                break
+              }
+            }
+          }
+        }
+      }
+
+      if (isValid){
+        formRef.value
+          .validate()
+          .then(() => {
+            Modal.confirm({
+              title: () => 'Are you sure you want to create this sub category?',
+              icon: () => createVNode(ExclamationCircleOutlined),
+              content: () => '',
+              onOk() {
+                formState.year = year.value
+                formState.parentId = typeof formState.parentId === 'undefined' ? null : formState.parentId
+                store.dispatch('formManager/CREATE_SUB_CATEGORY', { payload: toRaw(formState) })
+                resetForm()
+              },
+              onCancel() {},
+            });
+          })
+          .catch(error => {
+            console.log('error', error);
           });
+      }else
+        Modal.error({
+          title: () => 'Unable to save the form',
+          content: () => 'The Ordering for this Category has already been used.',
         })
-        .catch(error => {
-          console.log('error', error);
-        });
     };
 
     const resetForm = () => {
