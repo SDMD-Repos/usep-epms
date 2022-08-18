@@ -54,6 +54,7 @@ import { useStore } from 'vuex'
 import { WarningOutlined } from '@ant-design/icons-vue'
 import { CheckOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons-vue';
 import { cloneDeep } from 'lodash'
+import {Modal} from "ant-design-vue";
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -79,7 +80,7 @@ export default defineComponent({
     isCreate : Boolean,
     allAccess: Boolean,
   },
-  emits: ['delete'],
+  emits: ['delete','fetchDetails'],
   setup(props, { emit } ) {
     const store = useStore()
     const loading = computed( () => store.getters['formManager/manager'].loading)
@@ -89,6 +90,10 @@ export default defineComponent({
     // METHODS
     const onDelete = key => {
       emit('delete', key)
+    }
+
+    const fetchDetails  = () => {
+      emit('fetchDetails')
     }
 
     const onUpdate = obj => {
@@ -129,21 +134,48 @@ export default defineComponent({
     const update = key => {
       let subCategory = getSubcategory(key)
       if (subCategory.ordering){
-        if (subCategory.parent_id)
-          subCategory.ordering = previousInput.value[key].ordering.toString().split('.')[0] + '.' + subCategory.ordering
-        Object.assign(subCategory, editableData[key])
-        delete editableData[key]
-        onUpdate(subCategory)
+        let isValid = true
+        if (subCategory.parent_id !== null){
+          let parentSubCategory = getSubcategory(subCategory.parent_id)
+          if(parseFloat(parentSubCategory.ordering + "." + subCategory.ordering) !== parseFloat(previousInput.value[key].ordering)){
+            if (parentSubCategory.children && Object.keys(parentSubCategory.children).length > 0){
+              for (let obj of parentSubCategory.children){
+                if (parseInt(obj.id) !== parseInt(subCategory.id) && parseFloat(parentSubCategory.ordering+"."+subCategory.ordering) === parseFloat(obj.ordering)){
+                  isValid = false
+                  break
+                }
+              }
+              subCategory.ordering = parentSubCategory.ordering + "." + subCategory.ordering
+            }
+          }
+        }else{
+          if(subCategory.ordering !== previousInput.value[key].ordering){
+            for (let obj of props.subCategoryList){
+              if (parseFloat(subCategory.ordering) === parseFloat(obj.ordering) && subCategory.id !== obj.id && parseInt(subCategory.category_id) === parseInt(obj.category_id)){
+                isValid = false
+                break
+              }
+            }
+          }
+        }
+        if (isValid){
+          Object.assign(subCategory, editableData[key])
+          delete editableData[key]
+          onUpdate(subCategory)
+        }else{
+          delete editableData[key]
+          subCategory.ordering = previousInput.value[key].ordering
+          Modal.error({
+            title: () => 'Unable to save the form',
+            content: () => 'The Ordering for this Sub Category has already been used',
+          })
+        }
       }
     };
     const cancelUpdate = key => {
+      delete editableData[key]
       let subCategory = getSubcategory(key)
-      if (subCategory.ordering){
-        if (subCategory.parent_id)
-          subCategory.ordering = previousInput.value[key].ordering.toString().split('.')[0] + '.' + subCategory.ordering
-        Object.assign(subCategory, editableData[key])
-        delete editableData[key]
-      }
+      subCategory.ordering = previousInput.value[key].ordering
     }
     return {
       columns,
