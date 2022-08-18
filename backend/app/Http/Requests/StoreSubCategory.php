@@ -58,7 +58,7 @@ class StoreSubCategory extends FormRequest
             'name.unique' => 'The Sub Category name has already been used.',
             'category_id.required' => 'This field is required',
             'ordering.required' => 'This field is required',
-            'ordering.unique' => 'The Ordering for this Category has already been used.',
+            'ordering.unique' => 'The Ordering for this Sub Category has already been used',
         ];
     }
 

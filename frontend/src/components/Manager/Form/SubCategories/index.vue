@@ -277,12 +277,14 @@ export default defineComponent({
       }else
         Modal.error({
           title: () => 'Unable to save the form',
-          content: () => 'The Ordering for this Category has already been used.',
+          content: () => 'The Ordering for this Sub Category has already been used',
         })
     };
 
     const resetForm = () => {
-      formRef.value.resetFields()
+      if (formRef.value){
+        formRef.value.resetFields()
+      }
       orderingDisabled.value = false
       orderingChildDisabled.value = false
       frmOrdering.value = null
