@@ -150,8 +150,6 @@ export default defineComponent({
               }
             }
         }else{
-          console.log(subCategory.ordering)
-          console.log(previousInput.value[key].ordering)
           if(subCategory.ordering === previousInput.value[key].ordering) return
 
           for (let obj of props.subCategoryList){

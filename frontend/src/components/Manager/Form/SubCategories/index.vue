@@ -243,13 +243,14 @@ export default defineComponent({
       let isValid = true
       if (subCategories.value && Object.keys(subCategories.value).length > 0){
         for (let obj of subCategories.value){
-          if (parseInt(formState.category_id) === obj.category_id && parseInt(formState.ordering) === obj.ordering){
+          if (parseInt(formState.category_id) === obj.category_id && formState.ordering.toString() === (obj.parent_id ? obj.parent_id +"."+obj.ordering : obj.ordering.toString())){
             isValid = false
             break
           }
+
           if (obj.children && Object.keys(obj.children).length > 0){
             for (let cObj of obj.children){
-              if (parseInt(formState.category_id) === cObj.category_id && parseInt(formState.ordering) === cObj.ordering){
+              if (parseInt(formState.category_id) === cObj.category_id && formState.ordering.toString() === (obj.parent_id ? obj.parent_id +"."+cObj.ordering : cObj.ordering.toString())){
                 isValid = false
                 break
               }
