@@ -80,7 +80,7 @@ export default defineComponent({
     isCreate : Boolean,
     allAccess: Boolean,
   },
-  emits: ['delete','fetchDetails'],
+  emits: ['delete','fetch-details'],
   setup(props, { emit } ) {
     const store = useStore()
     const loading = computed( () => store.getters['formManager/manager'].loading)
@@ -93,7 +93,7 @@ export default defineComponent({
     }
 
     const fetchDetails  = () => {
-      emit('fetchDetails')
+      emit('fetch-details')
     }
 
     const onUpdate = obj => {
@@ -136,27 +136,31 @@ export default defineComponent({
       if (subCategory.ordering){
         let isValid = true
         if (subCategory.parent_id !== null){
-          let parentSubCategory = getSubcategory(subCategory.parent_id)
-          if(parseFloat(parentSubCategory.ordering + "." + subCategory.ordering) !== parseFloat(previousInput.value[key].ordering)){
-            if (parentSubCategory.children && Object.keys(parentSubCategory.children).length > 0){
-              for (let obj of parentSubCategory.children){
-                if (parseInt(obj.id) !== parseInt(subCategory.id) && parseFloat(parentSubCategory.ordering+"."+subCategory.ordering) === parseFloat(obj.ordering)){
-                  isValid = false
-                  break
+          if (subCategory.ordering.toString() === previousInput.value[key].ordering.toString().split('.')[1]) return
+            let parentSubCategory = getSubcategory(subCategory.parent_id)
+            if(parseFloat(parentSubCategory.ordering + "." + subCategory.ordering) !== parseFloat(previousInput.value[key].ordering)){
+              if (parentSubCategory.children && Object.keys(parentSubCategory.children).length > 0){
+                for (let obj of parentSubCategory.children){
+                  if (parseInt(obj.id) !== parseInt(subCategory.id) && parseFloat(parentSubCategory.ordering+"."+subCategory.ordering) === parseFloat(obj.ordering)){
+                    isValid = false
+                    break
+                  }
                 }
+                subCategory.ordering = parentSubCategory.ordering + "." + subCategory.ordering
               }
-              subCategory.ordering = parentSubCategory.ordering + "." + subCategory.ordering
             }
-          }
         }else{
-          if(subCategory.ordering !== previousInput.value[key].ordering){
-            for (let obj of props.subCategoryList){
-              if (parseFloat(subCategory.ordering) === parseFloat(obj.ordering) && subCategory.id !== obj.id && parseInt(subCategory.category_id) === parseInt(obj.category_id)){
-                isValid = false
-                break
-              }
+          console.log(subCategory.ordering)
+          console.log(previousInput.value[key].ordering)
+          if(subCategory.ordering === previousInput.value[key].ordering) return
+
+          for (let obj of props.subCategoryList){
+            if (parseFloat(subCategory.ordering) === parseFloat(obj.ordering) && subCategory.id !== obj.id && parseInt(subCategory.category_id) === parseInt(obj.category_id)){
+              isValid = false
+              break
             }
           }
+
         }
         if (isValid){
           Object.assign(subCategory, editableData[key])

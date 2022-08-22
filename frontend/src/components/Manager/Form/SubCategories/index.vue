@@ -77,7 +77,7 @@
       </a-form>
     </div>
 
-    <sub-categories-table :sub-category-list="subCategories" :is-delete="isDelete"  :is-create="isCreate" @delete="onDelete" @fetchDetails="fetchSubCategory(year)"/>
+    <sub-categories-table :sub-category-list="subCategories" :is-delete="isDelete"  :is-create="isCreate" @delete="onDelete" @fetch-details="fetchSubCategory(year)"/>
   </a-spin>
 </template>
 <script>
