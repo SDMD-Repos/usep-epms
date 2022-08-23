@@ -31,6 +31,7 @@ use App\Signatory;
 use App\SignatoryType;
 use App\SubCategory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -215,6 +216,7 @@ class SettingController extends Controller
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
+            $subcategory->ordering = $validated['ordering'];
             $subcategory->year = $validated['year'];
             $subcategory->create_id = $this->login_user->pmaps_id;
             $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -227,6 +229,59 @@ class SettingController extends Controller
 
             return response()->json([
                 'success' => 'Sub category created successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function updateSubCategory(StoreSubCategory $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            $history = '';
+
+            DB::beginTransaction();
+            $subcategory = SubCategory::find($validated['id']);
+            $original = $subcategory->getOriginal();
+            $childSubcategories = SubCategory::where('parent_id', $validated['id'])->get();
+
+            foreach ($childSubcategories as $childSubcategory) {
+                $childSubcategory->ordering = ($childSubcategory->ordering - (int)$childSubcategory->ordering) + $validated['ordering'];
+                if (!$childSubcategory->save()) {
+                    DB::rollBack();
+                }
+            }
+
+            if($subcategory->isDirty('ordering')){
+                $history .= "Update Ordering from '".$original['ordering']."' to '".$validated['ordering']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
+            $subcategory->name = $validated['name'];
+            $subcategory->category_id = $validated['category_id'];
+            $subcategory->parent_id = $validated['parentId'];
+            $subcategory->ordering = $validated['ordering'];
+            $subcategory->year = $validated['year'];
+            $subcategory->updated_at = Carbon::now();
+            $subcategory->modify_id = $this->login_user->pmaps_id;
+            $subcategory->history = $subcategory->history . $history;
+
+            if (!$subcategory->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Sub category updated successfully'
             ], 200);
 
         } catch (\Exception $e) {

@@ -118,9 +118,9 @@ export default defineComponent({
       store.commit('aapcr/SET_STATE', { dataSource: [] })
       resetFormFields()
 
-      aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
-      if(hasAapcrAccess.value || aapcrFormPermission.value){
-        if(aapcrId.value) {
+      if(hasAapcrAccess.value || aapcrFormPermission.value ) {
+        aapcrId.value = typeof route.params.aapcrId !== 'undefined' ? route.params.aapcrId : null
+        if (aapcrId.value) {
           getFormDetails()
         } else {
           checkFormAvailability()

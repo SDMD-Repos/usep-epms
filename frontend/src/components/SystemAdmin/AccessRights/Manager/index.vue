@@ -13,6 +13,7 @@
                   :tree-data="offices"
                   placeholder="Select Office/College"
                   tree-node-filter-prop="title"
+                  tree-default-expand-all
                   show-search
                   allow-clear
                   label-in-value

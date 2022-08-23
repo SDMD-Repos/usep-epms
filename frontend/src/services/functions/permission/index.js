@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 export const usePermission = permission => {
-  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr } = permission
+  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request } = permission
 
   const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()
@@ -39,6 +39,14 @@ export const usePermission = permission => {
     return listIpcr ? listIpcr.includes(value.permission_id) : 0
   })
 
+  const ManagerPermission = accessLists.value.filter(value => {
+    return AccessRightsManager ? AccessRightsManager.includes(value.permission_id) : 0
+  })
+
+  const requestModulePermission = accessLists.value.filter(value => {
+    return request ? request.includes(value.permission_id) : 0
+  })
+
   const isCreate = ref(false)
   const isDelete = ref(false)
   const isEdit = ref(false)
@@ -47,6 +55,9 @@ export const usePermission = permission => {
   const opcrFormPermission = ref(false)
   const cpcrFormPermission = ref(false)
   const ipcrFormPermission = ref(false)
+  const ARManagerPermission = ref(false)
+  const requestPermission = ref(false)
+
   const aapcrTab = ref('')
   const opcrvpTab = ref('')
   const currentForms = ref([])
@@ -88,6 +99,14 @@ export const usePermission = permission => {
     ipcrFormPermission.value = true
   }
 
+  if (ManagerPermission.length > 0) {
+    ARManagerPermission.value = true
+  }
+
+  if (requestModulePermission.length > 0) {
+    requestPermission.value = true
+  }
+
   const allForms = currentForms.value
   return {
     isCreate,
@@ -101,5 +120,7 @@ export const usePermission = permission => {
     aapcrTab,
     opcrvpTab,
     allForms,
+    ARManagerPermission,
+    requestPermission,
   }
 }

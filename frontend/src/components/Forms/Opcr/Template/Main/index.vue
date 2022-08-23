@@ -1,45 +1,46 @@
 <template>
-  <div>
+  <div v-if="opcrFormPermission" >
     <a-spin :spinning="loading || isCheckingForm" :tip="spinningTip">
-      <a-row type="flex">
-        <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
-        <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
-          <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability" :disabled="editMode">
-            <template v-for="(y, i) in years" :key="i">
-              <a-select-option :value="y"> {{ y }} </a-select-option>
-            </template>
-          </a-select>
-        </a-col>
-      </a-row>
-
-      <div class="mt-4">
-        <a-collapse v-model:activeKey="activeKey" accordion>
-          <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`">
-            <template #header>
-              {{ !category.form_category ? category.name : category.form_category.display_name }}
-            </template>
-
-            <indicator-component v-if="allowEdit"
-                                 :function-id="category.id" :form-id="formId" :item-source="dataSource"
-                                 :categories="categories" :year="year" :counter="counter"
-                                 @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
-                                 @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
-          </a-collapse-panel>
-        </a-collapse>
-      </div>
-
-      <div class="mt-4" v-if="allowEdit">
-        <a-row type="flex" justify="center" align="middle">
-          <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
-            <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
-          </a-col>
-          <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
-            <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
+        <a-row type="flex">
+          <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
+          <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
+            <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="checkFormAvailability" :disabled="editMode">
+              <template v-for="(y, i) in years" :key="i">
+                <a-select-option :value="y"> {{ y }} </a-select-option>
+              </template>
+            </a-select>
           </a-col>
         </a-row>
-      </div>
-    </a-spin>
+
+        <div class="mt-4">
+          <a-collapse v-model:activeKey="activeKey" accordion>
+            <a-collapse-panel v-for="(category, key) in categories" :key="`${key}`">
+              <template #header>
+                {{ !category.form_category ? category.name : category.form_category.display_name }}
+              </template>
+
+              <indicator-component v-if="allowEdit"
+                                   :function-id="category.id" :form-id="formId" :item-source="dataSource"
+                                   :categories="categories" :year="year" :counter="counter"
+                                   @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
+                                   @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
+            </a-collapse-panel>
+          </a-collapse>
+        </div>
+
+        <div class="mt-4" v-if="allowEdit">
+          <a-row type="flex" justify="center" align="middle">
+            <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
+              <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
+            </a-col>
+            <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
+              <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
+            </a-col>
+          </a-row>
+        </div>
+      </a-spin>
   </div>
+  <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
 import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
@@ -50,6 +51,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useFormOperations } from '@/services/functions/indicator'
 import { getRequest } from '@/services/api/mainForms/ocpcr'
 import IndicatorComponent from './partials/items'
+import { usePermission } from '@/services/functions/permission'
 
 export default defineComponent({
   name: "OpcrTemplateForm",
@@ -93,18 +95,30 @@ export default defineComponent({
       return tip
     })
 
+    const permission ={
+      listOpcr: [ "form", "f-opcr", "fo-template" ],
+    }
+    // EVENTS
+    const {
+      // DATA
+      opcrFormPermission,
+      // METHODS
+    } = usePermission(permission)
+
     // EVENTS
     onMounted(() => {
+
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('opcrtemplate/SET_STATE', { dataSource: [] })
       resetFormFields()
 
       opcrTemplateId.value = typeof route.params.opcrTemplateId !== 'undefined' ? route.params.opcrTemplateId : null
-
-      if(opcrTemplateId.value) {
-        getFormDetails()
-      } else {
-        checkFormAvailability()
+      if (opcrFormPermission.value){
+        if(opcrTemplateId.value) {
+          getFormDetails()
+        } else {
+          checkFormAvailability()
+        }
       }
     })
 
@@ -258,7 +272,7 @@ export default defineComponent({
       deleteSourceItem,
       updateSourceItem,
       addDeletedItem,
-
+      opcrFormPermission,
     }
   },
 })

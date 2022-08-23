@@ -15,6 +15,7 @@ const mapApiProviders = {
   deleteOtherProgram: manager.deleteOtherProgram,
   getSubCategories: manager.getSubCategories,
   createSubCategory: manager.createSubCategory,
+  updateSubCategory: manager.updateSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
   getMeasures: manager.getMeasures,
   createMeasure: manager.createMeasure,
@@ -313,7 +314,7 @@ export default {
       })
     },
     CREATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
-      const { year, category_id, parentId, name } = payload
+      const { year, category_id, parentId, ordering, name } = payload
       commit('SET_STATE', {
         loading: true,
       })
@@ -321,6 +322,7 @@ export default {
         name: name,
         category_id: category_id,
         parentId: parentId,
+        ordering: ordering,
         year: year,
       }
 
@@ -331,6 +333,34 @@ export default {
           notification.success({
             message: 'Success',
             description: 'Sub category created successfully',
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE_SUB_CATEGORY({ commit, dispatch }, { payload }) {
+      const { id, year, category_id, parent_id, ordering, name } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const data = {
+        id: id,
+        name: name,
+        category_id: category_id,
+        parentId: parent_id,
+        ordering: ordering,
+        year: year,
+      }
+
+      const updateSubCategory = mapApiProviders.updateSubCategory
+      updateSubCategory(data).then(response => {
+        dispatch('FETCH_SUB_CATEGORIES', { payload: { year: year } })
+        if (response) {
+          notification.success({
+            message: 'Success',
+            description: 'Sub category updated successfully',
           })
         }
         commit('SET_STATE', {

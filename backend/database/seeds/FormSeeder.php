@@ -21,7 +21,7 @@ class FormSeeder extends Seeder
             ],
             [
                 'id' => 'vpopcr',
-                'abbreviation' => "OPCR (VPs)",
+                'abbreviation' => "OPCR (VP)",
                 'formal_name' => "Office Performance Commitment and Review (Vice Presidents)",
                 'ordering' => 2
             ],

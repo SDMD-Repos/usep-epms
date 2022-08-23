@@ -29,34 +29,41 @@
       </template>
 
       <template v-if="column.key === 'operation'">
-        <template v-if="record.is_active && !record.published_date">
-          <a-tooltip>
-            <template #title><span>Update</span></template>
-            <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
-          </a-tooltip>
-          <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
+        <template v-if="(accessOfficeId === record.office_id) || hasAapcrAccess">
+            <template v-if="record.is_active && !record.published_date">
+              <a-tooltip>
+                <template #title><span>Update</span></template>
+                <EditOutlined :style="{ fontSize: '18px' }" @click="handleUpdate(record.id)"/>
+              </a-tooltip>
+              <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
+            </template>
+            <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
+              <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
+            </a-tooltip>
+            <template v-if="record.finalized_date && !record.published_date && record.is_active">
+              <a-divider type="vertical" />
+              <a-tooltip title="Publish">
+                <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
+              </a-tooltip>
+            </template>
+            <template v-if="record.published_date && record.is_active &&
+                            (record.status && (!record.status.filter(i => i.status === 'pending').length) || form === 'opcrtemplate')"
+            >
+              <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
+              <a-tooltip title="Request to unpublish">
+                <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record)" />
+              </a-tooltip>
+            </template>
+            <template v-if="record.status && record.status.length && record.status.filter(i => i.status === 'verified').length">
+              <a-divider type="vertical" />
+              <a-tooltip title="View Archived">
+                <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUnpublishedForms(record)"/>
+              </a-tooltip>
+            </template>
         </template>
-        <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
-          <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
-        </a-tooltip>
-        <template v-if="record.finalized_date && !record.published_date && record.is_active">
-          <a-divider type="vertical" />
-          <a-tooltip title="Publish">
-            <FileDoneOutlined :style="{ fontSize: '18px' }" @click="handlePublish(record)"/>
-          </a-tooltip>
-        </template>
-        <template v-if="record.published_date && record.is_active &&
-                          (record.status && (!record.status.filter(i => i.status === 'pending').length) || form === 'opcrtemplate')"
-        >
-          <a-divider type="vertical" v-if="form !== 'opcrtemplate'" />
-          <a-tooltip title="Request to unpublish">
-            <CloseSquareFilled :style="{ fontSize: '18px' }" @click="onUnpublish(record)" />
-          </a-tooltip>
-        </template>
-        <template v-if="record.status && record.status.length && record.status.filter(i => i.status === 'verified').length">
-          <a-divider type="vertical" />
-          <a-tooltip title="View Archived">
-            <UnorderedListOutlined :style="{ fontSize: '18px' }" @click="openUnpublishedForms(record)"/>
+        <template v-else>
+          <a-tooltip v-if="form !== 'opcrtemplate'" title="View PDF">
+            <FilePdfOutlined :style="{ fontSize: '18px' }" @click="viewPdf(record)"/>
           </a-tooltip>
         </template>
       </template>
@@ -70,7 +77,7 @@ import dayjs from 'dayjs'
 import {
   EditOutlined, FilePdfOutlined, FileDoneOutlined, CloseSquareFilled, UnorderedListOutlined, ExclamationCircleOutlined,
 } from "@ant-design/icons-vue"
-
+import { usePermission } from '@/services/functions/permission'
 import { Modal } from "ant-design-vue"
 
 export default defineComponent({
@@ -83,6 +90,8 @@ export default defineComponent({
     dataList: { type: Array, default: () => { return [] } },
     form: { type: String, default: '' },
     loading: Boolean,
+    accessOfficeId: { type: Number, default: null },
+    hasAapcrAccess: { type: Boolean, default: false },
   },
   emits: [
     'update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms', 'cancel-unpublish-request',
@@ -94,7 +103,9 @@ export default defineComponent({
 
     // COMPUTED
     const dateFormat = computed(() => store.getters.mainStore.dateFormat)
+    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
 
+    const { opcrvpFormPermission } = usePermission(permission)
     // METHODS
     const handleUpdate = id => {
       loadingTip.value = 'Please wait...'
@@ -186,6 +197,7 @@ export default defineComponent({
       onUnpublish,
       cancelUnpublishRequest,
       openUnpublishedForms,
+      opcrvpFormPermission,
     }
   },
 })

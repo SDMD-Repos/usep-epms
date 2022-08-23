@@ -54,7 +54,7 @@
    <div v-else><error403 /></div>
 </template>
 <script>
-import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
+import {defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed, onBeforeMount} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -142,9 +142,10 @@ export default defineComponent({
       value: 'id',
     }
 
-      const permission ={
-                      listOpcr: [ "form", "f-opcr" ],
-                    }
+    const permission ={
+      listOpcr: [ "form", "f-opcr", "fo-manager" ],
+    }
+
     const {
           // DATA
         opcrFormPermission,
@@ -152,12 +153,12 @@ export default defineComponent({
       } = usePermission(permission)
 
     // EVENTS
+
     onMounted(() => {
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       if(opcrFormPermission.value){
           fetchAllPrograms(year.value)
       }
-
     })
 
     // METHODS

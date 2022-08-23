@@ -71,7 +71,7 @@ import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 import Error403 from '@/components/Errors/403'
 
-const permission = { listOpcr: [ "form", "f-opcr" ] }
+const permission = { listOpcr: [ "form", "f-opcr", "fo-formlist" ] }
 
 export default defineComponent({
   name: "OpcrForm",
@@ -156,7 +156,6 @@ export default defineComponent({
       resetFormFields()
 
       opcrId.value = typeof route.params.opcrId !== 'undefined' ? route.params.opcrId : null
-
       if(opcrId.value) {
         getFormDetails()
       } else {
