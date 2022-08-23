@@ -165,8 +165,12 @@ export default defineComponent({
           delete editableData[key]
           onUpdate(subCategory)
         }else{
-          delete editableData[key]
-          subCategory.ordering = previousInput.value[key].ordering
+          if (subCategory.parent_id){
+            subCategory.ordering = previousInput.value[key].ordering.toString().split('.')[1]
+          }else{
+            subCategory.ordering = previousInput.value[key].ordering
+          }
+
           Modal.error({
             title: () => 'Unable to save the form',
             content: () => 'The Ordering for this Sub Category has already been used',
