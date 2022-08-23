@@ -28,8 +28,11 @@
           <template #label>
             <span class="required-indicator">Program</span>
           </template>
-          <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
-                    label-in-value :disabled="config.type === 'sub'" />
+          <a-select v-model:value="form.program" placeholder="Select" style="width: 100%"
+                    label-in-value :disabled="config.type === 'sub'"
+                    :options="programsByFunction" />
+<!--          <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
+                    label-in-value :disabled="config.type === 'sub'" />-->
         </a-form-item>
 
         <a-form-item name="subCategory" label="Sub Category">
@@ -39,7 +42,7 @@
             :disabled="config.type === 'sub'"
             allow-clear tree-default-expand-all label-in-value
             @change="changeNullValue($event, 'subCategory')"
-          ></a-tree-select>
+          />
         </a-form-item>
 
         <a-form-item name="name" :rules="rules.name">
@@ -340,6 +343,10 @@ export default defineComponent({
       } else {
         values.type = config.value.type
 
+        if(typeof config.value.hasError !== 'undefined') {
+          values.hasError = false
+        }
+
         if(values.isHeader) {
           values.target = ''
           values.measures = []
@@ -357,6 +364,7 @@ export default defineComponent({
         })
         msgContent = 'Updated!'
       }
+
       await _message.success(msgContent, 2)
       await changeSubmitStatus()
     }

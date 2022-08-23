@@ -13,7 +13,7 @@
       :is-unpublish="isUnpublish" :form-id="formId"
       @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><error403 /></div>
 </template>
 
 <script>
@@ -29,10 +29,11 @@ import { usePermission } from '@/services/functions/permission'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "VpOpcrList",
-  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
+  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal, Error403 },
   props: {
     formId: { type: String, default: '' },
   },

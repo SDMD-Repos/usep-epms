@@ -10,8 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateVpOpcr;
-use App\Http\Requests\UploadPdfFile;
-use App\Http\Traits\ConverterTrait;
+/*use App\Http\Requests\UploadPdfFile;
+use App\Http\Traits\ConverterTrait;*/
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
@@ -28,6 +28,8 @@ class VpopcrController extends Controller
     use OfficeTrait, FileTrait, FormTrait;
 
     private $STO = 5;
+
+    protected $IDs = [];
 
     public function checkSaved($officeId, $year)
     {
@@ -84,7 +86,7 @@ class VpopcrController extends Controller
 
         $detailsOrdered = $query->detailsOrdered;
 
-        $savedIndicators = $this->getSavedIndicators($detailsOrdered);
+        $savedIndicators = $this->getSavedIndicators($detailsOrdered, $vpId);
 
         if ($query) {
             # Loop through PI details
@@ -359,7 +361,7 @@ class VpopcrController extends Controller
         }
     }
 
-    public function saveVpOpcrDetails($id, $data, $isNew=0)
+    protected function saveVpOpcrDetails($id, $data, $isNew=0)
     {
         $formFields = FormField::select('id', 'code')->whereIn('code', ['implementing', 'supporting'])->get();
 
@@ -509,135 +511,139 @@ class VpopcrController extends Controller
 
         $parentIds = []; // To store parent PIs' id for tracking purposes
 
-        $details = $vpOpcr->details()->where('parent_id', NULL)
+        $details = $vpOpcr->details()
             ->orderBy('category_id', 'ASC')
             ->orderByRaw('-program_id DESC')
             ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
             ->orderBy('created_at', 'ASC')->get();
 
+        $savedIndicators = $this->getSavedIndicators($details, $officeId,'view');
+
         foreach($details as $detail) {
-            $stored = 0;
+            if(!$detail->parent_id) {
+                $stored = 0;
 
-            $isParent = 0;
+                $isParent = 0;
 
-            $parentDetails = null;
+                $parentDetails = null;
 
-            $detail->isCascaded = $detail->from_aapcr;
+                $detail->isCascaded = $detail->from_aapcr;
 
-            $detail->wasSaved = 1;
+                $detail->wasSaved = 1;
 
-            $data = $this->getVpOpcrDetails($detail, []);
+                $data = $this->getVpOpcrDetails($detail, []);
 
-            if($detail->aapcr_detail_id) {
-                $aapcrDetail = $detail->aapcrDetail;
+                if($detail->aapcr_detail_id) {
+                    $aapcrDetail = $detail->aapcrDetail;
 
-                if($aapcrDetail->parent_id && $detail->from_aapcr) {
-                    if(!$detail->aapcrDetail->parent->is_header) {
-                        $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
-                            $query->where(function($q) use ($officeId) {
-                                $q->where('vp_office_id', '=', $officeId)
-                                    ->orWhere('office_id', '=', $officeId);
-                            });
-                        })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
+                    if($aapcrDetail->parent_id && $detail->from_aapcr) {
+                        if(!$detail->aapcrDetail->parent->is_header) {
+                            $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
+                                $query->where(function($q) use ($officeId) {
+                                    $q->where('vp_office_id', '=', $officeId)
+                                        ->orWhere('office_id', '=', $officeId);
+                                });
+                            })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
 
-                        if($parentDetail) {
+                            if($parentDetail) {
+                                $isParent = 1;
+
+                                $parentDetails = $parentDetail;
+                            }else{
+                                $stored = 1;
+                            }
+                        }else {
                             $isParent = 1;
 
-                            $parentDetails = $parentDetail;
+                            $parentDetails = $detail->aapcrDetail->parent;
+                        }
+                    } else {
+                        if(!$detail->from_aapcr) {
+                            $isParent = 1;
+
+                            $parentDetails = $aapcrDetail;
                         }else{
+
                             $stored = 1;
                         }
-                    }else {
-                        $isParent = 1;
-
-                        $parentDetails = $detail->aapcrDetail->parent;
                     }
                 } else {
-                    if(!$detail->from_aapcr) {
-                        $isParent = 1;
-
-                        $parentDetails = $aapcrDetail;
-                    }else{
-
-                        $stored = 1;
-                    }
-                }
-            } else {
-                $stored = 1;
-            }
-
-            if($isParent) {
-                $isExists = 0;
-
-                foreach($parentIds as $id) {
-                    if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
-                        $isExists = 1;
-                    }
+                    $stored = 1;
                 }
 
-                if(!$isExists) {
-                    $parentDetails->isCascaded = 1;
+                if($isParent) {
+                    $isExists = 0;
 
-                    $parentDetails->wasSaved = 0;
-
-                    if($parentDetails->category_id !== $detail->category_id){
-                        $parentDetails->category_id = $detail->category_id;
-
-                        $parentDetails->program_id = $detail->program_id;
-
-                        $parentDetails->sub_category_id = null;
-                    }else{
-                        $parentDetails->sub_category_id = $detail->sub_category_id;
-                    }
-
-                    $data['type'] = 'sub';
-
-                    $parentDetails['type'] = 'pi';
-
-                    $dataSource[] = $this->getVpOpcrDetails($parentDetails, $data);
-
-                    $parentIds[] = array(
-                        'id' => $parentDetails->id,
-                        'index' => $detail->category_id
-                    );
-
-                } else{
-                    foreach($dataSource as $key => $source) {
-                        if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
-                            $data['type'] = 'sub';
-
-                            $dataSource[$key]['children'][] = $data;
+                    foreach($parentIds as $id) {
+                        if($id['id'] === $parentDetails->id && $detail->category_id === $id['index']) {
+                            $isExists = 1;
                         }
                     }
-                }
-            } elseif($stored) {
-                if(count($detail->subDetails)) {
-                    $subs = [];
 
-                    foreach($detail->subDetails as $subDetail) {
+                    if(!$isExists) {
+                        $parentDetails->isCascaded = 1;
 
-                        $subDetail->isCascaded = $subDetail->from_aapcr;
+                        $parentDetails->wasSaved = 0;
 
-                        $subDetail->wasSaved = 1;
+                        if($parentDetails->category_id !== $detail->category_id){
+                            $parentDetails->category_id = $detail->category_id;
 
-                        $subDetail->type = 'sub';
+                            $parentDetails->program_id = $detail->program_id;
 
-                        $subs[] = $this->getVpOpcrDetails($subDetail, []);
+                            $parentDetails->sub_category_id = null;
+                        }else{
+                            $parentDetails->sub_category_id = $detail->sub_category_id;
+                        }
+
+                        $data['type'] = 'sub';
+
+                        $parentDetails['type'] = 'pi';
+
+                        $dataSource[] = $this->getVpOpcrDetails($parentDetails, $data);
+
+                        $parentIds[] = array(
+                            'id' => $parentDetails->id,
+                            'index' => $detail->category_id
+                        );
+
+                    } else{
+                        foreach($dataSource as $key => $source) {
+                            if($source['id'] === $parentDetails->id && $detail->category_id == $source['category']) {
+                                $data['type'] = 'sub';
+
+                                $dataSource[$key]['children'][] = $data;
+                            }
+                        }
+                    }
+                } elseif($stored) {
+                    if(count($detail->subDetails)) {
+                        $subs = [];
+
+                        foreach($detail->subDetails as $subDetail) {
+
+                            $subDetail->isCascaded = $subDetail->from_aapcr;
+
+                            $subDetail->wasSaved = 1;
+
+                            $subDetail->type = 'sub';
+
+                            $subs[] = $this->getVpOpcrDetails($subDetail, []);
+                        }
+
+                        $data['children'] = $subs;
                     }
 
-                    $data['children'] = $subs;
+                    $data['type'] = 'pi';
+
+                    $dataSource[] = $data;
+
+                    $parentIds[] = array(
+                        'id' => $detail->id,
+                        'index' => $detail->category_id
+                    );
                 }
-
-                $data['type'] = 'pi';
-
-                $dataSource[] = $data;
-
-                $parentIds[] = array(
-                    'id' => $detail->id,
-                    'index' => $detail->category_id
-                );
-            }
-        }
+            } // end if ($details->parent_id)
+        } // end foreach details
 
         $vpOffice = new \stdClass();
 
@@ -650,6 +656,7 @@ class VpopcrController extends Controller
             'vpOffice' => $vpOffice,
             'isFinalized' => $vpOpcr->finalized_date !== NULL,
             'targetsBasisList' => $this->targetsBasisList,
+            'savedIndicators' => $savedIndicators,
             'aapcrId' => $vpOpcr->aapcr_id,
             'editMode' => true,
         ], 200);
@@ -966,7 +973,7 @@ class VpopcrController extends Controller
         }
     }
 
-    public function viewUploadedFile($id)
+    /*public function viewUploadedFile($id)
     {
         $model = new VpOpcrFile();
 
@@ -1008,14 +1015,140 @@ class VpopcrController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
-    }
+    }*/
 
-    public function getSavedIndicators($indicators)
+    public function getSavedIndicators($indicators, $officeId, $mode='create')
     {
-        $detailIds = $indicators->pluck('id');
+        if($mode === 'view') {
+            $detailIds = $indicators->pluck('aapcr_detail_id');
+        } else {
+            $detailIds = $indicators->pluck('id');
+        }
 
-        $list = VpOpcrDetail::whereIn('aapcr_detail_id', $detailIds)->with(['offices', 'offices.field', 'vpopcr'])->get();
+        $params = [
+            'detailIds' => $detailIds, 'officeId' => $officeId
+        ];
+
+        $list = $this->querySavedIndicators($params);
 
         return $list;
+    }
+
+    public function checkSavedIndicators(Request $request)
+    {
+        $indicators = $request->data;
+        $officeId = $request->officeId;
+
+        $duplicates = [];
+
+        $this->getIndicatorsByField($indicators);
+
+        $params = [
+            'detailIds' => $this->IDs, 'officeId' => $officeId
+        ];
+
+        $savedIndicators = $this->querySavedIndicators($params);
+
+        if($savedIndicators) {
+            $this->recursiveIndicatorsChecking($indicators, $savedIndicators, $duplicates);
+        }
+
+        return response()->json([
+            'savedIndicators' => $savedIndicators,
+            'dataSource' => $indicators,
+            'duplicates' => $duplicates ?? [],
+        ], 200);
+    }
+
+    protected function recursiveIndicatorsChecking(&$data, $savedIndicators, &$storage)
+    {
+        foreach($data as $key => $datum) {
+            $offices = [];
+
+            foreach ($datum['implementing'] as $implementing) {
+                $offices[] = $implementing['value'];
+            }
+
+            foreach ($datum['supporting'] as $implementing) {
+                $offices[] = $implementing['value'];
+            }
+
+            foreach ($savedIndicators as $savedIndicator) {
+                if($datum['key'] === $savedIndicator['aapcr_detail_id']) {
+                    $officesArray = $savedIndicator->offices->toArray();
+
+                    $officesSearch = array_filter($officesArray, function($x) use ($offices) {
+                        return in_array((int)$x['office_id'], $offices);
+                    });
+
+                    if(count($officesSearch)) {
+                        $data[$key]['hasError'] = true;
+                        $errors = [];
+
+                        foreach ($officesSearch as $search ) {
+                            $vpOfficeName = $savedIndicator->vpOpcr->office_name;
+                            $assignedField = $search['field']['code'];
+
+                            if(count($data[$key][$assignedField])) {
+                                $data[$key][$assignedField] = array_filter($data[$key][$assignedField], function($x) use ($search) {
+                                    return $x['value'] !== (int)$search['office_id'];
+                                });
+                            }
+
+                            $errors[] = [
+                                'vpOffice' => $vpOfficeName,
+                                'officeId' => $search['office_id'],
+                                'officeName' => $search['office_name'],
+                                'field' => ucfirst($assignedField),
+                                'msg' => $vpOfficeName . " already set " . $search['office_name'] . " as " . ucfirst($assignedField),
+                                'solved' => false
+                            ];
+                        }
+
+                        $storage[] =  [
+                            'key' => $key,
+                            'id' => $datum['id'],
+                            'name' => $datum['name'],
+                            'errors' => $errors,
+                        ];
+                    }
+                }
+            }
+
+            if(isset($datum['children']) && count($datum['children'])) {
+                $this->recursiveIndicatorsChecking($datum['children'], $savedIndicators, $storage);
+            }
+        }
+    }
+
+    protected function querySavedIndicators($params=[])
+    {
+        extract($params);
+
+        $list = VpOpcrDetail::whereIn('aapcr_detail_id', $detailIds)
+            ->whereHas('vpopcr', function($q) use ($officeId) {
+                $q->where('office_id', '<>', $officeId);
+            })->where('is_header', 0)->with(['offices', 'offices.field', 'vpopcr'])->get();
+
+        return $list;
+    }
+
+    protected function getIndicatorsByField($data)
+    {
+        foreach ($data as $datum) {
+            if (strpos($datum['key'], 'new') === false) {
+                if($datum['isCascaded'] && !$datum['isHeader']) {
+                    if(!isset($datum['aapcr_detail_id'])) {
+                        $this->IDs[] = $datum['id'];
+                    }elseif($datum['aapcr_detail_id']){
+                        $this->IDs[] = $datum['aapcr_detail_id'];
+                    }
+                }
+
+                if(isset($datum['children']) && count($datum['children'])) {
+                    $this->getIndicatorsByField($datum['children']);
+                }
+            }
+        }
     }
 }

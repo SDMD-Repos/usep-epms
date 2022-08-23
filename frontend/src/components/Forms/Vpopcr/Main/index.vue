@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasVpopcrAccess || opcrvpFormPermission">
+  <div id="main-element" v-if="hasVpopcrAccess || opcrvpFormPermission">
     <a-spin :spinning="loading" :tip="spinningTip">
       <a-row type="flex">
         <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
@@ -27,18 +27,26 @@
         </a-col>
       </a-row>
 
+      <div class="mt-5" v-if="errorList.length">
+        <template v-for="(i, k) in errorList" :key="k">
+          <template v-for="(error, e) in i.errors" :key="e">
+            <a-alert class="mt-2" :message="error.msg" :type="error.solved ? 'success' : 'error'" show-icon />
+          </template>
+        </template>
+      </div>
+
       <div class="mt-5">
         <template v-for="(category, key) in categories" :key="`${key}`">
           <a-divider><b>{{ category.name }}</b></a-divider>
           <indicator-component
             :form-id="formId" :function-id="category.key" :item-source="dataSource" :allow-edit="allowEdit" :counter="counter"
             :categories="categories" :targets-basis-list="targetsBasisList" :is-published="viewOnly"
-            @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @update-source-item="updateSourceItem"
+            @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @update-source-item="updateSourceItemVP"
             @delete-source-item="deleteSourceItem" @add-deleted-item="addDeletedItem" @link-parent-indicator="linkParentIndicator" />
         </template>
       </div>
 
-      <div class="mt-4" v-if="allowEdit">
+      <div class="mt-4" v-if="allowEdit && !errorCount">
         <a-row type="flex" justify="center" align="middle">
           <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
             <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
@@ -50,7 +58,7 @@
       </div>
     </a-spin>
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><error403 /></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, onBeforeUnmount, createVNode, computed } from 'vue'
@@ -59,13 +67,14 @@ import { useRouter, useRoute } from "vue-router";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useFormOperations } from '@/services/functions/indicator'
-import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails } from '@/services/api/mainForms/vpopcr'
+import { checkSaved, getAapcrDetailsByOffice, fetchFormDetails, checkSavedIndicators } from '@/services/api/mainForms/vpopcr'
 import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "VpOPCRForm",
-  components: { IndicatorComponent },
+  components: { IndicatorComponent, Error403 },
   props: {
     formId: { type: String, default: '' },
   },
@@ -85,12 +94,14 @@ export default defineComponent({
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear, years, allowEdit,
       // METHOD
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, resetFormFields, linkParentIndicator,
+      updateDataSource, addTargetsBasisItem, updateSourceItemVP, deleteSourceItem, addDeletedItem, resetFormFields, linkParentIndicator,
     } = useFormOperations(props)
 
     // COMPUTED
     const hasVpopcrAccess = computed(() => store.getters['vpopcr/form'].hasVpopcrAccess)
     const accessOfficeId = computed(() => store.getters['vpopcr/form'].accessOfficeId)
+    const errorList = computed(() => store.getters['vpopcr/form'].formErrors)
+    const errorCount = computed(() => store.getters['vpopcr/form'].countFormErrors)
 
     let vpOfficesList =  computed(() => {
       let res = store.getters['external/external'].vpOffices
@@ -242,7 +253,9 @@ export default defineComponent({
 
           await onLoad()
 
-          store.commit('vpopcr/SET_STATE', { dataSource: response.dataSource })
+          store.commit('vpopcr/SET_STATE', {
+            dataSource: response.dataSource, savedIndicators: response.savedIndicators,
+          })
 
           year.value = response.year
           vpOffice.value = response.vpOffice
@@ -258,6 +271,39 @@ export default defineComponent({
     }
 
     const validateForm = isFinal => {
+      if(errorCount.value < 1) {
+        store.commit('vpopcr/SET_STATE', { loading: true })
+
+        const params = { data: dataSource.value, officeId: vpOffice.value.key }
+        checkSavedIndicators(params).then(response => {
+          if(response) {
+            const { duplicates } = response
+
+            store.commit('vpopcr/SET_STATE', {
+              dataSource: response.dataSource, savedIndicators: response.savedIndicators, formErrors: duplicates,
+              countFormErrors: duplicates.length,
+            })
+
+            if(duplicates.length > 0) {
+              // Scroll page to top
+              let element = document.querySelector(`#main-element`);
+              element.scrollIntoView({ behavior: "smooth" });
+            }else {
+              validateFormLevelTwo(isFinal);
+            }
+
+            store.commit('vpopcr/SET_STATE', { loading: false })
+          }
+        })
+      }else {
+        Modal.error({
+          title: () => 'Unable to save the form',
+          content: () => 'AAPCR ' + year.value + ' has not yet published',
+        })
+      }
+    }
+
+    const validateFormLevelTwo = isFinal => {
       if(viewOnly.value && vpOpcrId.value === null) {
         Modal.error({
           title: () => 'Unable to save the form',
@@ -269,7 +315,6 @@ export default defineComponent({
           content: () => 'No Performance Indicators were added to the list',
         })
       }else {
-
         let title = ''
         if (isFinal) {
           title = 'This will finalize and save your form'
@@ -320,7 +365,7 @@ export default defineComponent({
     }
 
     return {
-      vpOffice, allowEdit, viewOnly,
+      vpOffice, allowEdit, viewOnly, errorList, errorCount,
 
       vpOfficesList, categories, loading, spinningTip, hasVpopcrAccess, opcrvpFormPermission,
 
@@ -330,7 +375,7 @@ export default defineComponent({
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear,
       years,
 
-      updateDataSource, addTargetsBasisItem, updateSourceItem, deleteSourceItem, addDeletedItem, linkParentIndicator,
+      updateDataSource, addTargetsBasisItem, updateSourceItemVP, deleteSourceItem, addDeletedItem, linkParentIndicator,
     }
   },
 })

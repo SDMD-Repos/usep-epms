@@ -90,7 +90,7 @@ export function renderPdf(id) {
     .catch(err => console.log(err))
 }
 
-export function viewUploadedFile(id) {
+/*export function viewUploadedFile(id) {
   return apiClient
     .get('/forms/opcrvp/viewUploadedFile/' + id, { responseType: 'blob' })
     .then(response => {
@@ -102,6 +102,15 @@ export function viewUploadedFile(id) {
 export function updateFile(data) {
   return apiClient
     .post('/forms/opcrvp/update-file', data)
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}*/
+
+export function checkSavedIndicators(data) {
+  return apiClient
+    .post('/forms/opcrvp/check-saved-indicators', data)
     .then(response => {
       return response.data
     })

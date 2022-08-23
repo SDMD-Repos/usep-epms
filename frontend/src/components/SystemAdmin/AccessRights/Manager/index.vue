@@ -181,8 +181,8 @@ export default defineComponent({
 
     const onCheck = (data, { checkedNodes }) => {
       checkedNodes.forEach((checkedNode) => {
-        if (typeof checkedNode.props.dataRef.children !== "undefined") {
-          const { children } = checkedNode.props.dataRef;
+        if (typeof checkedNode.children !== "undefined") {
+          const { children } = checkedNode;
           checkedKeys.value = checkedKeys.value.filter(
             (o1) => !children.some((o2) => o1 === o2.key),
           );

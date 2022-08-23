@@ -179,7 +179,7 @@ export default defineComponent({
     }
 
     const editItem = data => {
-      let editData = null, updateId = null, parentDetails = undefined
+      let editData = null, updateId = null, parentDetails = undefined, hasError = false
       if (data.type === 'pi') {
         editData = cloneDeep(dataSource.value.filter(item => item.key === data.key)[0])
         updateId = dataSource.value.findIndex(record => record.key === data.key)
@@ -205,7 +205,14 @@ export default defineComponent({
       }
       assignFormData(editData)
 
-      openDrawer({ action: 'Update', updateId: updateId, type: data.type, isCascaded: data.isCascaded, parentDetails: parentDetails })
+      openDrawer({
+        action: 'Update',
+        updateId: updateId,
+        type: data.type,
+        isCascaded: data.isCascaded,
+        parentDetails: parentDetails,
+        hasError: editData.hasError,
+      })
     }
 
     const updateTableItem = async data => {
@@ -225,6 +232,7 @@ export default defineComponent({
         updateId: data.updateId,
         type: drawerConfig.value.type,
         parentId: ((typeof parentDetails !== 'undefined') ? parentDetails.key : undefined),
+        hasError: drawerConfig.value.hasError,
       })
       await closeDrawer({ isNewIndicator: 0, callback: data.resetFields })
     }

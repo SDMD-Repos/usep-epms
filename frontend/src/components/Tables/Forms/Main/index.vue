@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-table :columns="formTableColumns" :data-source="filteredSource" size="middle" bordered
-             :scroll="{ x: scrollX, y: 600 }">
+             :scroll="{ x: scrollX, y: 600 }" :row-class-name="record => { return record.hasError ? 'hasError' : '' }">
       <template #title>
         <a-button type="primary" :disabled="newButtonDisabled" @click="openDrawer('Add')">New</a-button>
       </template>

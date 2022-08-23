@@ -10,7 +10,7 @@ import { filters } from './filters'
 
 import {
   Avatar, TreeSelect, InputNumber, Button, Layout, Table, Radio, Dropdown, Menu, Input,
-  Badge, Slider, Form, Tooltip, Select, Switch, Descriptions,
+  Badge, Slider, Form, Tooltip, Select, Switch, Descriptions, Alert,
   Spin, Checkbox, Tabs, Drawer, Divider, AutoComplete, Collapse, Card, List,
   Tree, Row, Col, Modal, Popconfirm, ConfigProvider, message, notification,
 } from 'ant-design-vue'
@@ -49,6 +49,7 @@ const app = createApp(App)
   .use(Drawer)
   .use(Switch)
   .use(Descriptions)
+  .use(Alert)
   .use(AutoComplete)
   .use(Collapse)
   .use(ConfigProvider)

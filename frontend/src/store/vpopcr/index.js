@@ -21,6 +21,8 @@ export default {
     savedIndicators: [],
     hasVpopcrAccess: false,
     accessOfficeId : 0,
+    formErrors: [],
+    countFormErrors: 0,
   },
   mutations: {
     SET_STATE(state, payload) {

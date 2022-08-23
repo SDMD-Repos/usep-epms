@@ -14,7 +14,7 @@
         </template>
       </a-tabs>
     </a-card>
-    <div v-else><span>You have no permission to access this page</span></div>
+    <div v-else><error403 /></div>
   </a-spin>
 </template>
 <script>
@@ -22,9 +22,10 @@ import SignatoryForm from '@/components/Manager/Signatory/Main'
 import { defineComponent, ref, onMounted, onBeforeMount, computed } from 'vue'
 import { useStore } from 'vuex'
 import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
-  components: { SignatoryForm },
+  components: { SignatoryForm, Error403 },
   setup() {
     const store = useStore()
 

@@ -51,7 +51,7 @@
     </a-spin>
   </div>
   </div>
-   <div v-else><span>You have no permission to access this page.</span></div>
+   <div v-else><error403 /></div>
 </template>
 <script>
 import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
@@ -61,12 +61,14 @@ import { Modal } from 'ant-design-vue'
 import ProgramsTable from './partials/lists'
 import PreviousList from './partials/previousList'
 import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "OtherProgramsManager",
   components: {
     ProgramsTable,
     PreviousList,
+    Error403,
   },
   props: {
     formId: { type: String, default: null },

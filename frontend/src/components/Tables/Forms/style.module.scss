@@ -34,3 +34,11 @@ th.column-program {
 }
 
 .ant-table td { white-space: pre-wrap; }
+
+.hasError {
+  background: #FFCCC7;
+
+  .ant-table-cell-row-hover {
+    background: #FFF2F0 !important;
+  }
+}

@@ -9,6 +9,7 @@ export const useDrawerSettings = () => {
     updateId: null,
     type: 'pi',
     parentDetails: undefined,
+    hasError: false,
   })
 
   const data = ref(initialData())
@@ -24,6 +25,7 @@ export const useDrawerSettings = () => {
           updateId: null,
           type: 'pi',
           parentDetails: undefined,
+          hasError: false,
         }
         return false
       case 'newsub':
@@ -34,6 +36,7 @@ export const useDrawerSettings = () => {
           updateId: null,
           type: 'sub',
           parentDetails: params.parentDetails,
+          hasError: false,
         }
         return false
       case 'Update':
@@ -45,6 +48,7 @@ export const useDrawerSettings = () => {
           type: params.type,
           isCascaded: params.isCascaded,
           parentDetails: params.parentDetails,
+          hasError: params.hasError,
         }
         return false
     }
@@ -86,7 +90,7 @@ const defaultAapcrFormData = {
 }
 
 const defaultOpcrVpFormData = () => ({
-  program: null,
+  program: undefined,
   subCategory: undefined,
   name: '',
   isHeader: false,
@@ -105,7 +109,7 @@ const defaultOpcrVpFormData = () => ({
 })
 
 const defaultOpcrFormData = {
-  program: null,
+  program: undefined,
   subCategory: undefined,
   name: '',
   isHeader: false,
@@ -387,6 +391,24 @@ export const useFormOperations = props => {
     }
   }
 
+  const updateSourceItemVP = async data => {
+    updateSourceItem(data).then(() => {
+      const formErrors = computed(() => store.getters['vpopcr/form'].formErrors)
+      const countFormErrors = computed(() => store.getters['vpopcr/form'].countFormErrors)
+
+      if(data.hasError !== false && formErrors.value.length > 0 && countFormErrors.value !== 0) {
+        store.commit('vpopcr/SET_STATE', { countFormErrors: --countFormErrors.value })
+
+        const findError = formErrors.value.filter(e => { return e.key === data.updateId})
+        if(findError.length > 0) {
+          findError[0].errors.forEach(e => {
+            e.solved = true
+          })
+        }
+      }
+    })
+  }
+
   const addDeletedItem = id => {
     deletedItems.value.push(id)
   }
@@ -421,6 +443,6 @@ export const useFormOperations = props => {
     years,
 
     updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
-    resetFormFields, linkParentIndicator,
+    updateSourceItemVP, resetFormFields, linkParentIndicator,
   }
 }

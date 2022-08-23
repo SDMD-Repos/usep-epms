@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -122,8 +121,9 @@ Route::group([
         Route::get('/view/{id}', 'Form\VpopcrController@view');
         Route::get('/viewPdf/{id}', 'AppController@viewVpOpcrPdf');
         Route::post('/update/{id}', 'Form\VpopcrController@update');
-        Route::get('/viewUploadedFile/{id}', 'Form\VpopcrController@viewUploadedFile');
-        Route::post('/update-file', 'Form\VpopcrController@updateFile');
+        /*Route::get('/viewUploadedFile/{id}', 'Form\VpopcrController@viewUploadedFile');
+        Route::post('/update-file', 'Form\VpopcrController@updateFile');*/
+        Route::post('/check-saved-indicators', 'Form\VpopcrController@checkSavedIndicators');
     });
 
     # OPCR & CPCR Form Controller routes

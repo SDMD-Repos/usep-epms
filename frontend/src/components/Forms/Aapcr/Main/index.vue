@@ -41,7 +41,7 @@
       </div>
     </a-spin>
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><error403 /></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, onBeforeUnmount, onBeforeMount, createVNode, computed } from 'vue'
@@ -55,10 +55,11 @@ import { checkSavedForm, fetchFormDetails } from '@/services/api/mainForms/aapcr
 import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
 import BudgetListComponent from './partials/budget'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "AAPCRForm",
-  components: { IndicatorComponent, BudgetListComponent },
+  components: { IndicatorComponent, BudgetListComponent, Error403 },
   props: {
     formId: { type: String, default: '' },
     aapcrId: { type: Number, default: 0 },

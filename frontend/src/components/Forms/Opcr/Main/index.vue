@@ -57,7 +57,7 @@
       </div>
     </a-spin>
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><error403 /></div>
 </template>
 <script>
 import {defineComponent, ref, onMounted, createVNode, watch, computed, onBeforeMount} from 'vue'
@@ -69,12 +69,13 @@ import { useFormOperations } from '@/services/functions/indicator'
 import { getRequest } from '@/services/api/mainForms/ocpcr'
 import { usePermission } from '@/services/functions/permission'
 import IndicatorComponent from './partials/items'
+import Error403 from '@/components/Errors/403'
 
 const permission = { listOpcr: [ "form", "f-opcr" ] }
 
 export default defineComponent({
   name: "OpcrForm",
-  components: { IndicatorComponent },
+  components: { IndicatorComponent, Error403 },
   props: {
     formId: { type: String, default: '' },
     opcrTemplateId: { type: Number, default: 0 },
