@@ -192,7 +192,7 @@ class SettingController extends Controller
 
     public function getSubCategories($year, $isNested=0)
     {
-        $subCategories = SubCategory::with('category')->where('year', $year)->get();
+        $subCategories = SubCategory::select('*')->orderBy('ordering','asc')->with('category')->where('year', $year)->get();
 
         $isNested = filter_var($isNested, FILTER_VALIDATE_BOOLEAN);
 
