@@ -60,7 +60,7 @@ Route::group([
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
 
-    Route::get('/get-user-form-access/{pmaps_id}', 'SettingController@getUserFormAccess');
+    Route::get('/get-user-form-access', 'SettingController@getUserFormAccess');
     Route::get('/get-all-spms-forms', 'SettingController@getAllForms');
 
     Route::get('/get-all-signatory-types', 'SettingController@getAllSignatoryTypes');

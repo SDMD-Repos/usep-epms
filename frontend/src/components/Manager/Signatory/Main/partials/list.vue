@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-table :columns="columns" :data-source="list" bordered>
+    <a-table :columns="columns" :data-source="list" size="small" :pagination="false" :show-header="false" bordered>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'operation'">
           <a-popconfirm

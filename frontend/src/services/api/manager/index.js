@@ -171,9 +171,9 @@ export async function getAllForms() {
     .catch(err => console.log(err))
 }
 
-export async function getUserFormAccess($pmaps_id) {
+export async function getUserFormAccess() {
   return apiClient
-    .get('/settings/get-user-form-access/' + $pmaps_id)
+    .get('/settings/get-user-form-access')
     .then(response => {
       return response.data
     })

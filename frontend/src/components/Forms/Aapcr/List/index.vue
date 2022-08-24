@@ -1,19 +1,16 @@
 <template>
-  <div v-if="hasAapcrAccess || aapcrFormPermission">
-    <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-aapcr-access="aapcrFormPermission"
-      @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
-      @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
+  <form-list-table
+    :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-aapcr-access="aapcrFormPermission"
+    @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
+    @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
 
-    <unpublished-forms-modal
-      :modal-state="isUploadedViewed" :form-details="viewedForm"
-      @close-list-modal="onCloseList" @view-file="viewPdf" />
+  <unpublished-forms-modal
+    :modal-state="isUploadedViewed" :form-details="viewedForm"
+    @close-list-modal="onCloseList" @view-file="viewPdf" />
 
-    <unpublish-remarks-modal
-      :is-unpublish="isUnpublish" :form-id="formId"
-      @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
-  </div>
-   <div v-else><error403 /></div>
+  <unpublish-remarks-modal
+    :is-unpublish="isUnpublish" :form-id="formId"
+    @unpublish="unpublish" @close-remarks-modal="changeRemarksState" />
 </template>
 <script>
 import { defineComponent, ref, onMounted, inject, computed } from "vue"
@@ -27,11 +24,10 @@ import { usePermission } from '@/services/functions/permission'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
-import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "AapcrList",
-  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal, Error403 },
+  components: { FormListTable, UnpublishedFormsModal, UnpublishRemarksModal },
   props: {
     formId: { type: String, default: '' },
   },
@@ -49,7 +45,7 @@ export default defineComponent({
     // COMPUTED
     const list = computed(() => store.getters['aapcr/form'].list)
     const loading = computed(() => store.getters['aapcr/form'].loading)
-    
+
 
     const { isUploadedViewed, viewedForm,
       viewUnpublishedForms, onCloseList } = useViewPublishedFiles()

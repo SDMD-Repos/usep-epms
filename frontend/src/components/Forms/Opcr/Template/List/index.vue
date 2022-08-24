@@ -3,22 +3,21 @@
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
       @update-form="updateForm" @publish="publish" @unpublish="unpublish"  />
-
   </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+  <div v-else><error403 /></div>
 </template>
 <script>
 import { defineComponent, ref, onMounted, computed } from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
-import { useUnpublish } from '@/services/functions/formListActions'
 import FormListTable from '@/components/Tables/Forms/List'
 import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
   name: "OPCRTemplateList",
-  components: { FormListTable },
+  components: { FormListTable, Error403 },
   props: {
     formId: { type: String, default: '' },
   },

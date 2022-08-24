@@ -9,7 +9,7 @@
               <a-tab-pane tab="Programs" key="2"><opcr-programs-manager v-if="formId === `opcr`" :form-id="formId"/></a-tab-pane>
             </a-tabs>
           </div>
-          <div v-else><span>You have no permission to access this page.</span></div>
+          <div v-else><error403 /></div>
         </div>
       </div>
     </div>
@@ -21,9 +21,10 @@ import { useRoute } from 'vue-router'
 import OpcrFunctionsManager from '@/components/Forms/Opcr/Manager/Form/Functions'
 import OpcrProgramsManager from '@/components/Forms/Opcr/Manager/Form/Programs'
 import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
-  components: { OpcrFunctionsManager, OpcrProgramsManager },
+  components: { OpcrFunctionsManager, OpcrProgramsManager, Error403 },
   setup() {
     const formId = ref(null)
     const route = useRoute()

@@ -14,7 +14,7 @@
         </template>
       </a-tabs>
     </a-card>
-    <div v-else><error403 /></div>
+    <a-card v-else><error403 /></a-card>
   </a-spin>
 </template>
 <script>
@@ -51,10 +51,12 @@ export default defineComponent({
       store.dispatch('formManager/FETCH_USER_FORM_ACCESS', {
         payload: { pmapsId: store.state.user.pmapsId },
       })
+
+      store.dispatch('formManager/FETCH_ALL_FORMS_BY_PERMISSION', { payload: { allForms : allForms } })
     })
 
     onMounted( () => {
-      store.dispatch('formManager/FETCH_ALL_FORMS_BY_PERMISSION', { payload: { allForms : allForms } })
+
     })
 
     return {

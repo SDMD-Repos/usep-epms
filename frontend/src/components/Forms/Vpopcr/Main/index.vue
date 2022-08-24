@@ -46,7 +46,7 @@
         </template>
       </div>
 
-      <div class="mt-4" v-if="allowEdit && !errorCount">
+      <div class="mt-4" v-if="allowEdit && !errorCount && !viewOnly">
         <a-row type="flex" justify="center" align="middle">
           <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
             <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>

@@ -497,14 +497,13 @@ export default {
         })
       })
     },
-    FETCH_USER_FORM_ACCESS({ commit }, { payload }) {
-      const { pmapsId } = payload
+    FETCH_USER_FORM_ACCESS({ commit }) {
       commit('SET_STATE', {
         loading: true,
       })
 
       const getUserFormAccess = mapApiProviders.getUserFormAccess
-      getUserFormAccess(pmapsId).then(response => {
+      getUserFormAccess().then(response => {
         if (response) {
           const { userForms } = response
           commit('SET_STATE', {

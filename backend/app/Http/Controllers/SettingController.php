@@ -682,8 +682,10 @@ class SettingController extends Controller
         return response()->json(['forms' => $forms], 200);
     }
 
-    public function getUserFormAccess($pmaps_id)
+    public function getUserFormAccess()
     {
+        $pmaps_id = $this->login_user->pmaps_id;
+
         $userForms = FormAccess::where(function($q) use ($pmaps_id) {
             $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
         })->with('form')->get();

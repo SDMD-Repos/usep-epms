@@ -1,6 +1,6 @@
 <template>
-  <div v-if="ARManagerPermission">
-    <a-card>
+  <a-card>
+    <template v-if="ARManagerPermission">
       <a-spin :spinning="loading">
         <a-row type="flex">
           <a-col :span="12">
@@ -69,9 +69,10 @@
           <a-button v-else-if="!updateBtn && saveBtn" type="primary" @click="onUpdate" >Update</a-button>
         </a-row>
       </a-spin>
-    </a-card>
-  </div>
-  <div v-else><span>You have no permission to access this page.</span></div>
+    </template>
+    <div v-else><error403 /></div>
+  </a-card>
+
 </template>
 <script>
 import { defineComponent, onMounted, ref, computed } from 'vue';
@@ -80,6 +81,7 @@ import { DownOutlined } from '@ant-design/icons-vue';
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
 import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 const columns = [
   {
@@ -91,7 +93,7 @@ const columns = [
 
 export default defineComponent({
   name:"AccessRightsTable",
-  components: { DownOutlined },
+  components: { DownOutlined, Error403 },
   setup() {
     const store = useStore()
 
