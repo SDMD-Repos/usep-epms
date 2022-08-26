@@ -29,23 +29,44 @@ class AapcrController extends Controller
 
     public function checkSaved($year)
     {
-        $getSaved = Aapcr::where([
-            ['year', $year],
-            ['is_active', 1],
-        ])->orderBy('created_at', 'DESC')->first();
+        try {
+            $getSaved = Aapcr::where([
+                ['year', $year],
+                ['is_active', 1],
+            ])->orderBy('created_at', 'DESC')->first();
 
-        return response()->json([
-            'hasSaved' => isset($getSaved->id)
-        ], 200);
+            return response()->json([
+                'hasSaved' => isset($getSaved->id)
+            ], 200);
+        }catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+
     }
 
     public function getAllAapcrs()
     {
-        $aapcrList = Aapcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
+        try  {
+            $aapcrList = Aapcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
 
-        return response()->json([
-            'aapcrList' => $aapcrList
-        ], 200);
+            return response()->json([
+                'aapcrList' => $aapcrList
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function save(StoreAapcr $request)
@@ -182,32 +203,42 @@ class AapcrController extends Controller
 
     public function publish(Request $request)
     {
-        $id = $request->id;
-        $year = $request->year;
+        try {
+            $id = $request->id;
+            $year = $request->year;
 
-        $hasPublished = Aapcr::where([
-            ['year', $year],
-            ['is_active', 1]
-        ])->whereNotNull('published_date')->first();
+            $hasPublished = Aapcr::where([
+                ['year', $year],
+                ['is_active', 1]
+            ])->whereNotNull('published_date')->first();
 
-        if(!$hasPublished) {
-            $aapcr = Aapcr::find($id);
+            if(!$hasPublished) {
+                $aapcr = Aapcr::find($id);
 
-            $aapcr->published_date = Carbon::now();
-            $aapcr->updated_at = Carbon::now();
-            $aapcr->modify_id = $this->login_user->pmaps_id;
-            $aapcr->history = $aapcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $aapcr->published_date = Carbon::now();
+                $aapcr->updated_at = Carbon::now();
+                $aapcr->modify_id = $this->login_user->pmaps_id;
+                $aapcr->history = $aapcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-            $filename = $this->viewAapcrPdf($id, 1);
+                $filename = $this->viewAapcrPdf($id, 1);
 
-            $aapcr->published_file = $filename;
+                $aapcr->published_file = $filename;
 
-            $aapcr->save();
+                $aapcr->save();
 
-            return response()->json('AAPCR was published successfully', 200);
+                return response()->json('AAPCR was published successfully', 200);
 
-        }else{
-            return response()->json('Cannot publish two or more AAPCRs in a year', 400);
+            }else{
+                return response()->json('Cannot publish two or more AAPCRs in a year', 400);
+            }
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 
@@ -256,21 +287,31 @@ class AapcrController extends Controller
 
     public function deactivate(Request $request)
     {
-        $id = $request->id;
+        try {
+            $id = $request->id;
 
-        $now = Carbon::now();
+            $now = Carbon::now();
 
-        $aapcr = Aapcr::find($id);
+            $aapcr = Aapcr::find($id);
 
-        $aapcr->is_active = 0;
-        $aapcr->end_effectivity = $now;
-        $aapcr->updated_at = $now;
-        $aapcr->modify_id = $this->login_user->pmaps_id;
-        $aapcr->history = $aapcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+            $aapcr->is_active = 0;
+            $aapcr->end_effectivity = $now;
+            $aapcr->updated_at = $now;
+            $aapcr->modify_id = $this->login_user->pmaps_id;
+            $aapcr->history = $aapcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
 
-        $aapcr->save();
+            $aapcr->save();
 
-        return response()->json("Successfully deactivated", 200);
+            return response()->json("Successfully deactivated", 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function view($id)
@@ -393,7 +434,6 @@ class AapcrController extends Controller
     public function update(UpdateAapcr $request, $id)
     {
         try {
-
             DB::beginTransaction();
 
             $validated = $request->validated();

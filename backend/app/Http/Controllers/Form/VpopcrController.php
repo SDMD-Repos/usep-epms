@@ -33,15 +33,25 @@ class VpopcrController extends Controller
 
     public function checkSaved($officeId, $year)
     {
-        $hasSaved = VpOpcr::where([
-            ['office_id', (int)$officeId],
-            ['year', $year],
-            ['is_active', 1]
-        ])->first();
+        try {
+            $hasSaved = VpOpcr::where([
+                ['office_id', (int)$officeId],
+                ['year', $year],
+                ['is_active', 1]
+            ])->first();
 
-        return response()->json([
-            'hasSaved' => $hasSaved !== null
-        ], 200);
+            return response()->json([
+                'hasSaved' => $hasSaved !== null
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getAapcrDetails($vpId, $year)
@@ -101,8 +111,7 @@ class VpopcrController extends Controller
 
                 $subCategory = $extracted['subCategory'];
 
-//                $offices = $this->splitPIOffices($data, ['origin' => 'vpopcr']);
-                $offices = $this->processVpOffices($data, $vpId, 'vpopcr');
+                $offices = $this->processVpOffices($data, 'vpopcr');
 
                 $this->getTargetsBasisList($data->targets_basis);
 
@@ -111,7 +120,6 @@ class VpopcrController extends Controller
                 foreach($data->offices as $dataOffice) {
                     if(($dataOffice['vp_office_id'] === $vpId || $dataOffice['office_id'] === $vpId ||
                         ($dataOffice['is_group'] && $dataOffice->group->supervising_id === (int)$vpId))) {
-//                        $filteredOffices[] = $dataOffice;
 
                         $isCategoryExists = array_filter($tempCategoryList, function($x) use ($dataOffice){
                             return $x['id'] === $dataOffice['cascade_to'];
@@ -159,7 +167,19 @@ class VpopcrController extends Controller
                     );
 
                     if($data->parent_id) {
-                        $parent = AapcrDetail::where('id', $data->parent_id)->first();
+                        $parent = AapcrDetail::where('id', $data->parent_id)
+                            ->with(['offices' => function ($queryOffice) use ($vpId) {
+                                $queryOffice->where(function($officeQ) use ($vpId) {
+                                    $officeQ->where('vp_office_id', '=', $vpId)
+                                        ->orWhere('office_id', '=', $vpId)
+                                        ->orWhere(function($groupOfcWhere) use ($vpId) {
+                                            $groupOfcWhere->where('is_group', 1)
+                                                ->whereHas('group', function($joinOfcQuery) use ($vpId) {
+                                                    $joinOfcQuery->where('supervising_id', '=', $vpId);
+                                                });
+                                        });
+                                });
+                            }])->first();
 
                         if($parent) {
                             $isExists = 0;
@@ -171,7 +191,25 @@ class VpopcrController extends Controller
                             }
 
                             if(!$isExists){
-                                if($parent->is_header) {
+                                if($parent->is_header || $parent->linked_to_child) {
+                                    $target = ''; $measures = []; $budget = 0.00;
+                                    $targetsBasis = ""; $cascadingLevel = ""; $remarks = "";
+                                    $linkedToChild = 0; $parentImplementing = []; $parentSupporting = [];
+
+                                    if($parent->linked_to_child) {
+                                        $target = $parent->target;
+                                        $measures = $this->extractMeasures($parent->measures);
+                                        $budget = $parent->budget;
+                                        $targetsBasis = $parent->targets_basis;
+                                        $cascadingLevel = $parent->cascading_level;
+                                        $remarks = $parent->remarks;
+                                        $linkedToChild = $parent->linked_to_child;
+
+                                        $parentOffices = $this->processVpOffices($parent, 'vpopcr');
+
+                                        $parentImplementing = $parentOffices['implementing'] ?? [];
+                                        $parentSupporting = $parentOffices['supporting'] ?? [];
+                                    }
 
                                     $detail = array(
                                         'key' => $parent->id,
@@ -183,16 +221,16 @@ class VpopcrController extends Controller
                                         'programLabel' => $programLabel,
                                         'name' => $parent->pi_name,
                                         'isHeader' => true,
-                                        'target' => '',
-                                        'measures' => [],
-                                        'budget' => 0.00,
-                                        'targetsBasis' => '',
-                                        'cascadingLevel' => '',
-                                        'implementing' => [],
-                                        'supporting' => [],
-                                        'remarks' => '',
+                                        'target' => $target,
+                                        'measures' => $measures,
+                                        'budget' => $budget,
+                                        'targetsBasis' => $targetsBasis,
+                                        'cascadingLevel' => $cascadingLevel,
+                                        'implementing' => $parentImplementing,
+                                        'supporting' => $parentSupporting,
+                                        'remarks' => $remarks,
                                         'children' => [],
-                                        'linkedToChild' => 0,
+                                        'linkedToChild' => $linkedToChild,
                                         'deleted' => 0,
                                         'isCascaded' => 1
                                     );
@@ -253,11 +291,21 @@ class VpopcrController extends Controller
 
     public function getAllVpOpcrs()
     {
-        $list = VpOpcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
+        try {
+            $list = VpOpcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
 
-        return response()->json([
-            'list' => $list
-        ], 200);
+            return response()->json([
+                'list' => $list
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function save(StoreVpopcr $request)
@@ -407,29 +455,39 @@ class VpopcrController extends Controller
 
     public function publish(Request $request)
     {
-        $id = $request->id;
-        $year = $request->year;
-        $officeId = $request->officeId;
+        try {
+            $id = $request->id;
+            $year = $request->year;
+            $officeId = $request->officeId;
 
-        $hasPublished = VpOpcr::where([
-            ['year', $year],
-            ['office_id', $officeId],
-            ['is_active', 1]
-        ])->whereNotNull('published_date')->first();
+            $hasPublished = VpOpcr::where([
+                ['year', $year],
+                ['office_id', $officeId],
+                ['is_active', 1]
+            ])->whereNotNull('published_date')->first();
 
-        if(!$hasPublished) {
-            $vpopcr = VpOpcr::find($id);
+            if(!$hasPublished) {
+                $vpopcr = VpOpcr::find($id);
 
-            $vpopcr->published_date = Carbon::now();
-            $vpopcr->updated_at = Carbon::now();
-            $vpopcr->modify_id = $this->login_user->pmaps_id;
-            $vpopcr->history = $vpopcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $vpopcr->published_date = Carbon::now();
+                $vpopcr->updated_at = Carbon::now();
+                $vpopcr->modify_id = $this->login_user->pmaps_id;
+                $vpopcr->history = $vpopcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
-            $vpopcr->save();
+                $vpopcr->save();
 
-            return response()->json('OPCR was published successfully', 200);
-        }else{
-            return response()->json('Cannot publish two or more OPCRs for '.$hasPublished->office_name.' in a year', 400);
+                return response()->json('OPCR was published successfully', 200);
+            }else{
+                return response()->json('Cannot publish two or more OPCRs for '.$hasPublished->office_name.' in a year', 400);
+            }
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 
@@ -476,21 +534,31 @@ class VpopcrController extends Controller
 
     public function deactivate(Request $request)
     {
-        $id = $request->id;
+        try {
+            $id = $request->id;
 
-        $now = Carbon::now();
+            $now = Carbon::now();
 
-        $vpopcr = VpOpcr::find($id);
+            $vpopcr = VpOpcr::find($id);
 
-        $vpopcr->is_active = 0;
-        $vpopcr->end_effectivity = $now;
-        $vpopcr->updated_at = $now;
-        $vpopcr->modify_id = $this->login_user->pmaps_id;
-        $vpopcr->history = $vpopcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+            $vpopcr->is_active = 0;
+            $vpopcr->end_effectivity = $now;
+            $vpopcr->updated_at = $now;
+            $vpopcr->modify_id = $this->login_user->pmaps_id;
+            $vpopcr->history = $vpopcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
 
-        $vpopcr->save();
+            $vpopcr->save();
 
-        return response()->json("Successfully deactivated", 200);
+            return response()->json("Successfully deactivated", 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function view($id)
@@ -1036,28 +1104,38 @@ class VpopcrController extends Controller
 
     public function checkSavedIndicators(Request $request)
     {
-        $indicators = $request->data;
-        $officeId = $request->officeId;
+        try {
+            $indicators = $request->data;
+            $officeId = $request->officeId;
 
-        $duplicates = [];
+            $duplicates = [];
 
-        $this->getIndicatorsByField($indicators);
+            $this->getIndicatorsByField($indicators);
 
-        $params = [
-            'detailIds' => $this->IDs, 'officeId' => $officeId
-        ];
+            $params = [
+                'detailIds' => $this->IDs, 'officeId' => $officeId
+            ];
 
-        $savedIndicators = $this->querySavedIndicators($params);
+            $savedIndicators = $this->querySavedIndicators($params);
 
-        if($savedIndicators) {
-            $this->recursiveIndicatorsChecking($indicators, $savedIndicators, $duplicates);
+            if($savedIndicators) {
+                $this->recursiveIndicatorsChecking($indicators, $savedIndicators, $duplicates);
+            }
+
+            return response()->json([
+                'savedIndicators' => $savedIndicators,
+                'dataSource' => $indicators,
+                'duplicates' => $duplicates ?? [],
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
-
-        return response()->json([
-            'savedIndicators' => $savedIndicators,
-            'dataSource' => $indicators,
-            'duplicates' => $duplicates ?? [],
-        ], 200);
     }
 
     protected function recursiveIndicatorsChecking(&$data, $savedIndicators, &$storage)

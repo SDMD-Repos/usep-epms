@@ -63,23 +63,33 @@ class SettingController extends Controller
 
     public function getFunctions($year, $formId=null)
     {
-        if($formId) {
-            $categories = Category::select("*", "id as key")->where('year', $year)
-                ->with(['formCategory' => function($query) use ($formId) {
-                    $query->where('form_id', $formId)->where('display_name', '<>', NULL);
-                }])
-                ->orderBy('order', 'ASC')->get();
-        } else {
-            $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
-        }
+        try {
+            if($formId) {
+                $categories = Category::select("*", "id as key")->where('year', $year)
+                    ->with(['formCategory' => function($query) use ($formId) {
+                        $query->where('form_id', $formId)->where('display_name', '<>', NULL);
+                    }])
+                    ->orderBy('order', 'ASC')->get();
+            } else {
+                $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
+            }
 
-        foreach ($categories as $key => $category) {
-            $categories[$key]['header'] = $this->integerToRomanNumeral($category->order) . ". " . mb_strtoupper($category->name);
-        }
+            foreach ($categories as $key => $category) {
+                $categories[$key]['header'] = $this->integerToRomanNumeral($category->order) . ". " . mb_strtoupper($category->name);
+            }
 
-        return response()->json([
-            'categories' => $categories
-        ], 200);
+            return response()->json([
+                'categories' => $categories
+            ], 200);
+        } catch(\Exception $e){
+            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function createFunction(StoreCategory $request)
@@ -120,7 +130,6 @@ class SettingController extends Controller
     public function deleteCategory($id)
     {
         try {
-
             $category = Category::find($id);
 
             if((isset($category->programs) && count($category->programs)) && (isset($category->subCategory) && count($category->subCategory))) {
@@ -192,21 +201,30 @@ class SettingController extends Controller
 
     public function getSubCategories($year, $isNested=0)
     {
-        $subCategories = SubCategory::with('category')->where('year', $year)->get();
+        try {
+            $subCategories = SubCategory::with('category')->where('year', $year)->get();
 
-        $isNested = filter_var($isNested, FILTER_VALIDATE_BOOLEAN);
+            $isNested = filter_var($isNested, FILTER_VALIDATE_BOOLEAN);
 
-        $modSubCategories = $isNested ? $this->getNestedChildren($subCategories) : $subCategories;
+            $modSubCategories = $isNested ? $this->getNestedChildren($subCategories) : $subCategories;
 
-        return response()->json([
-            'subCategories' => $modSubCategories
-        ], 200);
+            return response()->json([
+                'subCategories' => $modSubCategories
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function createSubCategory(StoreSubCategory $request)
     {
         try {
-
             $validated = $request->validated();
 
             DB::beginTransaction();
@@ -299,7 +317,6 @@ class SettingController extends Controller
     public function deleteSubCategory($id)
     {
         try {
-
             DB::beginTransaction();
 
             $subcategory = SubCategory::where('id', $id)->with('childSubCategories')->get();
@@ -337,20 +354,40 @@ class SettingController extends Controller
 
     public function getPrograms($year)
     {
-        $programs = Program::select("*", "id as key")->where('year', $year)->with('category')->get();
+        try {
+            $programs = Program::select("*", "id as key")->where('year', $year)->with('category')->get();
 
-        return response()->json([
-            'programs' => $programs
-        ], 200);
+            return response()->json([
+                'programs' => $programs
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getOtherPrograms($year,$form_id)
     {
-        $programs = OtherProgram::select("*", "id as key")->where('year', $year)->where('form_id',$form_id)->with('category')->get();
+        try {
+            $programs = OtherProgram::select("*", "id as key")->where('year', $year)->where('form_id',$form_id)->with('category')->get();
 
-        return response()->json([
-            'otherPrograms' => $programs
-        ], 200);
+            return response()->json([
+                'otherPrograms' => $programs
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function createProgram(StoreProgram $request)
@@ -391,7 +428,6 @@ class SettingController extends Controller
 
     public function createOtherProgram(StoreOtherProgram $request)
     {
-
         try {
             $validated = $request->validated();
 
@@ -430,7 +466,6 @@ class SettingController extends Controller
     public function deleteProgram($id)
     {
         try {
-
             $program = Program::find($id);
 
             if($program)
@@ -466,7 +501,6 @@ class SettingController extends Controller
     public function deleteOtherProgram($id)
     {
         try {
-
             $program = OtherProgram::find($id);
 
             $program->modify_id = $this->login_user->pmaps_id;
@@ -499,17 +533,26 @@ class SettingController extends Controller
 
     public function getMeasures($year)
     {
-        $measures = Measure::select('id', 'name', 'year', 'display_as_items', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
+        try {
+            $measures = Measure::select('id', 'name', 'year', 'display_as_items', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
 
-        return response()->json([
-            'measures' => $measures
-        ], 200);
+            return response()->json([
+                'measures' => $measures
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function createMeasure(StoreMeasure $request)
     {
         try {
-
             $validated = $request->validated();
 
             DB::beginTransaction();
@@ -642,7 +685,6 @@ class SettingController extends Controller
     public function deleteMeasure($id)
     {
         try {
-
             DB::beginTransaction();
 
             $measure = Measure::find($id);
@@ -677,57 +719,97 @@ class SettingController extends Controller
 
     public function getAllForms()
     {
-        $forms = Form::orderBy('ordering', 'asc')->get();
+        try {
+            $forms = Form::orderBy('ordering', 'asc')->get();
 
-        return response()->json(['forms' => $forms], 200);
+            return response()->json(['forms' => $forms], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getUserFormAccess()
     {
-        $pmaps_id = $this->login_user->pmaps_id;
+        try {
+            $pmaps_id = $this->login_user->pmaps_id;
 
-        $userForms = FormAccess::where(function($q) use ($pmaps_id) {
-            $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
-        })->with('form')->get();
+            $userForms = FormAccess::where(function($q) use ($pmaps_id) {
+                $q->where('pmaps_id', $pmaps_id)->orWhere('staff_id', $pmaps_id);
+            })->with('form')->get();
 
-        return response()->json([
-            'userForms' => $userForms
-        ], 200);
+            return response()->json([
+                'userForms' => $userForms
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getAllSignatoryTypes()
     {
-        $signatoryTypes = SignatoryType::orderBy('ordering', 'ASC')->get();
+        try {
+            $signatoryTypes = SignatoryType::orderBy('ordering', 'ASC')->get();
 
-        return response()->json([
-            'signatoryTypes' => $signatoryTypes
-        ], 200);
+            return response()->json([
+                'signatoryTypes' => $signatoryTypes
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getYearSignatories($year, $formId, $officeId)
     {
-        if($officeId === 'undefined') {
-            $signatories = Signatory::select("*", "id as key")->where([
-                ['form_id', $formId],
-                ['year', $year]
-            ])->get();
-        } else {
-            $signatories = Signatory::select("*", "id as key")->where([
-                ['form_id', $formId],
-                ['year', $year],
-                ['office_form_id', $officeId]
-            ])->get();
+        try {
+            if($officeId === 'undefined') {
+                $signatories = Signatory::select("*", "id as key")->where([
+                    ['form_id', $formId],
+                    ['year', $year]
+                ])->get();
+            } else {
+                $signatories = Signatory::select("*", "id as key")->where([
+                    ['form_id', $formId],
+                    ['year', $year],
+                    ['office_form_id', $officeId]
+                ])->get();
+            }
+
+            foreach($signatories as $i => $signatory) {
+                $offices = $this->getPersonnelByOffice($signatory->office_id, 1, 0, 0);
+
+                $signatories[$i]['memberList'] = $offices;
+            }
+
+            return response()->json([
+                'signatories' => $signatories
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
-
-        foreach($signatories as $i => $signatory) {
-            $offices = $this->getPersonnelByOffice($signatory->office_id, 1, 0, 0);
-
-            $signatories[$i]['memberList'] = $offices;
-        }
-
-        return response()->json([
-            'signatories' => $signatories
-        ], 200);
     }
 
     public function saveSignatories(StoreSignatory $request)
@@ -940,17 +1022,26 @@ class SettingController extends Controller
 
     public function getAllGroups()
     {
-        $groups = Group::select('*', 'id as key')->with('members')->get();
+        try {
+            $groups = Group::select('*', 'id as key')->with('members')->get();
 
-        return response()->json([
-            'groups' => $groups
-        ], 200);
+            return response()->json([
+                'groups' => $groups
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function saveGroup(StoreGroup $request)
     {
         try{
-
             $validated = $request->validated();
 
             $name = $validated['name'];
@@ -991,7 +1082,7 @@ class SettingController extends Controller
             DB::commit();
 
             return response()->json('Group created successfully', 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
                 $status = $e->getCode();
             } else {
@@ -1023,7 +1114,13 @@ class SettingController extends Controller
                 DB::rollBack();
             }
         }catch (\Exception $e) {
-            dd($e);
+            if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 
@@ -1135,7 +1232,6 @@ class SettingController extends Controller
     public function deleteGroup($id)
     {
         try {
-
             DB::beginTransaction();
 
             $group = Group::find($id);
@@ -1168,22 +1264,42 @@ class SettingController extends Controller
 
     public function getAllCascadingLevels()
     {
-        $cascadingLevels = CascadingLevel::orderBy('ordering', 'ASC')->get();
+        try {
+            $cascadingLevels = CascadingLevel::orderBy('ordering', 'ASC')->get();
 
-        return response()->json([
-            'cascadingLevels' => $cascadingLevels
-        ], 200);
+            return response()->json([
+                'cascadingLevels' => $cascadingLevels
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function getAllFormFields($year, $formId)
     {
-        $formFields = FormField::with(['settings' => function($query) use ($year, $formId) {
-            $query->where('year', $year)->where('form_id', $formId);
-        }])->get();
+        try {
+            $formFields = FormField::with(['settings' => function($query) use ($year, $formId) {
+                $query->where('year', $year)->where('form_id', $formId);
+            }])->get();
 
-        return response()->json([
-            'formFields' => $formFields
-        ], 200);
+            return response()->json([
+                'formFields' => $formFields
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     public function saveFormFieldSettings(StoreFormFieldSetting $request)
@@ -1354,7 +1470,6 @@ class SettingController extends Controller
     public function deleteFormCategory($id)
     {
         try {
-
             DB::beginTransaction();
 
             $formCategory = FormCategory::find($id);

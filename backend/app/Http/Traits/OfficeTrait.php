@@ -291,7 +291,7 @@ trait OfficeTrait {
         ], 200);
     }
 
-    public function processVpOffices($list, $id, $origin)
+    public function processVpOffices($list, $origin)
     {
         $offices = array();
 

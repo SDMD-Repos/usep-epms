@@ -232,15 +232,7 @@ trait ConverterTrait {
         $measures = [];
 
         if(count($detail->measures)) {
-            foreach($detail->measures as $measure) {
-                $record = new \stdClass();
-
-                $record->key = $measure->id;
-                $record->label = $measure->name;
-                $record->option = $measure;
-
-                $measures[] = $record;
-            }
+            $measures = $this->extractMeasures($detail->measures);
         }
 
         return [
@@ -249,6 +241,23 @@ trait ConverterTrait {
             'cascadingLevel' => $cascadingLevel ?? "",
             'measures' => $measures,
         ];
+    }
+
+    public function extractMeasures($measures)
+    {
+        $list = [];
+
+        foreach($measures as $measure) {
+            $record = new \stdClass();
+
+            $record->key = $measure->id;
+            $record->label = $measure->name;
+            $record->option = $measure;
+
+            $measures[] = $record;
+        }
+
+        return $list;
     }
 
     public function checkArrayObjectsValue($lists, $object, $value)
