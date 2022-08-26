@@ -16,6 +16,24 @@
         </template>
       </a-select>
     </div>
+    <div class="mt-2" v-if="formId === 'opcr'">
+      <a-tree-select
+        v-model:value="selectedOffice"
+        :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+        style="width: 450px"
+        placeholder="Select Office/College"
+        tree-node-filter-prop="title"
+        :tree-data="offices"
+        tree-default-expand-all
+        show-search
+        allow-clear
+        label-in-value
+        @change="fetchSignatories"
+      />
+
+    </div>
+
+
     <div class="mt-4">
       <a-collapse v-model:activeKey="activeKey">
         <a-collapse-panel v-for="(type, key) in signatoryTypes" :header="type.name" :key="`${key}`">
@@ -97,10 +115,21 @@ export default defineComponent({
 
     // EVENTS
     onBeforeMount(async () => {
+
       let params = {
         selectable: { allColleges: true, mains: true },
         isAcronym: false,
+        isOfficesOnly: true,
       }
+
+      switch (formId.value){
+        case 'opcr':
+          params.selectable = { allColleges: false, mains: false }
+          break
+        default:
+          break
+      }
+
 
       await store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
       await store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
@@ -125,14 +154,25 @@ export default defineComponent({
       store.commit('formManager/SET_STATE', {
         signatories: [],
       })
-      if (formId.value === 'vpopcr') {
-        if (typeof selectedOffice.value !== 'undefined') {
-          data.officeId = selectedOffice.value
+
+      switch (formId.value){
+        case 'vpopcr':
+          if (typeof selectedOffice.value !== 'undefined') {
+            data.officeId = selectedOffice.value
+            store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
+          }
+          break
+        case 'opcr':
+          if (selectedOffice.value && typeof selectedOffice.value !== 'undefined'){
+            data.officeId = selectedOffice.value.value
+            store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
+          }
+          break
+        default:
           store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
-        }
-      } else {
-        store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
+          break
       }
+
     }
 
     const filterBySignatory = type => {

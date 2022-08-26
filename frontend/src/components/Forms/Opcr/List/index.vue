@@ -36,15 +36,15 @@ export default defineComponent({
     const { opcrFormPermission } = usePermission(permission)
 
     // COMPUTED
-    const list = computed(() => store.getters['opcrtemplate/form'].list)
-    const loading = computed(() => store.getters['opcrtemplate/form'].loading)
+    const list = computed(() => store.getters['opcr/form'].list)
+    const loading = computed(() => store.getters['opcr/form'].loading)
     const hasOpcrAccess = computed(() => store.getters['opcr/form'].hasOpcrAccess)
     const { unpublish } = useUnpublish()
 
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcrtemplate/FETCH_LIST')
+      store.dispatch('opcr/FETCH_LIST')
     })
 
     // METHODS
@@ -60,12 +60,7 @@ export default defineComponent({
         id: data.id,
         year: data.year,
       }
-      store.dispatch('opcrtemplate/PUBLISH', { payload: payload })
-    }
-
-    const unpublishTemplate = data => {
-      const id = data
-      store.dispatch('opcrtemplate/UNPUBLISH', { payload: {id: id} })
+      store.dispatch('opcr/PUBLISH', { payload: payload })
     }
 
     return {
@@ -76,7 +71,6 @@ export default defineComponent({
       loading,
 
       unpublish,
-      unpublishTemplate,
 
       updateForm,
       publish,

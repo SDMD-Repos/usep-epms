@@ -137,6 +137,7 @@ Route::group([
         Route::get('/view-template/{id}', 'Form\OpcrTemplateController@viewTemplate');
         Route::get('/template-list', 'Form\OpcrTemplateController@getAllOpcrTemplate');
 
+
         Route::post('/save-template', 'Form\OpcrTemplateController@saveTemplate');
         Route::post('/publish-template', 'Form\OpcrTemplateController@publishTemplate');
         Route::post('/deactivate-template', 'Form\OpcrTemplateController@deactivateTemplate');
@@ -146,6 +147,7 @@ Route::group([
         # MAIN FORM
         Route::get('/check-saved/{officeId}/{year}', 'Form\OcpcrController@checkSaved');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
+        Route::get('/list', 'Form\OcpcrController@getAllOpcr');
     });
 });
 

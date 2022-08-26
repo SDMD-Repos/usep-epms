@@ -521,7 +521,7 @@ trait PdfTrait {
 
     public function getSignatories($model, $form)
     {
-        if($form === 'vpopcr') {
+        if($form === 'vpopcr' || $form === 'opcr') {
             $signatories = Signatory::where([
                 ['year', $model->year],
                 ['form_id', $form],

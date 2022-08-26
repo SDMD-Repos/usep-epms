@@ -366,4 +366,13 @@ class OcpcrController extends Controller
         return $details;
     }
 
+    public function getAllOpcr()
+    {
+        $list = Opcr::select("*", "id as key")->orderBy('created_at', 'ASC')->get();
+
+        return response()->json([
+            'list' => $list
+        ], 200);
+    }
+
 }

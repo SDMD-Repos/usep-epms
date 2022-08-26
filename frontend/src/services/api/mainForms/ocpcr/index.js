@@ -9,9 +9,9 @@ export function checkSavedForm(year) {
     .catch(err => console.log(err))
 }
 
-export function fetchOpcrTemplates() {
+export function fetchOpcr() {
   return apiClient
-    .get('/forms/ocpcr/template-list')
+    .get('/forms/ocpcr/list')
     .then(response => {
       return response.data
     })

@@ -712,11 +712,12 @@ class SettingController extends Controller
                 ['year', $year]
             ])->get();
         } else {
-            $signatories = Signatory::select("*", "id as key")->where([
+            $condition = [
                 ['form_id', $formId],
                 ['year', $year],
                 ['office_form_id', $officeId]
-            ])->get();
+            ];
+            $signatories = Signatory::select("*", "id as key")->where($condition)->get();
         }
 
         foreach($signatories as $i => $signatory) {
@@ -733,6 +734,7 @@ class SettingController extends Controller
     public function saveSignatories(StoreSignatory $request)
     {
         try {
+
             $validated = $request->validated();
 
             DB::beginTransaction();
