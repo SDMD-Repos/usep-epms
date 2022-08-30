@@ -184,7 +184,7 @@ export default defineComponent({
         })
         console.log('checkFormAvailability')
 
-        getRequest('/forms/ocpcr/check-saved/' + officeId.value + '/' + year.value).then(response => {
+        getRequest('/forms/ocpcr/check-saved/' + officeId.value.value + '/' + year.value).then(response => {
           if(response) {
             const { hasSaved } = response
             isCheckingForm.value = false
