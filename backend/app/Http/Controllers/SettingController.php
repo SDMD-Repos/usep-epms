@@ -786,19 +786,20 @@ class SettingController extends Controller
 
     public function getYearSignatories($year, $formId, $officeId)
     {
-        if($officeId === 'undefined') {
-            $signatories = Signatory::select("*", "id as key")->where([
-                ['form_id', $formId],
-                ['year', $year]
-            ])->get();
-        } else {
-            $condition = [
-                ['form_id', $formId],
-                ['year', $year],
-                ['office_form_id', $officeId]
-            ];
-            $signatories = Signatory::select("*", "id as key")->where($condition)->get();
-        }
+        try {
+            if($officeId === 'undefined') {
+                $signatories = Signatory::select("*", "id as key")->where([
+                    ['form_id', $formId],
+                    ['year', $year]
+                ])->get();
+            } else {
+                $condition = [
+                    ['form_id', $formId],
+                    ['year', $year],
+                    ['office_form_id', $officeId]
+                ];
+                $signatories = Signatory::select("*", "id as key")->where($condition)->get();
+            }
 
             foreach($signatories as $i => $signatory) {
                 $offices = $this->getPersonnelByOffice($signatory->office_id, 1, 0, 0);
@@ -815,7 +816,6 @@ class SettingController extends Controller
             } else {
                 $status = 400;
             }
-
             return response()->json($e->getMessage(), $status);
         }
     }

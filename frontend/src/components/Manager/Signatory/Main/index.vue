@@ -82,7 +82,23 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const isOpenModal = ref(false)
-    const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
+    const officeDetails = computed(()=> {
+      switch (props.formName) {
+         case 'aapcr':
+           return store.getters['system/permission'].officeHeadDetailsAAPCR
+         break
+        case 'vpopcr':
+          return store.getters['system/permission'].officeHeadDetailsVPOPCR
+          break
+        case 'opcr':
+          return store.getters['system/permission'].officeHeadDetailsOPCR
+          break
+        default:
+          return {}
+          break
+      }
+    })
+
     const formState = reactive({
       signatories: [],
     })
@@ -181,7 +197,7 @@ export default defineComponent({
           store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
           break
       }
-
+      store.dispatch('system/FETCH_OFFICE_DETAILS',{ payload: { form_id: formId.value, office_id: null }})
     }
 
     const filterBySignatory = type => {
@@ -307,6 +323,7 @@ export default defineComponent({
       addSignatory,
       deleteSignatory,
       resetFormModal,
+      officeDetails,
     }
   },
 })

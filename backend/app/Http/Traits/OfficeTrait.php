@@ -274,17 +274,17 @@ trait OfficeTrait {
         $data = $this->HRIS_CALL('ALL_EMPLOYEE_POSITIONS');
 
         $positionList = [];
+        if ($data)
+            foreach($data as $key => $list) {
+                if(!$this->checkArrayObjectsValue($positionList, 'value', $list->Name)) {
+                    $obj = new \stdClass();
 
-        foreach($data as $key => $list) {
-            if(!$this->checkArrayObjectsValue($positionList, 'value', $list->Name)) {
-                $obj = new \stdClass();
+                    $obj->value = $list->Name;
+                    $obj->key = $key;
 
-                $obj->value = $list->Name;
-                $obj->key = $key;
-
-                $positionList[] = $obj;
+                    $positionList[] = $obj;
+                }
             }
-        }
 
         return response()->json([
             'positionList' => $positionList
