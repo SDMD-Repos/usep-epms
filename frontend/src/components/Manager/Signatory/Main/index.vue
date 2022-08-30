@@ -82,9 +82,18 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const isOpenModal = ref(false)
-
+    const officeDetails = computed(()=>store.getters['system/permission'].officeHeadDetailsAAPCR)
     const formState = reactive({
       signatories: [],
+    })
+
+    watch(() => [officeDetails.value] , ([officeDetails]) => {
+      if (officeDetails && Object.keys(officeDetails).length > 0){
+        selectedOffice.value = {
+          "label": officeDetails.office_name,
+          "value": officeDetails.office_id,
+        }
+      }
     })
 
     let formId = ref(props.formName)
@@ -130,11 +139,11 @@ export default defineComponent({
           break
       }
 
-
       await store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
       await store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
       await store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
       await store.dispatch('external/FETCH_ALL_POSITIONS')
+      await store.dispatch('system/FETCH_OFFICE_DETAILS',{ payload: { form_id: formId.value, office_id: null }})
     })
 
     onMounted(() => {

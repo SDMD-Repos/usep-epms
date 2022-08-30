@@ -44,6 +44,7 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
+      store.dispatch('opcr/CHECK_OPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId: props.formId }})
       store.dispatch('opcr/FETCH_LIST')
     })
 
