@@ -7,7 +7,7 @@
   <div v-else><error403 /></div>
 </template>
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue"
+import {defineComponent, ref, onMounted, computed, onBeforeMount} from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
@@ -42,9 +42,14 @@ export default defineComponent({
     const { unpublish } = useUnpublish()
 
     // EVENTS
+
+    onBeforeMount(() => {
+      store.dispatch('opcr/CHECK_OPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId: props.formId }})
+    })
+
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcr/CHECK_OPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId: props.formId }})
+
       store.dispatch('opcr/FETCH_LIST')
     })
 
