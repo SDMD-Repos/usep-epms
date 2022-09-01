@@ -52,19 +52,13 @@ export default defineComponent({
     // EVENTS
 
     watch(() => [formsByPermission.value, userForms.value], ([formsByPermission, userForms]) => {
-      let cloneFormsByPermission = cloneDeep(formsByPermission)
-      if (cloneFormsByPermission && Object.keys(cloneFormsByPermission).length > 0){
-        if (userForms && Object.keys(userForms).length > 0){
-          for (let frm of userForms){
-            if (cloneFormsByPermission.filter(datum => datum.id === frm.form.id).length === 0) {
-              cloneFormsByPermission.push(frm)
-            }
-          }
-          allowedForms.value = cloneFormsByPermission
-        }
-      }else{
-        allowedForms.value = userForms
-      }
+      let clonedFormsByPermission = cloneDeep(formsByPermission)
+      if (clonedFormsByPermission && Object.keys(clonedFormsByPermission).length > 0){
+        if (userForms && Object.keys(userForms).length > 0)
+          for (let frm of userForms)
+            if (clonedFormsByPermission.filter(datum => datum.id === frm.form.id).length === 0) clonedFormsByPermission.push(frm)
+        allowedForms.value = clonedFormsByPermission
+      }else allowedForms.value = userForms
 
     })
 
