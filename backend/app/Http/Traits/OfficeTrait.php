@@ -6,7 +6,7 @@ use App\Group;
 use Illuminate\Http\Request;
 
 trait OfficeTrait {
-    use ConverterTrait, ThirdPartyApiTrait;
+    use ThirdPartyApiTrait;
 
     public function getMainOfficesOnly($officesOnly=0, $returnJson=1 )
     {
@@ -291,6 +291,17 @@ trait OfficeTrait {
         ], 200);
     }
 
+    public function checkArrayObjectsValue($lists, $object, $value)
+    {
+        $found = false;
+
+        foreach ($lists as $list) {
+            if ($list->$object === $value) { $found = true; }
+        }
+
+        return $found;
+    }
+
     public function processVpOffices($list, $origin)
     {
         $offices = array();
@@ -325,7 +336,7 @@ trait OfficeTrait {
                     break;
             }
 
-            if(!$datum->vp_office_id) {
+            if(!$datum->vp_office_id && !$datum->is_group) {
                 $children = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $officeId]);
 
                 foreach ($children as $child) {

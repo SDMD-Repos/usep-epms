@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Form;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateOpcrTemplate;
+use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Opcr;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class OpcrTemplateController extends Controller
 {
-    use OfficeTrait, FormTrait;
+    use ConverterTrait, OfficeTrait, FormTrait;
 
     private $login_user;
 

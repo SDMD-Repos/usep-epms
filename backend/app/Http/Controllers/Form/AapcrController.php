@@ -15,6 +15,7 @@ use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateAapcr;
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
+use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\PdfTrait;
 use App\Program;
 use App\SubCategory;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 
 class AapcrController extends Controller
 {
-    use PdfTrait, FileTrait, FormTrait;
+    use PdfTrait, OfficeTrait, FileTrait, FormTrait;
 
     public function checkSaved($year)
     {

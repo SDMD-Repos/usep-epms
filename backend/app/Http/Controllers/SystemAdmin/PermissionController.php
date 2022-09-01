@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SystemAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ConverterTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\AccessRight;
@@ -17,7 +18,7 @@ use App\Http\Requests\StoreFormAccess;
 
 class PermissionController extends Controller
 {
-    use OfficeTrait, FormTrait, PermissionTrait;
+    use ConverterTrait, OfficeTrait, FormTrait, PermissionTrait;
 
     private $userAccessRights;
 

@@ -56,7 +56,7 @@ export function deactivate(data) {
 
 export function fetchPdfData(id) {
   return apiClient
-    .get('/forms/aapcr/viewPdf/' + id, {responseType: 'blob'})
+    .get('/forms/aapcr/viewPdf/' + id, { responseType: 'blob' })
     .then(response => {
       return response.data
     })

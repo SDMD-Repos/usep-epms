@@ -9,9 +9,13 @@ class VpOpcrDetailOffice extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Get the group of the offices.
+     */
+
     public function group()
     {
-        return $this->belongsTo('App\Group', 'group_id');
+        return $this->belongsTo('App\Group', 'group_id')->withTrashed();
     }
 
     /**

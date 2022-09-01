@@ -47,7 +47,7 @@ class VpOpcr extends Model
 
     public function status()
     {
-        return $this->hasMany('App\FormUnpublishStatus', 'form_id')
+        return $this->hasMany('App\FormUnpublishStatus', 'form_id', 'id')
             ->where('form_type', '=', 'vpopcr');
     }
 }

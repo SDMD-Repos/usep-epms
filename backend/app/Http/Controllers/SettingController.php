@@ -22,6 +22,7 @@ use App\Http\Requests\StoreSignatory;
 use App\Http\Requests\StoreSubCategory;
 use App\Http\Requests\UpdateDefaultProgram;
 use App\Http\Requests\UpdateGroup;
+use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Measure;
 use App\MeasureItem;
@@ -31,14 +32,13 @@ use App\Signatory;
 use App\SignatoryType;
 use App\SubCategory;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
-    use OfficeTrait;
+    use ConverterTrait, OfficeTrait;
 
     private $login_user;
 

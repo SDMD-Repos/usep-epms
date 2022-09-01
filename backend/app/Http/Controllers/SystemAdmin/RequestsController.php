@@ -82,8 +82,8 @@ class RequestsController extends Controller
                         break;
                     case 'vpopcr':
                         $model = new VpOpcr();
-                        $filename = $this->viewVpOpcrPdf($original['form_id'], 1);
-                        $request->file_name = $filename;
+                        $this->pdfWatermark($fileName);
+                        $request->file_name = $fileName;
                         break;
                     default:
                         break;

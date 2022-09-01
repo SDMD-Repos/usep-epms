@@ -1,6 +1,6 @@
 <template>
   <form-list-table
-    :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-aapcr-access="aapcrFormPermission"
+    :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-form-access="aapcrFormPermission"
     @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
     @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel" />
 

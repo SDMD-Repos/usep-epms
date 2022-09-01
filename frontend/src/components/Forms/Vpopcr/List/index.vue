@@ -1,7 +1,7 @@
 <template>
   <div  v-if="hasVpopcrAccess || opcrvpFormPermission">
     <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading" :access-office-id="parseInt(accessOfficeId)"
+      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-form-access="opcrvpFormPermission" :access-office-id="parseInt(accessOfficeId)"
       @update-form="updateForm" @publish="publish" @view-pdf="viewPdf" @unpublish="openUnpublishRemarks"
       @view-uploaded-list="viewUploadedList" @view-unpublished-forms="viewUnpublishedForms" @cancel-unpublish-request="onUnpublishCancel"/>
 
@@ -23,12 +23,13 @@ import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
 import { renderPdf } from '@/services/api/mainForms/vpopcr'
-import FormListTable from '@/components/Tables/Forms/List'
+import { viewSavedPdf } from '@/services/api/mainForms/aapcr';
 import { useUnpublish } from '@/services/functions/formListActions'
 import { usePermission } from '@/services/functions/permission'
+import { getUnpublishedFormData } from '@/services/api/system/requests'
+import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
 import UnpublishRemarksModal from '@/components/Modals/Remarks'
-import { getUnpublishedFormData } from '@/services/api/system/requests'
 import Error403 from '@/components/Errors/403'
 
 export default defineComponent({
@@ -112,17 +113,19 @@ export default defineComponent({
       let renderer = null
       const documentName = data.office_name || data.file_name
 
-      if(!fromUnpublished) {
+      if(!fromUnpublished && !data.published_date) {
         store.commit('vpopcr/SET_STATE', { loading: true })
 
-        renderer = renderPdf
+        renderer = renderPdf(data.id)
+      }else if(data.published_date){
+        renderer = viewSavedPdf(data.published_file)
       }else {
         _message.loading('Loading...')
 
-        renderer = getUnpublishedFormData
+        renderer = getUnpublishedFormData(data.id)
       }
 
-      renderer(data.id).then(response => {
+      renderer.then(response => {
         if (response) {
           const blob = new Blob([response], { type: 'application/pdf' })
           const fileUrl = window.URL.createObjectURL(blob)

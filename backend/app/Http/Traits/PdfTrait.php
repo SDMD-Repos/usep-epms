@@ -390,7 +390,7 @@ trait PdfTrait {
             $params = array(
                 'usepLogo' => $publicPath."/logos/USeP_Logo.png",
                 'public_path' => $publicPath,
-                'notFinalImage' => (!$vpopcr->published_date || !$vpopcr->is_active ? $publicPath."/logos/notfinal.png" : ""),
+                'notFinalImage' => ((!$vpopcr->published_date || !$vpopcr->is_active) && !$isPublish ? $publicPath."/logos/notfinal.png" : ""),
                 'year' => $vpopcr->year,
                 'vpOfficeName' => $vpopcr->office_name,
                 'preparedBy' => strtoupper($signatory['preparedBy']),

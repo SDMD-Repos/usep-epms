@@ -27,6 +27,11 @@ class SignatoryTypeSeeder extends Seeder
                 'code' => 'prepared_by',
                 'name' => 'Prepared by',
                 'ordering' => 1
+            ],
+            [
+                'code' => 'assessed_by',
+                'name' => 'Assessed by',
+                'ordering' => 4
             ]
         ]);
     }

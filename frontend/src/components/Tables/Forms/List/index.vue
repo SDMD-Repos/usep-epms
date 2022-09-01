@@ -20,16 +20,19 @@
             <span v-else class="font-size-12 badge badge-primary">
             Inactive
           </span>
-            <span v-if="record.status && record.status.filter(i => i.status === 'pending').length"
-                  class="font-size-12 badge badge-warning" :style="{cursor: 'pointer'}"
-                  @click="cancelUnpublishRequest(record)">
-            Pending unpublish request
-          </span>
+          <template v-if="record.status && record.status.filter(i => i.status === 'pending').length">
+            <a-tooltip title="Cancel request">
+              <span class="font-size-12 badge badge-warning" :style="{cursor: 'pointer'}"
+                    @click="cancelUnpublishRequest(record)">
+                Pending unpublish request
+              </span>
+            </a-tooltip>
+          </template>
         </div>
       </template>
 
       <template v-if="column.key === 'operation'">
-        <template v-if="(accessOfficeId === record.office_id) || hasAapcrAccess">
+        <template v-if="(accessOfficeId === record.office_id) || hasFormAccess">
             <template v-if="record.is_active && !record.published_date">
               <a-tooltip>
                 <template #title><span>Update</span></template>
@@ -77,7 +80,6 @@ import dayjs from 'dayjs'
 import {
   EditOutlined, FilePdfOutlined, FileDoneOutlined, CloseSquareFilled, UnorderedListOutlined, ExclamationCircleOutlined,
 } from "@ant-design/icons-vue"
-import { usePermission } from '@/services/functions/permission'
 import { Modal } from "ant-design-vue"
 
 export default defineComponent({
@@ -91,7 +93,7 @@ export default defineComponent({
     form: { type: String, default: '' },
     loading: Boolean,
     accessOfficeId: { type: Number, default: null },
-    hasAapcrAccess: { type: Boolean, default: false },
+    hasFormAccess: { type: Boolean, default: false },
   },
   emits: [
     'update-form', 'publish', 'view-pdf', 'unpublish', 'view-unpublished-forms', 'cancel-unpublish-request',
@@ -103,9 +105,7 @@ export default defineComponent({
 
     // COMPUTED
     const dateFormat = computed(() => store.getters.mainStore.dateFormat)
-    const permission = { listOpcrvp: [ "form", "f-opcrvp" ] }
 
-    const { opcrvpFormPermission } = usePermission(permission)
     // METHODS
     const handleUpdate = id => {
       loadingTip.value = 'Please wait...'
@@ -197,7 +197,6 @@ export default defineComponent({
       onUnpublish,
       cancelUnpublishRequest,
       openUnpublishedForms,
-      opcrvpFormPermission,
     }
   },
 })

@@ -10,11 +10,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UnpublishForm;
 use App\Http\Requests\UpdateVpOpcr;
-/*use App\Http\Requests\UploadPdfFile;
-use App\Http\Traits\ConverterTrait;*/
 use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
+use App\Http\Traits\PdfTrait;
 use App\VpOpcr;
 use App\VpOpcrDetail;
 use App\VpOpcrDetailMeasure;
@@ -25,7 +24,7 @@ use Illuminate\Support\Facades\DB;
 
 class VpopcrController extends Controller
 {
-    use OfficeTrait, FileTrait, FormTrait;
+    use OfficeTrait, PdfTrait, FileTrait, FormTrait;
 
     private $STO = 5;
 
@@ -474,6 +473,10 @@ class VpopcrController extends Controller
                 $vpopcr->modify_id = $this->login_user->pmaps_id;
                 $vpopcr->history = $vpopcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
+                $filename = $this->viewVpOpcrPdf($id, 1);
+
+                $vpopcr->published_file = $filename;
+
                 $vpopcr->save();
 
                 return response()->json('OPCR was published successfully', 200);
@@ -499,6 +502,7 @@ class VpopcrController extends Controller
             $remarks = $validated['remarks'];
             $id = $validated['id'];
             $officeName = $validated['officeName'];
+            $fileName = $validated['fileName'];
 
             DB::beginTransaction();
 
@@ -511,6 +515,7 @@ class VpopcrController extends Controller
             $unpublished->status = 'pending';
             $unpublished->requested_date = Carbon::now();
             $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->file_name = $fileName;
             $unpublished->create_id = $this->login_user->pmaps_id;
             $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
 
@@ -1041,50 +1046,6 @@ class VpopcrController extends Controller
         }
     }
 
-    /*public function viewUploadedFile($id)
-    {
-        $model = new VpOpcrFile();
-
-        $file = $this->viewFile($model, $id);
-
-        return response()->download($file['contents'], '', $file['headers']);
-    }
-
-    public function updateFile(UploadPdfFile $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validated = $request->validated();
-
-            $fileModel = new VpOpcrFile();
-
-            $formModel = new VpOpcr();
-
-            $params = [
-                'fileModel' => $fileModel,
-                'formModel' => $formModel,
-                'validated' => $validated
-            ];
-
-            $data = $this->processUpdateFile($params);
-
-            DB::commit();
-
-            return response()->json([
-                'data' => $data
-            ], 200);
-        } catch(\Exception $e){
-            if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
-        }
-    }*/
-
     public function getSavedIndicators($indicators, $officeId, $mode='create')
     {
         if($mode === 'view') {
@@ -1147,8 +1108,8 @@ class VpopcrController extends Controller
                 $offices[] = $implementing['value'];
             }
 
-            foreach ($datum['supporting'] as $implementing) {
-                $offices[] = $implementing['value'];
+            foreach ($datum['supporting'] as $supporting) {
+                $offices[] = $supporting['value'];
             }
 
             foreach ($savedIndicators as $savedIndicator) {

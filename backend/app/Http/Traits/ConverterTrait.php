@@ -254,23 +254,9 @@ trait ConverterTrait {
             $record->label = $measure->name;
             $record->option = $measure;
 
-            $measures[] = $record;
+            $list[] = $record;
         }
 
         return $list;
     }
-
-    public function checkArrayObjectsValue($lists, $object, $value)
-    {
-        $found = false;
-
-        foreach ($lists as $list) {
-            if ($list->$object === $value) {
-                $found = true;
-            }
-        }
-
-        return $found;
-    }
-
 }
