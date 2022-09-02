@@ -8,16 +8,32 @@
       </template>
     </a-select>
     <div class="mt-2" v-if="formId === 'vpopcr'">
-      <a-select v-model:value="selectedOffice" placeholder="Select office" style="width: 450px" @change="fetchSignatories">
-        <template v-for="(y, i) in vpOfficesList" :key="i">
-          <a-select-option :value="y.value" >
-            {{ y.title }}
-          </a-select-option>
-        </template>
-      </a-select>
+      <a-tree-select
+        v-if="allAccess"
+        v-model:value="selectedOffice"
+        :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+        style="width: 450px"
+        placeholder="Select office"
+        tree-node-filter-prop="title"
+        :tree-data="vpOfficesList"
+        tree-default-expand-all
+        show-search
+        allow-clear
+        label-in-value
+        @change="fetchSignatories"
+      />
+<!--      <a-select v-if="allAccess" v-model:value="selectedOffice" placeholder="Select office" style="width: 450px" @change="fetchSignatories">-->
+<!--        <template v-for="(y, i) in vpOfficesList" :key="i">-->
+<!--          <a-select-option :value="{label:y.value}" >-->
+<!--            {{ y.title }}-->
+<!--          </a-select-option>-->
+<!--        </template>-->
+<!--      </a-select>-->
+      <span v-else>{{ selectedOffice ? selectedOffice.label : "Not Set"}}</span>
     </div>
     <div class="mt-2" v-if="formId === 'opcr'">
       <a-tree-select
+        v-if="allAccess"
         v-model:value="selectedOffice"
         :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
         style="width: 450px"
@@ -30,7 +46,7 @@
         label-in-value
         @change="fetchSignatories"
       />
-
+      <span v-else>{{ selectedOffice ? selectedOffice.label : "Not Set"}}</span>
     </div>
 
 
@@ -72,6 +88,10 @@ export default defineComponent({
     formName: {
       type: String,
       default: '',
+    },
+    allAccess: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props) {
@@ -182,11 +202,6 @@ export default defineComponent({
 
       switch (formId.value){
         case 'vpopcr':
-          if (typeof selectedOffice.value !== 'undefined') {
-            data.officeId = selectedOffice.value
-            store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
-          }
-          break
         case 'opcr':
           if (selectedOffice.value && typeof selectedOffice.value !== 'undefined'){
             data.officeId = selectedOffice.value.value
@@ -208,12 +223,28 @@ export default defineComponent({
 
     const openModal = (event, action, type) => {
       event.stopPropagation()
-      signatoryDetails.value = {
-        typeId: type,
-        year: year.value,
-        formId: formId.value,
-        office: selectedOffice.value,
+      switch (formId.value){
+        case 'vpopcr':
+        case 'opcr':
+          if (selectedOffice.value){
+            signatoryDetails.value = {
+              typeId: type,
+              year: year.value,
+              formId: formId.value,
+              office: selectedOffice.value.value,
+            }
+          }
+          break
+        default:
+          signatoryDetails.value = {
+            typeId: type,
+            year: year.value,
+            formId: formId.value,
+          }
+          break
       }
+
+
       changeAction(action,type)
     }
 

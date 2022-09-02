@@ -235,15 +235,12 @@ export default defineComponent({
             })
             switch (propsDetails.formId){
               case 'vpopcr':
-                data.value.officeId = propsDetails.office
-                    break
               case 'opcr':
-                data.value.officeId = propsDetails.office.value
+                data.value.officeId = propsDetails.office
                 break
               default:
                 break
             }
-
             if (props.actionType === 'create') {
               store.dispatch('formManager/SAVE_POSITION_SIGNATORIES', { payload: data.value })
             } else {

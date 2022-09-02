@@ -3,7 +3,7 @@
     <a-card v-if="allowedForms.length">
       <a-tabs v-model:activeKey="activeKey" :animated="false">
         <template v-for="(form, index) in allowedForms" :key="index">
-          <a-tab-pane :tab="typeof form.form === 'undefined' ? form.abbreviation : form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="typeof form.form === 'undefined' ? form.id : form.form.id" /></a-tab-pane>
+          <a-tab-pane :tab="typeof form.form === 'undefined' ? form.abbreviation : form.form.abbreviation"><signatory-form v-if="activeKey === index" :form-name="typeof form.form === 'undefined' ? form.id : form.form.id" :all-access="typeof form.form === 'undefined' ? true : false"/></a-tab-pane>
         </template>
       </a-tabs>
     </a-card>
