@@ -233,8 +233,13 @@ export default defineComponent({
               year: propsDetails.year,
               signatories: toRaw(form.value.signatories),
             })
-            if (propsDetails.formId === 'vpopcr') {
-              data.value.officeId = propsDetails.office
+            switch (propsDetails.formId){
+              case 'vpopcr':
+              case 'opcr':
+                data.value.officeId = propsDetails.office
+                break
+              default:
+                break
             }
             if (props.actionType === 'create') {
               store.dispatch('formManager/SAVE_POSITION_SIGNATORIES', { payload: data.value })

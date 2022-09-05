@@ -304,13 +304,13 @@ export default defineComponent({
     } = useFormFields(form)
 
     const onLoad = () => {
-      // let params = {
-      //   checkable: { allColleges: true, mains: false },
-      //   isAcronym: true,
-      //   currentYear: props.currentYear,
-      // }
-      //
-      // store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
+      let params = {
+        checkable: { allColleges: true, mains: false },
+        isAcronym: true,
+        currentYear: props.currentYear,
+      }
+
+      store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
     }
 
     const toggleIsHeader = checked => {

@@ -5,7 +5,7 @@ import { checkFormAccess } from '@/services/api/system/permission'
 
 const mapApiProviders = {
   save: ocpcrForm.save,
-  getList: ocpcrForm.fetchOpcrTemplates,
+  getList: ocpcrForm.fetchOpcr,
   publish: ocpcrForm.publish,
   unpublish: ocpcrForm.unpublish,
   deactivate: ocpcrForm.deactivate,

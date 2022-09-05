@@ -130,6 +130,7 @@ class SettingController extends Controller
     public function deleteCategory($id)
     {
         try {
+
             $category = Category::find($id);
 
             if((isset($category->programs) && count($category->programs)) && (isset($category->subCategory) && count($category->subCategory))) {
@@ -225,6 +226,7 @@ class SettingController extends Controller
     public function createSubCategory(StoreSubCategory $request)
     {
         try {
+
             $validated = $request->validated();
 
             DB::beginTransaction();
@@ -317,6 +319,7 @@ class SettingController extends Controller
     public function deleteSubCategory($id)
     {
         try {
+
             DB::beginTransaction();
 
             $subcategory = SubCategory::where('id', $id)->with('childSubCategories')->get();
@@ -428,6 +431,7 @@ class SettingController extends Controller
 
     public function createOtherProgram(StoreOtherProgram $request)
     {
+
         try {
             $validated = $request->validated();
 
@@ -466,6 +470,7 @@ class SettingController extends Controller
     public function deleteProgram($id)
     {
         try {
+
             $program = Program::find($id);
 
             if($program)
@@ -501,6 +506,7 @@ class SettingController extends Controller
     public function deleteOtherProgram($id)
     {
         try {
+
             $program = OtherProgram::find($id);
 
             $program->modify_id = $this->login_user->pmaps_id;
@@ -553,6 +559,7 @@ class SettingController extends Controller
     public function createMeasure(StoreMeasure $request)
     {
         try {
+
             $validated = $request->validated();
 
             DB::beginTransaction();
@@ -685,6 +692,7 @@ class SettingController extends Controller
     public function deleteMeasure($id)
     {
         try {
+
             DB::beginTransaction();
 
             $measure = Measure::find($id);
@@ -785,11 +793,12 @@ class SettingController extends Controller
                     ['year', $year]
                 ])->get();
             } else {
-                $signatories = Signatory::select("*", "id as key")->where([
+                $condition = [
                     ['form_id', $formId],
                     ['year', $year],
                     ['office_form_id', $officeId]
-                ])->get();
+                ];
+                $signatories = Signatory::select("*", "id as key")->where($condition)->get();
             }
 
             foreach($signatories as $i => $signatory) {
@@ -807,7 +816,6 @@ class SettingController extends Controller
             } else {
                 $status = 400;
             }
-
             return response()->json($e->getMessage(), $status);
         }
     }
@@ -815,6 +823,7 @@ class SettingController extends Controller
     public function saveSignatories(StoreSignatory $request)
     {
         try {
+
             $validated = $request->validated();
 
             DB::beginTransaction();
@@ -1042,6 +1051,7 @@ class SettingController extends Controller
     public function saveGroup(StoreGroup $request)
     {
         try{
+
             $validated = $request->validated();
 
             $name = $validated['name'];
@@ -1082,7 +1092,7 @@ class SettingController extends Controller
             DB::commit();
 
             return response()->json('Group created successfully', 200);
-        } catch (\Exception $e) {
+        }catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
                 $status = $e->getCode();
             } else {
@@ -1114,13 +1124,7 @@ class SettingController extends Controller
                 DB::rollBack();
             }
         }catch (\Exception $e) {
-            if (is_numeric($e->getCode()) && $e->getCode() && ($e->getCode() < 511)) {
-                $status = $e->getCode();
-            } else {
-                $status = 400;
-            }
-
-            return response()->json($e->getMessage(), $status);
+            dd($e);
         }
     }
 
@@ -1232,6 +1236,7 @@ class SettingController extends Controller
     public function deleteGroup($id)
     {
         try {
+
             DB::beginTransaction();
 
             $group = Group::find($id);
@@ -1470,6 +1475,7 @@ class SettingController extends Controller
     public function deleteFormCategory($id)
     {
         try {
+
             DB::beginTransaction();
 
             $formCategory = FormCategory::find($id);

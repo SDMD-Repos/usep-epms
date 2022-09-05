@@ -7,7 +7,7 @@
   <div v-else><error403 /></div>
 </template>
 <script>
-import { defineComponent, ref, onMounted, computed } from "vue"
+import {defineComponent, ref, onMounted, computed, onBeforeMount} from "vue"
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
@@ -36,15 +36,21 @@ export default defineComponent({
     const { opcrFormPermission } = usePermission(permission)
 
     // COMPUTED
-    const list = computed(() => store.getters['opcrtemplate/form'].list)
-    const loading = computed(() => store.getters['opcrtemplate/form'].loading)
+    const list = computed(() => store.getters['opcr/form'].list)
+    const loading = computed(() => store.getters['opcr/form'].loading)
     const hasOpcrAccess = computed(() => store.getters['opcr/form'].hasOpcrAccess)
     const { unpublish } = useUnpublish()
 
     // EVENTS
+
+    onBeforeMount(() => {
+      store.dispatch('opcr/CHECK_OPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId: props.formId }})
+    })
+
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
-      store.dispatch('opcrtemplate/FETCH_LIST')
+
+      store.dispatch('opcr/FETCH_LIST')
     })
 
     // METHODS
@@ -60,12 +66,7 @@ export default defineComponent({
         id: data.id,
         year: data.year,
       }
-      store.dispatch('opcrtemplate/PUBLISH', { payload: payload })
-    }
-
-    const unpublishTemplate = data => {
-      const id = data
-      store.dispatch('opcrtemplate/UNPUBLISH', { payload: {id: id} })
+      store.dispatch('opcr/PUBLISH', { payload: payload })
     }
 
     return {
@@ -76,7 +77,6 @@ export default defineComponent({
       loading,
 
       unpublish,
-      unpublishTemplate,
 
       updateForm,
       publish,
