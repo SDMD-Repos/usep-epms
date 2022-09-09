@@ -47,6 +47,7 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    officeId: { type: Object, default: () => { return {} }},
   },
   setup(props) {
     const store = useStore()
@@ -56,7 +57,7 @@ export default defineComponent({
       const data = {
         year: props.year,
         formId: props.formId,
-        officeId: props.officeId,
+        officeId: props.officeId.value,
         id: key,
       }
       store.dispatch('formManager/DELETE_POSITION_SIGNATORY', { payload: data })

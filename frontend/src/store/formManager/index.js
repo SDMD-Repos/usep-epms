@@ -596,12 +596,9 @@ export default {
           dispatch('FETCH_YEAR_SIGNATORIES', { payload: payload })
           notification.success({
             message: 'Success',
-            description: 'Personnel deleted successfully',
+            description: 'Signatory deleted successfully',
           })
         }
-        commit('SET_STATE', {
-          loading: false,
-        })
       })
     },
     FETCH_GROUPS({ commit }) {

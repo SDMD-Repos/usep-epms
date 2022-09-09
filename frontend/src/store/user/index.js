@@ -28,6 +28,7 @@ export default {
       return response
     }),
     accessRights:[],
+    formAccess: [],
   },
   mutations: {
     SET_STATE(state, payload) {
@@ -67,7 +68,7 @@ export default {
       const currentAccount = mapAuthProviders[rootState.settings.authProvider].currentAccount
       currentAccount().then(response => {
         if (response) {
-          const { id, lastName, firstName, pmapsId, avatar, role , accessRights } = response
+          const { id, lastName, firstName, pmapsId, avatar, role , accessRights, formAccess } = response
           commit('SET_STATE', {
             id,
             lastName,
@@ -77,6 +78,7 @@ export default {
             role,
             authorized: true,
             accessRights,
+            formAccess,
           })
 
         }
@@ -100,6 +102,7 @@ export default {
           authorized: false,
           loading: false,
           accessRights : [],
+          formAccess: [],
         })
         router.push('/auth/login')
       })

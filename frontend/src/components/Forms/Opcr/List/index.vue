@@ -1,10 +1,10 @@
 <template>
-  <div  v-if="hasOpcrAccess || opcrFormPermission">
+  <div v-if="hasOpcrAccess || opcrFormPermission">
     <form-list-table
       :columns="columns" :data-list="list" :form="formId" :loading="loading"
-      @update-form="updateForm" @publish="publish" @unpublish="unpublish" @unpublish-template="unpublishTemplate"/>
+      @update-form="updateForm" @publish="publish" @unpublish="unpublish"/>
   </div>
-  <div v-else><error403 /></div>
+  <div v-else><error403 v-if="!loading"/></div>
 </template>
 <script>
 import {defineComponent, ref, onMounted, computed, onBeforeMount} from "vue"

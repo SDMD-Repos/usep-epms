@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\FormAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -17,51 +18,6 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login1(){
-        $pmaps_id = request('pmapsId');
-
-        try {
-            $response = Http::post('https://hris.usep.edu.ph/hris/api/auth/login', [
-                "token" => config('services.hris.auth'),
-                "pmaps_id" => $pmaps_id,
-                "password" => request('password')
-            ]);
-
-            $obj = json_decode($response->body());
-
-            if (isset($obj->id)) {
-
-                $user = User::updateOrCreate(
-                    ['id' => $obj->id ],
-                    [
-                        'pmaps_id' => $pmaps_id,
-                        'firstName' => $obj->FirstName,
-                        'middleName' => $obj->MiddleName,
-                        'lastName' => $obj->LastName,
-                        'email' => $obj->Email,
-//                        'avatar' => $obj->Avatar
-                    ]
-                );
-
-                Auth::login($user);
-
-                $loggedInUser = Auth::user();
-
-                $success['accessToken'] =  $loggedInUser->createToken('e-PMS Password Grant')->accessToken;
-
-                $user->remember_token = $success['accessToken'];
-                $user->save();
-
-                return response()->json(["accessToken" => $success['accessToken']], $this->successStatus);
-            }else{
-                return response()->json("Invalid login credentials", 400);
-            }
-
-        } catch (\Exception $exception) {
-            return response()->json($exception->getMessage(), 400);
-        }
-    }
-
     public function login(){
         $pmaps_id = request('pmapsId');
         $password = request('password');
@@ -145,23 +101,44 @@ class UserController extends Controller
 
     public function account()
     {
-        $user = Auth::user();
-        
-        if($user) {
+        try {
+            $user = Auth::user();
 
-            return response()->json([
-                'id' => $user->id,
-                'lastName' => $user->lastName,
-                'firstName' => $user->firstName,
-                'pmapsId' => $user->pmaps_id,
-                'avatar' => $user->avatar,
-                'role' => '',
-                'accessToken' => $user->remember_token,
-                'accessRights'=> $user->accessrights,
-            ], $this->successStatus);
-        }else{
-            return response()->json("Error", 400);
+            if($user) {
+                $formAccess = $this->getUserFormAccess($user->pmaps_id);
+
+                return response()->json([
+                    'id' => $user->id,
+                    'lastName' => $user->lastName,
+                    'firstName' => $user->firstName,
+                    'pmapsId' => $user->pmaps_id,
+                    'avatar' => $user->avatar,
+                    'role' => '',
+                    'accessToken' => $user->remember_token,
+                    'accessRights'=> $user->accessrights,
+                    'formAccess' => $formAccess,
+                ], $this->successStatus);
+            }else{
+                return response()->json("Error", 400);
+            }
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
+    }
+
+    public function getUserFormAccess($pmapsId=null)
+    {
+        $userForms = FormAccess::where(function($q) use ($pmapsId) {
+            $q->where('pmaps_id', $pmapsId)->orWhere('staff_id', $pmapsId);
+        })->get();
+
+        return $userForms;
     }
 
 }

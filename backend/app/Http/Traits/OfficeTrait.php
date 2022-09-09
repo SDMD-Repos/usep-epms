@@ -236,7 +236,9 @@ trait OfficeTrait {
                     $firstName = mb_strtolower($list->FirstName);
                     $middleName = mb_strtolower($list->MiddleName);
 
-                    $fullName = $firstName . " " . substr($middleName,0,1) . ". " . $lastName;
+                    $MI = $middleName ? substr($middleName,0,1) . ". " : "";
+
+                    $fullName = $firstName . " " . $MI . $lastName;
 
                     $obj = new \stdClass();
 

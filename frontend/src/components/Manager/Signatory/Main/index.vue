@@ -1,61 +1,41 @@
 <template>
   <div>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSignatories">
-      <template v-for="(y, i) in yearList" :key="i">
-        <a-select-option :value="y">
-          {{ y }}
-        </a-select-option>
-      </template>
-    </a-select>
-    <div class="mt-2" v-if="formId === 'vpopcr'">
-      <a-tree-select
-        v-if="allAccess"
-        v-model:value="selectedOffice"
-        :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-        style="width: 450px"
-        placeholder="Select office"
-        tree-node-filter-prop="title"
-        :tree-data="vpOfficesList"
-        tree-default-expand-all
-        show-search
-        allow-clear
-        label-in-value
-        @change="fetchSignatories"
-      />
-<!--      <a-select v-if="allAccess" v-model:value="selectedOffice" placeholder="Select office" style="width: 450px" @change="fetchSignatories">-->
-<!--        <template v-for="(y, i) in vpOfficesList" :key="i">-->
-<!--          <a-select-option :value="{label:y.value}" >-->
-<!--            {{ y.title }}-->
-<!--          </a-select-option>-->
-<!--        </template>-->
-<!--      </a-select>-->
-      <span v-else>{{ selectedOffice ? selectedOffice.label : "Not Set"}}</span>
-    </div>
-    <div class="mt-2" v-if="formId === 'opcr'">
-      <a-tree-select
-        v-if="allAccess"
-        v-model:value="selectedOffice"
-        :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-        style="width: 450px"
-        placeholder="Select Office/College"
-        tree-node-filter-prop="title"
-        :tree-data="offices"
-        tree-default-expand-all
-        show-search
-        allow-clear
-        label-in-value
-        @change="fetchSignatories"
-      />
-      <span v-else>{{ selectedOffice ? selectedOffice.label : "Not Set"}}</span>
-    </div>
+    <a-row type="flex">
+      <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }"><b>Fiscal Year:</b></a-col>
+      <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 3, offset: 1 }">
+        <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchSignatories">
+          <template v-for="(y, i) in yearList" :key="i">
+            <a-select-option :value="y">
+              {{ y }}
+            </a-select-option>
+          </template>
+        </a-select>
+      </a-col>
+    </a-row>
 
+    <div class="w-100 mt-2"></div>
+
+    <a-row type="flex">
+      <a-col :sm="{ span: 4 }" :md="{ span: 3 }" :lg="{ span: 2 }" v-if="formId !== 'aapcr'"><b>Office :</b></a-col>
+      <a-col :sm="{ span: 12, offset: 1 }" :md="{ span: 10, offset: 1 }" :lg="{ span: 10, offset: 1 }">
+        <div class="mt-2" v-if="formId === 'vpopcr' || formId === 'opcr'">
+          <a-tree-select
+            v-if="offices.length > 1"
+            v-model:value="selectedOffice" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            style="width: 450px" placeholder="Select Office/College" tree-node-filter-prop="title" :tree-data="offices"
+            tree-default-expand-all show-search allow-clear label-in-value
+            @change="fetchSignatories"
+          />
+          <span v-else>{{ selectedOffice ? selectedOffice.label : "Not Set"}}</span>
+        </div>
+      </a-col>
+    </a-row>
 
     <div class="mt-4">
       <a-collapse v-model:activeKey="activeKey">
         <a-collapse-panel v-for="(type, key) in signatoryTypes" :header="type.name" :key="`${key}`">
-          <signatory-list :year="year"
-                          :form-id="formId"
-                          :list="filterBySignatory(type.id)" />
+          <signatory-list
+            :year="year" :form-id="formId" :list="filterBySignatory(type.id)" :office-id="selectedOffice"/>
           <template #extra v-if="formId !== 'vpopcr' || (formId === 'vpopcr' && typeof selectedOffice !== 'undefined')">
             <user-add-outlined v-if="!filterBySignatory(type.id).length" @click="openModal($event, 'create', type.id)"/>
             <edit-outlined v-else @click="openModal($event, 'update', type.id)" />
@@ -65,7 +45,7 @@
     </div>
 
     <form-modal
-      :visible="isOpenModal" :modal-title="modalTitle" :ok-text="okText" :action-type="action" :office-list="offices"
+      :visible="isOpenModal" :modal-title="modalTitle" :ok-text="okText" :action-type="action" :office-list="mainOfficesChildren"
       :position-list="positionList" :details="signatoryDetails" :form-state="formState"
       @add-signatory="addSignatory" @delete-signatory="deleteSignatory" @close-modal="resetFormModal"
     />
@@ -85,14 +65,8 @@ export default defineComponent({
     SignatoryList, FormModal, UserAddOutlined, EditOutlined,
   },
   props: {
-    formName: {
-      type: String,
-      default: '',
-    },
-    allAccess: {
-      type: Boolean,
-      default: false,
-    },
+    formName: { type: String, default: '' },
+    formAccess: { type: Array, default: () => { return [] } },
   },
   setup(props) {
     const store = useStore()
@@ -102,51 +76,47 @@ export default defineComponent({
     // DATA
     const year = ref(new Date().getFullYear())
     const isOpenModal = ref(false)
-    const officeDetails = computed(()=> {
-      switch (props.formName) {
-         case 'aapcr':
-           return store.getters['system/permission'].officeHeadDetailsAAPCR
-         break
-        case 'vpopcr':
-          return store.getters['system/permission'].officeHeadDetailsVPOPCR
-          break
-        case 'opcr':
-          return store.getters['system/permission'].officeHeadDetailsOPCR
-          break
-        default:
-          return {}
-          break
-      }
-    })
+    const selectedOffice = ref(undefined)
+    const memberList = ref([])
+    const signatoryDetails = ref({})
 
     const formState = reactive({
       signatories: [],
-    })
-
-    watch(() => [officeDetails.value] , ([officeDetails]) => {
-      if (officeDetails && Object.keys(officeDetails).length > 0){
-        selectedOffice.value = {
-          "label": officeDetails.office_name,
-          "value": officeDetails.office_id,
-        }
-      }
     })
 
     let formId = ref(props.formName)
     let action = ref('')
     let modalTitle = ref('')
     let okText = ref('')
-    const selectedOffice = ref(undefined)
-    const memberList = ref([])
-
-    const signatoryDetails = ref({})
 
     // COMPUTED
     const signatoryTypes = computed(() => store.getters['formManager/manager'].signatoryTypes)
-    const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
-    const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
     const positionList = computed(() => store.getters['external/external'].positionList)
+    const vpOfficesList = computed(() => store.getters['external/external'].vpOffices)
+    const mainOfficesChildren = computed(() => store.getters['external/external'].mainOfficesChildren)
     const signatoryList = computed(() => store.getters['formManager/manager'].signatories)
+
+    const filteredFormAccess = computed(() => props.formAccess.filter(e => e.form_id === formId.value) )
+
+    const offices = computed(() => {
+      let list = []
+      if(filteredFormAccess.value.length > 0) {
+        filteredFormAccess.value.forEach(e => {
+          list.push({ value: parseInt(e.office_id), title: e.office_name })
+        })
+      }else {
+        switch (formId.value) {
+          case 'vpopcr':
+            list = vpOfficesList.value
+            break
+          case 'opcr':
+            list = mainOfficesChildren.value
+            break
+        }
+      }
+
+      return list
+    })
 
     const yearList = computed(() => {
       const now = new Date().getFullYear()
@@ -160,26 +130,16 @@ export default defineComponent({
 
     // EVENTS
     onBeforeMount(async () => {
+      await fetchOfficeList()
+      await store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
+      await store.dispatch('external/FETCH_ALL_POSITIONS')
 
       let params = {
-        selectable: { allColleges: true, mains: true },
         isAcronym: false,
         isOfficesOnly: true,
+        selectable: { allColleges: false, mains: true },
       }
-
-      switch (formId.value){
-        case 'opcr':
-          params.selectable = { allColleges: false, mains: false }
-          break
-        default:
-          break
-      }
-
-      await store.dispatch('formManager/FETCH_ALL_SIGNATORY_TYPES')
       await store.dispatch('external/FETCH_MAIN_OFFICES_CHILDREN', { payload: params })
-      await store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
-      await store.dispatch('external/FETCH_ALL_POSITIONS')
-      await store.dispatch('system/FETCH_OFFICE_DETAILS',{ payload: { form_id: formId.value, office_id: null }})
     })
 
     onMounted(() => {
@@ -191,11 +151,34 @@ export default defineComponent({
     })
 
     // METHODS
+    const fetchOfficeList = () => {
+      if(filteredFormAccess.value.length < 1) {
+        let params = {
+          isAcronym: false,
+          isOfficesOnly: true,
+        }
+
+        switch (formId.value){
+          case 'vpopcr':
+            store.dispatch('external/FETCH_VP_OFFICES', { payload: { officesOnly: 1 } })
+            break
+          default:
+            break
+        }
+      }else {
+        if(filteredFormAccess.value.length === 1) {
+          const { title, value } = offices.value[0]
+          selectedOffice.value = { label: title, value: value }
+        }
+      }
+    }
+
     const fetchSignatories = () => {
       const data = {
         year: year.value,
         formId: formId.value,
       }
+
       store.commit('formManager/SET_STATE', {
         signatories: [],
       })
@@ -212,7 +195,6 @@ export default defineComponent({
           store.dispatch('formManager/FETCH_YEAR_SIGNATORIES', { payload: data })
           break
       }
-      store.dispatch('system/FETCH_OFFICE_DETAILS',{ payload: { form_id: formId.value, office_id: null }})
     }
 
     const filterBySignatory = type => {
@@ -330,23 +312,25 @@ export default defineComponent({
 
     return {
       activeKey: ref('0'),
+
       year,
-      formId,
       isOpenModal,
+      selectedOffice,
+      memberList,
+      signatoryDetails,
       formState,
+      formId,
       action,
       modalTitle,
       okText,
-      signatoryDetails,
-      selectedOffice,
-      memberList,
 
-      yearList,
       signatoryTypes,
-      offices,
-      vpOfficesList,
       positionList,
+      vpOfficesList,
+      mainOfficesChildren,
       signatoryList,
+      offices,
+      yearList,
 
       fetchSignatories,
       filterBySignatory,
@@ -354,7 +338,6 @@ export default defineComponent({
       addSignatory,
       deleteSignatory,
       resetFormModal,
-      officeDetails,
     }
   },
 })

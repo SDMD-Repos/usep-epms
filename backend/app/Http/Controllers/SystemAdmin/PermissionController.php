@@ -213,18 +213,24 @@ class PermissionController extends Controller
                     'form_id' => $form_id,
                     'pmaps_id' => $pmaps_id,
                     'pmaps_name' => $pmaps_name,
-                    'office_id'=>$office_id,
-                    'office_name'=>$office_name,
+                    'office_id'=> $office_id,
+                    'office_name'=> $office_name,
                     'create_id'=> $this->login_user->pmaps_id,
-                    'staff_id' => '',
-                    'staff_name' => '',
+                    'staff_id' => null,
+                    'staff_name' => null,
                 ]
             );
 
 
             return response()->json("Office head has been assigned!", 200);
         } catch (\Exception $e) {
-            return response()->json($e->getMessage());
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
         }
     }
 
@@ -255,8 +261,8 @@ class PermissionController extends Controller
         return response()->json(['hasPermission' => false], 200);
     }
 
-    function fetchOfficeHead($form_id,$office_id=""){
-        try{
+    public function fetchOfficeHead($form_id,$office_id=""){
+        try {
             $condition  = ['form_id' => $form_id];
             if($form_id==='vpopcr'|| $form_id==='opcr' ){
                 if ($office_id)
@@ -275,7 +281,7 @@ class PermissionController extends Controller
         }
     }
 
-    function saveOfficeStaff(StoreFormAccess $request){
+    public function saveOfficeStaff(StoreFormAccess $request){
 
         try {
             $validated = $request->validated();
@@ -306,7 +312,7 @@ class PermissionController extends Controller
         }
     }
 
-    function getFormAccessByOffice($office_id){
+    public function getFormAccessByOffice($office_id){
 
         try{
             $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
@@ -318,7 +324,8 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-    function checkFormHead($pmaps_id,$form_id){
+
+    public function checkFormHead($pmaps_id,$form_id){
 
         try{
             $permission = false;
@@ -335,7 +342,8 @@ class PermissionController extends Controller
             return response()->json($e->getMessage());
         }
     }
-    function checkFormAccess($pmaps_id, $form_id){
+
+    public function checkFormAccess($pmaps_id, $form_id){
 
         try{
             $permission = false;

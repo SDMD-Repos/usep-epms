@@ -2,10 +2,11 @@ import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 export const usePermission = permission => {
-  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request } = permission
-
-  const accessLists = computed(() => store.getters['user/access'])
   const store = useStore()
+
+  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request } = permission
+  const accessLists = computed(() => store.getters['user/access'])
+  const formAccess = computed(() => store.getters['user/user'].formAccess)
 
   const createPermission = accessLists.value.filter(value => {
     return listCreate ? listCreate.includes(value.permission_id) : 0
@@ -108,6 +109,7 @@ export const usePermission = permission => {
   }
 
   const allForms = currentForms.value
+
   return {
     isCreate,
     isDelete,
@@ -122,5 +124,7 @@ export const usePermission = permission => {
     allForms,
     ARManagerPermission,
     requestPermission,
+
+    formAccess,
   }
 }

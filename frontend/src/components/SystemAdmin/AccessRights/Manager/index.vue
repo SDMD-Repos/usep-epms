@@ -1,6 +1,7 @@
 <template>
-    <div>
-      <a-spin :spinning="loading">
+  <a-card>
+    <template v-if="ARManagerPermission">
+      <a-spin :spinning="loading || formLoading">
         <a-row type="flex">
           <a-col :span="12">
             <a-row type="flex">
@@ -68,7 +69,10 @@
           <a-button v-else-if="!updateBtn && saveBtn" type="primary" @click="onUpdate" >Update</a-button>
         </a-row>
       </a-spin>
-    </div>
+    </template>
+    <div v-else><error403 /></div>
+  </a-card>
+
 </template>
 <script>
 import { defineComponent, onMounted, ref, computed } from 'vue';
@@ -76,6 +80,8 @@ import { useStore } from 'vuex'
 import { DownOutlined } from '@ant-design/icons-vue';
 import { getPersonnelByOffice } from '@/services/api/hris';
 import { getAccessByUser } from '@/services/api/system/permission';
+import { usePermission } from '@/services/functions/permission'
+import Error403 from '@/components/Errors/403'
 
 const columns = [
   {
@@ -87,7 +93,7 @@ const columns = [
 
 export default defineComponent({
   name:"AccessRightsTable",
-  components: { DownOutlined },
+  components: { DownOutlined, Error403 },
   setup() {
     const store = useStore()
 
@@ -104,6 +110,11 @@ export default defineComponent({
     const list = computed(() => store.getters['system/permission'].list)
     const loading = computed(() => store.getters['system/permission'].loading)
     const offices = computed(() => store.getters['external/external'].mainOfficesChildren)
+    const vpOffices = computed(() => store.getters['external/external'].getVpOfficeChildren)
+
+    const permission = { AccessRightsManager: [ "adminPermission", "ap-manager" ] }
+
+    const { ARManagerPermission } = usePermission(permission)
 
     const fieldNames = {
       children: 'children',
@@ -120,13 +131,13 @@ export default defineComponent({
       store.dispatch('system/FETCH_PERMISSION')
     })
 
-    const getPersonnelList = officeId => {
+    const getPersonnelList = () => {
       memberList.value = []
-      personnelId.value = []
-      if (officeId) {
-        store.dispatch('system/FETCH_PERMISSION')
+      personnelId.value = undefined
+      checkedKeys.value = []
+      if (typeof officeId.value !== 'undefined') {
         formLoading.value = true
-        const id = officeId.value
+        const id = officeId.value.value
         getPersonnelByOffice(id).then(response => {
           if (response) {
             const { personnel } = response
@@ -163,12 +174,13 @@ export default defineComponent({
     }
 
     const onSave = () => {
-       let params = {
-         personnelId: personnelId.value.value,
-         listPermissions : checkedKeys.value,
-       }
+      let params = {
+        personnelId: personnelId.value.value,
+        listPermissions : checkedKeys.value,
+      }
 
       store.dispatch('system/SAVE_PERMISSION',{ payload: params })
+      updateBtn.value = false
     }
 
 
@@ -195,6 +207,7 @@ export default defineComponent({
       data: list,
       columns,
       offices,
+      vpOffices,
       officeId,
       personnelId,
       memberList,
@@ -211,6 +224,8 @@ export default defineComponent({
       getAccessList,
       onUpdate,
       onCheck,
+
+      ARManagerPermission,
     };
   },
 });
