@@ -35,7 +35,7 @@
           allow-clear tree-default-expand-all label-in-value
           :disabled="config.type === 'sub'"
           @change="changeNullValue($event, 'subCategory')"
-        ></a-tree-select>
+        />
       </a-form-item>
 
       <a-form-item v-bind="validateInfos.name">

@@ -108,7 +108,6 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('opcrtemplate/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -159,7 +158,7 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: props.formId }})
+      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { year: year.value, formId: 'opcr' }})
     }
 
     const resetFormFields = () => {

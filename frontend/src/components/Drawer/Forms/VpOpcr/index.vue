@@ -155,6 +155,7 @@
                   <a-tree-select
                     v-model:value="office.cascadeTo"
                     style="width: 100%"
+                    :list-height="233"
                     :tree-data="functionsWithProgram"
                     placeholder="Select a Program"
                     tree-default-expand-all

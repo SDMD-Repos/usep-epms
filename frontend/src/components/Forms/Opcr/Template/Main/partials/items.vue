@@ -223,6 +223,7 @@ export default defineComponent({
       displayIndicatorList,
 
       programsByFunction,
+      allPrograms,
       programs,
       // useDrawerSettings
       drawerConfig,
