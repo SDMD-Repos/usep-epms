@@ -93,9 +93,11 @@ class VpopcrController extends Controller
 
         $parentIds = []; // To store parent PIs' id for tracking purposes
 
-        $detailsOrdered = $query->detailsOrdered;
+        $detailsOrdered = $query ? $query->detailsOrdered : null;
 
-        $savedIndicators = $this->getSavedIndicators($detailsOrdered, $vpId);
+        if($detailsOrdered) {
+            $savedIndicators = $this->getSavedIndicators($detailsOrdered, $vpId);
+        }
 
         if ($query) {
             # Loop through PI details
@@ -283,8 +285,8 @@ class VpopcrController extends Controller
             'dataSource' => $dataSource,
             'aapcrId' => $query->id ?? null,
             'targetsBasisList' => $this->targetsBasisList,
-            'isPublished' => (bool)$query->published_date,
-            'savedIndicators' => $savedIndicators
+            'isPublished' => $query && (bool)$query->published_date,
+            'savedIndicators' => $savedIndicators ?? null
         ], 200);
     }
 
