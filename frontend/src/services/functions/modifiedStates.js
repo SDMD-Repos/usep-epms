@@ -9,15 +9,13 @@ export const useModifiedStates = () => {
 
     return functions.map(function(functionValue){
       const programs = store.getters['formManager/manager'].programs
-      const otherPrograms = store.getters['formManager/manager'].otherPrograms
-      const mergedPrograms = otherPrograms.length ? programs.concat(otherPrograms) : programs
 
       return {
-        'children' : mergedPrograms.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
+        'children' : programs.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
           let mappedKey = functionValue.id + "-" + mapValue.id
-          if(typeof mapValue.form_id !== 'undefined') {
+          /*if(typeof mapValue.form_id !== 'undefined') {
             mappedKey = mappedKey + "-" + mapValue.form_id
-          }
+          }*/
           mapValue.key = mappedKey
           mapValue.title = mapValue.name
           mapValue.value = mappedKey

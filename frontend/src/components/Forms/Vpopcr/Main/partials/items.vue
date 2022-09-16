@@ -74,6 +74,7 @@ export default defineComponent({
           dataIndex: 'count',
           className: 'column-count',
           width: 60,
+          fixed: 'left',
         },
         {
           title: 'Program',
@@ -83,7 +84,9 @@ export default defineComponent({
           width: 280,
         },
       ]
-      columns.splice(0, 0, ...addendum)
+
+      columns.splice(0, 0, {...addendum[0]})
+      columns.splice(2, 0, {...addendum[1]})
       modifiedTableColumns.value = columns
     }
 

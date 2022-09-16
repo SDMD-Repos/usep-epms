@@ -50,7 +50,7 @@
      </a-spin>
 </template>
 <script>
-import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
+import {defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed, onBeforeUnmount} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -129,14 +129,12 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.commit('formManager/SET_STATE', { previousPrograms: [] })
+      store.commit('formManager/SET_STATE', { programs: [], previousPrograms: [] })
 
       fetchData(year.value)
-      // checkUserPermission()
     })
 
     // METHODS
-
     const fetchData = async selectedYear => {
       if(isCreate.value){
          resetForm()

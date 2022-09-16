@@ -43,7 +43,7 @@ Route::group([
     Route::post('/save-form-category', 'SettingController@saveFormCategory');
     Route::post('/delete-form-category/{id}', 'SettingController@deleteFormCategory');
 
-    Route::get('/get-all-programs/{year}', 'SettingController@getPrograms');
+    Route::get('/get-all-programs/{year}/{formId}', 'SettingController@getPrograms');
     Route::post('/create-program', 'SettingController@createProgram');
     Route::post('/delete-program/{id}', 'SettingController@deleteProgram');
 

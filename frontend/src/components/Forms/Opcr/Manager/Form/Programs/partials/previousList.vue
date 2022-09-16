@@ -16,10 +16,10 @@
   </a-modal>
 </template>
 <script>
-import { computed, createVNode, defineComponent, onMounted, reactive, ref, toRefs, watch } from "vue"
+import { createVNode, defineComponent, onMounted, reactive, ref, toRefs, watch, computed } from "vue"
+import { useStore } from "vuex";
 import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
-import { useStore } from "vuex";
 
 export default defineComponent({
   name: "PreviousAllProgramList",
@@ -41,7 +41,7 @@ export default defineComponent({
 
     const columns = [
       { title: 'Name', dataIndex: 'name', key: 'name' },
-      { title: `Previous Function (${props.year-1})`, dataIndex: 'category.name', key: 'category_id', disabled: 'disabled' },
+      { title: `Previous Function (${props.year-1})`, dataIndex: ['category', 'name'], key: 'category_id', disabled: 'disabled' },
       { title: 'Percentage', dataIndex: 'percentage' },
     ]
 
@@ -51,7 +51,7 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: props.year, isPrevious: false }})
+      store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: (props.year - 1), isPrevious: true }})
     })
 
     // METHODS

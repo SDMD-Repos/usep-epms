@@ -73,7 +73,7 @@ trait FormTrait {
 
                     $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                     $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
-                    $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+//                    $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
                     break;
             }
 
@@ -180,7 +180,7 @@ trait FormTrait {
 
                         $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                         $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
-                        $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+//                        $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
                         break;
                 }
 
@@ -230,13 +230,13 @@ trait FormTrait {
                         case 'vpopcr':
                             $oldCategoryId = $updatedOffice->category_id;
                             $oldProgramId = $updatedOffice->program_id;
-                            $oldOtherProgramId = $updatedOffice->other_program_id;
+//                            $oldOtherProgramId = $updatedOffice->other_program_id;
 
                             $cascadeTo = explode("-", $office['cascadeTo']);
 
                             $updatedOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                             $updatedOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
-                            $updatedOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
+//                            $updatedOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
 
                             if($updatedOffice->isDirty('category_id')) {
                                 $history = "Updated category_id from '".$oldCategoryId."' to '".$updatedOffice->category_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -246,9 +246,9 @@ trait FormTrait {
                                 $history .= "Updated program_id from '".$oldProgramId."' to '".$updatedOffice->program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
                             }
 
-                            if($updatedOffice->isDirty('other_program_id')) {
+                            /*if($updatedOffice->isDirty('other_program_id')) {
                                 $history .= "Updated other_program_id from '".$oldOtherProgramId."' to '".$updatedOffice->other_program_id. "' ". Carbon::now() . " by " . $this->login_user->fullName . "\n";
-                            }
+                            }*/
                             break;
                     }
 

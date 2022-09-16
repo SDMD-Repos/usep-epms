@@ -200,7 +200,7 @@ class VpopcrController extends Controller
                                         $measures = $this->extractMeasures($parent->measures);
                                         $budget = $parent->budget;
                                         $targetsBasis = $parent->targets_basis;
-                                        $cascadingLevel = $parent->cascading_level;
+                                        $cascadingLevel = ['key' => $parent->cascading_level, 'label' => ucwords($parent->cascading_level)];
                                         $remarks = $parent->remarks;
                                         $linkedToChild = $parent->linked_to_child;
 
@@ -404,7 +404,13 @@ class VpopcrController extends Controller
                 $status = 400;
             }
 
-            return response()->json($e->getMessage(), $status);
+            $message = $e->getMessage();
+
+            if($e->getLine()) {
+                $message .= " (Line: ". $e->getLine() .")";
+            }
+
+            return response()->json($message, $status);
         }
     }
 
@@ -445,6 +451,7 @@ class VpopcrController extends Controller
                     'fieldName' => $formField->id,
                 ]);
             }
+
         }
 
         if($isNew){

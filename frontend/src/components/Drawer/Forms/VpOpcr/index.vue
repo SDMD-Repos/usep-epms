@@ -285,7 +285,7 @@ export default defineComponent({
     // COMPUTED
     const programsByFunction = computed( () => {
       const list = store.getters['formManager/manager'].programs
-      return list.filter(i => i.category_id === props.drawerId).map(v => ({ value: v.id, label: v.name }))
+      return list.filter(i => { return i.category_id === props.drawerId && !i.form_id}).map(v => ({ value: v.id, label: v.name }))
     })
 
     const subCategories = computed(() => {

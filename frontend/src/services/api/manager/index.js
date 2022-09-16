@@ -36,9 +36,9 @@ export function updateFunctionProgram(data, id) {
     .catch(err => console.log(err))
 }
 
-export async function getPrograms(year) {
+export async function getPrograms(year, formId) {
   return apiClient
-    .get('/settings/get-all-programs/' + year)
+    .get('/settings/get-all-programs/' + year + '/' + formId)
     .then(response => {
       return response.data
     })

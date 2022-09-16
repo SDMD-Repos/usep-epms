@@ -329,9 +329,9 @@ trait OfficeTrait {
 
                     if($datum->program_id) {
                         $cascadeTo = $datum->program->category_id . '-' . $datum->program_id;
-                    }else if($datum->other_program_id) {
+                    }/*else if($datum->other_program_id) {
                         $cascadeTo = $datum->otherProgram->category_id . '-' . $datum->other_program_id . '-opcr';
-                    }
+                    }*/
                     break;
                 default:
                     $cascadeTo = $datum->cascade_to;

@@ -9,7 +9,7 @@
           cancel-text="No"
         >
           <template #icon><warning-outlined /></template>
-          <a v-if="record.is_other" type="primary">Delete</a>
+          <a v-if="record.form_id" type="primary">Delete</a>
         </a-popconfirm>
       </template>
     </template>
@@ -44,7 +44,7 @@ export default defineComponent({
 
     // METHODS
     const onDelete = key => {
-      store.dispatch('formManager/DELETE_OTHER_PROGRAM', { payload: { formId: props.formId, id: key, year: props.year }})
+      store.dispatch('formManager/DELETE_PROGRAM', { payload: { id: key, year: props.year, formId: props.formId }})
     }
 
     return {

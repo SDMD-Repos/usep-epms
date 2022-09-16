@@ -76,7 +76,7 @@ export default {
   actions: {
     FETCH_FUNCTIONS({ commit }, { payload }) {
       const { year } = payload
-      const formId = typeof payload.formId !== 'undefined' ? payload.formId : null
+      const formId = typeof payload.formId !== 'undefined' ? payload.formId : 0
 
       commit('SET_STATE', {
         loading: true,
@@ -152,13 +152,14 @@ export default {
     },
     FETCH_PROGRAMS({ commit }, { payload }) {
       const { year } = payload
+      const formId = typeof payload.formId !== 'undefined' ? payload.formId : 0
 
       commit('SET_STATE', {
         loading: true,
       })
 
       const getPrograms = mapApiProviders.getPrograms
-      getPrograms(year).then(response => {
+      getPrograms(year, formId).then(response => {
         if (response) {
           const { programs } = response
           if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
@@ -183,12 +184,13 @@ export default {
         year: payload.year,
         category_id: payload.category_id,
         percentage: payload.percentage,
+        form_id: payload.formId,
       }
 
       const createProgram = mapApiProviders.createProgram
       createProgram(data).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS', { payload: { year: payload.year } })
+          dispatch('FETCH_PROGRAMS', { payload: { year: payload.year, formId: payload.formId } })
           notification.success({
             message: 'Success',
             description: 'Program created successfully',
@@ -208,7 +210,7 @@ export default {
       const deleteProgram = mapApiProviders.deleteProgram
       deleteProgram(id).then(response => {
         if (response) {
-          dispatch('FETCH_PROGRAMS', { payload: { year: year } })
+          dispatch('FETCH_PROGRAMS', { payload: { year: year, formId: payload.formId }})
           notification.success({
             message: 'Success',
             description: 'Program deleted successfully',

@@ -132,6 +132,8 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'top' })
+
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
@@ -143,6 +145,8 @@ export default defineComponent({
     })
 
     onBeforeUnmount(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'left' })
+
       resetFormFields()
     });
 
@@ -231,8 +235,8 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_SUB_CATEGORIES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
-      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value }})
-      await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
+      await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value, formId: 'opcr' }})
+      // await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
 
       let params = {

@@ -114,6 +114,8 @@ export default defineComponent({
     })
 
     onMounted(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'top' })
+
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('aapcr/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -129,6 +131,8 @@ export default defineComponent({
     })
 
     onBeforeUnmount(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'left' })
+
       resetFormFields()
     });
 

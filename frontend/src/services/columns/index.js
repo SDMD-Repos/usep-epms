@@ -1,17 +1,18 @@
 export const formTableColumns = [
   {
-    title: 'Sub Category',
-    key: 'subCategory',
-    dataIndex: 'subCategory',
-    className: 'column-sub-category',
-    width: 280,
-  },
-  {
     title: 'Performance Indicator',
     key: 'name',
     dataIndex: 'name',
     className: 'column-pi-name',
     width: 450,
+    fixed: 'left',
+  },
+  {
+    title: 'Sub Category',
+    key: 'subCategory',
+    dataIndex: 'subCategory',
+    className: 'column-sub-category',
+    width: 280,
   },
   {
     title: 'is Header PI?',

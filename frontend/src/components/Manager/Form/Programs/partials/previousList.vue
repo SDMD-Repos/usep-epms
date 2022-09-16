@@ -20,8 +20,6 @@ import { Modal } from "ant-design-vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { useStore } from "vuex";
 
-
-
 export default defineComponent({
   name: "ProgramsPreviousList",
   props: {
@@ -32,17 +30,21 @@ export default defineComponent({
   emits: ['close-modal', 'save-programs'],
   setup(props, { emit }) {
     const store = useStore()
+
     const isVisible = ref(false)
     const selectedFunction = ref(null)
-    const functions = computed(() => store.getters['formManager/manager'].functions)
+
     const state = reactive({
       selectedRowKeys: [],
     })
+
     const columns = [
       { title: 'Name', dataIndex: 'name', key: 'name' },
-      { title: `Previous Function (${props.year})`, dataIndex: 'category.name', key: 'category_id', disabled: 'disabled' },
+      { title: `Previous Function (${props.year})`, dataIndex: ['category', 'name'], key: 'category_id', disabled: 'disabled' },
       { title: 'Percentage', dataIndex: 'percentage' },
     ]
+
+    const functions = computed(() => store.getters['formManager/manager'].functions)
 
     watch(() => [props.visible] , ([visible]) => {
       isVisible.value = visible

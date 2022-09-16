@@ -171,11 +171,12 @@ class OcpcrController extends Controller
 
                         if((($indicatorOfficeId === $vpOfficeId && $indicatorOffice['vp_office_id'] === null)
                             || ($indicatorOfficeId === (int)$officeId))) {
-                            $categoryIndicator = !$indicatorOffice['category_id'] ?
+                           /* $categoryIndicator = !$indicatorOffice['category_id'] ?
                                 (!$indicatorOffice['program_id'] ?
                                     ($indicatorOffice['other_program_id'] ? $indicatorOffice->otherProgram->category : null)
                                     : $indicatorOffice->program->category)
-                                : $indicatorOffice->category;
+                                : $indicatorOffice->category;*/
+                            $categoryIndicator = !$indicatorOffice['category_id'] ? $indicatorOffice->program->category : $indicatorOffice->category;
 
                             $isCategoryExists = array_filter($tempCategoryList, function($x) use ($categoryIndicator){
                                 return $x['id'] === $categoryIndicator;
@@ -183,7 +184,7 @@ class OcpcrController extends Controller
 
                             $categoryProgram[] = [
                                 'category' => $categoryIndicator,
-                                'program' => $indicatorOffice['program_id'] ? : ($indicatorOffice['other_program_id'] ? : $programId)
+                                'program' => $indicatorOffice['program_id'] ? : $programId
                             ];
 
                             if(!$isCategoryExists) {
