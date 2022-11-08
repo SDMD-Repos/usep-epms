@@ -339,14 +339,3 @@ export default defineComponent({
   },
 })
 </script>
-<style scoped>
-.required-indicator::before {
-  display: inline-block;
-  margin-right: 4px;
-  color: #f5222e;
-  font-size: 14px;
-  font-family: SimSun, sans-serif;
-  line-height: 1;
-  content: '*';
-}
-</style>

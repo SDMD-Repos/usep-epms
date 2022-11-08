@@ -6,7 +6,22 @@
   font-weight: bold;
 }
 
-th.column-display-as-items,
-td.column-display-as-items {
+.required-indicator::before {
+  display: inline-block;
+  margin-right: 4px;
+  color: #f5222e;
+  font-size: 14px;
+  font-family: SimSun, sans-serif;
+  line-height: 1;
+  content: '*';
+}
+
+th.column-display-as-items, td.column-display-as-items,
+th.column-numerical-rating, td.column-numerical-rating,
+th.column-aps, td.column-aps,
+th.column-adjectival-rating, td.column-adjectival-rating,
+th.column-description, td.column-description,
+th.column-date-created, td.column-date-created,
+th.column-action, td.column-action,{
   text-align: center !important;
 }

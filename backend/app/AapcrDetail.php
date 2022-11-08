@@ -50,7 +50,9 @@ class AapcrDetail extends Model
     public function measures()
     {
         return $this->belongsToMany('App\Measure', 'aapcr_detail_measures', 'detail_id', 'measure_id')
-            ->wherePivotNull('deleted_at')->with('items')->orderBy('id', 'ASC');
+            ->using('App\AapcrDetailMeasure')
+            ->withPivot('category_id')
+            ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
     }
 
     /**

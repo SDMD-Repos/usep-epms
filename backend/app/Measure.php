@@ -15,27 +15,62 @@ class Measure extends Model
      * Get the items for the measure.
      */
 
-    public function items()
+    public function customItems()
     {
-        return $this->hasMany('App\MeasureItem')->orderBy('rate', 'asc');
+        return $this->hasMany('App\MeasureItem', 'measure_id', 'id')->whereNull('category_id');
+    }
+
+    /**
+     * Get the categories for the measure.
+     */
+
+    public function categories()
+    {
+        return $this->hasMany('App\MeasureCategory')->with('items')->orderBy('numbering', 'asc');
+    }
+
+    public function aapcrDetail() {
+        return $this->belongsToMany('App\AapcrDetail', 'aapcr_detail_measures', 'detail_id', 'measure_id')
+            ->using('App\AapcrDetailMeasure');
     }
 
     public static function boot() {
         parent::boot();
 
         static::deleting(function($measure) {
-            foreach($measure->items as $item) {
-                $loginUser = Auth::user()->pmaps_id;
+            $loginUser = Auth::user()->fullname;
 
-                $item->modify_id = $loginUser;
-                $item->updated_at = Carbon::now();
-                $item->history = $item->history . "Deleted " . Carbon::now() . " by " . $loginUser . "\n";
+            if(!$measure->is_custom) {
+                foreach($measure->categories as $category) {
+                    $category->modify_id = $loginUser;
+                    $category->updated_at = Carbon::now();
+                    $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $loginUser . "\n";
 
-                $item->save();
+                    $category->save();
 
-                $item->delete();
+                    $category->delete();
+
+                    self::deleteItems($category->items);
+                }
+            }else {
+                self::deleteItems($measure->customItems);
             }
-
         });
     }
+
+    protected static function deleteItems($items) {
+        $userFullname = Auth::user()->fullname;
+
+        foreach($items as $item) {
+            $item->modify_id = $userFullname;
+            $item->updated_at = Carbon::now();
+            $item->history = $item->history . "Deleted " . Carbon::now() . " by " . $userFullname . "\n";
+
+            $item->save();
+
+            $item->delete();
+        }
+    }
+
+
 }

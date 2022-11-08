@@ -135,33 +135,6 @@ export async function getMeasures(year) {
     .catch(err => console.log(err))
 }
 
-export async function createMeasure(data) {
-  return apiClient
-    .post('/settings/create-measure', data)
-    .then(response => {
-      return response.data
-    })
-    .catch(err => console.log(err))
-}
-
-export async function updateMeasure(data, id) {
-  return apiClient
-    .post('/settings/update-measure/' + id, data)
-    .then(response => {
-      return response.data
-    })
-    .catch(err => console.log(err))
-}
-
-export async function deleteMeasure(id) {
-  return apiClient
-    .post('/settings/delete-measure/' + id)
-    .then(response => {
-      return response.data
-    })
-    .catch(err => console.log(err))
-}
-
 export async function getAllForms() {
   return apiClient
     .get('/settings/get-all-spms-forms')

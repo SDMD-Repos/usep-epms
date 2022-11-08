@@ -10,7 +10,7 @@
                        @delete-item="deleteItem" @handle-link-parent="linkIndicator" @add-budget-list-item="addBudgetListItem"/>
 
       <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
-                         :targets-basis-list="targetsBasisList" :categories="categories" :current-year="year"
+                         :targets-basis-list="targetsBasisList" :category-list="categories" :current-year="year"
                          :validate="validate" :validate-infos="validateInfos"
                          @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
                          @close-drawer="closeDrawer" />
@@ -18,7 +18,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, ref, watch, reactive, createVNode,inject, computed } from "vue"
+import { defineComponent, ref, watch, reactive, createVNode, computed } from "vue"
 import { useStore } from 'vuex'
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'

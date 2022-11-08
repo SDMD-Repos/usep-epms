@@ -59,6 +59,10 @@ Route::group([
     Route::post('/create-measure', 'SettingController@createMeasure');
     Route::post('/update-measure/{id}', 'SettingController@updateMeasure');
     Route::post('/delete-measure/{id}', 'SettingController@deleteMeasure');
+    Route::get('/get-all-measure-ratings/{year}', 'SettingController@getMeasureRatings');
+    Route::post('/create-measure-rating', 'SettingController@createMeasureRating');
+    Route::post('/update-measure-rating/{id}', 'SettingController@updateMeasureRating');
+    Route::post('/delete-measure-rating/{id}', 'SettingController@deleteMeasureRating');
 
     Route::get('/get-user-form-access', 'SettingController@getUserFormAccess');
     Route::get('/get-all-spms-forms', 'SettingController@getAllForms');

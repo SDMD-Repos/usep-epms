@@ -13,9 +13,7 @@ export const useModifiedStates = () => {
       return {
         'children' : programs.filter(programValue => programValue.category_id === functionValue.id).map(function(mapValue){
           let mappedKey = functionValue.id + "-" + mapValue.id
-          /*if(typeof mapValue.form_id !== 'undefined') {
-            mappedKey = mappedKey + "-" + mapValue.form_id
-          }*/
+
           mapValue.key = mappedKey
           mapValue.title = mapValue.name
           mapValue.value = mappedKey

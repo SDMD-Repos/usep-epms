@@ -62,7 +62,7 @@
               </span>
               <span v-else >
                 <template v-for="item in measure.option.items" :key="item.id">
-                  <span>{{ item.rate }} - {{ item.description }}</span> <br />
+                  <span>{{ item.rating.numerical_rating }} - {{ item.description }}</span> <br />
                 </template>
               </span>
             </li>

@@ -25,10 +25,6 @@ class RequestsController extends Controller
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
 
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
             return $next($request);
         });
 
@@ -64,11 +60,11 @@ class RequestsController extends Controller
             $request->status = $status;
             $request->file_name = null;
             $request->changed_date = Carbon::now();
-            $request->changed_by = $this->login_user->fullName;
+            $request->changed_by = $this->login_user->fullname;
             $request->updated_at = Carbon::now();
-            $request->modify_id = $this->login_user->fullName;
+            $request->modify_id = $this->login_user->fullname;
 
-            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $history = "Updated status from '" . $original['status'] . "' to '" . $status . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             $request->history .= $request->history . $history;
 

@@ -219,3 +219,41 @@ export const listTableColumns = [
     key: 'operation',
   },
 ]
+
+export const measuresRating = [
+  {
+    title: 'Numerical Rating',
+    dataIndex: 'numerical_rating',
+    key: 'numerical_rating',
+    className: 'column-numerical-rating',
+    width: 100,
+  },
+  {
+    title: 'Rating Equivalent',
+    children: [
+      {
+        title: 'Average Point Score',
+        name: "average_point_score",
+        key: 'average_point_score',
+        className: 'column-aps',
+        width: 200,
+      },
+      {
+        title: 'Adjectival Rating',
+        dataIndex: 'adjectival_rating',
+        key: 'adjectival_rating',
+        className: 'column-adjectival-rating',
+        width: 250,
+      },
+      {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+        className: 'column-description',
+        width: 500,
+      },
+    ],
+  },
+  { title: 'Date Created', dataIndex: 'created_at', key: 'created_at', className: 'column-date-created', width: 250 },
+  { title: 'Action', dataIndex: 'operation', key: 'operation', className: 'column-action' },
+]

@@ -100,7 +100,7 @@ class AapcrController extends Controller
             $aapcr->document_name = $documentName;
             $aapcr->finalized_date = ($isFinalized ? Carbon::now() : null);
             $aapcr->create_id = $this->login_user->pmaps_id;
-            $aapcr->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $aapcr->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if ($aapcr->save()) {
                 foreach($dataSource as $value) {
@@ -156,10 +156,9 @@ class AapcrController extends Controller
         $detail->parent_id = $values['detailId'] ?? null;
         $detail->linked_to_child = $values['linkedToChild'] ?? 0;
         $detail->create_id = $this->login_user->pmaps_id;
-        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
         if($detail->save()) {
-
             $this->saveMeasures($detail, $values['measures']);
 
             $officeModel = new AapcrDetailOffice();
@@ -194,7 +193,7 @@ class AapcrController extends Controller
             $newBudget->program_id = $budget['mainCategory']['key'];
             $newBudget->budget = $budget['categoryBudget'];
             $newBudget->create_id = $this->login_user->pmaps_id;
-            $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$newBudget->save()){
                 DB::rollBack();
@@ -219,7 +218,7 @@ class AapcrController extends Controller
                 $aapcr->published_date = Carbon::now();
                 $aapcr->updated_at = Carbon::now();
                 $aapcr->modify_id = $this->login_user->pmaps_id;
-                $aapcr->history = $aapcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $aapcr->history = $aapcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 $filename = $this->viewAapcrPdf($id, 1);
 
@@ -263,10 +262,10 @@ class AapcrController extends Controller
             $unpublished->remarks = $remarks;
             $unpublished->status = 'pending';
             $unpublished->requested_date = Carbon::now();
-            $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->requested_by = $this->login_user->fullname;
             $unpublished->file_name = $fileName;
             $unpublished->create_id = $this->login_user->pmaps_id;
-            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$unpublished->save()) {
                 DB::rollBack();
@@ -299,7 +298,7 @@ class AapcrController extends Controller
             $aapcr->end_effectivity = $now;
             $aapcr->updated_at = $now;
             $aapcr->modify_id = $this->login_user->pmaps_id;
-            $aapcr->history = $aapcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+            $aapcr->history = $aapcr->history . "Deactivated " . $now . " by " . $this->login_user->fullname . "\n";
 
             $aapcr->save();
 
@@ -455,7 +454,7 @@ class AapcrController extends Controller
                     $finalized_date = $aapcr->finalized_date;
                 }else{
                     $finalized_date = Carbon::now();
-                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
             }
 
@@ -467,11 +466,11 @@ class AapcrController extends Controller
             $aapcr->modify_id = $this->login_user->pmaps_id;
 
             if($aapcr->isDirty('year')){
-                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($aapcr->isDirty('document_name')){
-                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             $aapcr->history = $aapcr->history.$history;
@@ -481,7 +480,7 @@ class AapcrController extends Controller
                     $deleteAapcr = AapcrDetail::find($deletedId);
 
                     $deleteAapcr->modify_id = $this->login_user->pmaps_id;
-                    $deleteAapcr->history = $deleteAapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+                    $deleteAapcr->history = $deleteAapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
 
                     if($deleteAapcr->save()){
                         if(!$deleteAapcr->delete()){
@@ -554,43 +553,43 @@ class AapcrController extends Controller
                 $history = '';
 
                 if($detail->isDirty('pi_name')){
-                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('is_header')){
-                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('target')){
-                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('allocated_budget')){
-                    $history .= "Updated Allocated Budget from '".$original['allocated_budget']."' to '".$data['budget']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Allocated Budget from '".$original['allocated_budget']."' to '".$data['budget']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('targets_basis')){
-                    $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('cascading_level')){
-                    $history .= "Updated Cascading Level from '".$original['cascading_level']."' to '".$cascadingLevel."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Cascading Level from '".$original['cascading_level']."' to '".$cascadingLevel."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('category_id')){
-                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('sub_category_id')){
-                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('program_id')){
-                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('other_remarks')){
-                    $history .= "Updated Other Remarks from '".$original['other_remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Other Remarks from '".$original['other_remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 $detail->history = $detail->history.$history;
@@ -647,7 +646,7 @@ class AapcrController extends Controller
                 $newBudget->program_id = $budget['mainCategory']['key'];
                 $newBudget->budget = $budget['categoryBudget'];
                 $newBudget->create_id = $this->login_user->pmaps_id;
-                $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 if(!$newBudget->save()){
                     DB::rollBack();
@@ -657,7 +656,7 @@ class AapcrController extends Controller
 
                 if($programBudget->trashed()){
                     $programBudget->restore();
-                    $history = "Added " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    $history = "Added " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
                 $cachedBudget = $programBudget->budget;
@@ -665,7 +664,7 @@ class AapcrController extends Controller
                 $programBudget->budget = $budget['categoryBudget'];
 
                 if($programBudget->isDirty('budget')) {
-                    $history = "Updated budget from '" . $cachedBudget . "' to '" . $budget['categoryBudget'] . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    $history = "Updated budget from '" . $cachedBudget . "' to '" . $budget['categoryBudget'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
                 $programBudget->modify_id = $this->login_user->pmaps_id;
@@ -684,7 +683,7 @@ class AapcrController extends Controller
         foreach($deletedIds as $deletedId) {
             $deletedId->updated_at = Carbon::now();
             $deletedId->modify_id = $this->login_user->pmaps_id;
-            $deletedId->history = $deletedId->history."Removed " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $deletedId->history = $deletedId->history."Removed " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$deletedId->save()){
                 DB::rollBack();

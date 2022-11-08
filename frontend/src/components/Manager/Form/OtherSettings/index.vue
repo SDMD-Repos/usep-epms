@@ -58,6 +58,7 @@ export default defineComponent({
     //METHODS
     const fetchSettings = value => {
       store.dispatch('formManager/FETCH_FUNCTIONS', { payload: { year: value }})
+      store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: value }})
     }
 
     const handleSave = data => {

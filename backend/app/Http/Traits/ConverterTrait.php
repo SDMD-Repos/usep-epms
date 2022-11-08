@@ -248,11 +248,35 @@ trait ConverterTrait {
         $list = [];
 
         foreach($measures as $measure) {
+            $measureId = $measure->id;
+            $measureName = $measure->name;
+
             $record = new \stdClass();
 
-            $record->key = $measure->id;
-            $record->label = $measure->name;
-            $record->option = $measure;
+            if($measure->is_custom) {
+                $record->value = $measureId;
+                $record->label = $measureName;
+                $record->items = $measure->customItems->load('rating');
+                $record->option = (array)$record;
+            }else {
+                $category = $measure->pivot->category;
+
+                $categoryId = $category->id;
+
+                $tempRecord = new \stdClass();
+
+                $tempRecord->value = $categoryId . "-" . $measureId;
+                $tempRecord->label = $measureName . strtolower($category->numbering);
+                $tempRecord->items = $category->items;
+                $tempRecord->measureId = $measureId;
+                $tempRecord->categoryId = $categoryId;
+
+                $record = $tempRecord;
+                $record->option = clone $tempRecord;
+            }
+
+            $record->displayAsItems = $measure->display_as_items;
+            $record->isCustom = $measure->is_custom;
 
             $list[] = $record;
         }

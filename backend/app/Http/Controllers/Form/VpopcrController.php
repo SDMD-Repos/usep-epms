@@ -333,7 +333,7 @@ class VpopcrController extends Controller
             $vpopcr->aapcr_id = $aapcrId;
             $vpopcr->finalized_date = ($isFinalized ? Carbon::now() : null);
             $vpopcr->create_id = $this->login_user->pmaps_id;
-            $vpopcr->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $vpopcr->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             $savedHeaders = [];
 
@@ -438,7 +438,7 @@ class VpopcrController extends Controller
         $detail->from_aapcr = $data['from_aapcr'];
         $detail->linked_to_child = $data['linkedToChild'] ?? 0;
         $detail->create_id = $this->login_user->pmaps_id;
-        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
         if($detail->save()){
             $this->saveMeasures($detail, $data['measures']);
@@ -480,7 +480,7 @@ class VpopcrController extends Controller
                 $vpopcr->published_date = Carbon::now();
                 $vpopcr->updated_at = Carbon::now();
                 $vpopcr->modify_id = $this->login_user->pmaps_id;
-                $vpopcr->history = $vpopcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $vpopcr->history = $vpopcr->history . "Published " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 $filename = $this->viewVpOpcrPdf($id, 1);
 
@@ -523,10 +523,10 @@ class VpopcrController extends Controller
             $unpublished->remarks = $remarks;
             $unpublished->status = 'pending';
             $unpublished->requested_date = Carbon::now();
-            $unpublished->requested_by = $this->login_user->fullName;
+            $unpublished->requested_by = $this->login_user->fullname;
             $unpublished->file_name = $fileName;
             $unpublished->create_id = $this->login_user->pmaps_id;
-            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$unpublished->save()) {
                 DB::rollBack();
@@ -559,7 +559,7 @@ class VpopcrController extends Controller
             $vpopcr->end_effectivity = $now;
             $vpopcr->updated_at = $now;
             $vpopcr->modify_id = $this->login_user->pmaps_id;
-            $vpopcr->history = $vpopcr->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+            $vpopcr->history = $vpopcr->history . "Deactivated " . $now . " by " . $this->login_user->fullname . "\n";
 
             $vpopcr->save();
 
@@ -803,7 +803,7 @@ class VpopcrController extends Controller
                     $finalized_date = $vpOpcr->finalized_date;
                 }else{
                     $finalized_date = Carbon::now();
-                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
             }
 
@@ -817,7 +817,7 @@ class VpopcrController extends Controller
                     $deletedVpOpcr = VpOpcrDetail::find($deletedId);
 
                     $deletedVpOpcr->modify_id = $this->login_user->pmaps_id;
-                    $deletedVpOpcr->history = $deletedVpOpcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+                    $deletedVpOpcr->history = $deletedVpOpcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
 
                     if($deletedVpOpcr->save()){
                         if(!$deletedVpOpcr->delete()){
@@ -871,7 +871,7 @@ class VpopcrController extends Controller
                                 $hasTrashed->restore();
 
                                 $hasTrashed->modify_id = $this->login_user->pmaps_id;
-                                $hasTrashed->history = $hasTrashed->history."Updated " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                                $hasTrashed->history = $hasTrashed->history."Updated " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                                 if(!$hasTrashed->save()){
                                     DB::rollBack();
@@ -947,7 +947,7 @@ class VpopcrController extends Controller
                             $aapcr = VpOpcrDetail::find($source['id']);
 
                             $aapcr->modify_id = $this->login_user->pmaps_id;
-                            $aapcr->history = $aapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+                            $aapcr->history = $aapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
 
                             if($aapcr->save()){
                                 if(!$aapcr->delete()){
@@ -1004,27 +1004,27 @@ class VpopcrController extends Controller
         $history = '';
 
         if($updated->isDirty('is_header')){
-            $history .= "Updated is_header column from '".$original['is_header']."' to '".$isHeader."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated is_header column from '".$original['is_header']."' to '".$isHeader."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         if($updated->isDirty('pi_name')){
-            $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         if($updated->isDirty('target')){
-            $history .= "Updated Target from ".$original['target']." to ".$data['target']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated Target from ".$original['target']." to ".$data['target']." ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         if($updated->isDirty('allocated_budget')){
-            $history .= "Updated Allocated Budget from ".$original['allocated_budget']." to ".$data['budget']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated Allocated Budget from ".$original['allocated_budget']." to ".$data['budget']." ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         if($updated->isDirty('targets_basis')){
-            $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         if($updated->isDirty('remarks')){
-            $history .= "Updated Remarks from '".$original['remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            $history .= "Updated Remarks from '".$original['remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
         }
 
         $updated->history = $updated->history.$history;

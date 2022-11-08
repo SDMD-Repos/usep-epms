@@ -29,10 +29,6 @@ class OpcrTemplateController extends Controller
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
 
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
             return $next($request);
         });
     }
@@ -157,7 +153,7 @@ class OpcrTemplateController extends Controller
             $opcrTemplate->document_name = $documentName;
             $opcrTemplate->finalized_date = ($isFinalized ? Carbon::now() : null);
             $opcrTemplate->create_id = $this->login_user->pmaps_id;
-            $opcrTemplate->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $opcrTemplate->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if ($opcrTemplate->save()) {
                 foreach($dataSource as $value) {
@@ -199,7 +195,7 @@ class OpcrTemplateController extends Controller
 
         $detail->parent_id = isset($values['detailId']) ? $values['detailId'] : null;
         $detail->create_id = $this->login_user->pmaps_id;
-        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+        $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
         if($detail->save()) {
 
@@ -227,7 +223,7 @@ class OpcrTemplateController extends Controller
         $opcrTemplate->is_active = 0;
         $opcrTemplate->updated_at = $now;
         $opcrTemplate->modify_id = $this->login_user->pmaps_id;
-        $opcrTemplate->history = $opcrTemplate->history . "Deactivated " . $now . " by " . $this->login_user->fullName . "\n";
+        $opcrTemplate->history = $opcrTemplate->history . "Deactivated " . $now . " by " . $this->login_user->fullname . "\n";
 
         $opcrTemplate->save();
 
@@ -257,7 +253,7 @@ class OpcrTemplateController extends Controller
                     $finalized_date = $opcrTemplate->finalized_date;
                 }else{
                     $finalized_date = Carbon::now();
-                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
             }
 
@@ -269,11 +265,11 @@ class OpcrTemplateController extends Controller
             $opcrTemplate->modify_id = $this->login_user->pmaps_id;
 
             if($opcrTemplate->isDirty('year')){
-                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($opcrTemplate->isDirty('document_name')){
-                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             $opcrTemplate->history = $opcrTemplate->history.$history;
@@ -283,7 +279,7 @@ class OpcrTemplateController extends Controller
                     $deleteOpcrTemplate = OpcrTemplateDetails::find($deletedId);
 
                     $deleteOpcrTemplate->modify_id = $this->login_user->pmaps_id;
-                    $deleteOpcrTemplate->history = $deleteOpcrTemplate->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullName."\n";
+                    $deleteOpcrTemplate->history = $deleteOpcrTemplate->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
 
                     if($deleteOpcrTemplate->save()){
                         if(!$deleteOpcrTemplate->delete()){
@@ -339,27 +335,27 @@ class OpcrTemplateController extends Controller
                 $history = '';
 
                 if($detail->isDirty('pi_name')){
-                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('is_header')){
-                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('target')){
-                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('category_id')){
-                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('sub_category_id')){
-                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 if($detail->isDirty('program_id')){
-                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 $detail->history = $detail->history.$history;
@@ -403,7 +399,7 @@ class OpcrTemplateController extends Controller
             $opcrTemplate->published_date = Carbon::now();
             $opcrTemplate->updated_at = Carbon::now();
             $opcrTemplate->modify_id = $this->login_user->pmaps_id;
-            $opcrTemplate->history = $opcrTemplate->history . "Published " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $opcrTemplate->history = $opcrTemplate->history . "Published " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             $opcrTemplate->save();
 
@@ -424,7 +420,7 @@ class OpcrTemplateController extends Controller
             $opcrTemplate = OpcrTemplate::find($id);
 
             $opcrTemplate->published_date = null;
-            $opcrTemplate->history = $opcrTemplate->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $opcrTemplate->history = $opcrTemplate->history . "Unpublished " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$opcrTemplate->save()) {
                 DB::rollBack();

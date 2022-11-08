@@ -1,5 +1,5 @@
 import * as manager from '@/services/api/manager'
-import { postRequest, deleteRequest } from '@/services/api/mainForms/ocpcr'
+import { postRequest, getRequest, deleteRequest } from '@/services/api/mainForms/ocpcr'
 import { notification } from 'ant-design-vue'
 
 const mapApiProviders = {
@@ -18,9 +18,6 @@ const mapApiProviders = {
   updateSubCategory: manager.updateSubCategory,
   deleteSubCategory: manager.deleteSubCategory,
   getMeasures: manager.getMeasures,
-  createMeasure: manager.createMeasure,
-  updateMeasure: manager.updateMeasure,
-  deleteMeasure: manager.deleteMeasure,
   getAllForms: manager.getAllForms,
   getUserFormAccess: manager.getUserFormAccess,
   getAllSignatoryTypes: manager.getAllSignatoryTypes,
@@ -54,8 +51,9 @@ export default {
     subCategories: [],
     prevSubCategories: [],
     measures: [],
-    previousCategories: [],
     previousMeasures: [],
+    measureRatings: [],
+    previousMeasureRatings: [],
     forms: [],
     userFormAccess: [],
     signatoryTypes: [],
@@ -416,21 +414,13 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const { name, displayAsItems, year, items } = payload
-      const data = {
-        name: name,
-        displayAsItems: displayAsItems,
-        year: year,
-        items: items,
-      }
 
-      const createMeasure = mapApiProviders.createMeasure
-      createMeasure(data).then(response => {
+      postRequest(baseUrl + '/create-measure', payload).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload: { year: year } })
+          dispatch('FETCH_MEASURES', { payload: { year: payload.year } })
           notification.success({
             message: 'Success',
-            description: 'Measure created successfully',
+            description: response.message,
           })
         } else {
           commit('SET_STATE', { loading: false })
@@ -441,21 +431,13 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      const { name, displayAsItems, items, deleted, id, year } = payload
-      const data = {
-        name: name,
-        displayAsItems: displayAsItems,
-        items: items,
-        deleted: deleted,
-      }
 
-      const updateMeasure = mapApiProviders.updateMeasure
-      updateMeasure(data, id).then(response => {
+      postRequest(baseUrl + '/update-measure/' + payload.id, payload).then(response => {
         if (response) {
-          dispatch('FETCH_MEASURES', { payload: { year: year } })
+          dispatch('FETCH_MEASURES', { payload: { year: payload.year } })
           notification.success({
             message: 'Success',
-            description: 'Measure updated successfully',
+            description: response.message,
           })
         } else {
           commit('SET_STATE', { loading: false })
@@ -468,8 +450,7 @@ export default {
         loading: true,
       })
 
-      const deleteMeasure = mapApiProviders.deleteMeasure
-      deleteMeasure(id).then(response => {
+      deleteRequest(baseUrl + '/delete-measure/' + id).then(response => {
         if (response) {
           dispatch('FETCH_MEASURES', { payload: { year: year } })
           notification.success({
@@ -479,6 +460,94 @@ export default {
         } else {
           commit('SET_STATE', { loading: false })
         }
+      })
+    },
+    FETCH_MEASURE_RATINGS({ commit }, { payload }) {
+      const { year } = payload
+
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      getRequest(baseUrl + '/get-all-measure-ratings/' + year).then(response => {
+        if (response) {
+          const { measureRatings } = response
+          if (typeof payload.isPrevious !== 'undefined' && payload.isPrevious) {
+            commit('SET_STATE', { previousMeasureRatings: measureRatings })
+          } else {
+            commit('SET_STATE', { measureRatings: measureRatings })
+          }
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    CREATE_MEASURE_RATING({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      postRequest(baseUrl + '/create-measure-rating', payload).then(response => {
+        if (response) {
+          dispatch('FETCH_MEASURE_RATINGS', { payload: { year: payload.year } })
+          notification.success({
+            message: 'Success',
+            description: response.message,
+          })
+        }
+        commit('SET_STATE', {
+          loading: false,
+        })
+      })
+    },
+    UPDATE_MEASURE_RATING({ commit, dispatch }, { payload }) {
+      commit('SET_STATE', {
+        loading: true,
+      })
+      const { id, numericalRating, averagePointScore, year, adjectivalRating, description } = payload
+      const data = {
+        id: id,
+        year: year,
+        numerical_rating: numericalRating,
+        aps_from: averagePointScore.from,
+        aps_to: averagePointScore.to,
+        adjectival_rating: adjectivalRating,
+        description: description,
+      }
+
+      postRequest(baseUrl + '/update-measure-rating/' + id, data).then(response => {
+        if (response) {
+          dispatch('FETCH_MEASURE_RATINGS', { payload: { year: year } })
+          notification.success({
+            message: 'Success',
+            description: response.message,
+          })
+        } else {
+          commit('SET_STATE', { loading: false })
+        }
+      })
+    },
+    DELETE_MEASURE_RATING({ commit, dispatch }, { payload }) {
+      const { id, year } = payload
+      commit('SET_STATE', {
+        loading: true,
+      })
+
+      deleteRequest(baseUrl + '/delete-measure-rating/' + id).then(response => {
+        let type = ''
+        if (response) {
+          const { message, description } = response
+          type = response.type
+
+          notification[type]({ message: message, description: description })
+
+          if(type !== 'error') {
+            dispatch('FETCH_MEASURE_RATINGS', { payload: { year: year } })
+          }
+        }
+
+        if(!response || type === 'error') { commit('SET_STATE', { loading: false }) }
       })
     },
     FETCH_ALL_FORMS({ commit }) {

@@ -31,10 +31,6 @@ class OcpcrController extends Controller
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
 
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
             return $next($request);
         });
     }

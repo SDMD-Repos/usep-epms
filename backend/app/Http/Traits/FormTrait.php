@@ -16,10 +16,6 @@ trait FormTrait {
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
 
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
-
             return $next($request);
         });
 
@@ -28,7 +24,12 @@ trait FormTrait {
     public function saveMeasures($detail, $measures)
     {
         foreach ($measures as $measure) {
-            $detail->measures()->attach($measure['key'], [
+            $isCustom = $measure['option']['isCustom'];
+
+            $measureId = $isCustom ? $measure['key'] : $measure['option']['measureId'];
+
+            $detail->measures()->attach($measureId, [
+                'category_id' => !$isCustom ? $measure['option']['categoryId'] : null,
                 'create_id' => $this->login_user->pmaps_id,
                 'history' => "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n"
             ]);
@@ -108,7 +109,7 @@ trait FormTrait {
                 if(!$newMeasure->save()){
                     DB::rollBack();
                 }else{
-                    array_push($measureIds, $newMeasure->id);
+                    $measureIds[] = $newMeasure->id;
                 }
             }else{
                 if($updatedMeasure->trashed()){
@@ -122,7 +123,7 @@ trait FormTrait {
                     }
                 }
 
-                array_push($measureIds, $updatedMeasure->id);
+                $measureIds[] = $updatedMeasure->id;
             }
         }
 

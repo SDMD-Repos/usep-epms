@@ -24,10 +24,15 @@ class StoreMeasure extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-            'displayAsItems' => 'boolean',
-            'items' => 'required',
-            'year' => ''
+            'year' => 'required',
+            'measures.*.name' => 'required',
+            'measures.*.displayAsItems' => 'boolean',
+            'measures.*.isCustom' => 'boolean',
+            'measures.*.description' => 'required_if:is_custom,false',
+            'measures.*.variableEquivalent' => 'required_if:is_custom,false',
+            'measures.*.elements' => 'required_if:is_custom,false',
+            'measures.*.categories' => 'required_if:is_custom,false',
+            'measures.*.customItems' => 'required_if:is_custom,true',
         ];
     }
 }

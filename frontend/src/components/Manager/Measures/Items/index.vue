@@ -44,28 +44,28 @@
 
     <form-modal
       :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"  :form-state="formState"
-      :validate="validate" :validate-infos="validateInfos" :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete"
-      @close-modal="resetModalData" @change-action="changeAction" @submit-form="onSubmit"
+      :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete" :current-year="year"
+      @close-modal="changeModalState" @change-action="changeAction" @submit-form="onSubmit"
     />
 
     <measures-previous-list
       :visible="isPreviousViewed" :year="year" :list="previousMeasures"
-      @save-measures="onMultipleSave" @close-modal="changePreviousModal" />
+      @multiple-save-measures="onMultipleSave" @close-modal="changePreviousModal" />
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, reactive, toRaw, createVNode, onMounted } from 'vue'
+import { computed, defineComponent, ref, reactive, toRaw, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { Form, Modal } from "ant-design-vue";
-import { WarningOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { cloneDeep } from "lodash"
+import { Form } from "ant-design-vue";
+import { WarningOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { usePermission } from '@/services/functions/permission'
 import dayjs from 'dayjs'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
-import { usePermission } from '@/services/functions/permission'
 
 const columns = [
-  { title: 'Name', dataIndex: 'name', key: 'name' },
-  { title: 'Display as Items', dataIndex: 'displayAsItems', key: 'displayAsItems' },
+  { title: 'Name', dataIndex: 'name', key: 'name', width: '50%' },
   { title: 'Date Created', dataIndex: 'created_at', key: 'created_at' },
   { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
@@ -73,13 +73,8 @@ const columns = [
 const useForm = Form.useForm
 
 export default defineComponent({
-  name: 'MeasuresList',
-  components: {
-    WarningOutlined,
-    PlusOutlined,
-    FormModal,
-    MeasuresPreviousList,
-  },
+  name: 'MeasureItemsTab',
+  components: { WarningOutlined, PlusOutlined, FormModal, MeasuresPreviousList },
   setup() {
     const store = useStore()
 
@@ -90,23 +85,23 @@ export default defineComponent({
     let okText = ref('')
     const year = ref(new Date().getFullYear())
     const isPreviousViewed = ref(false)
+    const requestPayload = ref([])
 
-    const formState = reactive({
+    const formInitial = () => ({
       id: null,
       year: year.value,
       name: '',
       displayAsItems: false,
-      items: [],
-      deleted: [],
+      isCustom: false,
+      description: '',
+      variableEquivalent: '',
+      elements: '',
+      categories: [],
+      customItems: [],
+      deleted: { categories: [], items: [] },
     })
 
-    const rules = reactive({
-      name: [
-        { required: true, message: 'This field is required', trigger: 'blur' },
-        { whitespace: true, message: 'Please input a valid Group name', trigger: 'change' },
-        { min: 3, message: 'Length should be at least 3 characters', trigger: 'change' },
-      ],
-    })
+    const formState = reactive(formInitial())
 
     // COMPUTED
     const mainStore = computed(() => store.getters.mainStore)
@@ -135,6 +130,7 @@ export default defineComponent({
     // EVENTS
     onMounted(() => {
       fetchMeasures(year.value)
+      store.dispatch('formManager/FETCH_MEASURE_RATINGS', { payload : { year: year.value, isPrevious: false }})
     })
 
     // METHODS
@@ -144,15 +140,20 @@ export default defineComponent({
     }
 
     const openModal = (event, record) => {
-      resetModalData()
+      changeModalState()
       isOpenModal.value = true
       const measureId = record !== null ? record.id : record
       if (measureId) {
         formState.id = record.id
+        formState.year = record.year
         formState.name = record.name
         formState.displayAsItems = !!record.display_as_items
-        formState.items = record.items
-        formState.year = record.year
+        formState.isCustom = !!record.is_custom
+        formState.description = record.description
+        formState.variableEquivalent = record.variable_equivalent
+        formState.elements = record.elements
+        formState.categories = cloneDeep(record.categories)
+        formState.customItems = cloneDeep(record.custom_items)
       }
       changeAction(event)
     }
@@ -177,44 +178,52 @@ export default defineComponent({
       store.dispatch('formManager/DELETE_MEASURE', { payload: { id: key, year: year.value } })
     }
 
-    const { resetFields, validate, validateInfos } = useForm(formState, rules)
-
-    const resetModalData = () => {
+    const changeModalState = () => {
       isOpenModal.value = false
-      resetFields()
+      Object.assign(formState, formInitial())
     }
 
-    const onSubmit = () => {
-      Modal.confirm({
-        title: () => 'Are you sure you want to save this?',
-        icon: () => createVNode(ExclamationCircleOutlined),
-        content: () => '',
-        okText: 'Yes',
-        cancelText: 'No',
-        onOk() {
-          formState.year = year.value
-          if (action.value === 'create') {
-            store.dispatch('formManager/CREATE_MEASURE', { payload: toRaw(formState) })
-          } else {
-            store.dispatch('formManager/UPDATE_MEASURE', { payload: toRaw(formState) })
-          }
-          isOpenModal.value = false
-          resetFields()
-        },
-        onCancel() {},
-      });
+    const onSubmit = data => {
+      if(action.value === 'create') {
+        requestPayload.value = []
+        requestPayload.value.push(data)
+        store.dispatch('formManager/CREATE_MEASURE', { payload: { measures: requestPayload.value, year: year.value }})
+      }else {
+        store.dispatch('formManager/UPDATE_MEASURE', { payload: toRaw(data) })
+      }
     }
 
     const changePreviousModal = () => {
       isPreviousViewed.value = !isPreviousViewed.value
     }
 
-    const onMultipleSave = keys => {
+    const onMultipleSave = async keys => {
+      requestPayload.value = []
+
       const saveKeys = previousMeasures.value.filter(item => {
         return keys.indexOf(item.key) !== -1
       })
 
-      saveKeys.forEach(item => {
+      for await ( const item of saveKeys) {
+        const data = {
+          year: year.value,
+          name: item.name,
+          displayAsItems: item.display_as_items,
+          isCustom: item.is_custom,
+          description: item.description,
+          variableEquivalent: item.variable_equivalent,
+          elements: item.elements,
+          categories: { ...item.categories },
+          customItems: { ...item.custom_items },
+        }
+
+        requestPayload.value.push(data)
+      }
+
+      await store.dispatch('formManager/CREATE_MEASURE', { payload: { measures: requestPayload.value, year: year.value} })
+      await changePreviousModal()
+
+      /*saveKeys.forEach(item => {
         const data = {
           name: item.name,
           displayAsItems: item.display_as_items,
@@ -222,8 +231,8 @@ export default defineComponent({
           items: item.items,
         }
         store.dispatch('formManager/CREATE_MEASURE', { payload: data })
-      })
-      changePreviousModal()
+      })*/
+
     }
 
     return {
@@ -247,13 +256,13 @@ export default defineComponent({
       isDelete,
       isEdit,
 
-      validate,
-      validateInfos,
+      /*validate,
+      validateInfos,*/
 
       fetchMeasures,
       openModal,
       onDelete,
-      resetModalData,
+      changeModalState,
       changeAction,
       onSubmit,
       changePreviousModal,

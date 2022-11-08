@@ -40,4 +40,9 @@ class User extends Authenticatable
             ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
     }
 
+    public function getFullnameAttribute()
+    {
+        return $this->firstName . " " . $this->lastName;
+    }
+
 }

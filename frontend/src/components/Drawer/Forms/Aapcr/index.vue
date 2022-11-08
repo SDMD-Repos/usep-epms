@@ -68,7 +68,7 @@
               <a-tooltip placement="right">
                 <template #title>
                   <template v-for="item in items" :key="item.id">
-                    <div>{{ item.rate }} - {{ item.description }}</div>
+                    <div>{{ item.rating.numerical_rating }} - {{ item.description }}</div>
                   </template>
                 </template>
                 <info-circle-filled :style="{ fontSize: '12px'}"/>
@@ -136,7 +136,7 @@
               </a-col>
               <a-col :span="8">
                 <a-select v-model:value="form.implementing[index].cascadeTo" style="width: 100%">
-                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
+                  <a-select-option v-for="category in categoryList" :value="category.id" :key="category.id">
                     {{ category.name }}
                   </a-select-option>
                 </a-select>
@@ -181,7 +181,7 @@
               </a-col>
               <a-col :span="8">
                 <a-select v-model:value="form.supporting[index].cascadeTo" style="width: 100%">
-                  <a-select-option v-for="category in categories" :value="category.id" :key="category.id">
+                  <a-select-option v-for="category in categoryList" :value="category.id" :key="category.id">
                     {{ category.name }}
                   </a-select-option>
                 </a-select>
@@ -234,7 +234,7 @@ export default defineComponent({
     formObject: { type: Object, default: () => { return {} }},
     drawerId: { type: Number, default: null },
     targetsBasisList: { type: Array, default: () => { return [] }},
-    categories: { type: Array, default: () => { return [] }},
+    categoryList: { type: Array, default: () => { return [] }},
     currentYear: { type: Number, default: new Date().getFullYear() },
     validate: { type: Function, default: () => {} },
     validateInfos: { type: Object, default: () => { return {} }},
@@ -261,7 +261,35 @@ export default defineComponent({
 
     const measuresList  = computed(() => {
       const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name, displayAsItems: i.display_as_items, items: i.items }))
+      let finalList = []
+
+      list.map(i => {
+        let items = []
+
+        if(i.is_custom === 1) {
+          finalList.push({
+            value: i.key,
+            label: i.name,
+            displayAsItems: i.display_as_items,
+            isCustom: i.is_custom,
+            items: i.custom_items,
+          })
+        } else {
+          i.categories.forEach(e => {
+            finalList.push({
+              value: e.id + "-" + i.id,
+              label: i.name + e.numbering.toLowerCase(),
+              displayAsItems: i.display_as_items,
+              isCustom: i.is_custom,
+              measureId: i.id,
+              categoryId: e.id,
+              items: e.items,
+            })
+          })
+        }
+      })
+
+      return finalList
     })
 
     const cascadingList  = computed(() => {

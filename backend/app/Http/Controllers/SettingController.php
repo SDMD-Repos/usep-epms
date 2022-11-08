@@ -16,16 +16,21 @@ use App\Http\Requests\StoreFormCategory;
 use App\Http\Requests\StoreFormFieldSetting;
 use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
+use App\Http\Requests\StoreMeasureRating;
 use App\Http\Requests\StoreProgram;
 use App\Http\Requests\StoreOtherProgram;
 use App\Http\Requests\StoreSignatory;
 use App\Http\Requests\StoreSubCategory;
 use App\Http\Requests\UpdateDefaultProgram;
 use App\Http\Requests\UpdateGroup;
+use App\Http\Requests\UpdateMeasure;
+use App\Http\Requests\UpdateMeasureRating;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Measure;
+use App\MeasureCategory;
 use App\MeasureItem;
+use App\MeasureRating;
 use App\Program;
 use App\OtherProgram;
 use App\Signatory;
@@ -52,10 +57,6 @@ class SettingController extends Controller
 
         $this->middleware(function ($request, $next) {
             $this->login_user = Auth::user();
-
-            if ($this->login_user) {
-                $this->login_user->fullName = $this->login_user->firstName . " " . $this->login_user->lastName;
-            }
 
             return $next($request);
         });
@@ -110,7 +111,7 @@ class SettingController extends Controller
             $category->percentage = $validated['percentage'];
             $category->order = ++$order;
             $category->create_id = $this->login_user->pmaps_id;
-            $category->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $category->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$category->save()) {
                 DB::rollBack();
@@ -139,7 +140,7 @@ class SettingController extends Controller
 
             $category->modify_id = $this->login_user->pmaps_id;
             $category->updated_at = Carbon::now();
-            $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $category->history = $category->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$category->save()) {
                 DB::rollBack();
@@ -179,7 +180,7 @@ class SettingController extends Controller
             $category->default_program_id = $defaultProgram['key'];
             $category->modify_id = $this->login_user->pmaps_id;
             $category->updated_at = Carbon::now();
-            $category->history = $category->history . "Update Default Program " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $category->history = $category->history . "Update Default Program " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$category->save()) {
                 DB::rollBack();
@@ -239,7 +240,7 @@ class SettingController extends Controller
             $subcategory->ordering = $validated['ordering'];
             $subcategory->year = $validated['year'];
             $subcategory->create_id = $this->login_user->pmaps_id;
-            $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$subcategory->save()) {
                 DB::rollBack();
@@ -270,8 +271,11 @@ class SettingController extends Controller
             $history = '';
 
             DB::beginTransaction();
+
             $subcategory = SubCategory::find($validated['id']);
+
             $original = $subcategory->getOriginal();
+
             $childSubcategories = SubCategory::where('parent_id', $validated['id'])->get();
 
             foreach ($childSubcategories as $childSubcategory) {
@@ -282,7 +286,7 @@ class SettingController extends Controller
             }
 
             if($subcategory->isDirty('ordering')){
-                $history .= "Update Ordering from '".$original['ordering']."' to '".$validated['ordering']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Update Ordering from '".$original['ordering']."' to '".$validated['ordering']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             $subcategory->name = $validated['name'];
@@ -327,7 +331,7 @@ class SettingController extends Controller
             foreach ($subcategory as $sub) {
                 $sub->modify_id = $this->login_user->pmaps_id;
                 $sub->updated_at = Carbon::now();
-                $sub->history = $sub->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $sub->history = $sub->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 if (!$sub->save()) {
                     DB::rollBack();
@@ -411,7 +415,7 @@ class SettingController extends Controller
             $program->year = $validated['year'];
             $program->form_id = $validated['form_id'] ?? null;
             $program->create_id = $this->login_user->pmaps_id;
-            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -449,7 +453,7 @@ class SettingController extends Controller
             $program->percentage = $validated['percentage'];
             $program->year = $validated['year'];
             $program->create_id = $this->login_user->pmaps_id;
-            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $program->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -474,14 +478,11 @@ class SettingController extends Controller
     public function deleteProgram($id)
     {
         try {
-
             $program = Program::find($id);
-
-            if($program)
 
             $program->modify_id = $this->login_user->pmaps_id;
             $program->updated_at = Carbon::now();
-            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -510,12 +511,11 @@ class SettingController extends Controller
     public function deleteOtherProgram($id)
     {
         try {
-
             $program = OtherProgram::find($id);
 
             $program->modify_id = $this->login_user->pmaps_id;
             $program->updated_at = Carbon::now();
-            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $program->history = $program->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$program->save()) {
                 DB::rollBack();
@@ -544,7 +544,8 @@ class SettingController extends Controller
     public function getMeasures($year)
     {
         try {
-            $measures = Measure::select('id', 'name', 'year', 'display_as_items', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
+            $measures = Measure::select('*', 'id as key')->where('year', $year)
+                ->with(['categories.items.rating', 'customItems.rating'])->get();
 
             return response()->json([
                 'measures' => $measures
@@ -563,41 +564,52 @@ class SettingController extends Controller
     public function createMeasure(StoreMeasure $request)
     {
         try {
-
             $validated = $request->validated();
+
+            $measureList = $validated['measures'];
+
+            $year = $validated['year'];
 
             DB::beginTransaction();
 
-            $measure = new Measure;
+            foreach($measureList as $list) {
+                $measure = new Measure;
 
-            $measure->name = $validated['name'];
-            $measure->display_as_items = $validated['displayAsItems'];
-            $measure->year = $validated['year'];
-            $measure->create_id = $this->login_user->pmaps_id;
-            $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $measure->year = $year;
+                $measure->name = $list['name'];
+                $measure->display_as_items = $list['displayAsItems'];
+                $measure->is_custom = $list['isCustom'];
+                $measure->description = $list['description'];
+                $measure->variable_equivalent = $list['variableEquivalent'];
+                $measure->elements = $list['elements'];
+                $measure->create_id = $this->login_user->pmaps_id;
+                $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-            if ($measure->save()) {
-                foreach ($validated['items'] as $item) {
-                    $measureItem = new MeasureItem();
+                if ($measure->save()) {
+                    $measureId = $measure->id;
 
-                    $measureItem->measure_id = $measure->id;
-                    $measureItem->rate = (int)$item['rate'];
-                    $measureItem->description = $item['description'];
-                    $measureItem->create_id = $this->login_user->pmaps_id;
-                    $measureItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    if(!$list['isCustom']) {
+                        $this->createMeasureCategory([
+                            'categories' => $list['categories'],
+                            'measureId' => $measureId
+                        ]);
 
-                    if (!$measureItem->save()) {
-                        DB::rollBack();
+                    }else {
+                        $this->createMeasureItems([
+                            'measureId' => $measureId,
+                            'categoryId' => NULL,
+                            'items' => $list['customItems']
+                        ]);
                     }
+                } else {
+                    DB::rollBack();
                 }
-            } else {
-                DB::rollBack();
             }
 
             DB::commit();
 
             return response()->json([
-                'success' => 'Measure created successfully'
+                'message' => 'Measure created successfully'
             ], 200);
 
         } catch (\Exception $e) {
@@ -611,7 +623,66 @@ class SettingController extends Controller
         }
     }
 
-    public function updateMeasure(StoreMeasure $request, $id)
+    /**
+     * @param array $data [ categories, measureId ]
+     * @return void
+     */
+
+    protected function createMeasureCategory(array $data)
+    {
+        extract($data);
+
+        foreach ($categories as $category) {
+            $measureCategory = new MeasureCategory();
+
+            $measureCategory->measure_id = $measureId;
+            $measureCategory->numbering = $category['numbering'];
+            $measureCategory->name = $category['name'];
+            $measureCategory->create_id = $this->login_user->pmaps_id;
+            $measureCategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+            if (!$measureCategory->save()) {
+                DB::rollBack();
+            }else {
+                $this->createMeasureItems([
+                    'measureId' => $measureId,
+                    'categoryId' => $measureCategory->id,
+                    'items' => $category['items']
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param array $data [ items, measureId, categoryId ]
+     * @return void
+     */
+
+    protected function createMeasureItems(array $data)
+    {
+        extract($data);
+
+        foreach($items as $item) {
+            $newItem = new MeasureItem;
+
+            $newItem->measure_id = $measureId;
+            $newItem->category_id = $categoryId;
+            $newItem->rating = $item['rating']['value'] ?? ($item['rating']['id'] ?? $item['rating']);;
+            $newItem->description = $item['description'];
+            $newItem->create_id = $this->login_user->pmaps_id;
+            $newItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+            $newItem->save();
+        }
+    }
+
+    /**
+     * @param StoreMeasure $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function updateMeasure(UpdateMeasure $request, $id)
     {
         try {
             $validated = $request->validated();
@@ -622,64 +693,53 @@ class SettingController extends Controller
 
             $original = $measure->getOriginal();
 
+            $measure->name = $validated['name'];
+            $measure->display_as_items = $validated['displayAsItems'];
+            $measure->is_custom = $validated['isCustom'];
+            $measure->description = $validated['description'];
+            $measure->variable_equivalent = $validated['variableEquivalent'];
+            $measure->elements = $validated['elements'];
+
             $history = '';
 
             if($measure->isDirty('name')){
-                $history .= "Updated Name from '".$original['name']."' to '".$validated['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Name from '".$original['name']."' to '".$validated['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($measure->isDirty('display_as_items')){
-                $history .= "Updated display_as_items from '".$original['display_as_items']."' to '".$validated['displayAsItems']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated display_as_items from '".$original['display_as_items']."' to '".$validated['displayAsItems']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
-            $measure->name = $validated['name'];
-            $measure->display_as_items = $validated['displayAsItems'];
+            if($measure->isDirty('is_custom')){
+                $history .= "Updated is_custom from '".$original['is_custom']."' to '".$validated['isCustom']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measure->isDirty('description')){
+                $history .= "Updated Description from '".$original['description']."' to '".$validated['description']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measure->isDirty('variable_equivalent')){
+                $history .= "Updated Variable Equivalent from '".$original['variable_equivalent']."' to '".$validated['variableEquivalent']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measure->isDirty('elements')){
+                $history .= "Updated Elements from '".$original['elements']."' to '".$validated['elements']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
             $measure->history = $measure->history . $history;
 
             if ($measure->save()) {
-                foreach ($validated['items'] as $item) {
-                    if (isset($item['status']) && $item['status'] === 'new') {
-                        $measureItem = new MeasureItem();
-
-                        $measureItem->measure_id = $id;
-                        $measureItem->rate = (int)$item['rate'];
-                        $measureItem->description = $item['description'];
-                        $measureItem->create_id = $this->login_user->pmaps_id;
-                        $measureItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                        if (!$measureItem->save()) {
-                            DB::rollBack();
-                        }
-                    }
-                }
+                $this->processMeasures($original, $validated);
             } else {
                 DB::rollBack();
-            }
-
-            if (!empty($deleted = $request->get('deleted'))) {
-                foreach ($deleted as $delete_id) {
-                    $measureItem = MeasureItem::find($delete_id);
-
-                    $measureItem->modify_id = $this->login_user->pmaps_id;
-                    $measureItem->updated_at = Carbon::now();
-                    $measureItem->history = $measureItem->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
-
-                    if (!$measureItem->save()) {
-                        DB::rollBack();
-                    } else {
-                        if (!$measureItem->delete()) {
-                            DB::rollBack();
-                        }
-                    }
-                }
             }
 
             DB:: commit();
 
             return response()->json([
-                'success' => 'Measure updated successfully'
+                'message' => 'Measure updated successfully'
             ], 200);
 
         } catch (\Exception $e) {
@@ -690,6 +750,154 @@ class SettingController extends Controller
             }
 
             return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    protected function processMeasures($original, $validated)
+    {
+        $measureId = $validated['id'];
+        $isCustom = $validated['isCustom'];
+        $categories = $validated['categories'];
+        $customItems = $validated['customItems'];
+
+        if((boolean)$original['is_custom'] === $isCustom) {
+            if(!$isCustom) {
+                foreach($categories as $category) {
+                    if(!isset($category['status']) || $category['status'] !== 'new') {
+                        $findCategory = MeasureCategory::find($category['id']);
+
+                        $orig = $findCategory->getOriginal();
+
+                        $findCategory->numbering = $category['numbering'];
+                        $findCategory->name = $category['name'];
+
+                        $history = '';
+
+                        if($findCategory->isDirty('numbering')) {
+                            $history .= "Updated Numbering from '".$orig['numbering']."' to '".$category['numbering']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                        }
+
+                        if($findCategory->isDirty('name')) {
+                            $history .= "Updated Name from '".$orig['name']."' to '".$category['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                        }
+
+                        $findCategory->modify_id = $this->login_user->pmaps_id;
+                        $findCategory->updated_at = Carbon::now();
+                        $findCategory->history = $findCategory->history . $history;
+
+                        if($findCategory->save()) {
+                            $this->updateMeasureItems([
+                                'items' => $category['items'],
+                                'measureId' => $category['measure_id'],
+                                'categoryId' => $category['id']
+                            ]);
+                        }
+                    }else {
+                        $this->createMeasureCategory([
+                            'categories' => [$category],
+                            'measureId' => $measureId
+                        ]);
+                    }
+                }
+            }else {
+                $this->updateMeasureItems([
+                    'items' => $customItems,
+                    'measureId' => $measureId,
+                    'categoryId' => null
+                ]);
+            }
+
+            $deleted = $validated['deleted'];
+
+            if (!empty($deletedCategories = $deleted['categories'])) {
+                foreach ($deletedCategories as $id) {
+                    $measureCategory = MeasureCategory::find($id);
+
+                    $measureCategory->modify_id = $this->login_user->pmaps_id;
+                    $measureCategory->updated_at = Carbon::now();
+                    $measureCategory->history = $measureCategory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+                    if ($measureCategory->save()) {
+                        $measureCategory->delete();
+                    }
+                }
+            }
+
+            if (!empty($deletedItems = $deleted['items'])) {
+                foreach ($deletedItems as $id) {
+                    $measureItems = MeasureItem::find($id);
+
+                    $measureItems->modify_id = $this->login_user->pmaps_id;
+                    $measureItems->updated_at = Carbon::now();
+                    $measureItems->history = $measureItems->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+                    if ($measureItems->save()) {
+                        $measureItems->delete();
+                    }
+                }
+            }
+        }else {
+            MeasureItem::where('measure_id', $measureId)->delete();
+
+            if(!$isCustom) {
+                $this->createMeasureCategory([
+                    'categories' => $categories,
+                    'measureId' => $measureId
+                ]);
+            }else {
+                MeasureCategory::where('measure_id', $measureId)->delete();
+
+                $this->createMeasureItems([
+                    'items' => $customItems,
+                    'measureId' => $measureId,
+                    'categoryId' => null
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param array $data [ items, measureId, categoryId ]
+     * @return void
+     */
+
+    protected function updateMeasureItems(array $data)
+    {
+        extract($data);
+
+        foreach($items as $item) {
+            if(!isset($item['status']) || $item['status'] !== 'new') {
+                $findItem = MeasureItem::find($item['id']);
+
+                $orig = $findItem->getOriginal();
+
+                $rating = $item['rating']['value'] ?? ($item['rating']['id'] ?? $item['rating']);
+
+                $findItem->rating = $rating;
+                $findItem->description = $item['description'];
+
+                $history = '';
+
+                if($findItem->isDirty('rating')) {
+                    $history .= "Updated Rating from '".$orig['rating']."' to '".$rating."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                }
+
+                if($findItem->isDirty('description')) {
+                    $history .= "Updated Description from '".$orig['description']."' to '".$item['description']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                }
+
+                $findItem->modify_id = $this->login_user->pmaps_id;
+                $findItem->updated_at = Carbon::now();
+                $findItem->history = $findItem->history . $history;
+
+                $findItem->save();
+            }else {
+                $this->createMeasureItems([
+                    'items' => [$item],
+                    'measureId' => $measureId,
+                    'categoryId' => $categoryId
+                ]);
+            }
         }
     }
 
@@ -703,7 +911,7 @@ class SettingController extends Controller
 
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
-            $measure->history = $measure->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $measure->history = $measure->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$measure->save()) {
                 DB::rollBack();
@@ -718,6 +926,181 @@ class SettingController extends Controller
             return response()->json([
                 'success' => 'Measure deleted successfully'
             ], 200);
+        } catch (\Exception $e) {
+            dd($e);
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function getMeasureRatings($year)
+    {
+        try {
+            $measureRatings = MeasureRating::select("*", "id as key")->where('year', $year)->get();
+
+            return response()->json([
+                'measureRatings' => $measureRatings
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function createMeasureRating(StoreMeasureRating $request)
+    {
+        try {
+
+            $validated = $request->validated();
+
+            $ratings = $validated['ratings'];
+
+            DB::beginTransaction();
+
+            foreach($ratings as $rating) {
+                $measureRating = new MeasureRating();
+
+                $measureRating->year = $rating['year'];
+                $measureRating->numerical_rating = $rating['numerical_rating'];
+                $measureRating->aps_from = $rating['aps_from'];
+                $measureRating->aps_to = $rating['aps_to'];
+                $measureRating->adjectival_rating = $rating['adjectival_rating'];
+                $measureRating->description = $rating['description'];
+                $measureRating->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+                if(!$measureRating->save()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Rating created successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function updateMeasureRating(UpdateMeasureRating $request, $id)
+    {
+        try {
+            $validated = $request->validated();
+
+            $numericalRating = $validated['numerical_rating'];
+            $aps_from  = $validated['aps_from'];
+            $aps_to  = $validated['aps_to'];
+            $adjectivalRating  = $validated['adjectival_rating'];
+            $description  = $validated['description'];
+
+            DB::beginTransaction();
+
+            $measureRating = MeasureRating::find($id);
+
+            $original = $measureRating->getOriginal();
+
+            $measureRating->numerical_rating = $numericalRating;
+            $measureRating->aps_from = $aps_from;
+            $measureRating->aps_to = $aps_to;
+            $measureRating->adjectival_rating = $adjectivalRating;
+            $measureRating->description = $description;
+
+            $history = '';
+
+            if($measureRating->isDirty('numerical_rating')){
+                $history .= "Updated Numerical Rating from ".$original['numerical_rating']." to ".$numericalRating." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measureRating->isDirty('aps_from')){
+                $history .= "Updated APS From from ".$original['aps_from']." to ".$aps_from." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measureRating->isDirty('aps_to')){
+                $history .= "Updated APS To from ".$original['aps_to']." to ".$aps_to." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measureRating->isDirty('adjectival_rating')){
+                $history .= "Updated Adjectival Rating from '".$original['adjectival_rating']."' to '".$adjectivalRating."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            if($measureRating->isDirty('description')){
+                $history .= "Updated Description from '".$original['description']."' to '".$description."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            }
+
+            $measureRating->history = $measureRating->history . $history;
+
+            if (!$measureRating->save()) {
+                DB::rollBack();
+            }
+
+            DB:: commit();
+
+            return response()->json([
+                'message' => 'Rating updated successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function deleteMeasureRating($id)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            $mesureRating = MeasureRating::find($id);
+
+            if(count($mesureRating->items)) {
+                $message = 'Unable to delete rating';
+                $description = 'There were already saved measure items under Rating ' . $mesureRating->numerical_rating;
+            }else {
+                $mesureRating->modify_id = $this->login_user->pmaps_id;
+                $mesureRating->updated_at = Carbon::now();
+                $mesureRating->history = $mesureRating->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+                if (!$mesureRating->save()) {
+                    DB::rollBack();
+                } else {
+                    if (!$mesureRating->delete()) {
+                        DB::rollBack();
+                    }
+                }
+
+                DB::commit();
+
+                $message = 'Success';
+                $description = 'Rating deleted successfully';
+            }
+
+            return response()->json([
+                'type' => $message === 'Success' ? 'success' : 'error',
+                'message' => $message, 'description' => $description
+            ], 202);
         } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode()) {
                 $status = $e->getCode();
@@ -872,7 +1255,7 @@ class SettingController extends Controller
                 $newSignatory->position = $signatory['position'];
                 $newSignatory->office_form_id = $officeFormId; // selected office for the signatories added
                 $newSignatory->create_id = $this->login_user->pmaps_id;
-                $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 if(!$newSignatory->save()) {
                     DB::rollBack();
@@ -937,18 +1320,18 @@ class SettingController extends Controller
                     if ($check->office_id !== $officeId || ($signatory['isCustom'] && $check->office_name !== $officeName)) {
                         $check->office_id = $officeId;
                         $check->office_name = $officeName;
-                        $history .= "Updated office from '" . $original['office_name'] . "' to '" . $officeName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                        $history .= "Updated office from '" . $original['office_name'] . "' to '" . $officeName . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                     }
 
                     if($check->personnel_id !== $personnelId || ($signatory['isCustom'] && $check->personnel_name !== $personnelName)) {
                         $check->personnel_id = $personnelId;
                         $check->personnel_name = $personnelName;
-                        $history .= "Updated personnel from '" . $original['personnel_name'] . "' to '" . $personnelName . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                        $history .= "Updated personnel from '" . $original['personnel_name'] . "' to '" . $personnelName . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                     }
 
                     if($check->position !== $signatory['position']) {
                         $check->position = $signatory['position'];
-                        $history .= "Updated position from '" . $original['position'] . "' to '" . $signatory['position'] . "' " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                        $history .= "Updated position from '" . $original['position'] . "' to '" . $signatory['position'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                     }
 
                     if($history !== '') {
@@ -972,7 +1355,7 @@ class SettingController extends Controller
                     $newSignatory->office_name = $officeName;
                     $newSignatory->position = $signatory['position'];
                     $newSignatory->create_id = $this->login_user->pmaps_id;
-                    $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    $newSignatory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                     if(!$newSignatory->save()) {
                         DB::rollBack();
@@ -1007,7 +1390,7 @@ class SettingController extends Controller
 
             $signatory->modify_id = $this->login_user->pmaps_id;
             $signatory->updated_at = Carbon::now();
-            $signatory->history = $signatory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $signatory->history = $signatory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$signatory->save()) {
                 DB::rollBack();
@@ -1083,7 +1466,7 @@ class SettingController extends Controller
             }
 
             $group->create_id = $this->login_user->pmaps_id;
-            $group->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $group->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if($group->save()){
                 foreach($members as $member) {
@@ -1122,7 +1505,7 @@ class SettingController extends Controller
             $newMember->office_id = $office['value'];
             $newMember->office_name = $office['label'];
             $newMember->create_id = $this->login_user->pmaps_id;
-            $newMember->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $newMember->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$newGroup->members()->save($newMember)) {
                 DB::rollBack();
@@ -1173,19 +1556,19 @@ class SettingController extends Controller
             $history = '';
 
             if($group->isDirty('name')){
-                $history .= "Updated Name from '".$original['name']."' to '".$name."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Name from '".$original['name']."' to '".$name."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($group->isDirty('effective_until')){
-                $history .= "Updated Effective Until from '".$original['effective_until']."' to '".$effectivity."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Effective Until from '".$original['effective_until']."' to '".$effectivity."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($group->isDirty('supervising_id')){
-                $history .= "Updated Supervising office from '".$original['supervising_name']."' to '".$supervising['label']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Supervising office from '".$original['supervising_name']."' to '".$supervising['label']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             if($group->isDirty('oic_id')){
-                $history .= "Updated Officer-in-Charge from '".$original['oic_name']."' to '".$group->oic_name."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Officer-in-Charge from '".$original['oic_name']."' to '".$group->oic_name."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             $group->history = $group->history . $history;
@@ -1210,7 +1593,7 @@ class SettingController extends Controller
 
                     $deleteMember->modify_id = $this->login_user->pmaps_id;
                     $deleteMember->updated_at = Carbon::now();
-                    $deleteMember->history = $deleteMember->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                    $deleteMember->history = $deleteMember->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                     if (!$deleteMember->save()) {
                         DB::rollBack();
@@ -1247,7 +1630,7 @@ class SettingController extends Controller
 
             $group->modify_id = $this->login_user->pmaps_id;
             $group->updated_at = Carbon::now();
-            $group->history = $group->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $group->history = $group->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$group->save()) {
                 DB::rollBack();
@@ -1336,7 +1719,7 @@ class SettingController extends Controller
             $settings->form_id = $formId;
             $settings->setting = $setting['value'];
             $settings->create_id = $this->login_user->pmaps_id;
-            $settings->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $settings->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if(!$settings->save()) {
                 DB::rollBack();
@@ -1379,7 +1762,7 @@ class SettingController extends Controller
             $history = '';
 
             if($settings->isDirty('setting')){
-                $history .= "Updated Setting from '".$original['setting']."' to '".$setting['value']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                $history .= "Updated Setting from '".$original['setting']."' to '".$setting['value']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
             }
 
             $settings->history = $settings->history . $history;
@@ -1436,7 +1819,7 @@ class SettingController extends Controller
                 $history = '';
 
                 if($formCategory->isDirty('display_name')){
-                    $history .= "Updated Display Name from '".$original['display_name']."' to '".$displayName."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                    $history .= "Updated Display Name from '".$original['display_name']."' to '".$displayName."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
                 }
 
                 $formCategory->history = $formCategory->history . $history;
@@ -1450,7 +1833,7 @@ class SettingController extends Controller
                 $formCategory->category_id = $categoryId;
                 $formCategory->display_name = $displayName;
                 $formCategory->create_id = $this->login_user->pmaps_id;
-                $formCategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+                $formCategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
                 $successMessage = 'Form Category was saved successfully';
             }
@@ -1486,7 +1869,7 @@ class SettingController extends Controller
 
             $formCategory->modify_id = $this->login_user->pmaps_id;
             $formCategory->updated_at = Carbon::now();
-            $formCategory->history = $formCategory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+            $formCategory->history = $formCategory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if (!$formCategory->save()) {
                 DB::rollBack();

@@ -74,11 +74,6 @@ export default defineComponent({
       })
     })
 
-    // EVENTS
-    onMounted(() => {
-      store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: props.year }})
-    })
-
     // METHODS
     const filteredPrograms = functionId => {
       return programs.value.filter(i => i.category_id === functionId)
