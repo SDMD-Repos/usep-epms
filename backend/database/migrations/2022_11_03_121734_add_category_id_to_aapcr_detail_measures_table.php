@@ -15,6 +15,7 @@ class AddCategoryIdToAapcrDetailMeasuresTable extends Migration
     {
         Schema::table('aapcr_detail_measures', function (Blueprint $table) {
             $table->integer('category_id')->nullable()->after('measure_id');
+            $table->uuid('uuid')->after('created_at');
 
             $table->foreign('category_id')->references('id')->on('measure_categories')->onUpdate('cascade');
         });

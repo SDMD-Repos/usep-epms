@@ -278,7 +278,7 @@ export default defineComponent({
           i.categories.forEach(e => {
             finalList.push({
               value: e.id + "-" + i.id,
-              label: i.name + e.numbering.toLowerCase(),
+              label: i.name + (e.numbering ? e.numbering.toLowerCase() : ''),
               displayAsItems: i.display_as_items,
               isCustom: i.is_custom,
               measureId: i.id,

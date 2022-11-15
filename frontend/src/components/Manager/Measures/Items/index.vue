@@ -16,6 +16,7 @@
             New Measure
           </a-button>
           <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" >Add {{ year - 1}} measures</a-button>
+          <a-button class="pull-right" v-if="measuresList.length" @click="viewMeasuresPdf" >View PDF</a-button>
         </template>
 
         <template #bodyCell="{ column, record }">
@@ -44,25 +45,27 @@
 
     <form-modal
       :visible="isOpenModal" :action-type="action" :modal-title="modalTitle" :ok-text="okText"  :form-state="formState"
-      :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete" :current-year="year"
+      :is-edit="isEdit" :is-create="isCreate" :is-delete="isDelete" :current-year="year" :rating-list="ratingList"
       @close-modal="changeModalState" @change-action="changeAction" @submit-form="onSubmit"
     />
 
     <measures-previous-list
       :visible="isPreviousViewed" :year="year" :list="previousMeasures"
       @multiple-save-measures="onMultipleSave" @close-modal="changePreviousModal" />
+
+    <pdf-table :measures="measuresList" :ratings="ratingList"/>
   </div>
 </template>
 <script>
 import { computed, defineComponent, ref, reactive, toRaw, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { cloneDeep } from "lodash"
-import { Form } from "ant-design-vue";
 import { WarningOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { usePermission } from '@/services/functions/permission'
 import dayjs from 'dayjs'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
+import PdfTable from './partials/pdfTable'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name', width: '50%' },
@@ -70,11 +73,9 @@ const columns = [
   { title: 'Action', dataIndex: 'operation', key: 'operation' },
 ]
 
-const useForm = Form.useForm
-
 export default defineComponent({
   name: 'MeasureItemsTab',
-  components: { WarningOutlined, PlusOutlined, FormModal, MeasuresPreviousList },
+  components: { WarningOutlined, PlusOutlined, FormModal, MeasuresPreviousList, PdfTable },
   setup() {
     const store = useStore()
 
@@ -96,6 +97,7 @@ export default defineComponent({
       description: '',
       variableEquivalent: '',
       elements: '',
+      bgColor: '#000',
       categories: [],
       customItems: [],
       deleted: { categories: [], items: [] },
@@ -107,6 +109,7 @@ export default defineComponent({
     const mainStore = computed(() => store.getters.mainStore)
     const measuresList = computed(() => store.getters['formManager/manager'].measures)
     const previousMeasures = computed(() => store.getters['formManager/manager'].previousMeasures)
+    const ratingList = computed(() => store.getters['formManager/manager'].measureRatings)
     const loading = computed(() => store.getters['formManager/manager'].loading)
 
     const years = computed(() => {
@@ -152,6 +155,7 @@ export default defineComponent({
         formState.description = record.description
         formState.variableEquivalent = record.variable_equivalent
         formState.elements = record.elements
+        formState.bgColor = record.bg_color ? record.bg_color : '#000'
         formState.categories = cloneDeep(record.categories)
         formState.customItems = cloneDeep(record.custom_items)
       }
@@ -213,6 +217,7 @@ export default defineComponent({
           description: item.description,
           variableEquivalent: item.variable_equivalent,
           elements: item.elements,
+          bgColor: item.bg_color,
           categories: { ...item.categories },
           customItems: { ...item.custom_items },
         }
@@ -223,15 +228,9 @@ export default defineComponent({
       await store.dispatch('formManager/CREATE_MEASURE', { payload: { measures: requestPayload.value, year: year.value} })
       await changePreviousModal()
 
-      /*saveKeys.forEach(item => {
-        const data = {
-          name: item.name,
-          displayAsItems: item.display_as_items,
-          year: year.value,
-          items: item.items,
-        }
-        store.dispatch('formManager/CREATE_MEASURE', { payload: data })
-      })*/
+    }
+
+    const viewMeasuresPdf = () => {
 
     }
 
@@ -250,14 +249,13 @@ export default defineComponent({
       mainStore,
       measuresList,
       previousMeasures,
+      ratingList,
       loading,
       years,
+
       isCreate,
       isDelete,
       isEdit,
-
-      /*validate,
-      validateInfos,*/
 
       fetchMeasures,
       openModal,
@@ -267,7 +265,9 @@ export default defineComponent({
       onSubmit,
       changePreviousModal,
       onMultipleSave,
+      viewMeasuresPdf,
     }
   },
 })
 </script>
+

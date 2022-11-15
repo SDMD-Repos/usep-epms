@@ -582,6 +582,7 @@ class SettingController extends Controller
                 $measure->description = $list['description'];
                 $measure->variable_equivalent = $list['variableEquivalent'];
                 $measure->elements = $list['elements'];
+                $measure->bg_color = $list['bgColor'];
                 $measure->create_id = $this->login_user->pmaps_id;
                 $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
@@ -699,6 +700,7 @@ class SettingController extends Controller
             $measure->description = $validated['description'];
             $measure->variable_equivalent = $validated['variableEquivalent'];
             $measure->elements = $validated['elements'];
+            $measure->bg_color = $validated['bgColor'];
 
             $history = '';
 
@@ -927,7 +929,6 @@ class SettingController extends Controller
                 'success' => 'Measure deleted successfully'
             ], 200);
         } catch (\Exception $e) {
-            dd($e);
             if (is_numeric($e->getCode()) && $e->getCode()) {
                 $status = $e->getCode();
             } else {

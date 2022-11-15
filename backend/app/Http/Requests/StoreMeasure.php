@@ -31,6 +31,7 @@ class StoreMeasure extends FormRequest
             'measures.*.description' => 'required_if:is_custom,false',
             'measures.*.variableEquivalent' => 'required_if:is_custom,false',
             'measures.*.elements' => 'required_if:is_custom,false',
+            'measures.*.bgColor' => '',
             'measures.*.categories' => 'required_if:is_custom,false',
             'measures.*.customItems' => 'required_if:is_custom,true',
         ];

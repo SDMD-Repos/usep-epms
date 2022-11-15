@@ -45,6 +45,14 @@ class AapcrDetail extends Model
     }
 
     /**
+     * Get the cascading level of the detail.
+     */
+    public function cascading()
+    {
+        return $this->belongsTo('App\CascadingLevel', 'cascading_level', 'code');
+    }
+
+    /**
      * Get the measures of the detail.
      */
     public function measures()

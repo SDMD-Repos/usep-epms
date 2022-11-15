@@ -36,10 +36,14 @@
 
         <a-form-item label="Elements" name="elements"
                      :rules="[{ required: !form.isCustom, message: 'This field is required', trigger: 'blur' }]">
-        <span v-if="actionType === 'view'">
-          <p class="readonly-fields paragraph">{{ form.elements }}</p>
-        </span>
+          <span v-if="actionType === 'view'">
+            <p class="readonly-fields paragraph">{{ form.elements }}</p>
+          </span>
           <a-textarea v-else v-model:value="form.elements" :disabled="actionType === 'view'" :rows="2" />
+        </a-form-item>
+
+        <a-form-item label="Background Color">
+          <color-input v-model="form.bgColor" format="hex" position="right center" :disabled="actionType === 'view'" />
         </a-form-item>
 
         <a-form-item>
@@ -121,10 +125,9 @@
   </a-modal>
 </template>
 <script>
-import { defineComponent, reactive, ref, watch, inject, createVNode, onMounted, computed } from 'vue'
-import { useStore } from "vuex"
+import { defineComponent, reactive, ref, watch, inject, createVNode, computed } from 'vue'
 import { SaveOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import { Modal } from "ant-design-vue";
+import { Modal } from "ant-design-vue"
 import { useExtras } from '@/services/functions/extras'
 
 export default defineComponent({
@@ -139,6 +142,7 @@ export default defineComponent({
     isDelete: Boolean,
     isEdit: Boolean,
     allAccess: Boolean,
+    ratingList: { type: Array, default: () => [] },
     formState: {
       type: Object,
       default: () => {
@@ -150,6 +154,7 @@ export default defineComponent({
           description: '',
           variableEquivalent: '',
           elements: '',
+          bgColor: '#000',
           categories: [],
           customItems: [],
           deleted: [],
@@ -161,8 +166,6 @@ export default defineComponent({
   setup(props, { emit }) {
 
     const _message = inject('a-message')
-
-    const store = useStore()
 
     // DATA
     const measuresFormRef = ref()
@@ -207,8 +210,6 @@ export default defineComponent({
     }
 
     // COMPUTED
-    const ratingList = computed(() => store.getters['formManager/manager'].measureRatings)
-
     const categoryItems = computed(() => {
       if(form.value.isCustom) { return form.value.customItems }
       else {
@@ -296,7 +297,7 @@ export default defineComponent({
     const handleItemActions = (mode, index=null) => {
       switch (mode) {
         case 'save':
-          const { id, rating, description, editMode, category } = itemData
+          const { id, rating, description, editMode } = itemData
           let allowAdd = true, hasDuplicate = null, itemList = []
 
           if(!form.value.isCustom) {
@@ -386,6 +387,7 @@ export default defineComponent({
       form.value.description = ''
       form.value.variableEquivalent = ''
       form.value.elements = ''
+      form.value.bgColor = '#000'
       form.value.categories = []
       form.value.customItems = []
 
@@ -502,7 +504,7 @@ export default defineComponent({
 
       labelCol, wrapperCol, itemData, categoryColumns, alphabet, categoryData, rules,
 
-      ratingList, categoryItems, storage,
+      categoryItems, storage,
 
       okAction, onClose,
       addCategory, handleCategoryActions, handleCustomChange, handleCategoryChange, handleItemActions,

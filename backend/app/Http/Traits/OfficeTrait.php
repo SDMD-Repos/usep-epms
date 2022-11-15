@@ -3,6 +3,7 @@
 namespace App\Http\Traits;
 
 use App\Group;
+use App\OtherConfig;
 use Illuminate\Http\Request;
 
 trait OfficeTrait {
@@ -12,16 +13,6 @@ trait OfficeTrait {
     {
         try {
             $values = array();
-
-            if(!$officesOnly) {
-                $data = new \stdClass();
-
-                $data->id = "allColleges";
-                $data->value = "allColleges";
-                $data->title = "All Colleges";
-
-                $values[] = $data;
-            }
 
             $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
@@ -53,8 +44,11 @@ trait OfficeTrait {
     {
         $status = count($status) ? $status : request()->all();
 
+        $collegeVpId = (int)OtherConfig::find('college_vp_id')->value;
+
         $checkable = null;
         $selectable = null;
+        $isOfficesOnly = !isset($status['isOfficesOnly']) || (!$status['isOfficesOnly']);
 
         if(isset($status['checkable'])) {
             $checkable = $status['checkable'];
@@ -65,22 +59,22 @@ trait OfficeTrait {
         try {
             $values = array();
 
-            $data = new \stdClass();
+            $colleges = new \stdClass();
 
-            if(!isset($status['isOfficesOnly']) || (!$status['isOfficesOnly'])) {
-                $data->id = "allColleges";
-                $data->value = "allColleges";
-                $data->title = "All Colleges";
-                $data->cascadeTo = null;
-                $data->children = $this->getChildOffices("allColleges",1);
+            if($isOfficesOnly) {
+                $colleges->id = "allColleges";
+                $colleges->value = "allColleges";
+                $colleges->title = "All Colleges";
+                $colleges->acronym = "All Colleges";
+                $colleges->pId = $collegeVpId;
+                $colleges->cascadeTo = null;
+                $colleges->children = $this->getChildOffices($collegeVpId,1, 1);
 
                 if($checkable) {
-                    $data->checkable = $checkable['allColleges'];
+                    $colleges->checkable = $checkable['allColleges'];
                 } elseif($selectable) {
-                    $data->selectable = $selectable['allColleges'];
+                    $colleges->selectable = $selectable['allColleges'];
                 }
-
-                $values[] = $data;
             }
 
             $isAcronym = isset($status['isAcronym']) && $status['isAcronym'];
@@ -97,6 +91,10 @@ trait OfficeTrait {
                     $data->title = $isAcronym ? $vpOffice->Acronym : $vpOffice->Department;
                     $data->cascadeTo = null;
                     $data->children = $this->getChildOffices($vpOffice->id,1);
+
+                    if(($vpOffice->id === $collegeVpId) && $isOfficesOnly) {
+                        $data->children[] = $colleges;
+                    }
 
                     if($checkable) {
                         $data->checkable = $checkable['mains'];
@@ -166,10 +164,10 @@ trait OfficeTrait {
         ], 200);
     }
 
-    public function getChildOffices($vp_id, $update=0)
+    public function getChildOffices($vp_id, $update=0, $isCollege=0)
     {
         try {
-            if($vp_id === 'allColleges'){
+            if($isCollege){
                 $obj = $this->HRIS_CALL('ALL_COLLEGES');
             }else{
                 $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id ]);

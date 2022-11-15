@@ -32,6 +32,7 @@ class UpdateMeasure extends FormRequest
             'description' => 'required_if:is_custom,false',
             'variableEquivalent' => 'required_if:is_custom,false',
             'elements' => 'required_if:is_custom,false',
+            'bgColor' => '',
             'categories' => 'required_if:is_custom,false',
             'customItems' => 'required_if:is_custom,true',
             'deleted' => '',

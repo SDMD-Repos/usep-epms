@@ -21,7 +21,7 @@ class CreateAapcrDetailsTable extends Migration
             $table->string('target')->nullable();
             $table->float('allocated_budget', 11, 2)->nullable();
             $table->string('targets_basis')->nullable();
-            $table->enum('cascading_level', ['vps', 'offices', 'colleges', 'individuals'])->nullable();
+            $table->enum('cascading_level', ['offices', 'colleges', 'offices_colleges', 'individuals'])->nullable();
             $table->integer('category_id');
             $table->integer('sub_category_id')->nullable();
             $table->integer('program_id');

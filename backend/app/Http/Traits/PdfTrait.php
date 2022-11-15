@@ -405,7 +405,7 @@ trait PdfTrait {
                 'assessedBy' => 'NAME:',
                 'assessedByPosition' => 'PMT-PMG Member/Secretariat',
             );
-//            dd($dataSource);
+
             $pdfData = [
                 'documentName' => $documentName,
                 'isPublish' => $isPublish,
@@ -615,14 +615,19 @@ trait PdfTrait {
         $measures = array();
 
         foreach($details as $PIMeasure) {
-            $name = $PIMeasure->name;
             $itemNames = [];
             if($PIMeasure->display_as_items) {
-                foreach($PIMeasure->items as $item) {
-                    $itemNames[] = $item->rate . " - " . $item->description;
+                if($PIMeasure->is_custom) { $items = $PIMeasure->customItems; }
+                else { $items = $PIMeasure->items; }
+
+                foreach($items as $item) {
+                    $itemNames[] = $item->rating . " - " . $item->description;
                 }
 
                 $name = "\n" . implode("\n", $itemNames);
+            }else {
+                $name = $PIMeasure->name;
+                if(!$PIMeasure->is_custom) { $name .= strtolower($PIMeasure->pivot->category->numbering); }
             }
 
             $measures[] = $name;

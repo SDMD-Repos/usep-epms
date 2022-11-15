@@ -29,9 +29,16 @@ class CascadingLevelSeeder extends Seeder
                 'history' => 'Created ' . Carbon::now() . " by admin\n"
             ],
             [
+                'code' => 'offices_colleges',
+                'name' => 'Offices & Colleges',
+                'ordering' => 3,
+                'create_id' => 'admin',
+                'history' => 'Created ' . Carbon::now() . " by admin\n"
+            ],
+            [
                 'code' => 'individuals',
                 'name' => 'Individuals',
-                'ordering' => 3,
+                'ordering' => 4,
                 'create_id' => 'admin',
                 'history' => 'Created ' . Carbon::now() . " by admin\n"
             ]

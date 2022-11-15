@@ -197,7 +197,7 @@ export const useFormFields = form => {
       let tempCascadeTo = ''
       container.value = item.value
       container.title = typeof item.title !== 'undefined' ? item.title : item.label
-      if (typeof item.children !== 'undefined') {
+      if (typeof item.pId === 'undefined') {
         container.children = true
       } else {
         if (typeof item.isGroup === 'undefined') {

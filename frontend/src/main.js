@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import PerfectScrollbar from 'vue3-perfect-scrollbar'
+import ColorInput from 'vue-color-input'
 
 import App from './App.vue'
 import './registerServiceWorker'
@@ -20,6 +21,7 @@ const app = createApp(App)
   .use(router)
   .use(i18n)
   .use(PerfectScrollbar)
+  .use(ColorInput)
   .use(Avatar)
   .use(Popconfirm)
   .use(Modal)

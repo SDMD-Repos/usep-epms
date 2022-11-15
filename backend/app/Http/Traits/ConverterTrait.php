@@ -226,7 +226,7 @@ trait ConverterTrait {
             $cascadingLevel = new \stdClass();
 
             $cascadingLevel->key = $detail->cascading_level;
-            $cascadingLevel->label = ucwords($detail->cascading_level);
+            $cascadingLevel->label = ucwords($detail->cascading->name);
         }
 
         $measures = [];
@@ -253,30 +253,26 @@ trait ConverterTrait {
 
             $record = new \stdClass();
 
+            $record->displayAsItems = $measure->display_as_items;
+            $record->isCustom = $measure->is_custom;
+
             if($measure->is_custom) {
                 $record->value = $measureId;
                 $record->label = $measureName;
                 $record->items = $measure->customItems->load('rating');
-                $record->option = (array)$record;
             }else {
                 $category = $measure->pivot->category;
 
                 $categoryId = $category->id;
 
-                $tempRecord = new \stdClass();
-
-                $tempRecord->value = $categoryId . "-" . $measureId;
-                $tempRecord->label = $measureName . strtolower($category->numbering);
-                $tempRecord->items = $category->items;
-                $tempRecord->measureId = $measureId;
-                $tempRecord->categoryId = $categoryId;
-
-                $record = $tempRecord;
-                $record->option = clone $tempRecord;
+                $record->value = $categoryId . "-" . $measureId;
+                $record->label = $measureName . strtolower($category->numbering);
+                $record->items = $category->items;
+                $record->measureId = $measureId;
+                $record->categoryId = $categoryId;
             }
 
-            $record->displayAsItems = $measure->display_as_items;
-            $record->isCustom = $measure->is_custom;
+            $record->option = clone $record;
 
             $list[] = $record;
         }

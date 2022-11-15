@@ -9,6 +9,8 @@ class AapcrDetailMeasure extends Pivot
 {
     use SoftDeletes;
 
+    protected $table = 'aapcr_detail_measures';
+
     /**
      * Get the measure of the detail.
      */

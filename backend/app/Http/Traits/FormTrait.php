@@ -5,6 +5,7 @@ namespace App\Http\Traits;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 trait FormTrait {
 
@@ -30,6 +31,7 @@ trait FormTrait {
 
             $detail->measures()->attach($measureId, [
                 'category_id' => !$isCustom ? $measure['option']['categoryId'] : null,
+                'uuid' => Str::uuid(),
                 'create_id' => $this->login_user->pmaps_id,
                 'history' => "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n"
             ]);
@@ -93,23 +95,34 @@ trait FormTrait {
         $measureIds = array();
 
         foreach($measures as $measure){
+            $isCustom = $measure['option']['isCustom'];
+
+            $measureId = $isCustom ? $measure['value'] : $measure['option']['measureId'];
+
             $updatedMeasure = $model::withTrashed()->where([
                 'detail_id' => $detailId,
-                'measure_id' => $measure['key']
+                'measure_id' => $measureId,
+                'category_id' => !$isCustom ? $measure['option']['categoryId'] : null
             ])->first();
 
             if(!isset($updatedMeasure->id)){
+                $uuid = Str::uuid();
+
                 $newMeasure = new $model;
 
                 $newMeasure->detail_id = $detailId;
-                $newMeasure->measure_id = $measure['key'];
+                $newMeasure->measure_id = $measureId;
+                $newMeasure->category_id = !$isCustom ? $measure['option']['categoryId'] : null;
+                $newMeasure->uuid = $uuid;
                 $newMeasure->create_id = $this->login_user->pmaps_id;
                 $newMeasure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                $newMeasure->save();
 
                 if(!$newMeasure->save()){
                     DB::rollBack();
                 }else{
-                    $measureIds[] = $newMeasure->id;
+                    $measureIds[] = $uuid;
                 }
             }else{
                 if($updatedMeasure->trashed()){
@@ -123,11 +136,11 @@ trait FormTrait {
                     }
                 }
 
-                $measureIds[] = $updatedMeasure->id;
+                $measureIds[] = $updatedMeasure->uuid;
             }
         }
 
-        $deletedMeasures = $model::where('detail_id', $detailId)->whereNotIn('id', $measureIds)->get();
+        $deletedMeasures = $model::where('detail_id', $detailId)->whereNotIn('uuid', $measureIds)->get();
 
         foreach($deletedMeasures as $deletedMeasure) {
             $deletedMeasure->updated_at = Carbon::now();
