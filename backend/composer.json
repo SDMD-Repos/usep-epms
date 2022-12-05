@@ -16,6 +16,8 @@
     "require": {
         "php": "^7.2.5|^8.0",
         "ext-json": "*",
+        "barryvdh/laravel-dompdf": "^2.0",
+        "daltcore/lara-pdf-merger": "^2.0",
         "doctrine/dbal": "2.*",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
@@ -24,7 +26,7 @@
         "laravel/framework": "^7.29",
         "laravel/passport": "~9.0",
         "laravel/tinker": "^2.5",
-        "setasign/fpdi-fpdf": "^2.3"
+        "setasign/fpdi-fpdf": "2.3"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

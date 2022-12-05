@@ -9,7 +9,7 @@
     </a-select>
 
     <div class="mt-4">
-      <a-table :columns="columns" :data-source="measureRatingList" :loading="loading" bordered>
+      <a-table :columns="tableColumns" :data-source="measureRatingList" :loading="loading" bordered>
         <template #title v-if="isCreate">
           <a-button type="primary" class="mr-3" @click="openModal('create', null)" >
             <template #icon><PlusOutlined /></template>
@@ -53,7 +53,7 @@
     />
 
     <ratings-previous-list
-      :visible="isPreviousViewed" :year="year" :table-columns="columns" :list="previousMeasureRatings"
+      :visible="isPreviousViewed" :year="year" :table-columns="tableColumns" :list="previousMeasureRatings"
       :current-list="measureRatingList"
       @save-ratings="onMultipleSave" @close-modal="changePreviousModal" />
   </div>
@@ -268,7 +268,7 @@ export default defineComponent({
 
     return {
       dayjs,
-      columns: measuresRating,
+      tableColumns: measuresRating,
       year, ratingList, isOpenModal, action, modalTitle, okText, isPreviousViewed, formState,
       resetFields, validate, validateInfos,
 

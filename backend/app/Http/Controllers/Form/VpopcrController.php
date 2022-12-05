@@ -616,16 +616,17 @@ class VpopcrController extends Controller
                 $data = $this->getVpOpcrDetails($detail, []);
 
                 if($detail->aapcr_detail_id) {
-                    $aapcrDetail = $detail->aapcrDetail;
+                    $aapcrDetail = $detail->aapcrDetail()->with(['offices' => function($q) use ($officeId){
+                        $q->filterVpOffices($officeId);
+                    }])->first();
 
                     if($aapcrDetail->parent_id && $detail->from_aapcr) {
                         if(!$detail->aapcrDetail->parent->is_header) {
                             $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
-                                $query->where(function($q) use ($officeId) {
-                                    $q->where('vp_office_id', '=', $officeId)
-                                        ->orWhere('office_id', '=', $officeId);
-                                });
-                            })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
+                                $query->filterVpOffices($officeId);
+                            })->with(['measures', 'offices' => function ($queryOffice) use ($officeId) {
+                                $queryOffice->filterVpOffices($officeId);
+                            }])->where('id', $aapcrDetail->parent_id)->first();
 
                             if($parentDetail) {
                                 $isParent = 1;
@@ -642,10 +643,8 @@ class VpopcrController extends Controller
                     } else {
                         if(!$detail->from_aapcr) {
                             $isParent = 1;
-
                             $parentDetails = $aapcrDetail;
                         }else{
-
                             $stored = 1;
                         }
                     }
@@ -751,7 +750,6 @@ class VpopcrController extends Controller
         $this->getTargetsBasisList($data->targets_basis);
 
         $extracted = $this->extractDetails($data);
-
         $details = array(
             'key' => $data->id,
             'id' => $data->id,

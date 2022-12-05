@@ -95,20 +95,22 @@
           </ul>
         </template>
 
-        <template v-if="column.key === 'operation' && ((formId === 'vpopcr' && !viewOnly) || formId !== 'vpopcr')">
-          <EditFilled v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" @click="handleEdit(record)" />
+        <template v-if="column.key === 'operation' && ((formId !== 'aapcr' && !viewOnly) || formId === 'aapcr')">
+          <a-tooltip title="Update"><EditFilled v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" @click="handleEdit(record)" /></a-tooltip>
           <template v-if="record.type === 'pi'">
             <a-divider v-if="!record.isHeader || (record.isHeader && !record.isCascaded)" type="vertical" />
-            <PlusCircleFilled @click="handleAddSub(record)"/>
+            <a-tooltip title="Add Sub PI"><PlusCircleFilled @click="handleAddSub(record)"/></a-tooltip>
           </template>
           <template v-if="!record.isHeader &&
                           (typeof record.children !== 'undefined' && record.children.length > 0) &&
                           (typeof record.isCascaded === 'undefined' || (typeof record.isCascaded !== 'undefined' && !record.isCascaded))" >
             <a-divider type="vertical"/>
-            <link-outlined :style="{ fontSize: '16px' }" v-if="typeof record.linkedToChild !== 'undefined' && !record.linkedToChild"
-                           @click="handleLink(record)" />
-            <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fa fa-unlink" @click="handleLink(record)"
-               v-else-if="typeof record.linkedToChild !== 'undefined' && record.linkedToChild" />
+            <a-tooltip title="Link" v-if="typeof record.linkedToChild !== 'undefined' && !record.linkedToChild" >
+              <link-outlined :style="{ fontSize: '16px' }" @click="handleLink(record)" />
+            </a-tooltip>
+            <a-tooltip title="Unlink" v-else-if="typeof record.linkedToChild !== 'undefined' && record.linkedToChild">
+              <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fa fa-unlink" @click="handleLink(record)" />
+            </a-tooltip>
           </template>
           <a-divider type="vertical" v-if="allowedAction(record)"/>
           <a-popconfirm
@@ -117,7 +119,7 @@
             ok-text="Yes" cancel-text="No"
             v-if="allowedAction(record)"
           >
-            <DeleteFilled />
+            <a-tooltip title="Delete"><DeleteFilled /></a-tooltip>
           </a-popconfirm>
         </template>
       </template>

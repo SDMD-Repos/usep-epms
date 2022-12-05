@@ -98,4 +98,13 @@ export function deleteRequest(url) {
     .catch(err => console.log(err))
 }
 
+export function viewPdfRequest(url) {
+  return apiClient
+    .get(url, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
 

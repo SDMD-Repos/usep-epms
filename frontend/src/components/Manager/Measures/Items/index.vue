@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchMeasures">
+    <a-select v-model:value="year" placeholder="Select year" style="width: 200px" @change="fetchMeasureData">
       <template v-for="(y, i) in years" :key="i">
         <a-select-option :value="y">
           {{ y }}
@@ -52,20 +52,19 @@
     <measures-previous-list
       :visible="isPreviousViewed" :year="year" :list="previousMeasures"
       @multiple-save-measures="onMultipleSave" @close-modal="changePreviousModal" />
-
-    <pdf-table :measures="measuresList" :ratings="ratingList"/>
   </div>
 </template>
 <script>
-import { computed, defineComponent, ref, reactive, toRaw, onMounted } from 'vue'
+import { defineComponent, ref, reactive, toRaw, onMounted, inject, computed } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import { cloneDeep } from "lodash"
 import { WarningOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { usePermission } from '@/services/functions/permission'
+import { viewPdfRequest } from "@/services/api/mainForms/ocpcr"
 import dayjs from 'dayjs'
 import FormModal from './partials/formModal'
 import MeasuresPreviousList from './partials/previousList'
-import PdfTable from './partials/pdfTable'
 
 const columns = [
   { title: 'Name', dataIndex: 'name', key: 'name', width: '50%' },
@@ -75,9 +74,12 @@ const columns = [
 
 export default defineComponent({
   name: 'MeasureItemsTab',
-  components: { WarningOutlined, PlusOutlined, FormModal, MeasuresPreviousList, PdfTable },
+  components: { WarningOutlined, PlusOutlined, FormModal, MeasuresPreviousList },
   setup() {
     const store = useStore()
+    const router = useRouter()
+
+    const _message = inject('a-message')
 
     // DATA
     const isOpenModal = ref(false)
@@ -132,14 +134,16 @@ export default defineComponent({
 
     // EVENTS
     onMounted(() => {
-      fetchMeasures(year.value)
-      store.dispatch('formManager/FETCH_MEASURE_RATINGS', { payload : { year: year.value, isPrevious: false }})
+      fetchMeasureData(year.value)
     })
 
     // METHODS
-    const fetchMeasures = async selectedYear => {
+    const fetchMeasureData = async selectedYear => {
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: selectedYear, isPrevious: false }})
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: (selectedYear - 1), isPrevious: true }})
+
+      await store.dispatch('formManager/FETCH_MEASURE_RATINGS', { payload : { year: selectedYear, isPrevious: false }})
+      await store.dispatch('formManager/FETCH_MEASURE_RATINGS', { payload : { year: (selectedYear - 1), isPrevious: true }})
     }
 
     const openModal = (event, record) => {
@@ -231,7 +235,22 @@ export default defineComponent({
     }
 
     const viewMeasuresPdf = () => {
+      _message.loading('Loading...')
 
+      viewPdfRequest('/settings/view-measure-pdf/' + year.value).then(response => {
+        if (response) {
+          const blob = new Blob([response], { type: 'application/pdf' })
+          const fileUrl = window.URL.createObjectURL(blob)
+
+          localStorage.setItem('pdf.document.url', fileUrl)
+          localStorage.setItem('pdf.document.name', 'Rating Scale ' + year.value)
+
+          const route = router.resolve({ name: "viewerPdf" });
+          window.open(route.href, "_blank")
+        }
+
+        _message.destroy()
+      })
     }
 
     return {
@@ -257,7 +276,7 @@ export default defineComponent({
       isDelete,
       isEdit,
 
-      fetchMeasures,
+      fetchMeasureData,
       openModal,
       onDelete,
       changeModalState,

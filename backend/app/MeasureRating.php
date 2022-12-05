@@ -17,7 +17,7 @@ class MeasureRating extends Model
 
     public function items()
     {
-        return $this->hasMany('App\MeasureItem', 'id', 'rating')->orderBy('rating', 'desc');
+        return $this->hasMany('App\MeasureItem', 'rating', 'id')->orderBy('rating', 'desc');
     }
 
     /**

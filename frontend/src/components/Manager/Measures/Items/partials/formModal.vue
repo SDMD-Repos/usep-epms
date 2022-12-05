@@ -359,7 +359,7 @@ export default defineComponent({
           item.edited = true
 
           itemData.id = item.id
-          itemData.rating = itemRating
+          itemData.rating = { value: itemRating.id, label: itemRating.numerical_rating }
           itemData.description = item.description
           itemData.editMode = true
 

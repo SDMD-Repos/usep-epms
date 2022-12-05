@@ -54,12 +54,22 @@ class VpOpcrDetail extends Model
     }
 
     /**
+     * Get the cascading level of the detail.
+     */
+    public function cascading()
+    {
+        return $this->belongsTo('App\CascadingLevel', 'cascading_level', 'code');
+    }
+
+    /**
      * Get the measures of the detail.
      */
     public function measures()
     {
         return $this->belongsToMany('App\Measure', 'vp_opcr_detail_measures', 'detail_id', 'measure_id')
-            ->wherePivotNull('deleted_at')->with('items')->orderBy('id', 'ASC');
+            ->using('App\AapcrDetailMeasure')
+            ->withPivot('category_id')
+            ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
     }
 
     /**

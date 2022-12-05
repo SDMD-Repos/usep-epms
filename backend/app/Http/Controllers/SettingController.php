@@ -592,14 +592,16 @@ class SettingController extends Controller
                     if(!$list['isCustom']) {
                         $this->createMeasureCategory([
                             'categories' => $list['categories'],
-                            'measureId' => $measureId
+                            'measureId' => $measureId,
+                            'year' => $year,
                         ]);
 
                     }else {
                         $this->createMeasureItems([
                             'measureId' => $measureId,
                             'categoryId' => NULL,
-                            'items' => $list['customItems']
+                            'items' => $list['customItems'],
+                            'year' => $year,
                         ]);
                     }
                 } else {
@@ -648,7 +650,8 @@ class SettingController extends Controller
                 $this->createMeasureItems([
                     'measureId' => $measureId,
                     'categoryId' => $measureCategory->id,
-                    'items' => $category['items']
+                    'items' => $category['items'],
+                    'year' => $year
                 ]);
             }
         }
@@ -664,11 +667,34 @@ class SettingController extends Controller
         extract($data);
 
         foreach($items as $item) {
+            $ratingId = $item['rating']['value'] ?? ($item['rating']['id'] ?? $item['rating']);
+            $numerical_rating = $item['rating']['label'] ?? ($item['rating']['numerical_rating'] ?? null);
+
+            if(!$numerical_rating) {
+                $numerical_rating = MeasureRating::where('id', $ratingId)->first();
+            }
+
+            $rating = MeasureRating::where([
+                ['numerical_rating', $numerical_rating],
+                ['year', 2023],
+            ])->first();
+
+            if(!$rating) {
+                $prevRating = MeasureRating::find($ratingId);
+                $prevRating->year = $year;
+
+                $new = []; $new[] = $prevRating;
+
+                $ratingId = $this->createMeasureRatings($new, 1);
+            }else {
+                $ratingId = $rating->id;
+            }
+
             $newItem = new MeasureItem;
 
             $newItem->measure_id = $measureId;
             $newItem->category_id = $categoryId;
-            $newItem->rating = $item['rating']['value'] ?? ($item['rating']['id'] ?? $item['rating']);;
+            $newItem->rating = $ratingId;
             $newItem->description = $item['description'];
             $newItem->create_id = $this->login_user->pmaps_id;
             $newItem->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
@@ -761,6 +787,7 @@ class SettingController extends Controller
         $isCustom = $validated['isCustom'];
         $categories = $validated['categories'];
         $customItems = $validated['customItems'];
+        $year = $validated['year'];
 
         if((boolean)$original['is_custom'] === $isCustom) {
             if(!$isCustom) {
@@ -791,13 +818,15 @@ class SettingController extends Controller
                             $this->updateMeasureItems([
                                 'items' => $category['items'],
                                 'measureId' => $category['measure_id'],
-                                'categoryId' => $category['id']
+                                'categoryId' => $category['id'],
+                                'year' => $year
                             ]);
                         }
                     }else {
                         $this->createMeasureCategory([
                             'categories' => [$category],
-                            'measureId' => $measureId
+                            'measureId' => $measureId,
+                            'year' => $year
                         ]);
                     }
                 }
@@ -805,7 +834,8 @@ class SettingController extends Controller
                 $this->updateMeasureItems([
                     'items' => $customItems,
                     'measureId' => $measureId,
-                    'categoryId' => null
+                    'categoryId' => null,
+                    'year' => $year
                 ]);
             }
 
@@ -844,7 +874,8 @@ class SettingController extends Controller
             if(!$isCustom) {
                 $this->createMeasureCategory([
                     'categories' => $categories,
-                    'measureId' => $measureId
+                    'measureId' => $measureId,
+                    'year' => $year,
                 ]);
             }else {
                 MeasureCategory::where('measure_id', $measureId)->delete();
@@ -852,7 +883,8 @@ class SettingController extends Controller
                 $this->createMeasureItems([
                     'items' => $customItems,
                     'measureId' => $measureId,
-                    'categoryId' => null
+                    'categoryId' => null,
+                    'year' => $year,
                 ]);
             }
         }
@@ -897,7 +929,8 @@ class SettingController extends Controller
                 $this->createMeasureItems([
                     'items' => [$item],
                     'measureId' => $measureId,
-                    'categoryId' => $categoryId
+                    'categoryId' => $categoryId,
+                    'year' => $year
                 ]);
             }
         }
@@ -958,31 +991,15 @@ class SettingController extends Controller
         }
     }
 
-    public function createMeasureRating(StoreMeasureRating $request)
+    public function validateMeasureRating(StoreMeasureRating $request)
     {
         try {
-
             $validated = $request->validated();
-
             $ratings = $validated['ratings'];
 
             DB::beginTransaction();
 
-            foreach($ratings as $rating) {
-                $measureRating = new MeasureRating();
-
-                $measureRating->year = $rating['year'];
-                $measureRating->numerical_rating = $rating['numerical_rating'];
-                $measureRating->aps_from = $rating['aps_from'];
-                $measureRating->aps_to = $rating['aps_to'];
-                $measureRating->adjectival_rating = $rating['adjectival_rating'];
-                $measureRating->description = $rating['description'];
-                $measureRating->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
-
-                if(!$measureRating->save()) {
-                    DB::rollBack();
-                }
-            }
+            $this->createMeasureRatings($ratings);
 
             DB::commit();
 
@@ -998,6 +1015,27 @@ class SettingController extends Controller
             }
 
             return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function createMeasureRatings($ratings, $fromPrevious=0)
+    {
+        foreach($ratings as $rating) {
+            $measureRating = new MeasureRating();
+
+            $measureRating->year = $rating['year'];
+            $measureRating->numerical_rating = $rating['numerical_rating'];
+            $measureRating->aps_from = $rating['aps_from'];
+            $measureRating->aps_to = $rating['aps_to'];
+            $measureRating->adjectival_rating = $rating['adjectival_rating'];
+            $measureRating->description = $rating['description'];
+            $measureRating->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+
+            if(!$measureRating->save()) {
+                DB::rollBack();
+            }
+
+            if($fromPrevious) { return $measureRating->id; }
         }
     }
 

@@ -68,7 +68,7 @@ class AapcrDetail extends Model
      */
     public function offices()
     {
-        return $this->hasMany('App\AapcrDetailOffice', 'detail_id');
+        return $this->hasMany('App\AapcrDetailOffice', 'detail_id')->orderBy('office_type_id', 'asc');
     }
 
     /*public function getMeasureIds()

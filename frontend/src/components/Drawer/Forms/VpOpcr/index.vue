@@ -31,8 +31,6 @@
           <a-select v-model:value="form.program" placeholder="Select" style="width: 100%"
                     label-in-value :disabled="config.type === 'sub'"
                     :options="programsByFunction" />
-<!--          <a-select v-model:value="form.program" placeholder="Select" :options="programsByFunction"
-                    label-in-value :disabled="config.type === 'sub'" />-->
         </a-form-item>
 
         <a-form-item name="subCategory" label="Sub Category">
@@ -74,13 +72,15 @@
             <template #label><span class="required-indicator">Measures</span></template>
 
             <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
-                      style="width: 100%" :options="measuresList" label-in-value allow-clear >
+                      style="width: 100%" label-in-value allow-clear
+                      :options="measuresList"
+                      @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
               <template #option="{ label, items }">
                 {{ label }} &nbsp;&nbsp;
                 <a-tooltip placement="right">
                   <template #title>
                     <template v-for="item in items" :key="item.id">
-                      <div>{{ item.rate }} - {{ item.description }}</div>
+                      <div>{{ item.rating.numerical_rating }} - {{ item.description }}</div>
                     </template>
                   </template>
                   <info-circle-filled :style="{ fontSize: '12px'}"/>
@@ -293,11 +293,6 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => {
-      const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name, displayAsItems: i.display_as_items, items: i.items }))
-    })
-
     const cascadingList  = computed(() => {
       const list = store.state.formManager.cascadingLevels
       return list.map(i => ({ value: i.code, label: i.name }))
@@ -305,7 +300,7 @@ export default defineComponent({
 
     const officesList  = computed(() => store.getters['external/external'].officesAccountable)
 
-    const { functionsWithProgram } = useModifiedStates()
+    const { functionsWithProgram, measuresList } = useModifiedStates()
 
     // EVENTS
     watch(() => [props.drawerConfig, props.formObject], ([drawerConfig, formObject]) => {

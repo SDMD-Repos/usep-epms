@@ -225,6 +225,7 @@ import { TreeSelect } from 'ant-design-vue'
 import { cloneDeep } from 'lodash'
 import { CheckOutlined, EditOutlined, DeleteFilled, InfoCircleFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
+import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 export default defineComponent({
   name: "AapcrFormDrawer",
@@ -259,38 +260,7 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === props.drawerId && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => {
-      const list = store.state.formManager.measures
-      let finalList = []
-
-      list.map(i => {
-        let items = []
-
-        if(i.is_custom === 1) {
-          finalList.push({
-            value: i.key,
-            label: i.name,
-            displayAsItems: i.display_as_items,
-            isCustom: i.is_custom,
-            items: i.custom_items,
-          })
-        } else {
-          i.categories.forEach(e => {
-            finalList.push({
-              value: e.id + "-" + i.id,
-              label: i.name + (e.numbering ? e.numbering.toLowerCase() : ''),
-              displayAsItems: i.display_as_items,
-              isCustom: i.is_custom,
-              measureId: i.id,
-              categoryId: e.id,
-              items: e.items,
-            })
-          })
-        }
-      })
-
-      return finalList
-    })
+    const { measuresList } = useModifiedStates()
 
     const cascadingList  = computed(() => {
       const list = store.state.formManager.cascadingLevels

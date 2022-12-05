@@ -44,4 +44,25 @@ class AapcrDetailOffice extends Model
     {
         return $this->belongsTo('App\Category', 'cascade_to');
     }
+
+    /**
+     * Scope a query to only include users of a given type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFilterVpOffices($query, $id)
+    {
+        return $query->where(function($officeQ) use ($id) {
+            $officeQ->where('vp_office_id', '=', $id)
+                ->orWhere('office_id', '=', $id)
+                ->orWhere(function($groupOfcWhere) use ($id) {
+                    $groupOfcWhere->where('is_group', 1)
+                        ->whereHas('group', function($joinOfcQuery) use ($id) {
+                            $joinOfcQuery->where('supervising_id', '=', $id);
+                        });
+                });
+        });
+    }
 }

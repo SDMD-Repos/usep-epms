@@ -4,13 +4,15 @@ namespace App\Http\Traits;
 
 use App\Aapcr;
 use App\AapcrDetail;
-use App\AapcrDetailOffice;
+use App\Measure;
+use App\MeasureRating;
 use App\Program;
 use App\Signatory;
 use App\VpOpcr;
-use App\VpOpcrDetailOffice;
 use Illuminate\Support\Facades\Storage;
 use PHPJasper\PHPJasper;
+use PDF;
+use LynX39\LaraPdfMerger\Facades\PdfMerger;
 
 trait PdfTrait {
     use ConverterTrait;
@@ -24,6 +26,8 @@ trait PdfTrait {
         $uploadsPath = public_path('storage/uploads');
 
         $uploadsPublishedPath = public_path('storage/uploads/published');
+
+        $publishedRatingScalesPath = public_path('storage/uploads/published/scales');
 
         if(!Storage::exists($jsonPath)) {
             Storage::makeDirectory('public/json', 0777, true, true);
@@ -39,6 +43,10 @@ trait PdfTrait {
 
         if(!Storage::exists($uploadsPublishedPath)) {
             Storage::makeDirectory('public/uploads/published', 0777, true, true);
+        }
+
+        if(!Storage::exists($publishedRatingScalesPath)) {
+            Storage::makeDirectory('public/uploads/published/scales', 0777, true, true);
         }
     }
 
@@ -57,11 +65,11 @@ trait PdfTrait {
 
             $documentName = $aapcr->document_name;
 
-            $officeModel = new AapcrDetailOffice();
+            $year = $aapcr->year;
 
             $signatory = $this->getSignatories($aapcr, "aapcr");
 
-            $programs = Program::where('year', $aapcr->year)->orderBy('category_id', 'asc')->get();
+            $programs = Program::where('year', $year)->whereNull('form_id')->orderBy('category_id', 'asc')->get();
 
             $programsDataSet = array();
 
@@ -107,7 +115,7 @@ trait PdfTrait {
 
                 $measures = $this->fetchMeasuresPdf($detail->measures);
 
-                $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+                $getOffices = $this->getOfficesPdf($detail->offices);
 
                 if(!$tempProgramId || $tempProgramId !== $detail->program_id){
                     $tempProgramId = $detail->program_id;
@@ -158,14 +166,14 @@ trait PdfTrait {
 
                 $PICount++;
 
-                $subPis = $aapcr->details()->where('parent_id', $detail->id)->get();
+                $subIndicators = $aapcr->details()->where('parent_id', $detail->id)->get();
 
-                if(count($subPis)){
-                    foreach($subPis as $subKey => $subPi) {
+                if(count($subIndicators)){
+                    foreach($subIndicators as $subKey => $subIndicator) {
 
-                        $subMeasures = $this->fetchMeasuresPdf($subPi->measures);
+                        $subMeasures = $this->fetchMeasuresPdf($subIndicator->measures);
 
-                        $getSubOffices = $this->getOfficesPdf($officeModel, $subPi->id);
+                        $getSubOffices = $this->getOfficesPdf($subIndicator->offices);
 
                         $data[$PICount] = array(
                             'category_id' => $detail->category_id,
@@ -174,14 +182,14 @@ trait PdfTrait {
                             'program' => $detail->program->name,
                             'subCategory' => $subCategory,
                             'parentSubCategory' => $parentSubCategory,
-                            'pi_name' => $subPi->pi_name,
-                            'target' => $subPi->target,
+                            'pi_name' => $subIndicator->pi_name,
+                            'target' => $subIndicator->target,
                             'measures' => implode(", ", $subMeasures),
-                            'allocatedBudget' => $subPi->allocated_budget ? number_format($subPi->allocated_budget) : '',
-                            'targetsBasis' => $subPi->targets_basis,
+                            'allocatedBudget' => $subIndicator->allocated_budget ? number_format($subPi->allocated_budget) : '',
+                            'targetsBasis' => $subIndicator->targets_basis,
                             'implementing' => implode(', ', $getSubOffices['implementing']),
                             'supporting' => implode(', ', $getSubOffices['supporting']),
-                            'otherRemarks' => $subPi->other_remarks,
+                            'otherRemarks' => $subIndicator->other_remarks,
                             'subPICount' => $subKey+1
                         );
 
@@ -206,7 +214,7 @@ trait PdfTrait {
                 'usepLogo' => $publicPath."/logos/USeP_Logo.png",
                 'notFinal' => ((!$aapcr->published_date || !$aapcr->is_active) && !$isPublish ? $publicPath."/logos/notfinal.png" : ""),
                 'totalBudget' => number_format($totalBudget, 0),
-                'year' => $aapcr->year,
+                'year' => $year,
                 'preparedBy' => strtoupper($signatory['preparedBy']),
                 'preparedByPosition' => $signatory['preparedByPosition'],
                 'preparedDate' => $signatory['preparedDate'],
@@ -225,6 +233,7 @@ trait PdfTrait {
                 'isPublish' => $isPublish,
                 'form' => 'aapcr',
                 'id' => $id,
+                'year' => $year,
                 'jsonArrayData' => ['main' => $data, 'programsDataSet' => $programsDataSet],
                 'params' => $params,
             ];
@@ -243,7 +252,7 @@ trait PdfTrait {
                 } else {
                     $status = 400;
                 }
-
+dd($e);
                 return response()->json($e->getMessage(), $status);
             }
         }
@@ -256,6 +265,8 @@ trait PdfTrait {
             $vpopcr = VpOpcr::find($id);
 
             $officeId = $vpopcr->office_id;
+
+            $year = $vpopcr->year;
 
             $signatory = $this->getSignatories($vpopcr, 'vpopcr');
 
@@ -281,16 +292,17 @@ trait PdfTrait {
                 $data = $this->getVpOpcrPdfDetails($detail, []);
 
                 if($detail->aapcr_detail_id) {
-                    $aapcrDetail = $detail->aapcrDetail;
+                    $aapcrDetail = $detail->aapcrDetail()->with(['offices' => function($q) use ($officeId){
+                        $q->filterVpOffices($officeId);
+                    }])->first();
 
                     if($aapcrDetail->parent_id && $detail->from_aapcr) {
                         if(!$detail->aapcrDetail->parent->is_header) {
                             $parentDetail = AapcrDetail::whereHas('offices', function($query) use ($officeId) {
-                                $query->where(function($q) use ($officeId) {
-                                    $q->where('vp_office_id', '=', $officeId)
-                                        ->orWhere('office_id', '=', $officeId);
-                                });
-                            })->with(['measures', 'offices'])->where('id', $aapcrDetail->parent_id)->first();
+                                $query->filterVpOffices($officeId);
+                            })->with(['measures', 'offices' => function ($queryOffice) use ($officeId) {
+                                $queryOffice->filterVpOffices($officeId);
+                            }])->where('id', $aapcrDetail->parent_id)->first();
 
                             if($parentDetail) {
                                 $isParent = 1;
@@ -391,7 +403,7 @@ trait PdfTrait {
                 'usepLogo' => $publicPath."/logos/USeP_Logo.png",
                 'public_path' => $publicPath,
                 'notFinalImage' => ((!$vpopcr->published_date || !$vpopcr->is_active) && !$isPublish ? $publicPath."/logos/notfinal.png" : ""),
-                'year' => $vpopcr->year,
+                'year' => $year,
                 'vpOfficeName' => $vpopcr->office_name,
                 'preparedBy' => strtoupper($signatory['preparedBy']),
                 'preparedByPosition' => $signatory['preparedByPosition'],
@@ -411,6 +423,7 @@ trait PdfTrait {
                 'isPublish' => $isPublish,
                 'form' => 'vpopcr',
                 'id' => $id,
+                'year' => $year,
                 'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
                 'params' => $params,
             ];
@@ -433,8 +446,6 @@ trait PdfTrait {
 
     public function getVpOpcrPdfDetails($detail, $children)
     {
-        $officeModel = new VpOpcrDetailOffice();
-
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
         $program = $detail->program ? $detail->program->name : null;
@@ -446,11 +457,7 @@ trait PdfTrait {
         if(!$detail->is_header) {
             $measures = $this->fetchMeasuresPdf($detail->measures);
 
-            if(isset($detail->isParent) && $detail->isParent) {
-                $officeModel = new AapcrDetailOffice();
-            }
-
-            $getOffices = $this->getOfficesPdf($officeModel, $detail->id);
+            $getOffices = $this->getOfficesPdf($detail->offices);
         }
 
         $detailSubCategory = $detail->subCategory;
@@ -501,9 +508,12 @@ trait PdfTrait {
         }
 
         # OVER-ALL RATING DETAILS
-        $ifSaved = $this->array_any(function($x, $compare){
-            return $x['programName'] === ucwords($compare['progName']);
-        }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
+        $ifSaved = false;
+        if($program) {
+            $ifSaved = $this->array_any(function($x, $compare){
+                return strtolower($x['programName']) === $compare['progName'];
+            }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
+        }
 
         if(!$ifSaved && $detail->program) {
             $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
@@ -636,27 +646,22 @@ trait PdfTrait {
         return $measures;
     }
 
-    public function getOfficesPdf($model, $detailId)
+    public function getOfficesPdf($offices)
     {
-        $getOffices = $model::select('office_name', 'office_type_id', 'is_group', 'group_id')
-            ->where('detail_id', $detailId)
-            ->orderBy('office_type_id', 'asc')
-            ->get();
-
         $allOffices = [
             'implementing' => array(),
             'supporting' => array()
         ];
 
-        foreach($getOffices as $getOffice) {
-            $officeName = $getOffice['office_name'];
+        foreach($offices as $office) {
+            $officeName = $office['office_name'];
 
-            if ($getOffice['is_group']) {
-                $officeName = $getOffice->group->name;
+            if ($office['is_group']) {
+                $officeName = $office->group->name;
             }
 
             //if($getOffice['office_type_id'] === 'implementing') {
-            $allOffices[$getOffice->field->code][] = $officeName;
+            $allOffices[$office->field->code][] = $officeName;
             /*}else{
                 array_push($allOffices['supporting'], $officeName);
             }*/
@@ -673,13 +678,14 @@ trait PdfTrait {
 
         $extension = 'pdf' ;
         $input = public_path() . '/raw/' . $form . '.jasper';
+        $publishedPath = storage_path('app/public/uploads/published/');
 
         if(!$isPublish) {
             $filename =  $documentName  . "_". date("Ymd");
             $output = base_path('/public/forms/' . $filename);
         } else{
             $filename =  strtoupper($form) . "_". $id . "_". time();
-            $output = storage_path('app/public/uploads/published/' . $filename);
+            $output = $publishedPath . $filename;
         }
 
         $jsonArry = array('data' => $jsonArrayData);
@@ -710,7 +716,23 @@ trait PdfTrait {
             $options
         )->execute();
 
-        $file = $output .'.'.$extension ;
+        $file = $output .'.'.$extension;
+
+        // Generate rating scale's PDF file
+        $this->viewMeasurePDF($year, 1);
+
+        $scalesFileName = 'scales/' . 'rating_scale_' . $year . '.pdf';
+        $scalesFilePath = $publishedPath . $scalesFileName;
+
+        if(Storage::disk('public')->exists('/uploads/published/' . $scalesFileName)) {
+            // Merge Main Form's PDF and rating scale's PDF
+            $pdfMerger = PDFMerger::init();
+
+            $pdfMerger->addPDF($file);
+            $pdfMerger->addPDF($scalesFilePath, '1');
+            $pdfMerger->merge();
+            $pdfMerger->save($file);
+        }
 
         if (!file_exists($file)) {
             abort(404);
@@ -719,5 +741,41 @@ trait PdfTrait {
         }
 
         return $file;
+    }
+
+    public function viewMeasurePDF($year, $save=0)
+    {
+        try {
+            $measures = Measure::select('*', 'id as key')->where([
+                ['year', $year], ['is_custom', 0]
+            ])->with(['categories.items.rating'])->get();
+
+            $ratings = MeasureRating::select("*", "id as key")->where('year', $year)->get();
+
+            $tableColumnCount = 4;
+
+            foreach($measures as $measure) { $tableColumnCount += count($measure->categories); }
+
+            $data = ['measures' => $measures, 'ratings' => $ratings, 'tableColumnCount' => $tableColumnCount];
+
+            $pdf = PDF::loadView('measurePdf', $data)->setPaper('folio', 'landscape');
+
+            $filename = 'rating_scale_' . $year . '.pdf';
+
+            if(!$save) {
+                return $pdf->download($filename);
+            }else {
+                $pdf->save(storage_path('app/public/uploads/published/scales/' . $filename));
+            }
+        }catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+
     }
 }
