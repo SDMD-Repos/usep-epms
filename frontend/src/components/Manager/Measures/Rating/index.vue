@@ -176,7 +176,7 @@ export default defineComponent({
 
     const checkRatingDuplicate = () => {
       const { numericalRating } = formState
-      const hasDuplicate = measureRatingList.value.filter(i => i.rating.numerical_rating === numericalRating )
+      const hasDuplicate = measureRatingList.value.filter(i => i.numerical_rating === numericalRating )
       if(hasDuplicate.length > 0 && action.value === 'create') {
         _message.error("Unable to save data. A same Numerical Rating has already been set for the year " + year.value);
       }else {
