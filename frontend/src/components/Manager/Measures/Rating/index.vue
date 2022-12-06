@@ -162,7 +162,7 @@ export default defineComponent({
       const measureId = record !== null ? record.id : record
       if (measureId) {
         formState.id = record.id
-        formState.numericalRating = record.rating.numerical_rating
+        formState.numericalRating = record.numerical_rating
         formState.averagePointScore = { from: record.aps_from, to: record.aps_to }
         formState.adjectivalRating = record.adjectival_rating
         formState.description = record.description
