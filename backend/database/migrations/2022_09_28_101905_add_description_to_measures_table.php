@@ -18,6 +18,7 @@ class AddDescriptionToMeasuresTable extends Migration
             $table->text('description')->nullable()->after('is_custom');
             $table->string('variable_equivalent', 15)->nullable()->after('description');
             $table->text('elements')->nullable()->after('variable_equivalent');
+            $table->string('bg_color', 10)->nullable()->after('elements');
         });
     }
 
