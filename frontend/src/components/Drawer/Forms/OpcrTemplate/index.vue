@@ -64,13 +64,13 @@
 
           <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
                     style="width: 100%" label-in-value allow-clear :options="measuresList"
-                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})">
+                    @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
             <template #option="{ label, items }">
               {{ label }} &nbsp;&nbsp;
               <a-tooltip placement="right">
                 <template #title>
                   <template v-for="item in items" :key="item.id">
-                    <div>{{ item.rate }} - {{ item.description }}</div>
+                    <div>{{ item.rating.numerical_rating }} - {{ item.description }}</div>
                   </template>
                 </template>
                 <info-circle-filled :style="{ fontSize: '12px'}"/>
@@ -105,6 +105,7 @@ import { useStore } from 'vuex'
 import { TreeSelect } from 'ant-design-vue'
 import { InfoCircleFilled } from '@ant-design/icons-vue'
 import { useFormFields } from '@/services/functions/form/main'
+import { useModifiedStates } from '@/services/functions/modifiedStates'
 
 export default defineComponent({
   name: "OpcrTemplateFormDrawer",
@@ -139,10 +140,7 @@ export default defineComponent({
       return subs.filter(i => { return i.category_id === parseInt(props.drawerId) && i.parent_id === null})
     })
 
-    const measuresList  = computed(() => {
-      const list = store.state.formManager.measures
-      return list.map(i => ({ value: i.key, label: i.name, displayAsItems: i.display_as_items, items: i.items }))
-    })
+    const { measuresList } = useModifiedStates()
 
     // EVENTS
     watch(() => [props.drawerConfig, props.formObject] , ([drawerConfig, formObject]) => {

@@ -42,7 +42,9 @@
             :form-id="formId" :function-id="category.key" :item-source="dataSource" :allow-edit="allowEdit" :counter="counter"
             :categories="categories" :targets-basis-list="targetsBasisList" :is-published="viewOnly"
             @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @update-source-item="updateSourceItemVP"
-            @delete-source-item="deleteSourceItem" @add-deleted-item="addDeletedItem" @link-parent-indicator="linkParentIndicator" />
+            @delete-source-item="deleteSourceItem" @add-deleted-item="addDeletedItem" @link-parent-indicator="linkParentIndicator"
+            @convert-child="convertChild"
+          />
         </template>
       </div>
 
@@ -94,7 +96,8 @@ export default defineComponent({
       // DATA
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, year, cachedYear, years, allowEdit,
       // METHOD
-      updateDataSource, addTargetsBasisItem, updateSourceItemVP, deleteSourceItem, addDeletedItem, resetFormFields, linkParentIndicator,
+      updateDataSource, addTargetsBasisItem, updateSourceItemVP, deleteSourceItem, addDeletedItem, resetFormFields,
+      linkParentIndicator, convertChild,
     } = useFormOperations(props)
 
     // COMPUTED
@@ -120,9 +123,7 @@ export default defineComponent({
       let tip = ''
       if (loading.value) {
         tip = 'Initializing form...'
-      } /*else if(isCheckingForm.value) {
-        tip = 'Checking form availability...'
-      }*/
+      }
       return tip
     })
 
@@ -137,6 +138,7 @@ export default defineComponent({
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.dispatch('vpopcr/CHECK_VPOPCR_PERMISSION', { payload: { pmapsId: store.state.user.pmapsId, formId:'vpopcr' }})
       vpOpcrId.value = typeof route.params.vpOpcrId !== 'undefined' ? route.params.vpOpcrId : null
+
       if(vpOpcrId.value) {
         getVpOpcrDetails()
       } else {
@@ -236,7 +238,6 @@ export default defineComponent({
       await store.dispatch('formManager/FETCH_MEASURES', { payload : { year: year.value }})
       await store.dispatch('formManager/FETCH_CASCADING_LEVELS')
       await store.dispatch('formManager/FETCH_PROGRAMS', { payload : { year: year.value, formId: 'opcr' }})
-      // await store.dispatch('formManager/FETCH_OTHER_PROGRAMS', { payload : { formId: 'opcr', year: year.value }})
       await store.dispatch('formManager/FETCH_FORM_FIELDS', { payload: { year: year.value, formId: 'vpopcr' }})
 
       let params = {
@@ -379,6 +380,7 @@ export default defineComponent({
       years,
 
       updateDataSource, addTargetsBasisItem, updateSourceItemVP, deleteSourceItem, addDeletedItem, linkParentIndicator,
+      convertChild,
     }
   },
 })

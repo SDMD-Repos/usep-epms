@@ -30,7 +30,7 @@ class OpcrTemplateDetails extends Migration
             $table->softDeletes();
             $table->text('history');
 
-            $table->foreign('opcr_template_id')->references('id')->on('opcr_template')->onUpdate('cascade');
+            $table->foreign('opcr_template_id')->references('id')->on('opcr_templates')->onUpdate('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onUpdate('cascade');
             $table->foreign('sub_category_id')->references('id')->on('sub_categories')->onUpdate('cascade');
         });

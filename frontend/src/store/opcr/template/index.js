@@ -11,7 +11,7 @@ const mapApiProviders = {
   update: opcrTemplateForm.update,
 }
 
-const baseUrl = '/forms/ocpcr'
+const baseUrl = '/forms/ocpcr/template'
 
 export default {
   namespaced: true,
@@ -56,7 +56,7 @@ export default {
       commit('SET_STATE', {
         loading: true,
       })
-      getRequest(baseUrl + '/template-list').then(response => {
+      getRequest(baseUrl + '/list').then(response => {
         if (response) {
           const { list } = response
           commit('SET_STATE', {
@@ -73,7 +73,7 @@ export default {
         loading: true,
       })
 
-      postRequest(baseUrl + '/save-template', payload).then(response => {
+      postRequest(baseUrl + '/save', payload).then(response => {
         if (response) {
           // dispatch('FETCH_LIST')
           notification.success({
@@ -91,7 +91,7 @@ export default {
         loading: true,
       })
       const id = payload.opcrTemplateId
-      postRequest(baseUrl + '/update-template/' + id, payload).then(response => {
+      postRequest(baseUrl + '/update/' + id, payload).then(response => {
         if (response) {
           dispatch('FETCH_LIST')
           notification.success({
@@ -109,7 +109,7 @@ export default {
         loading: true,
       })
 
-      postRequest(baseUrl + '/publish-template', payload).then(response => {
+      postRequest(baseUrl + '/publish', payload).then(response => {
         if (response) {
           dispatch('FETCH_LIST')
           notification.success({
@@ -127,7 +127,7 @@ export default {
         loading: true,
       })
 
-      postRequest("/forms/ocpcr/unpublish-template", payload).then(response => {
+      postRequest(baseUrl + "/unpublish", payload).then(response => {
         if (response) {
           dispatch('FETCH_LIST')
           notification.success({

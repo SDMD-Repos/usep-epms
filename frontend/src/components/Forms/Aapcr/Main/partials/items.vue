@@ -4,16 +4,20 @@
               :options="programsByFunction" @change="loadPIs" />
 
     <div class="mt-4">
-      <indicator-table :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
-                       :main-category="mainCategory" :form-table-columns="formTableColumns" :allow-edit="displayIndicatorList"
-                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
-                       @delete-item="deleteItem" @handle-link-parent="linkIndicator" @add-budget-list-item="addBudgetListItem"/>
+      <indicator-table
+        :year="year" :form-id="formId" :item-source="dataSource" :budget-list="budgetList"
+        :main-category="mainCategory" :form-table-columns="formTableColumns" :allow-edit="displayIndicatorList"
+        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem" @convert-child-to-parent="convertChildToParent"
+        @delete-item="deleteItem" @handle-link-parent="linkIndicator" @add-budget-list-item="addBudgetListItem"
+      />
 
-      <aapcr-form-drawer :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
-                         :targets-basis-list="targetsBasisList" :category-list="categories" :current-year="year"
-                         :validate="validate" :validate-infos="validateInfos"
-                         @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
-                         @close-drawer="closeDrawer" />
+      <aapcr-form-drawer
+        :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId"
+        :targets-basis-list="targetsBasisList" :category-list="categories" :current-year="year"
+        :validate="validate" :validate-infos="validateInfos"
+        @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
+        @close-drawer="closeDrawer"
+      />
     </div>
   </div>
 </template>
@@ -43,7 +47,7 @@ export default defineComponent({
     counter: { type: Number, default: 0 },
   },
   emits: ['add-targets-basis-item', 'update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item',
-    'update-source-item', 'add-budget-list-item', 'link-parent-indicator'],
+    'update-source-item', 'add-budget-list-item', 'link-parent-indicator', 'convert-child'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -144,6 +148,7 @@ export default defineComponent({
         if (typeof source[index].children === 'undefined') {
           source[index]['children'] = new Proxy([], {})
         }
+        newData.parentId = parentDetails.id
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
         await resetFields()
@@ -259,6 +264,11 @@ export default defineComponent({
       emit('link-parent-indicator', data)
     }
 
+    const convertChildToParent = async data => {
+      await emit('convert-child', {...data})
+      await deleteItem(data)
+    }
+
     return {
       formTableColumns,
       mainCategory,
@@ -287,6 +297,7 @@ export default defineComponent({
       deleteItem,
       linkIndicator,
       addBudgetListItem,
+      convertChildToParent,
     }
   },
 })

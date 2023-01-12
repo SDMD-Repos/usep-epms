@@ -1,7 +1,7 @@
 <template>
   <div v-if="opcrFormPermission" >
     <form-list-table
-      :columns="columns" :data-list="list" :form="formId" :loading="loading"
+      :columns="columns" :data-list="list" :form="formId" :loading="loading" :has-form-access="opcrFormPermission"
       @update-form="updateForm" @publish="publish" @unpublish="unpublish"  />
   </div>
   <div v-else><error403 /></div>
@@ -37,11 +37,7 @@ export default defineComponent({
       listOpcr: [ "form", "f-opcr", "fo-template" ],
     }
     // EVENTS
-    const {
-      // DATA
-      opcrFormPermission,
-      // METHODS
-    } = usePermission(permission)
+    const { opcrFormPermission } = usePermission(permission)
 
     onMounted(() => {
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
@@ -70,18 +66,16 @@ export default defineComponent({
     }
 
     return {
-      documentName,
-
       columns: listTableColumns,
+
+      documentName,
       list,
       loading,
-
-      unpublish,
+      opcrFormPermission,
 
       updateForm,
       publish,
-
-      opcrFormPermission,
+      unpublish,
     }
   },
 })

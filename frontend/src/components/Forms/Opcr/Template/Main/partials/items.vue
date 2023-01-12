@@ -4,10 +4,11 @@
               label-in-value @change="loadPIs" />
 
     <div class="mt-4">
-      <indicator-table :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
-                       :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
-                       @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem"
-                       @delete-item="deleteItem"/>
+      <indicator-table
+        :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
+        :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
+        @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem" @convert-child-to-parent="convertChildToParent"
+        @delete-item="deleteItem"/>
 
       <opcr-template-form-drawer
         :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
@@ -40,7 +41,7 @@ export default defineComponent({
     formId: { type: String, default: "" },
     counter: { type: Number, default: 0 },
   },
-  emits: ['update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item', 'update-source-item'],
+  emits: ['update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item', 'update-source-item', 'convert-child'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -99,6 +100,8 @@ export default defineComponent({
       }
 
       if (drawerConfig.value.type === 'pi') {
+        newData.linkedToChild = false
+
         await emit('update-data-source', { data: newData, isNew: true })
         await resetFields()
         if (newData.isHeader) {
@@ -122,6 +125,7 @@ export default defineComponent({
         if (typeof source[index].children === 'undefined') {
           source[index]['children'] = new Proxy([], {})
         }
+        newData.parentId = parentDetails.id
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
         await resetFields()
@@ -212,6 +216,11 @@ export default defineComponent({
       }
     }
 
+    const convertChildToParent = async data => {
+      await emit('convert-child', {...data})
+      await deleteItem(data)
+    }
+
     const closeDrawer = async isNewIndicator => {
       await resetDrawerSettings(isNewIndicator)
       await resetFields()
@@ -240,6 +249,7 @@ export default defineComponent({
       loadPIs,
       addTableItem,
       handleAddSub,
+      convertChildToParent,
       closeDrawer,
       editItem,
       updateTableItem,

@@ -109,7 +109,13 @@
               <link-outlined :style="{ fontSize: '16px' }" @click="handleLink(record)" />
             </a-tooltip>
             <a-tooltip title="Unlink" v-else-if="typeof record.linkedToChild !== 'undefined' && record.linkedToChild">
-              <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fa fa-unlink" @click="handleLink(record)" />
+              <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fas fa-link-slash" @click="handleLink(record)" />
+            </a-tooltip>
+          </template>
+          <template v-if="record.type === 'sub'">
+            <a-divider type="vertical" />
+            <a-tooltip title="Convert child to parent">
+              <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fas fa-circle-arrow-down" @click="handleSubToParent(record)" />
             </a-tooltip>
           </template>
           <a-divider type="vertical" v-if="allowedAction(record)"/>
@@ -148,7 +154,7 @@ export default defineComponent({
     allowEdit: { type: Boolean, default: false },
     viewOnly: { type: Boolean, default: false },
   },
-  emits: ['open-drawer', 'delete-item', 'handle-link-parent', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
+  emits: ['open-drawer', 'delete-item', 'handle-link-parent', 'convert-child-to-parent', 'add-sub-item', 'edit-item', 'add-budget-list-item'],
   setup(props, { emit }) {
     const _message = inject('a-message')
 
@@ -216,6 +222,10 @@ export default defineComponent({
       emit('handle-link-parent', data)
     }
 
+    const handleSubToParent = data => {
+      emit('convert-child-to-parent', data)
+    }
+
     const allowedAction = data => {
       let allow = false
       if (props.formId === 'aapcr' || (props.formId === 'vpopcr' && !data.isCascaded) || props.formId === 'opcrtemplate') {
@@ -254,6 +264,7 @@ export default defineComponent({
       handleAddSub,
       handleDelete,
       handleLink,
+      handleSubToParent,
       allowedAction,
       saveProgramBudget,
     }

@@ -132,26 +132,30 @@ Route::group([
     });
 
     # OPCR & CPCR Form Controller routes
-
     Route::group([
         'prefix' => 'ocpcr'
     ], function() {
-        # TEMPLATE
-        Route::get('/check-saved-template/{year}', 'Form\OpcrTemplateController@checkSavedTemplate');
-        Route::get('/view-template/{id}', 'Form\OpcrTemplateController@viewTemplate');
-        Route::get('/template-list', 'Form\OpcrTemplateController@getAllOpcrTemplate');
-
-
-        Route::post('/save-template', 'Form\OpcrTemplateController@saveTemplate');
-        Route::post('/publish-template', 'Form\OpcrTemplateController@publishTemplate');
-        Route::post('/deactivate-template', 'Form\OpcrTemplateController@deactivateTemplate');
-        Route::post('/update-template/{id}', 'Form\OpcrTemplateController@updateTemplate');
-        Route::post('/unpublish-template', 'Form\OpcrTemplateController@unpublishTemplate');
 
         # MAIN FORM
         Route::get('/check-saved/{officeId}/{year}', 'Form\OcpcrController@checkSaved');
         Route::get('/get-vp-opcr-details/{officeId}/{year}/{formId}', 'Form\OcpcrController@getVpOpcrDetails');
         Route::get('/list', 'Form\OcpcrController@getAllOpcr');
+
+        # TEMPLATE
+        Route::group([
+            'prefix' => 'template'
+        ], function()  {
+            Route::get('/check-saved/{year}', 'Form\TemplateController@opcrCheckSaved');
+            Route::get('/view/{id}', 'Form\TemplateController@opcrView');
+            Route::get('/list', 'Form\TemplateController@getAllOpcr');
+
+
+            Route::post('/save', 'Form\TemplateController@saveOpcr');
+            Route::post('/publish', 'Form\TemplateController@publishOpcr');
+            Route::post('/deactivate', 'Form\TemplateController@deactivateOpcr');
+            Route::post('/update/{id}', 'Form\TemplateController@updateOpcr');
+            Route::post('/unpublish', 'Form\TemplateController@unpublishOpcr');
+        });
     });
 });
 

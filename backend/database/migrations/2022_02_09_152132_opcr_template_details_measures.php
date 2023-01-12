@@ -14,7 +14,7 @@ class OpcrTemplateDetailsMeasures extends Migration
     public function up()
     {
         //
-        Schema::create('opcr_template_details_measures', function (Blueprint $table) {
+        Schema::create('opcr_template_detail_measures', function (Blueprint $table) {
             $table->integer("id")->autoIncrement();
             $table->integer("detail_id");
             $table->integer("measure_id");
@@ -38,6 +38,6 @@ class OpcrTemplateDetailsMeasures extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('opcr_template_details_measures');
+        Schema::dropIfExists('opcr_template_detail_measures');
     }
 }

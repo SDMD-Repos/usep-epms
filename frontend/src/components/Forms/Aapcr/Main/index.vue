@@ -20,7 +20,7 @@
               :categories="categories" :year="year" :counter="counter" :budget-list="budgetList"
               @add-targets-basis-item="addTargetsBasisItem" @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
               @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" @add-budget-list-item="addBudgetListItem"
-              @link-parent-indicator="linkParentIndicator"/>
+              @link-parent-indicator="linkParentIndicator" @convert-child="convertChild"/>
           </a-collapse-panel>
         </a-collapse>
       </div>
@@ -82,7 +82,7 @@ export default defineComponent({
       dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
-      resetFormFields, linkParentIndicator,
+      resetFormFields, linkParentIndicator, convertChild,
     } = useFormOperations(props)
 
     const { budgetList, addBudgetListItem, deleteBudgetItem } = useProgramBudget()
@@ -328,6 +328,7 @@ export default defineComponent({
       updateSourceItem,
       addDeletedItem,
       linkParentIndicator,
+      convertChild,
 
       // useProgramBudget
       budgetList,

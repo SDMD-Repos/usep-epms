@@ -13,7 +13,7 @@ class AddPublishDateToOpcrTemplateTable extends Migration
      */
     public function up()
     {
-        Schema::table('opcr_template', function (Blueprint $table) {
+        Schema::table('opcr_templates', function (Blueprint $table) {
             //
             $table->dateTime('published_date')->nullable()->after('is_active');
         });
@@ -26,7 +26,7 @@ class AddPublishDateToOpcrTemplateTable extends Migration
      */
     public function down()
     {
-        Schema::table('opcr_template', function (Blueprint $table) {
+        Schema::table('opcr_templates', function (Blueprint $table) {
             //
         });
     }

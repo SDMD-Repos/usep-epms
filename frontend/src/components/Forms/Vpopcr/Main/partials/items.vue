@@ -1,14 +1,18 @@
 <template>
   <div>
-    <indicator-table :year="year" :form-id="formId" :function-id="functionId" :form-table-columns="modifiedTableColumns"
-                     :item-source="dataSource" :allow-edit="allowEdit" :view-only="isPublished"
-                     @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"
-                     @handle-link-parent="linkIndicator" />
+    <indicator-table
+      :year="year" :form-id="formId" :function-id="functionId" :form-table-columns="modifiedTableColumns"
+      :item-source="dataSource" :allow-edit="allowEdit" :view-only="isPublished"
+      @open-drawer="openDrawer" @edit-item="editItem" @delete-item="deleteItem" @add-sub-item="handleAddSub"
+      @handle-link-parent="linkIndicator" @convert-child-to-parent="convertChildToParent"
+    />
 
-    <opcr-vp-form :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :rules="rules" :current-year="year"
-                  :targets-basis-list="targetsBasisList"
-                  @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
-                  @close-drawer="closeDrawer" />
+    <opcr-vp-form
+      :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :rules="rules" :current-year="year"
+      :targets-basis-list="targetsBasisList"
+      @toggle-is-header="resetFormAsHeader" @add-table-item="addTableItem" @update-table-item="updateTableItem"
+      @close-drawer="closeDrawer"
+    />
   </div>
 </template>
 <script>
@@ -36,7 +40,7 @@ export default defineComponent({
     isPublished: { type: Boolean, default: false },
   },
   emits: ['add-targets-basis-item', 'update-data-source', 'update-source-item', 'delete-source-item', 'add-deleted-item',
-    'link-parent-indicator'],
+    'link-parent-indicator', 'convert-child'],
   setup(props, { emit }) {
     // DATA
     const modifiedTableColumns = ref()
@@ -159,6 +163,7 @@ export default defineComponent({
         if (typeof source[index].children === 'undefined') {
           source[index]['children'] = new Proxy([], {})
         }
+        newData.parentId = parentDetails.id
         target['children'].push(newData)
         await emit('update-data-source', { data: source, isNew: false })
         await params.resetFields
@@ -289,10 +294,15 @@ export default defineComponent({
       emit('link-parent-indicator', data)
     }
 
+    const convertChildToParent = async data => {
+      await emit('convert-child', {...data})
+      await deleteItem(data)
+    }
+
     return {
       modifiedTableColumns,
 
-      closeDrawer, addTableItem, handleAddSub, editItem, updateTableItem, deleteItem, linkIndicator,
+      closeDrawer, addTableItem, handleAddSub, editItem, updateTableItem, deleteItem, linkIndicator, convertChildToParent,
 
       // useDrawerSettings
       drawerConfig, openDrawer,

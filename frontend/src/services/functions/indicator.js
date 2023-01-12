@@ -437,12 +437,19 @@ export const useFormOperations = props => {
     await _message.success("Indicator " + action + " successfully!", 2)
   }
 
+  const convertChild = async data => {
+    const parentIndex = dataSource.value.findIndex(item => data.parentId === item.key)
+    data.type = 'pi'
+    delete data.parentId
+    dataSource.value.splice(parentIndex+1, 0, data)
+  }
+
   return {
     dataSource, targetsBasisList, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear,
 
     years,
 
     updateDataSource, addTargetsBasisItem, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
-    updateSourceItemVP, resetFormFields, linkParentIndicator,
+    updateSourceItemVP, resetFormFields, linkParentIndicator, convertChild,
   }
 }

@@ -14,7 +14,7 @@ class OpcrTemplate extends Migration
     public function up()
     {
         //
-        Schema::create('opcr_template', function (Blueprint $table) {
+        Schema::create('opcr_templates', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
             $table->year('year');
             $table->dateTime('finalized_date')->nullable();
@@ -36,6 +36,6 @@ class OpcrTemplate extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('opcr_template');
+        Schema::dropIfExists('opcr_templates');
     }
 }

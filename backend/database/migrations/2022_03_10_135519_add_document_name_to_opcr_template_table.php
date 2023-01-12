@@ -13,7 +13,7 @@ class AddDocumentNameToOpcrTemplateTable extends Migration
      */
     public function up()
     {
-        Schema::table('opcr_template', function (Blueprint $table) {
+        Schema::table('opcr_templates', function (Blueprint $table) {
             //
             $table->string('document_name')->after('year');
         });
@@ -26,7 +26,7 @@ class AddDocumentNameToOpcrTemplateTable extends Migration
      */
     public function down()
     {
-        Schema::table('opcr_template', function (Blueprint $table) {
+        Schema::table('opcr_templates', function (Blueprint $table) {
             //
         });
     }

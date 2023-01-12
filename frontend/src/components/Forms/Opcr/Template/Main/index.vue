@@ -20,10 +20,11 @@
               </template>
 
               <indicator-component v-if="allowEdit"
-                                   :function-id="category.id" :form-id="formId" :item-source="dataSource"
-                                   :categories="categories" :year="year" :counter="counter"
-                                   @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
-                                   @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" />
+                :function-id="category.id" :form-id="formId" :item-source="dataSource"
+                :categories="categories" :year="year" :counter="counter"
+                @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
+                @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" @convert-child="convertChild"
+              />
             </a-collapse-panel>
           </a-collapse>
         </div>
@@ -43,7 +44,7 @@
   <div v-else><error403 /></div>
 </template>
 <script>
-import { defineComponent, ref, computed, onMounted, createVNode } from 'vue'
+import {defineComponent, ref, computed, onMounted, createVNode, onBeforeUnmount} from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
@@ -77,8 +78,14 @@ export default defineComponent({
       // DATA
       dataSource, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
-      updateDataSource, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem,
+      updateDataSource, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem, convertChild,
     } = useFormOperations(props)
+
+    const permission ={
+      listOpcr: [ "form", "f-opcr", "fo-template" ],
+    }
+
+    const { opcrFormPermission } = usePermission(permission)
 
     // COMPUTED
     const categories = computed(() => store.getters['formManager/functions'])
@@ -96,18 +103,10 @@ export default defineComponent({
       return tip
     })
 
-    const permission ={
-      listOpcr: [ "form", "f-opcr", "fo-template" ],
-    }
-    // EVENTS
-    const {
-      // DATA
-      opcrFormPermission,
-      // METHODS
-    } = usePermission(permission)
-
     // EVENTS
     onMounted(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'top' })
+
       store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('opcrtemplate/SET_STATE', { dataSource: [] })
       resetFormFields()
@@ -122,20 +121,26 @@ export default defineComponent({
       }
     })
 
+    onBeforeUnmount(() => {
+      store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: 'left' })
+
+      resetFormFields()
+    });
+
     // METHODS
     const checkFormAvailability = () => {
       resetFormFields()
 
       if(year.value !== cachedYear.value) {
         isCheckingForm.value = true
-        getRequest('/forms/ocpcr/check-saved-template/' + year.value).then(response => {
+        getRequest('/forms/ocpcr/template/check-saved/' + year.value).then(response => {
           if(response) {
             const { hasSaved } = response
             isCheckingForm.value = false
             if(hasSaved) {
               Modal.error({
                 title: () => 'Unable to create an OPCR Template for the year ' + year.value,
-                content: () => 'Please check the OPCR list or select a different year to create a new OPCR Template',
+                content: () => 'Please check the OPCR Template list or select a different year to create a new OPCR Template',
               })
               if (editMode.value) {
                 year.value = cachedYear.value
@@ -174,7 +179,7 @@ export default defineComponent({
       store.commit('opcrtemplate/SET_STATE', {
         loading: true,
       })
-      getRequest("/forms/ocpcr/view-template/" + opcrTemplateId.value).then(response => {
+      getRequest("/forms/ocpcr/template/view/" + opcrTemplateId.value).then(response => {
         if(response) {
           allowEdit.value = true
           store.commit('opcrtemplate/SET_STATE', {
@@ -253,6 +258,7 @@ export default defineComponent({
       isFinalized,
       allowEdit,
       isCheckingForm,
+      opcrFormPermission,
 
       years,
       categories,
@@ -272,7 +278,7 @@ export default defineComponent({
       deleteSourceItem,
       updateSourceItem,
       addDeletedItem,
-      opcrFormPermission,
+      convertChild,
     }
   },
 })

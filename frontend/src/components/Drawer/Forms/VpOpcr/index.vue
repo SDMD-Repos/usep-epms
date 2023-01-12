@@ -73,8 +73,7 @@
 
             <a-select v-model:value="form.measures" mode="multiple" placeholder="Select"
                       style="width: 100%" label-in-value allow-clear
-                      :options="measuresList"
-                      @blur="validate('measures', { trigger: 'blur' }).catch(() => {})" >
+                      :options="measuresList" >
               <template #option="{ label, items }">
                 {{ label }} &nbsp;&nbsp;
                 <a-tooltip placement="right">
