@@ -8,7 +8,7 @@
         :year="year" :function-id="functionId" :form-id="formId" :item-source="dataSource"
         :main-category="mainCategory" :form-table-columns="formTemplateTableColumns" :allow-edit="displayIndicatorList"
         @open-drawer="openDrawer" @add-sub-item="handleAddSub" @edit-item="editItem" @convert-child-to-parent="convertChildToParent"
-        @delete-item="deleteItem"/>
+        @delete-item="deleteItem" @handle-link-parent="linkIndicator" />
 
       <opcr-template-form-drawer
         :drawer-config="drawerConfig" :form-object="formData" :drawer-id="functionId" :categories="categories" :current-year="year"
@@ -41,7 +41,7 @@ export default defineComponent({
     formId: { type: String, default: "" },
     counter: { type: Number, default: 0 },
   },
-  emits: ['update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item', 'update-source-item', 'convert-child'],
+  emits: ['update-counter', 'update-data-source', 'delete-source-item', 'add-deleted-item', 'update-source-item', 'convert-child','link-parent-indicator'],
   setup(props, { emit }) {
     const store = useStore()
 
@@ -226,6 +226,10 @@ export default defineComponent({
       await resetFields()
     }
 
+    const linkIndicator = data => {
+      emit('link-parent-indicator', data)
+    }
+
     return {
       formTemplateTableColumns,
       mainCategory,
@@ -254,6 +258,7 @@ export default defineComponent({
       editItem,
       updateTableItem,
       deleteItem,
+      linkIndicator,
     }
   },
 })

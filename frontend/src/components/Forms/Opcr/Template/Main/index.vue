@@ -24,6 +24,7 @@
                 :categories="categories" :year="year" :counter="counter"
                 @update-data-source="updateDataSource" @delete-source-item="deleteSourceItem"
                 @add-deleted-item="addDeletedItem" @update-source-item="updateSourceItem" @convert-child="convertChild"
+                @link-parent-indicator="linkParentIndicator"
               />
             </a-collapse-panel>
           </a-collapse>
@@ -79,6 +80,7 @@ export default defineComponent({
       dataSource, counter, deletedItems, editMode, isFinalized, allowEdit, year, cachedYear, years,
       // METHODS
       updateDataSource, updateSourceCount, deleteSourceItem, updateSourceItem, addDeletedItem, convertChild,
+      linkParentIndicator,
     } = useFormOperations(props)
 
     const permission ={
@@ -272,6 +274,7 @@ export default defineComponent({
       dataSource,
       counter,
       deletedItems,
+      linkParentIndicator,
 
       updateDataSource,
       updateSourceCount,
