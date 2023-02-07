@@ -381,6 +381,7 @@ class AapcrController extends Controller
                         'implementing' => $subImplementing,
                         'supporting' => $subSupporting,
                         'remarks' => $subPI->other_remarks,
+                        'parentId' => $subPI->parent_id,
                     );
 
                     $subs[] = $subItem;
@@ -409,7 +410,8 @@ class AapcrController extends Controller
                     'implementing' => $implementing,
                     'supporting' => $supporting,
                     'remarks' => $detail->other_remarks,
-                    'linkedToChild' => $detail->linked_to_child
+                    'linkedToChild' => $detail->linked_to_child,
+                    'parent_id' => null,
                 );
 
                 if(count($subs)) {

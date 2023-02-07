@@ -438,8 +438,10 @@ export const useFormOperations = props => {
   }
 
   const convertChild = async data => {
-    const parentIndex = dataSource.value.findIndex(item => data.parentId === item.key)
+    const parentID = data.parentId && (data.parentId.toString().split('_').length > 0) ? data.parentId.toString().split('_')[1] : data.parentId
+    const parentIndex = dataSource.value.findIndex(item => parentID === item.key)
     data.type = 'pi'
+    data.linkedToChild = 0
     delete data.parentId
     dataSource.value.splice(parentIndex+1, 0, data)
   }
