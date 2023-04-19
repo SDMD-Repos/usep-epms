@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class OpcrTemplateDetails extends Model
+class OpcrTemplateDetail extends Model
 {
     //
     use SoftDeletes;
@@ -37,12 +37,22 @@ class OpcrTemplateDetails extends Model
     public function measures()
     {
         return $this->belongsToMany('App\Measure', 'opcr_template_detail_measures', 'detail_id', 'measure_id')
-            ->wherePivotNull('deleted_at')->with('items')->orderBy('id', 'ASC');
+            ->using('App\OpcrTemplateDetailMeasure')
+            ->withPivot('category_id')
+            ->wherePivotNull('deleted_at')->orderBy('id', 'ASC');
+    }
+
+    /**
+     * Get the program of the detail.
+     */
+    public function program()
+    {
+        return $this->belongsTo('App\Program');
     }
 
     public function mainDetails()
     {
-        return $this->hasMany("App\OpcrTemplateDetails", 'parent_id');
+        return $this->hasMany("App\OpcrTemplateDetail", 'parent_id');
     }
 
     public function subDetails()

@@ -660,11 +660,7 @@ dd($e);
                 $officeName = $office->group->name;
             }
 
-            //if($getOffice['office_type_id'] === 'implementing') {
             $allOffices[$office->field->code][] = $officeName;
-            /*}else{
-                array_push($allOffices['supporting'], $officeName);
-            }*/
         }
 
         return $allOffices;

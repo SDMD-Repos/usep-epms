@@ -11,6 +11,8 @@ trait ThirdPartyApiTrait {
         'ALL_PARENT_OFFICES' => 'https://hris.usep.edu.ph/hris/api/epms/department',
         // Get all colleges; params: token
         'ALL_COLLEGES' => 'https://hris.usep.edu.ph/hris/api/epms/college',
+        // Get all subunit by office id; params: token, department_id
+        'OFFICE_SUBUNIT' => 'https://hris.usep.edu.ph/hris/api/epms/structure/subunit',
         // Get all sub departments by parent ID; params: department_id, token
         'OFFICES_BY_PARENT' => 'https://hris.usep.edu.ph/hris/api/epms/structure',
         // Get all employee by office; params: department_id, token

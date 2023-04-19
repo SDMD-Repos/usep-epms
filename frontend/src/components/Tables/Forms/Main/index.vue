@@ -112,7 +112,9 @@
               <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fas fa-link-slash" @click="handleLink(record)" />
             </a-tooltip>
           </template>
-          <template v-if="record.type === 'sub'">
+          <template v-if="record.type === 'sub' &&
+                         (typeof record.isCascaded === 'undefined' || (typeof record.isCascaded !== 'undefined' && !record.isCascaded))"
+          >
             <a-divider type="vertical" />
             <a-tooltip title="Convert child to parent">
               <i :style="{ fontSize: '16px', cursor: 'pointer' }" class="fas fa-circle-arrow-down" @click="handleSubToParent(record)" />

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class OpcrTemplateDetailsMeasures extends Migration
+class OpcrTemplateDetailMeasures extends Migration
 {
     /**
      * Run the migrations.

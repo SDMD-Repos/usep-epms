@@ -34,6 +34,11 @@ class Measure extends Model
             ->using('App\AapcrDetailMeasure');
     }
 
+    public function opcrTemplateDetail() {
+        return $this->belongsToMany('App\OpcrTemplateDetail', 'opcr_template_detail_measures', 'detail_id', 'measure_id')
+            ->using('App\OpcrTemplateDetailMeasure');
+    }
+
     public static function boot() {
         parent::boot();
 

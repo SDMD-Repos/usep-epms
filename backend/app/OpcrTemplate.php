@@ -15,7 +15,7 @@ class OpcrTemplate extends Model
 
     public function details()
     {
-        return $this->hasMany('App\OpcrTemplateDetails');
+        return $this->hasMany('App\OpcrTemplateDetail');
     }
 
     /**

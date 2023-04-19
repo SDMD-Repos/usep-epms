@@ -474,11 +474,11 @@
 				<text><![CDATA[]]></text>
 			</staticText>
 		</band>
-		<band height="13" splitType="Prevent">
+		<band height="13" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<printWhenExpression><![CDATA[!$F{children}.isEmpty()]]></printWhenExpression>
 			<componentElement>
-				<reportElement x="0" y="0" width="898" height="13" uuid="4e136b62-c356-4399-acba-c7f61cc44a8d">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="898" height="13" isPrintWhenDetailOverflows="true" uuid="4e136b62-c356-4399-acba-c7f61cc44a8d">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 2_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 2_CH"/>
@@ -497,8 +497,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="227" height="13" uuid="97aa6996-6d9b-477e-b315-379e98c6cf8f"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="227" height="13" isPrintWhenDetailOverflows="true" uuid="97aa6996-6d9b-477e-b315-379e98c6cf8f"/>
 								<box topPadding="2" leftPadding="10" bottomPadding="2" rightPadding="2"/>
 								<textElement verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -512,8 +512,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="94" height="13" uuid="bbe324ef-4b3e-4c2a-a075-7f3a869c193a"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="94" height="13" isPrintWhenDetailOverflows="true" uuid="bbe324ef-4b3e-4c2a-a075-7f3a869c193a"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -527,8 +527,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="84" height="13" uuid="6556ec12-72b2-4e33-8239-c79d5635c6fa"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="84" height="13" isPrintWhenDetailOverflows="true" uuid="6556ec12-72b2-4e33-8239-c79d5635c6fa"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -542,8 +542,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="49" height="13" uuid="2b24d7f4-cf25-47e4-87ca-858580e78c0b"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="49" height="13" isPrintWhenDetailOverflows="true" uuid="2b24d7f4-cf25-47e4-87ca-858580e78c0b"/>
 								<box padding="2"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -556,8 +556,8 @@
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="100" height="13" uuid="227d63b4-d782-467d-ba81-0257e8e96d7c"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="100" height="13" isPrintWhenDetailOverflows="true" uuid="227d63b4-d782-467d-ba81-0257e8e96d7c"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -571,8 +571,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="97" height="13" uuid="0782817a-17a2-4bbc-94f6-68d25038aeca"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="97" height="13" isPrintWhenDetailOverflows="true" uuid="0782817a-17a2-4bbc-94f6-68d25038aeca"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>
@@ -586,8 +586,8 @@
 						<jr:detailCell style="Table 2_TD" height="13">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="97" height="13" uuid="77d99e5d-0602-427f-a64c-2d5d14dd5144"/>
+							<textField textAdjust="StretchHeight">
+								<reportElement stretchType="ElementGroupHeight" x="0" y="0" width="97" height="13" isPrintWhenDetailOverflows="true" uuid="77d99e5d-0602-427f-a64c-2d5d14dd5144"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="DejaVu Sans" size="6"/>

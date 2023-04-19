@@ -146,14 +146,13 @@ Route::group([
             'prefix' => 'template'
         ], function()  {
             Route::get('/check-saved/{year}', 'Form\TemplateController@opcrCheckSaved');
-            Route::get('/view/{id}', 'Form\TemplateController@opcrView');
-            Route::get('/list', 'Form\TemplateController@getAllOpcr');
-
-
             Route::post('/save', 'Form\TemplateController@saveOpcr');
+            Route::get('/list', 'Form\TemplateController@getAllOpcr');
+            Route::get('/view/{id}', 'Form\TemplateController@viewOpcr');
+            Route::post('/update/{id}', 'Form\TemplateController@updateOpcr');
+
             Route::post('/publish', 'Form\TemplateController@publishOpcr');
             Route::post('/deactivate', 'Form\TemplateController@deactivateOpcr');
-            Route::post('/update/{id}', 'Form\TemplateController@updateOpcr');
             Route::post('/unpublish', 'Form\TemplateController@unpublishOpcr');
         });
     });
@@ -191,7 +190,7 @@ Route::group([
 ], function() {
     Route::post('/get-main-offices-children', 'SettingController@getMainOfficesWithChildren');
     Route::get('/get-main-offices-only/{officesOnly}', 'SettingController@getMainOfficesOnly');
-    Route::get('/get-personnel-by-office/{id}/{permanentOnly}', 'SettingController@getPersonnelByOffice');
+    Route::get('/get-personnel-by-office/{id}/{permanentOnly}/{isSubunit}', 'SettingController@getPersonnelByOffice');
     Route::get('/get-all-positions', 'SettingController@getAllPositions');
     Route::get('/get-user-offices/{formId}', 'SettingController@getUserOffices');
     Route::post('/get-offices-accountable', 'SettingController@getOfficesAccountable');

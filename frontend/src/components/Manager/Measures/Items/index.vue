@@ -16,7 +16,7 @@
             New Measure
           </a-button>
           <a-button type="link" v-if="previousMeasures.length" @click="changePreviousModal" >Add {{ year - 1}} measures</a-button>
-          <a-button class="pull-right" v-if="measuresList.length" @click="viewMeasuresPdf" >View PDF</a-button>
+          <a-button class="float-right" v-if="measuresList.length" @click="viewMeasuresPdf" >View PDF</a-button>
         </template>
 
         <template #bodyCell="{ column, record }">

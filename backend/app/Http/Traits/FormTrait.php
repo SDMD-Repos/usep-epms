@@ -56,14 +56,22 @@ trait FormTrait {
                 $newOffice->is_group = true;
                 $newOffice->group_id = $office['value'];
             } else {
-                if(!array_key_exists('children', $office)){
-                    $newOffice->vp_office_id = $office['pId'];
+                if(isset($office['is_subunit']) && $office['is_subunit']) {
+                    $newOffice->vp_office_id = $office['vp_id'];
+                    $newOffice->office_id = $office['pId'];
+                    $newOffice->subunit_id = str_replace("SUB", "", $office['value']);
                     $office_name = $office['acronym'];
-                }else{
-                    $office_name = $office['title'];
+                }else {
+                    if(!array_key_exists('children', $office)){
+                        $newOffice->vp_office_id = $office['pId'];
+                        $office_name = $office['acronym'];
+                    }else {
+                        $office_name = $office['title'];
+                    }
+
+                    $newOffice->office_id = $office['value'];
                 }
 
-                $newOffice->office_id = $office['value'];
                 $newOffice->office_name = $office_name;
             }
 
@@ -172,10 +180,16 @@ trait FormTrait {
                 'detail_id' => $detailId,
                 'office_type_id' => $type
             ])->where(function ($query) use ($office) {
+                $value = $office['value'];
+
+                if(isset($office['is_subunit']) && $office['is_subunit']) {
+                    $value = str_replace("SUB", "", $office['value']);
+                }
+
                 if (isset($office['isGroup']) && $office['isGroup']) {
-                    $query->where('group_id', $office['value']);
+                    $query->where('group_id', $value);
                 } else {
-                    $query->where('office_id', $office['value']);
+                    $query->where('office_id', $value);
                 }
             })->first();
 
@@ -202,15 +216,23 @@ trait FormTrait {
                     $newOffice->is_group = true;
                     $newOffice->group_id = $office['value'];
                 } else {
-                    if(!array_key_exists('children', $office)){
-                        $newOffice->vp_office_id = $office['pId'];
-
+                    if(isset($office['is_subunit']) && $office['is_subunit']) {
+                        $newOffice->vp_office_id = $office['vp_id'];
+                        $newOffice->office_id = $office['pId'];
+                        $newOffice->subunit_id = str_replace("SUB", "", $office['value']);
                         $office_name = $office['acronym'];
-                    }else{
-                        $office_name = $office['title'];
+                    }else {
+                        if(!array_key_exists('children', $office)){
+                            $newOffice->vp_office_id = $office['pId'];
+
+                            $office_name = $office['acronym'];
+                        }else{
+                            $office_name = $office['title'];
+                        }
+
+                        $newOffice->office_id = $office['value'];
                     }
 
-                    $newOffice->office_id = $office['value'];
                     $newOffice->office_name = $office_name;
                 }
 

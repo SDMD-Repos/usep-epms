@@ -23,7 +23,7 @@
                 :tree-data="officeList" placeholder="Select office"
                 tree-node-filter-prop="title"
                 show-search allow-clear label-in-value
-                @change="getPersonnelList($event, index)"
+                @change="(value, label, extra) => { getPersonnelList(value, label, extra, index) }"
               />
               <a-input v-else
                        v-model:value="data.officeId"
@@ -172,19 +172,24 @@ export default defineComponent({
     // METHODS
     const handleCustomChange = index => {
       form.value.signatories[index].officeId = undefined
+      form.value.signatories[index].isSubunit = 0
       form.value.signatories[index].personnelId = undefined
       form.value.signatories[index].position = undefined
     }
 
-    const getPersonnelList = (officeId, index) => {
+    const getPersonnelList = (officeId, label, extra, index) => {
       form.value.signatories[index].personnelId = undefined
       form.value.signatories[index].position = undefined
-      // listMembers.value[index] = []
 
       if (officeId && !form.value.isCustom) {
         formLoading.value = true
+
         const id = officeId.value
-        getPersonnelByOffice(id, 1).then(response => {
+        const isSubunit = extra.triggerNode.props.is_subunit ?? 0
+
+        form.value.signatories[index].isSubunit = isSubunit
+
+        getPersonnelByOffice(id, 1, isSubunit).then(response => {
           if (response) {
             const { personnel } = response
             form.value.signatories[index].memberList = personnel
@@ -199,10 +204,21 @@ export default defineComponent({
       if (typeof extra.triggerNode !== 'undefined') {
         const { position } = extra.triggerNode.props
         const office = form.value.signatories[index].officeId
-        const officePosition = position.filter(i => {
-          return i.DepartmentID === office.value
-        })[0]
-        if (typeof officePosition !== 'undefined') {
+        const isSubunit = form.value.signatories[index].isSubunit
+
+        let officePosition = null
+
+        for(let key in position) {
+          let obj = position[key]
+
+          if(obj.length) {
+            officePosition = obj.find(i => {
+              return i.DepartmentID === office.value || (isSubunit && i.SubunitID === office.value)
+            })
+          }
+        }
+
+        if (officePosition && typeof officePosition !== 'undefined') {
           form.value.signatories[index].position = officePosition.PositionName
           signatoryRef.value.validate()
         }

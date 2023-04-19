@@ -235,6 +235,7 @@ export default defineComponent({
         formState.signatories.push({
           id: 'new',
           officeId: undefined,
+          isSubunit: 0,
           personnelId: undefined,
           memberList: [],
           position: undefined,

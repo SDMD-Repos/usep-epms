@@ -186,6 +186,27 @@ trait OfficeTrait {
                     $data->pId = $vp_id;
                     $data->cascadeTo = null;
 
+                    if(isset($o->has_subunit) && $o->has_subunit) {
+                        $data->children = [];
+
+                        $subunits = $this->HRIS_CALL('OFFICE_SUBUNIT', ['department_id' => $o->id ]);
+
+                        foreach($subunits as $subunit) {
+                            $sub = new \stdClass();
+
+                            $sub->id = $subunit->id;
+                            $sub->value = $subunit->subID;
+                            $sub->title = $subunit->Name;
+                            $sub->acronym = $subunit->Acronym;
+                            $sub->vp_id = $vp_id;
+                            $sub->pId = $o->id;
+                            $sub->cascadeTo = null;
+                            $sub->is_subunit = 1;
+
+                            $data->children[] = $sub;
+                        }
+                    }
+
                     $values[] = $data;
                 }
             }
@@ -202,33 +223,37 @@ trait OfficeTrait {
         }
     }
 
-    public function getPersonnelByOffice($id, $permanentOnly=0, $withHeader=0, $returnJson=1)
+    public function getPersonnelByOffice($id, $permanentOnly=0, $isSubunit=0, $withHeader=0, $returnJson=1)
     {
         try {
             $personnel = array();
 
-            $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id ]);
+            $isSubunit = (int)$isSubunit;
 
-            if($permanentOnly) {
-                $lists = array_filter($lists, function($x) {
-                    return $x->isPermanent === true;
-                });
-            }
+            if($isSubunit) $id =  str_replace("SUB", "", $id);
 
-            $obj = new \stdClass();
-
-            if($withHeader) {
-                $obj->id = "all";
-                $obj->value = "all";
-                $obj->title = "All Personnel";
-                $obj->isPersonnel = 1;
-                $obj->isPermanent = false;
-                $obj->children = [];
-
-                $personnel[] = $obj;
-            }
+            $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id, 'isSubunit' => $isSubunit ]);
 
             if(count($lists)){
+                if($permanentOnly) {
+                    $lists = array_filter($lists, function($x) {
+                        return $x->isPermanent === true;
+                    });
+                }
+
+                $obj = new \stdClass();
+
+                if($withHeader) {
+                    $obj->id = "all";
+                    $obj->value = "all";
+                    $obj->title = "All Personnel";
+                    $obj->isPersonnel = 1;
+                    $obj->isPermanent = false;
+                    $obj->children = [];
+
+                    $personnel[] = $obj;
+                }
+
                 foreach ($lists as $list){
                     $lastName = mb_strtolower($list->LastName);
                     $firstName = mb_strtolower($list->FirstName);
@@ -240,10 +265,12 @@ trait OfficeTrait {
 
                     $obj = new \stdClass();
 
+                    $positions = ['main'=> $list->Position, 'designation' => $list->Designation];
+
                     $obj->id = $list->PmapsID;
                     $obj->value = $list->PmapsID;
                     $obj->title = ucwords($fullName);
-                    $obj->position = $list->Position;
+                    $obj->position = $positions;
                     $obj->isPermanent = $list->isPermanent;
                     $obj->isPersonnel = 1;
 
@@ -304,6 +331,7 @@ trait OfficeTrait {
 
     public function processVpOffices($list, $origin)
     {
+
         $offices = array();
 
         $officeList = $list->offices;
@@ -313,8 +341,13 @@ trait OfficeTrait {
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
 
-            $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
             $officeName = $datum->office_name;
+
+            if($datum->subunit_id) {
+                $officeId = "SUB".$datum->subunit_id;
+            }else {
+                $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
+            }
 
             if ($datum->is_group) {
                 $officeId = $datum->group->id;
@@ -336,7 +369,7 @@ trait OfficeTrait {
                     break;
             }
 
-            if(!$datum->vp_office_id && !$datum->is_group) {
+            if(!$datum->vp_office_id && !$datum->is_group ) {
                 $children = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $officeId]);
 
                 foreach ($children as $child) {
@@ -347,6 +380,7 @@ trait OfficeTrait {
                         'pId' => $officeId,
                         'acronym' => $child->Acronym,
                     );
+
                     $counter++;
                 }
             }else {
@@ -355,6 +389,12 @@ trait OfficeTrait {
                     'value' => $officeId,
                     'cascadeTo' => $cascadeTo,
                 );
+
+                if($datum->subunit_id) {
+                    $offices[$officeType][$counter]['pId'] = (int)$datum->office_id;
+                    $offices[$officeType][$counter]['vp_id'] = (int)$datum->vp_office_id;
+                    $offices[$officeType][$counter]['is_subunit'] = 1;
+                }
             }
 
             if ($datum->is_group) {

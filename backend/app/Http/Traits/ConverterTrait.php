@@ -115,12 +115,17 @@ trait ConverterTrait {
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
 
-            if(isset($datum->personnel_id) && $datum->personnel_id !== NULL) {
+            if(isset($datum->personnel_id) && $datum->personnel_id) {
                 $officeId = (int)$datum->personnel_id !== 0 ? (int)$datum->personnel_id : $datum->personnel_id;
                 $officeName = $datum->personnel_name;
             }else{
-                $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
                 $officeName = $datum->office_name;
+
+                if($datum->subunit_id) {
+                    $officeId = "SUB".$datum->subunit_id;
+                }else {
+                    $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
+                }
             }
 
             if ($datum->is_group) {
@@ -175,7 +180,13 @@ trait ConverterTrait {
             }*/
 
             if($datum->vp_office_id){
-                $offices[$officeType][$counter]['pId'] = $datum->vp_office_id;
+                if($datum->subunit_id) {
+                    $offices[$officeType][$counter]['pId'] = (int)$datum->office_id;
+                    $offices[$officeType][$counter]['vp_id'] = (int)$datum->vp_office_id;
+                    $offices[$officeType][$counter]['is_subunit'] = 1;
+                }else {
+                    $offices[$officeType][$counter]['pId'] = $datum->vp_office_id;
+                }
 
                 $offices[$officeType][$counter]['acronym'] = $datum->office_name; # used for view only PIs
             }else{

@@ -31,11 +31,11 @@
         </div>
 
         <div class="mt-4" v-if="allowEdit">
-          <a-row type="flex" justify="center" align="middle">
-            <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
+          <a-row type="flex" justify="center" align="middle" :gutter="15">
+            <a-col >
               <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
             </a-col>
-            <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
+            <a-col v-if="!isFinalized">
               <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
             </a-col>
           </a-row>
@@ -45,16 +45,16 @@
   <div v-else><error403 /></div>
 </template>
 <script>
-import {defineComponent, ref, computed, onMounted, createVNode, onBeforeUnmount} from 'vue'
+import { defineComponent, ref, onMounted, createVNode, onBeforeUnmount, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useFormOperations } from '@/services/functions/indicator'
 import { getRequest } from '@/services/api/mainForms/ocpcr'
-import IndicatorComponent from './partials/items'
 import { usePermission } from '@/services/functions/permission'
 import Error403 from '@/components/Errors/403'
+import IndicatorComponent from './partials/items'
 
 export default defineComponent({
   name: "OpcrTemplateForm",

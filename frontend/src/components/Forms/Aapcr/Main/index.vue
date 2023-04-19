@@ -30,11 +30,11 @@
       </div>
 
       <div class="mt-4" v-if="allowEdit">
-        <a-row type="flex" justify="center" align="middle">
-          <a-col :sm="{ span: 3 }" :md="{ span: 3 }" :lg="{ span: 2 }" >
+        <a-row type="flex" justify="center" align="middle" :gutter="15">
+          <a-col >
             <a-button ghost @click="validateForm(0)">{{ !editMode ? 'Save as draft' : 'Update' }}</a-button>
           </a-col>
-          <a-col :sm="{ span: 4, offset: 1 }" :md="{ span: 4, offset: 1 }" :lg="{ span: 4, offset: 1 }" v-if="!isFinalized">
+          <a-col v-if="!isFinalized">
             <a-button type="primary" @click="validateForm(1)">Finalize</a-button>
           </a-col>
         </a-row>

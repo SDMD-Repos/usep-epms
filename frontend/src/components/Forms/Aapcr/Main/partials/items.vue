@@ -24,12 +24,14 @@
 <script>
 import { defineComponent, ref, watch, reactive, createVNode, computed } from "vue"
 import { useStore } from 'vuex'
+import { cloneDeep } from "lodash";
 import { Form, Modal } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { formTableColumns } from "@/services/columns"
 import { useDrawerSettings, useDefaultFormData } from '@/services/functions/indicator'
 import IndicatorTable from '@/components/Tables/Forms/Main'
 import AapcrFormDrawer from '@/components/Drawer/Forms/Aapcr'
+
 
 const useForm = Form.useForm
 
@@ -172,7 +174,7 @@ export default defineComponent({
     const editItem = data => {
       let editData = null, updateId = null, parentDetails = undefined
       if (data.type === 'pi') {
-        editData = dataSource.value.filter(item => item.key === data.key)[0]
+        editData = cloneDeep(dataSource.value.filter(item => item.key === data.key)[0])
         updateId = dataSource.value.findIndex(record => record.key === data.key)
       } else {
         let shouldBreak = false
@@ -184,7 +186,7 @@ export default defineComponent({
               return
             }
             if (temp.length) {
-              editData = temp[0]
+              editData = cloneDeep(temp[0])
               shouldBreak = true
               updateId = item.children.findIndex(i => i.key === data.key)
               parentDetails = { ...item }

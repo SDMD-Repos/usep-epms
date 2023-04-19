@@ -10,8 +10,8 @@ use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Opcr;
 use App\OpcrTemplate;
-use App\OpcrTemplateDetails;
-use App\OpcrTemplateDetailsMeasures;
+use App\OpcrTemplateDetail;
+use App\OpcrTemplateDetailMeasure;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -180,7 +180,7 @@ class OpcrTemplateController extends Controller
     public function saveOpcrTemplateDetails($opcrTemplateId, $values)
     {
 
-        $detail = new OpcrTemplateDetails();
+        $detail = new OpcrTemplateDetail();
 
         $detail->opcr_template_id = $opcrTemplateId;
         $detail->category_id = $values['category'];
@@ -276,7 +276,7 @@ class OpcrTemplateController extends Controller
 
             if($opcrTemplate->save()) {
                 foreach($deletedIds as $deletedId){
-                    $deleteOpcrTemplate = OpcrTemplateDetails::find($deletedId);
+                    $deleteOpcrTemplate = OpcrTemplateDetail::find($deletedId);
 
                     $deleteOpcrTemplate->modify_id = $this->login_user->pmaps_id;
                     $deleteOpcrTemplate->history = $deleteOpcrTemplate->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
@@ -316,7 +316,7 @@ class OpcrTemplateController extends Controller
     {
         if (strpos((string)$data['id'], 'new') === false) {
 
-            $detail = OpcrTemplateDetails::find($data['id']);
+            $detail = OpcrTemplateDetail::find($data['id']);
 
             if($detail) {
                 $original = $detail->getOriginal();
@@ -364,7 +364,7 @@ class OpcrTemplateController extends Controller
                     DB::rollBack();
                 }
 
-                $this->updateMeasures(new OpcrTemplateDetailsMeasures, $data['id'], $data['measures']);
+                $this->updateMeasures(new OpcrTemplateDetailMeasure, $data['id'], $data['measures']);
 
                 if(isset($data['children']) && count($data['children'])) {
 

@@ -1228,7 +1228,7 @@ class SettingController extends Controller
             }
 
             foreach($signatories as $i => $signatory) {
-                $offices = $this->getPersonnelByOffice($signatory->office_id, 1, 0, 0);
+                $offices = $this->getPersonnelByOffice($signatory->office_id, 1, $signatory->is_subunit, 0, 0);
 
                 $signatories[$i]['memberList'] = $offices;
             }
@@ -1266,18 +1266,18 @@ class SettingController extends Controller
 
             foreach($signatories as $signatory) {
 
+                $isSubunit = $signatory['isSubuit'] ?? 0;
+
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
                     $officeId = $signatory['officeId']['value'];
-                } else {
-                    $officeId = null;
-                    $officeName = $signatory['officeId'];
-                }
 
-                if(!$signatory['isCustom']) {
                     $personnelName = $signatory['personnelId']['label'];
                     $personnelId = $signatory['personnelId']['value'];
                 } else {
+                    $officeId = null;
+                    $officeName = $signatory['officeId'];
+
                     $personnelId = null;
                     $personnelName = $signatory['personnelId'];
                 }
@@ -1290,6 +1290,7 @@ class SettingController extends Controller
                 $newSignatory->personnel_id = $personnelId;
                 $newSignatory->personnel_name = $personnelName;
                 $newSignatory->office_id = $officeId;
+                $newSignatory->is_subunit = $isSubunit;
                 $newSignatory->office_name = $officeName;
                 $newSignatory->position = $signatory['position'];
                 $newSignatory->office_form_id = $officeFormId; // selected office for the signatories added
@@ -1337,18 +1338,18 @@ class SettingController extends Controller
             foreach($signatories as $signatory) {
                 $check = Signatory::find($signatory['id']);
 
+                $isSubunit = $signatory['isSubuit'] ?? 0;
+
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
                     $officeId = $signatory['officeId']['value'];
-                } else {
-                    $officeId = null;
-                    $officeName = $signatory['officeId'];
-                }
 
-                if(!$signatory['isCustom']) {
                     $personnelName = $signatory['personnelId']['label'];
                     $personnelId = $signatory['personnelId']['value'];
                 } else {
+                    $officeId = null;
+                    $officeName = $signatory['officeId'];
+
                     $personnelId = null;
                     $personnelName = $signatory['personnelId'];
                 }
@@ -1391,6 +1392,7 @@ class SettingController extends Controller
                     $newSignatory->personnel_id = $personnelId;
                     $newSignatory->personnel_name = $personnelName;
                     $newSignatory->office_id = $officeId;
+                    $newSignatory->is_subunit = $isSubunit;
                     $newSignatory->office_name = $officeName;
                     $newSignatory->position = $signatory['position'];
                     $newSignatory->create_id = $this->login_user->pmaps_id;

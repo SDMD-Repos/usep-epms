@@ -28,6 +28,7 @@ export const useFormFields = form => {
   }
 
   const onOfficeChange = (value, label, extra, field) => {
+    console.log(extra)
     storedOffices.value[field] = []
     const { allCheckedNodes } = extra
     if (typeof allCheckedNodes !== 'undefined' && allCheckedNodes.length > 0) {
@@ -205,6 +206,12 @@ export const useFormFields = form => {
         }
         container.pId = item.pId
       }
+
+      if (typeof item.is_subunit !== 'undefined' && item.is_subunit) {
+        container.vp_id = item.vp_id
+        container.is_subunit = item.is_subunit
+      }
+
       const hasCached = cachedOffice.value[field].filter(i => {
         return i.value === item.value || i.value === item.value.toString()
       })
