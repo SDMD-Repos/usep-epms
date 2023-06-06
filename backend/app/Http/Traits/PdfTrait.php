@@ -252,7 +252,7 @@ trait PdfTrait {
                 } else {
                     $status = 400;
                 }
-dd($e);
+
                 return response()->json($e->getMessage(), $status);
             }
         }
@@ -525,8 +525,11 @@ dd($e);
                 'programPercentage' => $detail->program->percentage
             );
         }
+    }
 
-        return $data;
+    public function viewCascadedVpOpcr()
+    {
+
     }
 
     public function getSignatories($model, $form)
@@ -628,7 +631,7 @@ dd($e);
             $itemNames = [];
             if($PIMeasure->display_as_items) {
                 if($PIMeasure->is_custom) { $items = $PIMeasure->customItems; }
-                else { $items = $PIMeasure->items; }
+                else { $items = $PIMeasure->items;  }
 
                 foreach($items as $item) {
                     $itemNames[] = $item->rating . " - " . $item->description;

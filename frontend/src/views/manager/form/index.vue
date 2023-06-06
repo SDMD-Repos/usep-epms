@@ -8,7 +8,7 @@
               <a-tab-pane tab="Functions" key="1"><functions-form v-if="activeKey === '1'"/></a-tab-pane>
               <a-tab-pane tab="Programs" key="2"><programs-form v-if="activeKey === '2'" /></a-tab-pane>
               <a-tab-pane tab="Sub Categories" key="3"><sub-categories-form v-if="activeKey === '3'"/></a-tab-pane>
-              <a-tab-pane tab="Other Settings" key="4"><other-settings v-if="activeKey === '4'"/></a-tab-pane>
+              <a-tab-pane tab="Cascading Options" key="4"><other-settings v-if="activeKey === '4'"/></a-tab-pane>
             </a-tabs>
           </div>
         </div>

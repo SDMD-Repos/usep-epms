@@ -45,7 +45,7 @@ class PermissionController extends Controller
 
             $user = User::find($personnelId);
 
-            $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+            $response = Http::post(config('services.hris.url') . '/api/epms/employee/pmaps', [
                 "token" => config('services.hris.data'),
                 "pmaps_id" => $personnelId,
             ]);
@@ -130,7 +130,7 @@ class PermissionController extends Controller
 
             $listPermissions = $request->listPermissions;
 
-            $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+            $response = Http::post(config('services.hris.url') . '/api/epms/employee/pmaps', [
                 "token" => config('services.hris.data'),
                 "pmaps_id" => $personnelId,
             ]);

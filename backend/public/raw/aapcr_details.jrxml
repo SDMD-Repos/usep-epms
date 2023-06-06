@@ -238,11 +238,14 @@
 					<text><![CDATA[]]></text>
 				</staticText>
 				<textField>
-					<reportElement style="SubCategoryStyle" x="0" y="1" width="227" height="8" uuid="10bddbfc-0a43-45f1-8a99-5ba6ed4c4431">
+					<reportElement style="SubCategoryStyle" x="1" y="1" width="217" height="8" uuid="10bddbfc-0a43-45f1-8a99-5ba6ed4c4431">
 						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						<property name="com.jaspersoft.studio.unit.width" value="px"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					</reportElement>
-					<box leftPadding="2"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+					</box>
 					<textElement verticalAlignment="Middle">
 						<font fontName="DejaVu Sans" size="6"/>
 					</textElement>

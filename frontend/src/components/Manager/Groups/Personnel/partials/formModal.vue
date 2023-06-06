@@ -25,7 +25,7 @@
               <span class="required-indicator">Officer-in-Charge</span>
             </template>
             <a-tree-select
-              v-model:value="form.chairOffice"
+              v-model:value="form.chair.office"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="officeList"
@@ -34,11 +34,11 @@
               show-search
               label-in-value
               :disabled="actionType === 'view'"
-              @change="getPersonnelList($event, 'oic')"
+              @change="(value, label, extra) => { getPersonnelList(value, label, extra, 'oic') }"
             />
             <div class="mt-2">
               <a-tree-select
-                v-model:value="form.chairId"
+                v-model:value="form.chair.id"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                 :tree-data="oicList"
                 placeholder="Select Personnel"
@@ -90,7 +90,7 @@
             allow-clear
             label-in-value
             :disabled="actionType === 'view'"
-            @change="getPersonnelList($event, 'member')"
+            @change="(value, label, extra) => { getPersonnelList(value, label, extra, 'member') }"
           />
           <a-input-group compact class="mt-2">
             <a-tree-select
@@ -134,7 +134,7 @@ import { UserAddOutlined } from '@ant-design/icons-vue'
 import { getPersonnelByOffice } from '@/services/api/hris'
 
 export default defineComponent({
-  name: 'FormModal',
+  name: 'FormModalPersonnel',
   components: {
     UserAddOutlined,
   },
@@ -159,8 +159,11 @@ export default defineComponent({
           id: null,
           name: '',
           hasChair: false,
-          chairOffice: undefined,
-          chairId: undefined,
+          chair: {
+            id: undefined,
+            office: undefined,
+            isSubunit: 0,
+          },
           effectivity: new Date().getFullYear(),
           supervising: undefined,
           members: [],
@@ -218,6 +221,7 @@ export default defineComponent({
 
     const memberIntial = () => ({
       officeId: undefined,
+      isSubunit: 0,
       id: undefined,
     })
 
@@ -245,6 +249,7 @@ export default defineComponent({
             _message.error('The member\'s list should not be empty')
           } else {
             Object.assign(member, memberIntial())
+            memberList.value = []
             emit('submit-form')
           }
         })
@@ -257,20 +262,26 @@ export default defineComponent({
       emit('close-modal')
     }
 
-    const getPersonnelList = async (data, field) => {
+    const getPersonnelList = async (fieldObj, label, extra, field) => {
+      const isSubunit = extra.triggerNode.props.is_subunit ?? 0
+
       if (field === 'oic') {
         oicList.value = []
         if(typeof form.value !== 'undefined') {
-          form.value.chairId = undefined
+          form.value.chair.id = undefined
+          form.value.chair.isSubunit = isSubunit
         }
       } else {
         memberList.value = []
         member.id = undefined
+        member.isSubunit = isSubunit
       }
-      if (typeof data !== 'undefined') {
-        const id = data.value
+
+      if (typeof fieldObj !== 'undefined') {
+        const id = fieldObj.value
+
         formLoading.value = true
-        await getPersonnelByOffice(id, 1).then(response => {
+        await getPersonnelByOffice(id, 1, isSubunit).then(response => {
           if (response) {
             const { personnel } = response
             formLoading.value = false
@@ -290,8 +301,8 @@ export default defineComponent({
       const ifExists = form.value.members.some(function(field) {
         return field.id.value === details.id.value
       })
-      if (form.value.chairId !== null && typeof form.value.chairId !== 'undefined') {
-        isChair = form.value.chairId.value === details.id.value
+      if (form.value.chair.id !== null && typeof form.value.chair.id !== 'undefined') {
+        isChair = form.value.chair.id.value === details.id.value
       }
       if (!ifExists && !isChair) {
         details.status = 'new'

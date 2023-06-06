@@ -212,9 +212,16 @@ export default defineComponent({
           let obj = position[key]
 
           if(obj.length) {
+            let officeValue = office.value
+
+            if(isSubunit) {
+              officeValue = office.value.replace("SUB", '')
+            }
+
             officePosition = obj.find(i => {
-              return i.DepartmentID === office.value || (isSubunit && i.SubunitID === office.value)
+              return i.DepartmentID === office.value || (isSubunit && i.SubunitID === parseInt(officeValue))
             })
+
           }
         }
 
@@ -248,6 +255,7 @@ export default defineComponent({
               formId: propsDetails.formId,
               year: propsDetails.year,
               signatories: toRaw(form.value.signatories),
+              officeId: 0,
             })
             switch (propsDetails.formId){
               case 'vpopcr':

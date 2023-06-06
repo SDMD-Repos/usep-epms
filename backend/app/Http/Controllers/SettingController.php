@@ -204,7 +204,8 @@ class SettingController extends Controller
     public function getSubCategories($year, $isNested=0)
     {
         try {
-            $subCategories = SubCategory::with('category')->where('year', $year)->get();
+            $subCategories = SubCategory::with('category')->where('year', $year)
+                ->orderBy('category_id', 'ASC')->orderBy('ordering', 'ASC')->get();
 
             $isNested = filter_var($isNested, FILTER_VALIDATE_BOOLEAN);
 
@@ -1213,7 +1214,8 @@ class SettingController extends Controller
     public function getYearSignatories($year, $formId, $officeId)
     {
         try {
-            if($officeId === 'undefined') {
+
+            if(!$officeId) {
                 $signatories = Signatory::select("*", "id as key")->where([
                     ['form_id', $formId],
                     ['year', $year]
@@ -1227,8 +1229,14 @@ class SettingController extends Controller
                 $signatories = Signatory::select("*", "id as key")->where($condition)->get();
             }
 
+//            dd($signatories);
+
             foreach($signatories as $i => $signatory) {
                 $offices = $this->getPersonnelByOffice($signatory->office_id, 1, $signatory->is_subunit, 0, 0);
+
+                if($signatory['is_subunit']) {
+                    $signatories[$i]['office_id'] = "SUB".$signatory['office_id'];
+                }
 
                 $signatories[$i]['memberList'] = $offices;
             }
@@ -1266,11 +1274,15 @@ class SettingController extends Controller
 
             foreach($signatories as $signatory) {
 
-                $isSubunit = $signatory['isSubuit'] ?? 0;
+                $isSubunit = $signatory['isSubunit'] ?? 0;
 
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
                     $officeId = $signatory['officeId']['value'];
+
+                    if($isSubunit) {
+                        $officeId = str_replace("SUB", "", $officeId);
+                    }
 
                     $personnelName = $signatory['personnelId']['label'];
                     $personnelId = $signatory['personnelId']['value'];
@@ -1338,11 +1350,15 @@ class SettingController extends Controller
             foreach($signatories as $signatory) {
                 $check = Signatory::find($signatory['id']);
 
-                $isSubunit = $signatory['isSubuit'] ?? 0;
+                $isSubunit = $signatory['isSubunit'] ?? 0;
 
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
                     $officeId = $signatory['officeId']['value'];
+
+                    if($isSubunit) {
+                        $officeId = str_replace("SUB", "", $officeId);
+                    }
 
                     $personnelName = $signatory['personnelId']['label'];
                     $personnelId = $signatory['personnelId']['value'];
@@ -1497,11 +1513,16 @@ class SettingController extends Controller
             $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']){
-                $chairId = $validated['chairId'];
-                $chairOffice = $validated['chairOffice'];
+                $chairId = $validated['chair']['id'];
+                $chairOffice = $validated['chair']['office'];
+                $isSubunit = $validated['chair']['isSubunit'] ?? 0;
+
+                if($isSubunit)
+                    $chairOffice['value'] = str_replace("SUB", "", $chairOffice['value']);
 
                 $group->oic_id = $chairId['value'];
                 $group->oic_name = trim($chairId['label']);
+                $group->is_subunit = $isSubunit;
                 $group->oic_dept_id = trim($chairOffice['value']);
                 $group->oic_dept_name = trim($chairOffice['label']);
             }
@@ -1538,11 +1559,16 @@ class SettingController extends Controller
 
             $detail = $member['id'];
             $office = $member['officeId'];
+            $isSubunit = $member['isSubunit'] ?? 0;
+
+            if($isSubunit)
+                $office['value'] = str_replace("SUB", "", $office['value']);
 
             $newMember = new GroupMember;
 
             $newMember->member_id = $detail['value'];
             $newMember->member_name = trim($detail['label']);
+            $newMember->is_subunit =  $isSubunit;
             $newMember->office_id = $office['value'];
             $newMember->office_name = $office['label'];
             $newMember->create_id = $this->login_user->pmaps_id;
@@ -1577,12 +1603,17 @@ class SettingController extends Controller
             $group->supervising_name = $supervising['label'];
 
             if($validated['hasChair']) {
-                $chairId = $validated['chairId'];
-                $chairOffice = $validated['chairOffice'];
+                $chairId = $validated['chair']['id'];
+                $chairOffice = $validated['chair']['office'];
+                $isSubunit = $validated['chair']['isSubunit'] ?? 0;
+
+                if($isSubunit)
+                    $chairOffice['value'] = str_replace("SUB", "", $chairOffice['value']);
 
                 $group->oic_id = $chairId['value'];
                 $group->oic_name = trim($chairId['label']);
                 $group->oic_dept_id = trim($chairOffice['value']);
+                $group->is_subunit = $isSubunit;
                 $group->oic_dept_name = trim($chairOffice['label']);
             } else {
                 $group->oic_id = NULL;

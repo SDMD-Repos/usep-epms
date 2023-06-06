@@ -12,12 +12,21 @@ class Measure extends Model
     use SoftDeletes;
 
     /**
-     * Get the items for the measure.
+     * Get the custom items for the measure.
      */
 
     public function customItems()
     {
         return $this->hasMany('App\MeasureItem', 'measure_id', 'id')->whereNull('category_id');
+    }
+
+    /**
+     * Get the items for the measure.
+     */
+
+    public function items()
+    {
+        return $this->hasMany('App\MeasureItem', 'measure_id', 'id')->orderBy('rating', 'asc');
     }
 
     /**

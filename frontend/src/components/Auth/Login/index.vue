@@ -27,7 +27,7 @@
     </div>
     <div class="text-center pt-2 mb-auto">
       <span class="mr-2">Don't have an account?</span>
-      <a href="https://hris.usep.edu.ph/hris/" class="vb__utils__link">
+      <a href="https://hris.usep.edu.ph/hris/" class="vb__utils__link" target="_blank">
         Sign up
       </a>
     </div>

@@ -30,8 +30,9 @@ class UpdateGroup extends FormRequest
             'supervising' => 'required',
             'members' => 'required|array',
             'hasChair' => 'boolean',
-            'chairId' => 'exclude_if:hasChair,false|required',
-            'chairOffice' => 'exclude_if:hasChair,false|required',
+            'chair.id' => 'exclude_if:hasChair,false|required',
+            'chair.office' => 'exclude_if:hasChair,false|required',
+            'chair.isSubunit' => 'exclude_if:hasChair,false|required',
             'deleted' => 'array'
         ];
     }

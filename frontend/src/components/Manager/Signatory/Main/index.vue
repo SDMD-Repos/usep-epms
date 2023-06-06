@@ -177,6 +177,7 @@ export default defineComponent({
       const data = {
         year: year.value,
         formId: formId.value,
+        officeId: 0,
       }
 
       store.commit('formManager/SET_STATE', {
@@ -262,7 +263,7 @@ export default defineComponent({
         let officeIdValue = item.office_id ? item.office_id : item.office_name
         if (item.office_id) {
           officeIdValue = {
-            value: parseInt(item.office_id),
+            value: !item.is_subunit ? parseInt(item.office_id) : item.office_id,
             label: item.office_name,
           }
         }
@@ -280,6 +281,7 @@ export default defineComponent({
           personnelId: personnelIdValue,
           memberList: item.memberList,
           position: item.position,
+          isSubunit: item.is_subunit,
           isCustom: !item.office_id && !item.personnel_id,
         })
       }

@@ -33,5 +33,6 @@ return [
     'hris' => [
         'auth' => env('HRIS_API_TOKEN'),
         'data' => env('DATA_HRIS_API_TOKEN'),
+        'url' => env('HRIS_URL')
     ]
 ];

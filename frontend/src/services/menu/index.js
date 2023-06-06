@@ -1,41 +1,38 @@
 export const getMenuData = [
   // VB:REPLACE-START:MENU-CONFIG
   {
-    category: true,
-    title: 'Dashboards',
-  },
-  {
     title: 'Dashboard',
     key: 'dashboard',
     icon: 'fe fe-home',
     url: '/dashboard',
   },
   {
+    category: true,
     title: 'Manager',
-    key: 'manager',
+  },
+  {
+    title: 'Form',
+    key: 'managerForm',
     icon: 'fe fe-settings',
-    children: [
-      {
-        title: 'Form',
-        key: 'managerForm',
-        url: '/manager/form',
-      },
-      {
-        title: 'Groups',
-        key: 'managerGroups',
-        url: '/manager/groups',
-      },
-      {
-        title: 'Measures',
-        key: 'managerMeasures',
-        url: '/manager/measures',
-      },
-      {
-        title: 'Signatories',
-        key: 'managerSignatories',
-        url: '/manager/signatories',
-      },
-    ],
+    url: '/manager/form',
+  },
+  {
+    title: 'Groups',
+    key: 'managerGroups',
+    icon: 'fe fe-users',
+    url: '/manager/groups',
+  },
+  {
+    title: 'Measures',
+    key: 'managerMeasures',
+    icon: 'fa fa-scale-balanced',
+    url: '/manager/measures',
+  },
+  {
+    title: 'Signatories',
+    key: 'managerSignatories',
+    icon: 'fa fa-signature',
+    url: '/manager/signatories',
   },
   {
     category: true,
@@ -78,7 +75,7 @@ export const getMenuData = [
   {
     title: 'OPCR',
     key: 'opcr',
-    icon: 'fe fe-file',
+    icon: 'fa fa-file-pen',
     children: [
       {
         title: 'Manager',
@@ -142,7 +139,7 @@ export const getMenuData = [
   {
     title: 'IPCR',
     key: 'ipcr',
-    icon: 'fe fe-edit-2',
+    icon: 'fa fa-file-lines',
     children: [
       {
         title: 'Form',

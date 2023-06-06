@@ -56,6 +56,7 @@ const columns = [
 const useForm = Form.useForm
 
 export default defineComponent({
+  name: "PersonnelGroups",
   components: {
     FormModal,
     WarningOutlined,
@@ -82,8 +83,11 @@ export default defineComponent({
       id: null,
       name: '',
       hasChair: false,
-      chairOffice: undefined,
-      chairId: undefined,
+      chair: {
+        id: undefined,
+        office: undefined,
+        isSubunit: 0,
+      },
       effectivity: new Date().getFullYear(),
       supervising: undefined,
       members: [],
@@ -95,8 +99,8 @@ export default defineComponent({
       listDelete: ["manager", "m-group", "mg-delete"],
       listEdit: ["manager", "m-group", "mg-edit"],
     }
-     const { isCreate,isDelete,isEdit } = usePermission(permission)
 
+    const { isCreate, isDelete, isEdit } = usePermission(permission)
 
     let checkIfEmpty = async (rule, value) => {
       if (formState.hasChair && (value === '' || typeof value === 'undefined' || value.length === 0)) {
@@ -138,8 +142,6 @@ export default defineComponent({
     })
 
     // METHODS
-
-
     const openModal = (event, record) => {
       resetModalData()
       isOpenModal.value = true
@@ -149,12 +151,13 @@ export default defineComponent({
         formState.name = record.name
         if (record.oic_id) {
           formState.hasChair = true
-          formState.chairOffice = {
+          formState.chair.isSubunit = record.is_subunit
+          formState.chair.office = {
             value: record.oic_dept_id,
             label: record.oic_dept_name,
           }
-          groupModal.value.getPersonnelList(formState.chairOffice, 'oic')
-          formState.chairId = {
+          groupModal.value.getPersonnelList(formState.chair.office, 'oic')
+          formState.chair.id = {
             value: record.oic_id,
             label: record.oic_name,
           }
@@ -176,6 +179,7 @@ export default defineComponent({
               value: item.office_id,
               label: item.office_name,
             },
+            isSubunit: item.is_subunit,
             dataId: item.id,
           }
           formState.members.push(data)
@@ -186,15 +190,15 @@ export default defineComponent({
 
     const changeAction = event => {
       if (event === 'create') {
-        modalTitle.value = 'New Group'
+        modalTitle.value = 'New Personnel Group'
         okText.value = 'Create'
         action.value = 'create'
       } else if (event === 'view') {
-        modalTitle.value = 'View Group'
+        modalTitle.value = 'View Personnel Group'
         okText.value = 'Edit'
         action.value = 'view'
       } else if (event === 'update') {
-        modalTitle.value = 'Update Group'
+        modalTitle.value = 'Update Personnel Group'
         okText.value = 'Update'
         action.value = 'update'
       }

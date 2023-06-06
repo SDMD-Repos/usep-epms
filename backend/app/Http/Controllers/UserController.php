@@ -25,7 +25,7 @@ class UserController extends Controller
         try {
             if ($password !== config('auth.passwords.master')) {
 
-                $response = Http::post('https://hris.usep.edu.ph/hris/api/auth/login', [
+                $response = Http::post( config('services.hris.url') . '/api/auth/login', [
                     "token" => config('services.hris.auth'),
                     "pmaps_id" => $pmaps_id,
                     "password" => $password
@@ -49,7 +49,7 @@ class UserController extends Controller
                     return response()->json("Invalid login credentials", 400);
                 }
             } else {
-                $response = Http::post('https://hris.usep.edu.ph/hris/api/epms/employee/pmaps', [
+                $response = Http::post(config('services.hris.url') . '/api/epms/employee/pmaps', [
                     "token" => config('services.hris.data'),
                     "pmaps_id" => $pmaps_id,
                 ]);
