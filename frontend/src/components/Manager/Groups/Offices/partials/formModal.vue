@@ -35,50 +35,13 @@
           <template #label>
             <span class="required-indicator">Offices</span>
           </template>
-<!--          <a-tree-select
-            v-model:value="member.officeId"
-            style="width: 100%"
-            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-            :tree-data="officeList"
-            placeholder="Select office"
-            tree-node-filter-prop="title"
-            show-search
-            allow-clear
-            label-in-value
-            :disabled="actionType === 'view'"
-            @change="(value, label, extra) => { getPersonnelList(value, label, extra, 'member') }"
-          />
-          <a-input-group compact class="mt-2">
-            <a-tree-select
-              v-model:value="member.id"
-              style="width: 88%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="memberList"
-              placeholder="Select Personnel"
-              tree-node-filter-prop="title"
-              show-search
-              allow-clear
-              label-in-value
-              :disabled="actionType === 'view'"
-            />
-            <a-button type="primary" class="mr-3" :disabled="!member.id" @click="addMember">
-              <template #icon><UserAddOutlined /></template>
-            </a-button>
-          </a-input-group>
-          <div class="mt-3">
-            <a-list item-layout="horizontal" :data-source="form.members">
-              <template #renderItem="{ item, index }">
-                <a-list-item>
-                  <template #actions v-if="actionType !== 'view'">
-                    <a @click="deleteMember(index)" >
-                      delete
-                    </a>
-                  </template>
-                  {{ item.id.label }}
-                </a-list-item>
-              </template>
-            </a-list>
-          </div>-->
+          <a-tree-select
+            v-model:value="form.offices"
+            style="width: 100%" placeholder="Select office/s" tree-node-filter-prop="title"
+            :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }" :tree-data="officeList"
+            :show-checked-strategy="SHOW_PARENT" :max-tag-count="6"
+            allow-clear tree-checkable label-in-value
+            @change="(value, label, extra) => { onOfficeChange() }" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -86,12 +49,12 @@
 </template>
 
 <script>
-import {ref, defineComponent, watch, computed} from "vue";
-// import { UserAddOutlined } from "@ant-design/icons-vue";
+import { ref, defineComponent, watch, onMounted, computed } from "vue";
+import { TreeSelect } from 'ant-design-vue'
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: 'FormModalOffice',
-  components: { /*UserAddOutlined*/ },
   props: {
     visible: Boolean,
     modalTitle: {
@@ -125,7 +88,14 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const store = useStore()
+
+    // STATIC DATA
+    const SHOW_PARENT = TreeSelect.SHOW_PARENT
+
     // DATA
+    const currentYear = ref(new Date().getFullYear())
+
     let isVisible = ref()
     let form = ref()
     let formLoading = ref(false)
@@ -135,7 +105,7 @@ export default defineComponent({
 
     // COMPUTED
     const years = computed(() => {
-      const now = new Date().getFullYear()
+      const now = currentYear.value
       const max = 10
       const lists = []
       for (let i = now; i <= (now + max); i++) {
@@ -144,13 +114,35 @@ export default defineComponent({
       return lists
     })
 
+    const officeList  = computed(() => store.getters['external/external'].officesAccountable)
+
     // EVENTS
     watch(() => [props.visible, props.formState] , ([visible, formState]) => {
       isVisible.value = visible
       form.value = formState
     })
 
+    onMounted(() => {
+      onLoad()
+    })
+
+    // METHODS
+    const onLoad = () => {
+      let params = {
+        checkable: { allColleges: true, mains: true },
+        groups: { included: true },
+        isAcronym: true,
+        currentYear: currentYear.value,
+      }
+      store.dispatch('external/FETCH_OFFICES_ACCOUNTABLE', { payload: params })
+    }
+
+    const onOfficeChange = () => {
+
+    }
+
     return {
+      SHOW_PARENT,
       isVisible,
       form,
       formLoading,
@@ -158,6 +150,9 @@ export default defineComponent({
       wrapperCol,
 
       years,
+      officeList,
+
+      onOfficeChange,
     }
   },
 })
