@@ -12,12 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
+            AccessRightsSeeder::class,
             CascadingLevelSeeder::class,
+            FormFieldSeeder::class,
             FormSeeder::class,
             OfficeTypesSeeder::class,
+            OtherConfigSeeder::class,
             SignatoryTypeSeeder::class,
-            FormFieldSeeder::class,
-            AccessRightsSeeder::class,
+
+
+
         ]);
     }
 }

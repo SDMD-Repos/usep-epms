@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://usepepms.local:8081'],
+    'allowed_origins' => ['http://usepepms.local:8081', 'http://usepepms.local:8080'],
 
     'allowed_origins_patterns' => [],
 

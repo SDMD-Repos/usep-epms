@@ -6,17 +6,18 @@ use App\Group;
 use App\OtherConfig;
 use Illuminate\Http\Request;
 
-trait OfficeTrait {
+trait OfficeTrait
+{
     use ThirdPartyApiTrait;
 
-    public function getMainOfficesOnly($officesOnly=0, $returnJson=1 )
+    public function getMainOfficesOnly($officesOnly = 0, $returnJson = 1)
     {
         try {
             $values = array();
 
             $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            if(count($vpOffices)) {
+            if (count($vpOffices)) {
                 foreach ($vpOffices as $vpOffice) {
 
                     $data = new \stdClass();
@@ -27,22 +28,23 @@ trait OfficeTrait {
                     $values[] = $data;
                 }
 
-                if($returnJson){
+                if ($returnJson) {
                     return response()->json([
                         'mainOffices' => $values
                     ], 200);
-                }else{
+                } else {
                     return $values;
                 }
             }
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json($e->getMessage(), 400);
         }
     }
 
-    public function getMainOfficesWithChildren($status, $params=array())
+    public function getMainOfficesWithChildren($status, $params = array())
     {
-        $status = count($status) ? $status : request()->all();
+
+        $status = is_array($status) && count($status) ? $status : request()->all();
 
         $collegeVpId = (int)OtherConfig::find('college_vp_id')->value;
 
@@ -50,9 +52,9 @@ trait OfficeTrait {
         $selectable = null;
         $isOfficesOnly = !isset($status['isOfficesOnly']) || (!$status['isOfficesOnly']);
 
-        if(isset($status['checkable'])) {
+        if (isset($status['checkable'])) {
             $checkable = $status['checkable'];
-        } elseif(isset($status['selectable'])) {
+        } elseif (isset($status['selectable'])) {
             $selectable = $status['selectable'];
         }
 
@@ -61,18 +63,18 @@ trait OfficeTrait {
 
             $colleges = new \stdClass();
 
-            if($isOfficesOnly) {
+            if ($isOfficesOnly) {
                 $colleges->id = "allColleges";
                 $colleges->value = "allColleges";
                 $colleges->title = "All Colleges";
                 $colleges->acronym = "All Colleges";
                 $colleges->pId = $collegeVpId;
                 $colleges->cascadeTo = null;
-                $colleges->children = $this->getChildOffices($collegeVpId,1, 1);
+                $colleges->children = $this->getChildOffices($collegeVpId, 1, 1);
 
-                if($checkable) {
+                if ($checkable) {
                     $colleges->checkable = $checkable['allColleges'];
-                } elseif($selectable) {
+                } elseif ($selectable) {
                     $colleges->selectable = $selectable['allColleges'];
                 }
             }
@@ -81,7 +83,8 @@ trait OfficeTrait {
 
             $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            if(count($vpOffices)) {
+            if (is_array($vpOffices) && count($vpOffices)) {
+
                 foreach ($vpOffices as $vpOffice) {
 
                     $data = new \stdClass();
@@ -90,30 +93,30 @@ trait OfficeTrait {
                     $data->value = $vpOffice->id;
                     $data->title = $isAcronym ? $vpOffice->Acronym : $vpOffice->Department;
                     $data->cascadeTo = null;
-                    $data->children = $this->getChildOffices($vpOffice->id,1);
+                    $data->children = $this->getChildOffices($vpOffice->id, 1);
 
-                    if(($vpOffice->id === $collegeVpId) && $isOfficesOnly) {
+                    if (($vpOffice->id === $collegeVpId) && $isOfficesOnly) {
                         $data->children[] = $colleges;
                     }
 
-                    if($checkable) {
+                    if ($checkable) {
                         $data->checkable = $checkable['mains'];
-                    } elseif($selectable) {
+                    } elseif ($selectable) {
                         $data->selectable = $selectable['mains'];
                     }
 
                     $values[] = $data;
                 }
 
-                if(empty($params)){
+                if (empty($params)) {
                     return response()->json([
                         'mainOffices' => $values
                     ], 200);
-                }else{
+                } else {
                     return $values;
                 }
             }
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json($e->getMessage(), 400);
         }
     }
@@ -126,12 +129,12 @@ trait OfficeTrait {
 
         $offices = $this->getMainOfficesWithChildren($nodeStatus, ['origin' => 'form']);
 
-        if($groupStatus && $groupStatus['included']) {
+        if ($groupStatus && $groupStatus['included']) {
             $groups = Group::where('effective_until', '>=', $nodeStatus['currentYear'])->get();
 
             $children = [];
 
-            foreach($groups as $group) {
+            foreach ($groups as $group) {
                 $data = new \stdClass();
 
                 $data->id = $group->id;
@@ -164,19 +167,19 @@ trait OfficeTrait {
         ], 200);
     }
 
-    public function getChildOffices($vp_id, $update=0, $isCollege=0)
+    public function getChildOffices($vp_id, $update = 0, $isCollege = 0)
     {
         try {
-            if($isCollege){
+            if ($isCollege) {
                 $obj = $this->HRIS_CALL('ALL_COLLEGES');
-            }else{
-                $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id ]);
+            } else {
+                $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id]);
             }
 
             $values = array();
 
-            if(count($obj)){
-                foreach($obj as $o) {
+            if (count($obj)) {
+                foreach ($obj as $o) {
                     $data = new \stdClass();
 
                     $data->id = $o->id;
@@ -186,12 +189,12 @@ trait OfficeTrait {
                     $data->pId = $vp_id;
                     $data->cascadeTo = null;
 
-                    if(isset($o->has_subunit) && $o->has_subunit) {
+                    if (isset($o->has_subunit) && $o->has_subunit) {
                         $data->children = [];
 
-                        $subunits = $this->HRIS_CALL('OFFICE_SUBUNIT', ['department_id' => $o->id ]);
+                        $subunits = $this->HRIS_CALL('OFFICE_SUBUNIT', ['department_id' => $o->id]);
 
-                        foreach($subunits as $subunit) {
+                        foreach ($subunits as $subunit) {
                             $sub = new \stdClass();
 
                             $sub->id = $subunit->id;
@@ -211,39 +214,39 @@ trait OfficeTrait {
                 }
             }
 
-            if($update){
+            if ($update) {
                 return $values;
-            }else{
+            } else {
                 return response()->json([
                     'childOffices' => $values
                 ], 200);
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return $e->getMessage();
         }
     }
 
-    public function getPersonnelByOffice($id, $permanentOnly=0, $isSubunit=0, $withHeader=0, $returnJson=1)
+    public function getPersonnelByOffice($id, $permanentOnly = 0, $isSubunit = 0, $withHeader = 0, $returnJson = 1)
     {
         try {
             $personnel = array();
 
             $isSubunit = (int)$isSubunit;
 
-            if($isSubunit) $id =  str_replace("SUB", "", $id);
+            if ($isSubunit) $id =  str_replace("SUB", "", $id);
 
-            $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id, 'isSubunit' => $isSubunit ]);
+            $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id, 'isSubunit' => $isSubunit]);
 
-            if(count($lists)){
-                if($permanentOnly) {
-                    $lists = array_filter($lists, function($x) {
+            if (count($lists)) {
+                if ($permanentOnly) {
+                    $lists = array_filter($lists, function ($x) {
                         return $x->isPermanent === true;
                     });
                 }
 
                 $obj = new \stdClass();
 
-                if($withHeader) {
+                if ($withHeader) {
                     $obj->id = "all";
                     $obj->value = "all";
                     $obj->title = "All Personnel";
@@ -254,18 +257,18 @@ trait OfficeTrait {
                     $personnel[] = $obj;
                 }
 
-                foreach ($lists as $list){
+                foreach ($lists as $list) {
                     $lastName = mb_strtolower($list->LastName);
                     $firstName = mb_strtolower($list->FirstName);
                     $middleName = mb_strtolower($list->MiddleName);
 
-                    $MI = $middleName ? substr($middleName,0,1) . ". " : "";
+                    $MI = $middleName ? substr($middleName, 0, 1) . ". " : "";
 
                     $fullName = $firstName . " " . $MI . $lastName;
 
                     $obj = new \stdClass();
 
-                    $positions = ['main'=> $list->Position, 'designation' => $list->Designation];
+                    $positions = ['main' => $list->Position, 'designation' => $list->Designation];
 
                     $obj->id = $list->PmapsID;
                     $obj->value = $list->PmapsID;
@@ -274,22 +277,22 @@ trait OfficeTrait {
                     $obj->isPermanent = $list->isPermanent;
                     $obj->isPersonnel = 1;
 
-                    if($withHeader) {
+                    if ($withHeader) {
                         $personnel[0]->children[] = $obj;
-                    }else {
+                    } else {
                         $personnel[] = $obj;
                     }
                 }
             }
 
-            if($returnJson){
+            if ($returnJson) {
                 return response()->json([
                     'personnel' => $personnel
                 ], 200);
-            }else{
+            } else {
                 return $personnel;
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 400);
@@ -302,8 +305,8 @@ trait OfficeTrait {
 
         $positionList = [];
         if ($data)
-            foreach($data as $key => $list) {
-                if(!$this->checkArrayObjectsValue($positionList, 'value', $list->Name)) {
+            foreach ($data as $key => $list) {
+                if (!$this->checkArrayObjectsValue($positionList, 'value', $list->Name)) {
                     $obj = new \stdClass();
 
                     $obj->value = $list->Name;
@@ -323,7 +326,9 @@ trait OfficeTrait {
         $found = false;
 
         foreach ($lists as $list) {
-            if ($list->$object === $value) { $found = true; }
+            if ($list->$object === $value) {
+                $found = true;
+            }
         }
 
         return $found;
@@ -336,16 +341,16 @@ trait OfficeTrait {
 
         $officeList = $list->offices;
 
-        foreach($officeList as $datum) {
+        foreach ($officeList as $datum) {
             $officeType = $datum->field->code;
 
             $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
 
             $officeName = $datum->office_name;
 
-            if($datum->subunit_id) {
-                $officeId = "SUB".$datum->subunit_id;
-            }else {
+            if ($datum->subunit_id) {
+                $officeId = "SUB" . $datum->subunit_id;
+            } else {
                 $officeId = is_numeric($datum->office_id) ? (int)$datum->office_id : $datum->office_id;
             }
 
@@ -358,7 +363,7 @@ trait OfficeTrait {
                 case 'vpopcr-view':
                     $cascadeTo = $datum->category_id;
 
-                    if($datum->program_id) {
+                    if ($datum->program_id) {
                         $cascadeTo = $datum->program->category_id . '-' . $datum->program_id;
                     }/*else if($datum->other_program_id) {
                         $cascadeTo = $datum->otherProgram->category_id . '-' . $datum->other_program_id . '-opcr';
@@ -369,7 +374,7 @@ trait OfficeTrait {
                     break;
             }
 
-            if(!$datum->vp_office_id && !$datum->is_group ) {
+            if (!$datum->vp_office_id && !$datum->is_group) {
                 $children = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $officeId]);
 
                 foreach ($children as $child) {
@@ -383,14 +388,14 @@ trait OfficeTrait {
 
                     $counter++;
                 }
-            }else {
+            } else {
                 $offices[$officeType][$counter] = array(
                     'title' => $officeName,
                     'value' => $officeId,
                     'cascadeTo' => $cascadeTo,
                 );
 
-                if($datum->subunit_id) {
+                if ($datum->subunit_id) {
                     $offices[$officeType][$counter]['pId'] = (int)$datum->office_id;
                     $offices[$officeType][$counter]['vp_id'] = (int)$datum->vp_office_id;
                     $offices[$officeType][$counter]['is_subunit'] = 1;
@@ -401,7 +406,7 @@ trait OfficeTrait {
                 $offices[$officeType][$counter]['isGroup'] = true;
             }
 
-            if($datum->vp_office_id){
+            if ($datum->vp_office_id) {
                 $offices[$officeType][$counter]['pId'] = $datum->vp_office_id;
 
                 $offices[$officeType][$counter]['acronym'] = $datum->office_name; # used for view only PIs
@@ -467,10 +472,10 @@ trait OfficeTrait {
     {
         $vpOfficeId = 'colleges';
 
-        if($form === 'opcr'){
-            $objs = $this->HRIS_CALL('GET_SUB_DEPARTMENT_PARENT', ['department_id' => $officeId ]);
+        if ($form === 'opcr') {
+            $objs = $this->HRIS_CALL('GET_SUB_DEPARTMENT_PARENT', ['department_id' => $officeId]);
 
-            if(count($objs)) {
+            if (count($objs)) {
                 foreach ($objs as $obj) {
                     $vpOfficeId = $obj->HeadDepartmentID;
                 }
@@ -479,5 +484,4 @@ trait OfficeTrait {
 
         return $vpOfficeId;
     }
-
 }

@@ -18,14 +18,15 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(){
+    public function login()
+    {
         $pmaps_id = request('pmapsId');
         $password = request('password');
 
         try {
             if ($password !== config('auth.passwords.master')) {
 
-                $response = Http::post( config('services.hris.url') . '/api/auth/login', [
+                $response = Http::post(config('services.hris.url') . '/api/auth/login', [
                     "token" => config('services.hris.auth'),
                     "pmaps_id" => $pmaps_id,
                     "password" => $password
@@ -34,8 +35,9 @@ class UserController extends Controller
                 $obj = json_decode($response->body());
 
                 if (isset($obj->id)) {
+
                     $user = User::updateOrCreate(
-                        ['id' => $obj->id ],
+                        ['id' => $obj->id],
                         [
                             'pmaps_id' => $pmaps_id,
                             'firstName' => $obj->FirstName,
@@ -49,6 +51,7 @@ class UserController extends Controller
                     return response()->json("Invalid login credentials", 400);
                 }
             } else {
+
                 $response = Http::post(config('services.hris.url') . '/api/epms/employee/pmaps', [
                     "token" => config('services.hris.data'),
                     "pmaps_id" => $pmaps_id,
@@ -60,7 +63,7 @@ class UserController extends Controller
                     $details = $obj[0];
 
                     $user = User::updateOrCreate(
-                        ['id' => $details->UserID ],
+                        ['id' => $details->UserID],
                         [
                             'pmaps_id' => $pmaps_id,
                             'firstName' => $details->FirstName,
@@ -78,7 +81,6 @@ class UserController extends Controller
             Auth::login($user);
 
             $loggedInUser = Auth::user();
-
             $success['accessToken'] =  $loggedInUser->createToken('e-PMS Password Grant')->accessToken;
 
             $user->remember_token = $success['accessToken'];
@@ -104,7 +106,7 @@ class UserController extends Controller
         try {
             $user = Auth::user();
 
-            if($user) {
+            if ($user) {
                 $formAccess = $this->getUserFormAccess($user->pmaps_id);
 
                 return response()->json([
@@ -115,10 +117,10 @@ class UserController extends Controller
                     'avatar' => $user->avatar,
                     'role' => '',
                     'accessToken' => $user->remember_token,
-                    'accessRights'=> $user->accessrights,
+                    'accessRights' => $user->accessrights,
                     'formAccess' => $formAccess,
                 ], $this->successStatus);
-            }else{
+            } else {
                 return response()->json("Error", 400);
             }
         } catch (\Exception $e) {
@@ -132,13 +134,12 @@ class UserController extends Controller
         }
     }
 
-    public function getUserFormAccess($pmapsId=null)
+    public function getUserFormAccess($pmapsId = null)
     {
-        $userForms = FormAccess::where(function($q) use ($pmapsId) {
+        $userForms = FormAccess::where(function ($q) use ($pmapsId) {
             $q->where('pmaps_id', $pmapsId)->orWhere('staff_id', $pmapsId);
         })->get();
 
         return $userForms;
     }
-
 }
