@@ -15,7 +15,7 @@ class CreateUserAccessRightsTable extends Migration
     {
         Schema::create('user_access_rights', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->string('user_id', 15);
+            $table->unsignedBigInteger('user_id');
             $table->integer('access_right_id');
             $table->softDeletes();
             $table->timestamp('created_at')->useCurrent();
@@ -23,8 +23,15 @@ class CreateUserAccessRightsTable extends Migration
             $table->timestamp('updated_at')->nullable();
             $table->string('modify_id', 35)->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade');
-            $table->foreign('access_right_id')->references('id')->on('access_rights')->onUpdate('cascade');
+            $table->foreign('user_id')
+            ->references('id')
+            ->on('users')
+            ->onUpdate('cascade');
+
+            $table->foreign('access_right_id')
+            ->references('id')
+            ->on('access_rights')
+            ->onUpdate('cascade');
         });
     }
 

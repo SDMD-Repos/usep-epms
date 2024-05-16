@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ConverterTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\AccessRight;
-use App\User;
-use App\UserAccessRights;
+use App\Models\AccessRight;
+use App\Models\User;
+use App\Models\UserAccessRights;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\PermissionTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Requests\StoreUserPermission;
-use App\FormAccess;
+use App\Models\FormAccess;
 use App\Http\Requests\StoreFormAccess;
 
 class PermissionController extends Controller

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Form;
 
-use App\Aapcr;
-use App\AapcrDetail;
-use App\FormField;
-use App\FormUnpublishStatus;
+use App\Models\Aapcr;
+use App\Models\AapcrDetail;
+use App\Models\FormField;
+use App\Models\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UnpublishForm;
@@ -14,10 +14,10 @@ use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\PdfTrait;
-use App\VpOpcr;
-use App\VpOpcrDetail;
-use App\VpOpcrDetailMeasure;
-use App\VpOpcrDetailOffice;
+use App\Models\VpOpcr;
+use App\Models\VpOpcrDetail;
+use App\Models\VpOpcrDetailMeasure;
+use App\Models\VpOpcrDetailOffice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

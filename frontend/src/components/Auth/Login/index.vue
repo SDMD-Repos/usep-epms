@@ -58,16 +58,17 @@ export default {
       password: '',
     })
 
-    const changeAuthProvider = value => {
+    const changeAuthProvider = value => { 
       store.commit('CHANGE_SETTING', { setting: 'authProvider', value })
     }
     const handleFinish = values => {
+      // console.log(values);
       store.dispatch('user/LOGIN', { payload: values })
     }
     const handleFinishFailed = errors => {
-      console.log(errors)
+      // console.log(errors)
     }
-
+    
     return {
       settings,
       loading,

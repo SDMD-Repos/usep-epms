@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\SystemAdmin;
 
-use App\Aapcr;
-use App\FormUnpublishStatus;
+use App\Models\Aapcr;
+use App\Models\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateRequestStatus;
 use App\Http\Traits\PdfTrait;
-use App\VpOpcr;
+use App\Models\VpOpcr;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

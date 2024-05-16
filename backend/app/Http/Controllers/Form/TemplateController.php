@@ -7,9 +7,9 @@ use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UpdateOpcrTemplate;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FormTrait;
-use App\OpcrTemplate;
-use App\OpcrTemplateDetail;
-use App\OpcrTemplateDetailMeasure;
+use App\Models\OpcrTemplate;
+use App\Models\OpcrTemplateDetail;
+use App\Models\OpcrTemplateDetailMeasure;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
-use App\Group;
-use App\OtherConfig;
+use App\Models\Group;
+use App\Models\OtherConfig;
 use Illuminate\Http\Request;
 
 trait OfficeTrait
@@ -172,10 +172,11 @@ trait OfficeTrait
         try {
             if ($isCollege) {
                 $obj = $this->HRIS_CALL('ALL_COLLEGES');
+                // dd("elow");
             } else {
                 $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id]);
             }
-
+            
             $values = array();
 
             if (count($obj)) {

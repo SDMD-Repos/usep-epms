@@ -2,7 +2,7 @@
 
 namespace App\Http\Traits;
 
-use App\SubCategory;
+use App\Models\SubCategory;
 
 trait ConverterTrait {
 

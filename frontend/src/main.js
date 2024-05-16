@@ -62,4 +62,3 @@ app.provide('a-message', message)
 app.provide('a-notification', notification)
 
 app.mount('#app')
-

@@ -2,13 +2,13 @@
 
 namespace App\Http\Traits;
 
-use App\Aapcr;
-use App\AapcrDetail;
-use App\Measure;
-use App\MeasureRating;
-use App\Program;
-use App\Signatory;
-use App\VpOpcr;
+use App\Models\Aapcr;
+use App\Models\AapcrDetail;
+use App\Models\Measure;
+use App\Models\MeasureRating;
+use App\Models\Program;
+use App\Models\Signatory;
+use App\Models\VpOpcr;
 use Illuminate\Support\Facades\Storage;
 use PHPJasper\PHPJasper;
 use PDF;
