@@ -4,9 +4,15 @@ import { useStore } from 'vuex'
 export const usePermission = permission => {
   const store = useStore()
 
-  const { listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request } = permission
+  const { 
+    listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request, adminPermission,
+   } = permission
   const accessLists = computed(() => store.getters['user/access'])
   const formAccess = computed(() => store.getters['user/user'].formAccess)
+
+  const admin = accessLists.value.filter(value => {
+    return adminPermission ? adminPermission.includes(value.permission_id) : 0
+  });
 
   const createPermission = accessLists.value.filter(value => {
     return listCreate ? listCreate.includes(value.permission_id) : 0
@@ -58,6 +64,7 @@ export const usePermission = permission => {
   const ipcrFormPermission = ref(false)
   const ARManagerPermission = ref(false)
   const requestPermission = ref(false)
+  const adminPermissionRef = ref(false)
 
   const aapcrTab = ref('')
   const opcrvpTab = ref('')
@@ -108,6 +115,10 @@ export const usePermission = permission => {
     requestPermission.value = true
   }
 
+  if(admin.length > 0) {
+    adminPermissionRef.value = true
+  }
+
   const allForms = currentForms.value
 
   return {
@@ -124,7 +135,7 @@ export const usePermission = permission => {
     allForms,
     ARManagerPermission,
     requestPermission,
-
     formAccess,
+    adminPermissionRef,
   }
 }

@@ -87,6 +87,8 @@ import find from 'lodash/find'
 import { getMenuData } from '@/services/menu'
 import SubMenu from './partials/submenu'
 import Item from './partials/item'
+import { usePermission } from '@/services/functions/permission'
+
 
 export default {
   name: 'MenuLeft',
@@ -94,7 +96,9 @@ export default {
   setup() {
     const store = useStore()
     const route = useRoute()
-    const menuData = computed(() => getMenuData)
+    const permission = { adminPermission: ["admin"] }
+    const { adminPermissionRef } = usePermission(permission)
+    const menuData = computed(() => filteredMenuData(getMenuData))
     const selectedKeys = ref([])
     const openKeys = ref([])
     const settings = computed(() => store.getters.settings)
@@ -102,7 +106,7 @@ export default {
     const user = computed(() => store.getters['user/user'])
     const pathname = computed(() => route.path)
     const mainStore = computed(() => store.getters.mainStore)
-
+    
     const onCollapse = (collapsed, type) => {
       const value = !settings.value.isMenuCollapsed
       store.commit('CHANGE_SETTING', { setting: 'isMenuCollapsed', value })
@@ -150,6 +154,55 @@ export default {
     watch(pathname, () => setSelectedKeys())
     watch(isMenuCollapsed, () => (openKeys.value = []))
 
+    function filteredMenuData(menuData) {
+      return menuData.filter(item => {
+            // Check if the item is not a category with title "System Admin"
+            if (item.title !== 'System Admin') {
+              // If it has children, recursively filter its children
+              if (item.children) {
+                item.children = filterMenuData(item.children);
+              }
+              return true; // Keep the item
+            }
+            return false; // Exclude the item
+          });
+      // if(adminPermissionRef) {
+      //   return menuData
+      // }else {
+      //   menuData.map(item => ({
+      //     ...item,
+      //     hidden: item.category === true && item.title === 'System Admin'
+      //   })).filter(item => !item.hidden);
+      //   return menuData;
+      // }
+
+      // console.log(menuData);
+      // // return menuData
+
+      // // Loop through the getMenuData array
+      // for (let i = 0; i < menuData.length; i++) {
+      //   // Check if the title is "System Admin"
+      //   if (menuData[i].title === 'System Admin') {
+      //     // Set the category property to false
+      //     menuData[i].category = false;
+      //     // Exit the loop since we found the item
+      //     break;
+      //   }
+      // }
+      // console.log(menuData);
+      // return menuData
+      // if (this.userRole === 'admin') {
+      //   // If user is admin, return all menu items
+      //   return this.menuData;
+      // } else {
+      //   // If user is not admin, filter out System Admin menu items
+      //   return this.menuData.map(item => ({
+      //     ...item,
+      //     hidden: item.category === true && item.title === 'System Admin'
+      //   })).filter(item => !item.hidden);
+      // }
+    }
+
     return {
       menuData,
       selectedKeys,
@@ -160,6 +213,7 @@ export default {
       handleClick,
       handleOpenChange,
       mainStore,
+      adminPermissionRef,
     }
   },
 }

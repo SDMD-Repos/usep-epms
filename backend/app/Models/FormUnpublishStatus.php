@@ -15,13 +15,13 @@ class FormUnpublishStatus extends Model
 
     public function form()
     {
-        return $this->belongsTo('App\Form', 'form_type');
+        return $this->belongsTo('App\Models\Form', 'form_type');
     }
 
 
     public function vpOpcrForm()
     {
-        return $this->belongsTo('App\VpOpcr', 'id', 'form_id')
+        return $this->belongsTo('App\Models\VpOpcr', 'id', 'form_id')
             ->where('form_type', 'vpopcr');
     }
 }
