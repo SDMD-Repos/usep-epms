@@ -88,7 +88,7 @@ class PermissionController extends Controller
                                 ['access_right_id', $permission],
                             ])->get();
 
-                if(!count($accessList)){
+                if(!count((array)$accessList)){
                     $userAccessRights->user_id = (string)$details->UserID;
                     $userAccessRights->access_right_id = $permission;
                     $userAccessRights->create_id = $this->login_user->pmaps_id;
@@ -112,7 +112,7 @@ class PermissionController extends Controller
 
             $accessLists  = UserAccessRights::where('user_id',$userInfo['id'])->get();
 
-            $status = (bool)count($accessLists);
+            $status = (bool)count((array)$accessLists);
 
             return response()->json([
                 'accessLists' => $accessLists ?? "",
@@ -176,7 +176,7 @@ class PermissionController extends Controller
                     $newList->delete();
                 }
             }
-            if(!count($currentList)){
+            if(!count((array)$currentList)){
                 $accessListss  = UserAccessRights::where([
                     ['user_id', $details->UserID],
                 ])->get();
@@ -332,7 +332,7 @@ class PermissionController extends Controller
             // $formAccessDetails  = FormAccess::where('office_id',$office_id)->first();
             $formAccessDetails  = FormAccess::where([['pmaps_id',$pmaps_id],['form_id',$form_id]])->get();
 
-            if(count($formAccessDetails)){
+            if(count((array)$formAccessDetails)){
               $permission = true;
             }
             return response()->json([

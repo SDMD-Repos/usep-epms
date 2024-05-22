@@ -105,7 +105,7 @@ trait PdfTrait {
 
                 $detailSubCategory = $detail->subCategory;
 
-                $countChildSubCategory = $detail->sub_category_id ? count($detail->subCategory->childSubCategories) : 0;
+                $countChildSubCategory = $detail->sub_category_id ? count((array)$detail->subCategory->childSubCategories) : 0;
 
                 $subCategory = (($detail->sub_category_id && !$countChildSubCategory) ? $detailSubCategory->name : NULL);
 
@@ -168,7 +168,7 @@ trait PdfTrait {
 
                 $subIndicators = $aapcr->details()->where('parent_id', $detail->id)->get();
 
-                if(count($subIndicators)){
+                if(count((array)$subIndicators)){
                     foreach($subIndicators as $subKey => $subIndicator) {
 
                         $subMeasures = $this->fetchMeasuresPdf($subIndicator->measures);
@@ -193,7 +193,7 @@ trait PdfTrait {
                             'subPICount' => $subKey+1
                         );
 
-                        if(count($reversedSubCategories)) {
+                        if(count((array)$reversedSubCategories)) {
                             foreach($reversedSubCategories as $key => $subParent) {
                                 $subCategoryKey = "subCategoryParent_".($key+1);
 
@@ -377,7 +377,7 @@ trait PdfTrait {
                         }
                     }
                 } elseif($stored) {
-                    if(count($detail->subDetails)) {
+                    if(count((array)$detail->subDetails)) {
                         $subs = [];
 
                         foreach($detail->subDetails as $subDetail) {
@@ -462,7 +462,7 @@ trait PdfTrait {
 
         $detailSubCategory = $detail->subCategory;
 
-        $countChildSubCategory = $detail->sub_category_id ? count($detailSubCategory->childSubCategories) : 0;
+        $countChildSubCategory = $detail->sub_category_id ? count((array)$detailSubCategory->childSubCategories) : 0;
 
         $subCategory = (($detail->sub_category_id && !$countChildSubCategory) ? $detailSubCategory->name : NULL);
 
@@ -501,7 +501,7 @@ trait PdfTrait {
             $data['subCategoryParent_1'] = $detailSubCategory->name;
         }
 
-        if(count($children)){
+        if(count((array)$children)){
             $data['children'][] = $children;
         }else {
             $data['children'] = null;
@@ -753,7 +753,7 @@ trait PdfTrait {
 
             $tableColumnCount = 4;
 
-            foreach($measures as $measure) { $tableColumnCount += count($measure->categories); }
+            foreach($measures as $measure) { $tableColumnCount += count((array)$measure->categories); }
 
             $data = ['measures' => $measures, 'ratings' => $ratings, 'tableColumnCount' => $tableColumnCount];
 

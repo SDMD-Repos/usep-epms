@@ -1,6 +1,6 @@
 <template>
   <a-card>
-    <template v-if="!ARManagerPermission">
+    <template v-if="ARManagerPermission">
       <a-spin :spinning="loading || formLoading">
         <a-row type="flex">
           <a-col :span="12">

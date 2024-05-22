@@ -134,7 +134,7 @@ class SettingController extends Controller
 
             $category = Category::find($id);
 
-            if((isset($category->programs) && count($category->programs)) && (isset($category->subCategory) && count($category->subCategory))) {
+            if((isset($category->programs) && count((array)$category->programs)) && (isset($category->subCategory) && count((array)$category->subCategory))) {
                 return response()->json('Sorry, unable to delete '.$category->name.'. There were saved Programs and Sub Categories under this category', 409);
             }
 
@@ -1115,7 +1115,7 @@ class SettingController extends Controller
 
             $mesureRating = MeasureRating::find($id);
 
-            if(count($mesureRating->items)) {
+            if((array)count($mesureRating->items)) {
                 $message = 'Unable to delete rating';
                 $description = 'There were already saved measure items under Rating ' . $mesureRating->numerical_rating;
             }else {

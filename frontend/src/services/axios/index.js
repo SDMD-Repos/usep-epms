@@ -2,6 +2,7 @@ import axios from 'axios'
 import store from 'store'
 import { notification } from 'ant-design-vue'
 
+// Set the default base URL for Axios
 const apiClient = axios.create({
   baseURL: process.env.VUE_APP_BACKEND_URL + '/api',
   // timeout: 1000,

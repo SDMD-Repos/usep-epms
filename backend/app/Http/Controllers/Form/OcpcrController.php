@@ -61,7 +61,7 @@ class OcpcrController extends Controller
 
         $hasUnpublished = VpOpcr::where('year', $year)->whereIn('office_id', $vpOpcrs)->whereNotNull('published_date')->where('is_active', 1)->get();
 
-        if(count($hasUnpublished) !== count($vpOpcrs)) {
+        if(count((array)$hasUnpublished) !== count((array)$vpOpcrs)) {
             return response()->json(['error' => "Unable to create this form at this time. Please wait for all VPs to publish their OPCR."], 200);
         }
 
@@ -87,7 +87,7 @@ class OcpcrController extends Controller
 
                 $sub = [];
 
-                if(count($detailParent->subDetails)) {
+                if(count((array)$detailParent->subDetails)) {
                     foreach($detailParent->subDetails as $subDetail) {
                         $subDetail['type'] = 'sub';
                         $subDetail['fromTemplate'] = 1;
@@ -308,7 +308,7 @@ class OcpcrController extends Controller
                             );
                         }
 
-                        if(count($detail)) {
+                        if(count((array)$detail)) {
 //                            dd($detail);
                             $dataSource[] = $detail; // Add new PI to array
                         }
@@ -353,7 +353,7 @@ class OcpcrController extends Controller
             'wasSaved' => $data->wasSaved,
         );
 
-        if(count($children)){
+        if(count((array)$children)){
             if(is_array($children)) {
                 $details['children'] = $children;
             } else {

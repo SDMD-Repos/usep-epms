@@ -136,25 +136,25 @@ export const getMenuData = [
   //     },
   //   ],
   // },
+  // {
+  //   title: 'IPCR',
+  //   key: 'ipcr',
+  //   icon: 'fa fa-file-lines',
+  //   children: [
+  //     {
+  //       title: 'Form',
+  //       key: 'ipcrForm',
+  //       url: '/form/ipcr',
+  //     },
+  //     {
+  //       title: 'List',
+  //       key: 'ipcrList',
+  //       url: '/list/ipcr',
+  //     },
+  //   ],
+  // },
   {
-    title: 'IPCR',
-    key: 'ipcr',
-    icon: 'fa fa-file-lines',
-    children: [
-      {
-        title: 'Form',
-        key: 'ipcrForm',
-        url: '/form/ipcr',
-      },
-      {
-        title: 'List',
-        key: 'ipcrList',
-        url: '/list/ipcr',
-      },
-    ],
-  },
-  {
-    category: false,
+    category: true,
     title: 'System Admin',
   },
   {

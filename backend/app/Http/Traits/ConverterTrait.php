@@ -64,7 +64,7 @@ trait ConverterTrait {
 
                 $children = $this->getNestedChildren($arr, $arr[$i]->id);
 
-                if (count($children)) {
+                if (count((array)$children)) {
                     $arr[$i]->children = $children;
                 }
 
@@ -113,7 +113,7 @@ trait ConverterTrait {
         foreach($officeList as $datum) {
             $officeType = $datum->field->code;
 
-            $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
+            $counter = isset($offices[$officeType]) ? count((array)$offices[$officeType]) : 0;
 
             if(isset($datum->personnel_id) && $datum->personnel_id) {
                 $officeId = (int)$datum->personnel_id !== 0 ? (int)$datum->personnel_id : $datum->personnel_id;
@@ -242,7 +242,7 @@ trait ConverterTrait {
 
         $measures = [];
 
-        if(count($detail->measures)) {
+        if(count((array)$detail->measures)) {
             $measures = $this->extractMeasures($detail->measures);
         }
 
