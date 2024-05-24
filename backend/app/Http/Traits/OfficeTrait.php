@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
-use App\Group;
-use App\OtherConfig;
+use App\Models\Group;
+use App\Models\OtherConfig;
 use Illuminate\Http\Request;
 
 trait OfficeTrait
@@ -17,7 +17,7 @@ trait OfficeTrait
 
             $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            if (count($vpOffices)) {
+            if (count((array)$vpOffices)) {
                 foreach ($vpOffices as $vpOffice) {
 
                     $data = new \stdClass();
@@ -44,7 +44,7 @@ trait OfficeTrait
     public function getMainOfficesWithChildren($status, $params = array())
     {
 
-        $status = is_array($status) && count($status) ? $status : request()->all();
+        $status = is_array($status) && count((array)$status) ? $status : request()->all();
 
         $collegeVpId = (int)OtherConfig::find('college_vp_id')->value;
 
@@ -83,7 +83,7 @@ trait OfficeTrait
 
             $vpOffices = $this->HRIS_CALL('ALL_PARENT_OFFICES');
 
-            if (is_array($vpOffices) && count($vpOffices)) {
+            if (is_array($vpOffices) && count((array)$vpOffices)) {
 
                 foreach ($vpOffices as $vpOffice) {
 
@@ -172,13 +172,14 @@ trait OfficeTrait
         try {
             if ($isCollege) {
                 $obj = $this->HRIS_CALL('ALL_COLLEGES');
+                // dd("elow");
             } else {
                 $obj = $this->HRIS_CALL('OFFICES_BY_PARENT', ['department_id' => $vp_id]);
             }
-
+            
             $values = array();
 
-            if (count($obj)) {
+            if (count((array)$obj)) {
                 foreach ($obj as $o) {
                     $data = new \stdClass();
 
@@ -237,7 +238,7 @@ trait OfficeTrait
 
             $lists = $this->HRIS_CALL('EMPLOYEES_BY_OFFICES', ['department_id' => $id, 'isSubunit' => $isSubunit]);
 
-            if (count($lists)) {
+            if (count((array)$lists)) {
                 if ($permanentOnly) {
                     $lists = array_filter($lists, function ($x) {
                         return $x->isPermanent === true;
@@ -344,7 +345,7 @@ trait OfficeTrait
         foreach ($officeList as $datum) {
             $officeType = $datum->field->code;
 
-            $counter = isset($offices[$officeType]) ? count($offices[$officeType]) : 0;
+            $counter = isset($offices[$officeType]) ? count((array)$offices[$officeType]) : 0;
 
             $officeName = $datum->office_name;
 
@@ -475,7 +476,7 @@ trait OfficeTrait
         if ($form === 'opcr') {
             $objs = $this->HRIS_CALL('GET_SUB_DEPARTMENT_PARENT', ['department_id' => $officeId]);
 
-            if (count($objs)) {
+            if (count((array)$objs)) {
                 foreach ($objs as $obj) {
                     $vpOfficeId = $obj->HeadDepartmentID;
                 }

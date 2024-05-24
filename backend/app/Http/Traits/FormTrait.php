@@ -82,7 +82,7 @@ trait FormTrait {
                 case 'vpopcr':
                     $cascadeTo = explode("-", $office['cascadeTo']);
 
-                    $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                    $newOffice->category_id = count((array)$cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                     $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
 //                    $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
                     break;
@@ -206,7 +206,7 @@ trait FormTrait {
                     case 'vpopcr':
                         $cascadeTo = explode("-", $office['cascadeTo']);
 
-                        $newOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                        $newOffice->category_id = count((array)$cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                         $newOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
 //                        $newOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
                         break;
@@ -270,7 +270,7 @@ trait FormTrait {
 
                             $cascadeTo = explode("-", $office['cascadeTo']);
 
-                            $updatedOffice->category_id = count($cascadeTo) === 1 ? $cascadeTo[0] : NULL;
+                            $updatedOffice->category_id = count((array)$cascadeTo) === 1 ? $cascadeTo[0] : NULL;
                             $updatedOffice->program_id = isset($cascadeTo[1]) && !isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
 //                            $updatedOffice->other_program_id = isset($cascadeTo[2]) ? $cascadeTo[1] : NULL;
 

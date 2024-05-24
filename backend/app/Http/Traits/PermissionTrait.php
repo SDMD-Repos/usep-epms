@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
-use App\AccessRight;
-use App\UserAccessRights;
+use App\Models\AccessRight;
+use App\Models\UserAccessRights;
 use Illuminate\Support\Facades\Auth;
 
 trait PermissionTrait {

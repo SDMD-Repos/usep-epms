@@ -70,7 +70,8 @@
         </a-row>
       </a-spin>
     </template>
-    <div v-else><error403 /></div>
+    <div v-else><error403 />
+    </div>
   </a-card>
 
 </template>

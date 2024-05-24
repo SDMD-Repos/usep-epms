@@ -87,14 +87,18 @@ import find from 'lodash/find'
 import { getMenuData } from '@/services/menu'
 import SubMenu from './partials/submenu'
 import Item from './partials/item'
+import { usePermission } from '@/services/functions/permission'
 
+console.log(usePermission);
 export default {
   name: 'MenuLeft',
   components: { SubMenu, Item },
   setup() {
     const store = useStore()
     const route = useRoute()
-    const menuData = computed(() => getMenuData)
+    const permission = { adminPermission: ["adminPermission"] }
+    const { adminPermissionRef } = usePermission(permission)
+    const menuData = computed(() => filterMenuData(getMenuData))
     const selectedKeys = ref([])
     const openKeys = ref([])
     const settings = computed(() => store.getters.settings)
@@ -102,7 +106,7 @@ export default {
     const user = computed(() => store.getters['user/user'])
     const pathname = computed(() => route.path)
     const mainStore = computed(() => store.getters.mainStore)
-
+    
     const onCollapse = (collapsed, type) => {
       const value = !settings.value.isMenuCollapsed
       store.commit('CHANGE_SETTING', { setting: 'isMenuCollapsed', value })
@@ -150,6 +154,28 @@ export default {
     watch(pathname, () => setSelectedKeys())
     watch(isMenuCollapsed, () => (openKeys.value = []))
 
+    function filterMenuData(menuData) {
+      if(adminPermissionRef.value==true) {
+        return menuData;
+      }else {
+        const filteredMenu = [];
+        for (let i = 0; i < menuData.length; i++) {
+          const item = menuData[i];
+          if (item.title === 'System Admin' || item.title === 'Access Rights') {
+            // If it's the "System Admin" skip it and its children
+            while (i < menuData.length && menuData[i].title !== 'Access Rights') {
+              // Skip children of "Access Rights" category
+              i++;
+            }
+          } else {
+            // Add non-"System Admin" category or non-category item
+            filteredMenu.push(item);
+          }
+        }
+        return filteredMenu;
+      }
+    }
+
     return {
       menuData,
       selectedKeys,
@@ -160,6 +186,7 @@ export default {
       handleClick,
       handleOpenChange,
       mainStore,
+      adminPermissionRef,
     }
   },
 }

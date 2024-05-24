@@ -18,6 +18,6 @@ module.exports = {
     },
   },
   devServer: {
-    host: 'usepepms.local',
+    host: '0.0.0.0',
   },
 }

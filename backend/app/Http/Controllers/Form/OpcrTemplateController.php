@@ -8,10 +8,10 @@ use App\Http\Requests\UpdateOpcrTemplate;
 use App\Http\Traits\ConverterTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
-use App\Opcr;
-use App\OpcrTemplate;
-use App\OpcrTemplateDetail;
-use App\OpcrTemplateDetailMeasure;
+use App\Models\Opcr;
+use App\Models\OpcrTemplate;
+use App\Models\OpcrTemplateDetail;
+use App\Models\OpcrTemplateDetailMeasure;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +66,7 @@ class OpcrTemplateController extends Controller
 
             $subs = [];
 
-            if(count($detail->subDetails)) {
+            if(count((array)$detail->subDetails)) {
                 foreach($detail->subDetails as $subPI){
 
                     $extracted = $this->extractDetails($subPI);
@@ -105,7 +105,7 @@ class OpcrTemplateController extends Controller
                     'measures' => $extracted['measures'],
                 );
 
-                if(count($subs)) {
+                if(count((array)$subs)) {
                     $item['children'] = $subs;
                 }
 
@@ -141,7 +141,7 @@ class OpcrTemplateController extends Controller
                 ['deleted_at', null],
             ])->get();
 
-            if(count($hasSavedOpcrTemplate)) {
+            if(count((array)$hasSavedOpcrTemplate)) {
                 return response()->json('Unable to save this document. A finalized OPCR Template has been created for the year '.$year.'.', 409);
             }
 
@@ -201,7 +201,7 @@ class OpcrTemplateController extends Controller
 
             $this->saveMeasures($detail, $values['measures']);
 
-            if(isset($values['children']) && count($values['children'])) {
+            if(isset($values['children']) && count((array)$values['children'])) {
 
                 foreach ($values['children'] as $child) {
                     $child['detailId'] = $detail->id;
@@ -366,7 +366,7 @@ class OpcrTemplateController extends Controller
 
                 $this->updateMeasures(new OpcrTemplateDetailMeasure, $data['id'], $data['measures']);
 
-                if(isset($data['children']) && count($data['children'])) {
+                if(isset($data['children']) && count((array)$data['children'])) {
 
                     foreach ($data['children'] as $child) {
                         $child['detailId'] = $detail->id;

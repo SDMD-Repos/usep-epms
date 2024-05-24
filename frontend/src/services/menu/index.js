@@ -72,87 +72,87 @@ export const getMenuData = [
       },
     ],
   },
-  {
-    title: 'OPCR',
-    key: 'opcr',
-    icon: 'fa fa-file-pen',
-    children: [
-      {
-        title: 'Manager',
-        key: 'opcrManager',
-        children: [
-          {
-            title: 'Form',
-            key: 'opcrFormManager',
-            url: '/opcr/manager',
-            level: 3,
-          },
-        ],
-      },
-      {
-        title: 'Template',
-        key: 'opcrTemplate',
-        children: [
-          {
-            title: 'Form',
-            key: 'opcrTemplateForm',
-            url: '/form/opcrtemplate',
-            level: 3,
-          },
-          {
-            title: 'List',
-            key: 'opcrTemplateList',
-            url: '/list/opcrtemplate',
-            level: 3,
-          },
-        ],
-      },
-      {
-        title: 'Form',
-        key: 'opcrForm',
-        url: '/form/opcr',
-      },
-      {
-        title: 'List',
-        key: 'opcrList',
-        url: '/list/opcr',
-      },
-    ],
-  },
-  {
-    title: 'CPCR',
-    key: 'cpcr',
-    icon: 'fe fe-edit-3',
-    children: [
-      {
-        title: 'Form',
-        key: 'cpcrForm',
-        url: '/form/cpcr',
-      },
-      {
-        title: 'List',
-        key: 'cpcrList',
-        url: '/list/cpcr',
-      },
-    ],
-  },
-  {
-    title: 'IPCR',
-    key: 'ipcr',
-    icon: 'fa fa-file-lines',
-    children: [
-      {
-        title: 'Form',
-        key: 'ipcrForm',
-        url: '/form/ipcr',
-      },
-      {
-        title: 'List',
-        key: 'ipcrList',
-        url: '/list/ipcr',
-      },
-    ],
-  },
+  // {
+  //   title: 'OPCR',
+  //   key: 'opcr',
+  //   icon: 'fa fa-file-pen',
+  //   children: [
+  //     {
+  //       title: 'Manager',
+  //       key: 'opcrManager',
+  //       children: [
+  //         {
+  //           title: 'Form',
+  //           key: 'opcrFormManager',
+  //           url: '/opcr/manager',
+  //           level: 3,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       title: 'Template',
+  //       key: 'opcrTemplate',
+  //       children: [
+  //         {
+  //           title: 'Form',
+  //           key: 'opcrTemplateForm',
+  //           url: '/form/opcrtemplate',
+  //           level: 3,
+  //         },
+  //         {
+  //           title: 'List',
+  //           key: 'opcrTemplateList',
+  //           url: '/list/opcrtemplate',
+  //           level: 3,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       title: 'Form',
+  //       key: 'opcrForm',
+  //       url: '/form/opcr',
+  //     },
+  //     {
+  //       title: 'List',
+  //       key: 'opcrList',
+  //       url: '/list/opcr',
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: 'CPCR',
+  //   key: 'cpcr',
+  //   icon: 'fe fe-edit-3',
+  //   children: [
+  //     {
+  //       title: 'Form',
+  //       key: 'cpcrForm',
+  //       url: '/form/cpcr',
+  //     },
+  //     {
+  //       title: 'List',
+  //       key: 'cpcrList',
+  //       url: '/list/cpcr',
+  //     },
+  //   ],
+  // },
+  // {
+  //   title: 'IPCR',
+  //   key: 'ipcr',
+  //   icon: 'fa fa-file-lines',
+  //   children: [
+  //     {
+  //       title: 'Form',
+  //       key: 'ipcrForm',
+  //       url: '/form/ipcr',
+  //     },
+  //     {
+  //       title: 'List',
+  //       key: 'ipcrList',
+  //       url: '/list/ipcr',
+  //     },
+  //   ],
+  // },
   {
     category: true,
     title: 'System Admin',
