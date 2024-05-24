@@ -47,14 +47,14 @@
 
       <previous-list :visible="isPreviousViewed" :year="year" :list="allPreviousPrograms"
                      @close-modal="changePreviousModal" @save-programs="onMultipleSave"/>
-    
+
     </a-spin>
   </div>
   </div>
    <div v-else><span>You have no permission to access this page.</span></div>
 </template>
 <script>
-import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
+import {defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed, onBeforeMount} from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -72,7 +72,6 @@ export default defineComponent({
     formId: { type: String, default: null },
   },
   setup(props) {
-    const PAGE_TITLE = "OPCR Programs"
     const store = useStore()
     const year = ref(new Date().getFullYear())
     const functions = computed(() => store.getters['formManager/functions'])
@@ -141,9 +140,10 @@ export default defineComponent({
       value: 'id',
     }
 
-      const permission ={
-                      listOpcr: [ "form", "f-opcr" ],
-                    }
+    const permission ={
+      listOpcr: [ "form", "f-opcr", "fo-manager" ],
+    }
+
     const {
           // DATA
         opcrFormPermission,
@@ -151,13 +151,12 @@ export default defineComponent({
       } = usePermission(permission)
 
     // EVENTS
+
     onMounted(() => {
-      store.commit('SET_DYNAMIC_PAGE_TITLE', { pageTitle: PAGE_TITLE })
       store.commit('formManager/SET_STATE', { previousOtherPrograms: [] })
       if(opcrFormPermission.value){
           fetchAllPrograms(year.value)
       }
-     
     })
 
     // METHODS

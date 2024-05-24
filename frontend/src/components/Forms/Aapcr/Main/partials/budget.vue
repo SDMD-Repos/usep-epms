@@ -33,8 +33,8 @@
   </a-list>
 </template>
 <script>
-import { createVNode, defineComponent, ref } from "vue"
-import { message, Modal } from "ant-design-vue"
+import { createVNode, defineComponent, ref, inject } from "vue"
+import { Modal } from "ant-design-vue"
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue"
 
 export default defineComponent({
@@ -44,6 +44,9 @@ export default defineComponent({
   },
   emits: ['delete-budget-item'],
   setup(props, { emit }) {
+    const _message = inject('a-message')
+
+    // DATA
     const editingKey = ref('')
     const budgetStorage = ref({})
 
@@ -85,7 +88,7 @@ export default defineComponent({
         cancelText: 'No',
         onOk() {
           emit('delete-budget-item', index)
-          message.success('Deleted!', 2)
+          _message.success('Deleted!', 2)
         },
         onCancel() {},
       })

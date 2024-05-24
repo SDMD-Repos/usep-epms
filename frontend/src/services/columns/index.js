@@ -112,6 +112,13 @@ export const formTableColumns = [
 
 export const formTemplateTableColumns = [
   {
+    title: '#',
+    key: 'count',
+    dataIndex: 'count',
+    className: 'column-count',
+    width: 60,
+  },
+  {
     title: 'Sub Category',
     key: 'subCategory',
     dataIndex: 'subCategory',

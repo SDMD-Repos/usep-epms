@@ -6,11 +6,13 @@ use App\CascadingLevel;
 use App\Category;
 use App\Form;
 use App\FormAccess;
+use App\FormCategory;
 use App\FormField;
 use App\FormFieldSetting;
 use App\Group;
 use App\GroupMember;
 use App\Http\Requests\StoreCategory;
+use App\Http\Requests\StoreFormCategory;
 use App\Http\Requests\StoreFormFieldSetting;
 use App\Http\Requests\StoreGroup;
 use App\Http\Requests\StoreMeasure;
@@ -59,9 +61,17 @@ class SettingController extends Controller
 
     }
 
-    public function getFunctions($year)
+    public function getFunctions($year, $formId=null)
     {
-        $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
+        if($formId) {
+            $categories = Category::select("*", "id as key")->where('year', $year)
+                ->with(['formCategory' => function($query) use ($formId) {
+                    $query->where('form_id', $formId)->where('display_name', '<>', NULL);
+                }])
+                ->orderBy('order', 'ASC')->get();
+        } else {
+            $categories = Category::select("*", "id as key")->orderBy('order', 'ASC')->where('year', $year)->get();
+        }
 
         foreach ($categories as $key => $category) {
             $categories[$key]['header'] = $this->integerToRomanNumeral($category->order) . ". " . mb_strtoupper($category->name);
@@ -206,6 +216,7 @@ class SettingController extends Controller
             $subcategory->name = $validated['name'];
             $subcategory->category_id = $validated['category_id'];
             $subcategory->parent_id = $validated['parentId'];
+            $subcategory->ordering = $validated['ordering'];
             $subcategory->year = $validated['year'];
             $subcategory->create_id = $this->login_user->pmaps_id;
             $subcategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -435,7 +446,7 @@ class SettingController extends Controller
 
     public function getMeasures($year)
     {
-        $measures = Measure::select('id', 'name', 'year', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
+        $measures = Measure::select('id', 'name', 'year', 'display_as_items', 'id as key', 'created_at')->where('year', $year)->with('items')->get();
 
         return response()->json([
             'measures' => $measures
@@ -453,6 +464,7 @@ class SettingController extends Controller
             $measure = new Measure;
 
             $measure->name = $validated['name'];
+            $measure->display_as_items = $validated['displayAsItems'];
             $measure->year = $validated['year'];
             $measure->create_id = $this->login_user->pmaps_id;
             $measure->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
@@ -501,15 +513,23 @@ class SettingController extends Controller
 
             $measure = Measure::find($id);
 
-            $changes = '';
-            if ($measure->name != $validated['name']) {
-                $changes = " from '" . $measure->name . "' to '" . $validated['name'] . "'";
+            $original = $measure->getOriginal();
+
+            $history = '';
+
+            if($measure->isDirty('name')){
+                $history .= "Updated Name from '".$original['name']."' to '".$validated['name']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
             }
 
-            $measure->history = $measure->history . "Updated " . Carbon::now() . $changes . " by " . $this->login_user->fullName . "\n";
+            if($measure->isDirty('display_as_items')){
+                $history .= "Updated display_as_items from '".$original['display_as_items']."' to '".$validated['displayAsItems']."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+            }
+
             $measure->name = $validated['name'];
+            $measure->display_as_items = $validated['displayAsItems'];
             $measure->modify_id = $this->login_user->pmaps_id;
             $measure->updated_at = Carbon::now();
+            $measure->history = $measure->history . $history;
 
             if ($measure->save()) {
                 foreach ($validated['items'] as $item) {
@@ -738,11 +758,6 @@ class SettingController extends Controller
 
             foreach($signatories as $signatory) {
                 $check = Signatory::find($signatory['id']);
-
-//                list($officeName, $officeId) = explode('_', $signatory['officeId']);
-
-
-//                list($personnelName, $personnelId) = explode('_', $signatory['personnelId']);
 
                 if(!$signatory['isCustom']) {
                     $officeName = $signatory['officeId']['label'];
@@ -1204,11 +1219,108 @@ class SettingController extends Controller
 
     public function getAllFormsByPermission(Request $data)
     {
-
-        
         $forms = Form::select('*')->whereIn('id', $data)->orderBy('ordering', 'asc')->get();
 
         return response()->json(['forms' => $forms], 200);
     }
 
+    public function saveFormCategory(StoreFormCategory $request)
+    {
+        try {
+            $validated = $request->validated();
+
+            $formId = $validated['formId'];
+            $categoryId = $validated['categoryId'];
+            $displayName = $validated['name'];
+
+            $successMessage = '';
+
+            DB::beginTransaction();
+
+            $formCategory = FormCategory::where('form_id', $formId)->where('category_id', $categoryId)->first();
+
+            if ($formCategory) {
+                $original = $formCategory->getOriginal();
+
+                $formCategory->display_name = $displayName;
+
+                $formCategory->modify_id = $this->login_user->pmaps_id;
+                $formCategory->updated_at = Carbon::now();
+
+                $history = '';
+
+                if($formCategory->isDirty('display_name')){
+                    $history .= "Updated Display Name from '".$original['display_name']."' to '".$displayName."' ". Carbon::now()." by ".$this->login_user->fullName."\n";
+                }
+
+                $formCategory->history = $formCategory->history . $history;
+
+                $successMessage = 'Form Category was updated successfully';
+
+            } else {
+                $formCategory = new FormCategory();
+
+                $formCategory->form_id = $formId;
+                $formCategory->category_id = $categoryId;
+                $formCategory->display_name = $displayName;
+                $formCategory->create_id = $this->login_user->pmaps_id;
+                $formCategory->history = "Created " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+                $successMessage = 'Form Category was saved successfully';
+            }
+
+            if(!$formCategory->save()) {
+                DB::rollBack();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => $successMessage
+            ], 200);
+
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
+
+    public function deleteFormCategory($id)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            $formCategory = FormCategory::find($id);
+
+            $formCategory->modify_id = $this->login_user->pmaps_id;
+            $formCategory->updated_at = Carbon::now();
+            $formCategory->history = $formCategory->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullName . "\n";
+
+            if (!$formCategory->save()) {
+                DB::rollBack();
+            } else {
+                if (!$formCategory->delete()) {
+                    DB::rollBack();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json('Form Category deleted successfully', 200);
+        } catch (\Exception $e) {
+            if (is_numeric($e->getCode()) && $e->getCode()) {
+                $status = $e->getCode();
+            } else {
+                $status = 400;
+            }
+
+            return response()->json($e->getMessage(), $status);
+        }
+    }
 }

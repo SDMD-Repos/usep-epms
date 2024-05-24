@@ -21,6 +21,7 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getMenuData } from '@/services/menu'
 import reduce from 'lodash/reduce'
+import reverse from 'lodash/reverse'
 
 export default {
   name: 'Breadcrumbs',
@@ -46,6 +47,9 @@ export default {
             return (result || []).concat(nested.filter(e => !!e))
           }
           if (entry.url === url) {
+            if(parents.length > 1) {
+              parents = reverse(parents)
+            }
             return [entry].concat(parents)
           }
           return result

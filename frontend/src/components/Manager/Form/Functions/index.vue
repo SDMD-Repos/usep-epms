@@ -41,7 +41,7 @@
   </a-spin>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, toRaw, createVNode, onMounted } from 'vue'
+import { defineComponent, reactive, ref, toRaw, createVNode, onMounted, computed } from 'vue'
 import { useStore } from 'vuex'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
@@ -91,6 +91,7 @@ export default defineComponent({
     // COMPUTED
     const loading = computed(() => store.getters['formManager/manager'].loading)
     const previousFunctions = computed(() => store.getters['formManager/manager'].previousFunctions)
+
     const years = computed(() => {
       const max = new Date().getFullYear() + 1
       const min = 10
@@ -100,22 +101,13 @@ export default defineComponent({
       }
       return lists
     })
-    const permission ={
-                        listCreate: ["manager","m-form", "mf-functions","mff-create"],
-                        listDelete: ["manager","m-form", "mf-functions","mff-delete"],
-                      }
 
-     const {
-          // DATA
-        isCreate,isDelete,
-          // METHODS
+    const permission = {
+      listCreate: ["manager","m-form", "mf-functions","mff-create"],
+      listDelete: ["manager","m-form", "mf-functions","mff-delete"],
+    }
 
-      } = usePermission(permission)
-
-    
-    onMounted(() => {
-    })
-
+     const { isCreate,isDelete } = usePermission(permission)
 
     // METHODS
     const fetchPreviousFunctions = year => {
@@ -180,6 +172,7 @@ export default defineComponent({
       previousFunctions,
       isCreate,
       isDelete,
+
       fetchPreviousFunctions,
       onSubmit,
       resetForm,

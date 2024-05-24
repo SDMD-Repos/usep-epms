@@ -1,29 +1,28 @@
 <template>
-
- <a-collapse v-model:activeKey="activeKey">
-    <a-collapse-panel key="1" header="AAPCR" :disabled="!aapcrFormPermission && !aapcrHeadPermission">
-         <form-admin/>
-    </a-collapse-panel>
-    <a-collapse-panel key="2" header="OPCR (VPs)" :disabled=" !opcrvpFormPermission && !vpopcrHeadPermission">
-      <form-admin-opcr-vp/>
-    </a-collapse-panel>
-    <a-collapse-panel key="3" header="OPCR" :disabled="!opcrFormPermission && !opcrHeadPermission">
-      <form-admin-opcr/>
-    </a-collapse-panel>
-    <a-collapse-panel key="4" header="CPCR">
-      <p>CPCR</p>
-    </a-collapse-panel>
-
-  </a-collapse>
-
+ <a-card>
+   <a-collapse v-model:activeKey="activeKey">
+     <a-collapse-panel key="1" header="AAPCR" v-if="aapcrFormPermission || aapcrHeadPermission">
+       <form-admin/>
+     </a-collapse-panel>
+     <a-collapse-panel key="2" header="OPCR (VPs)" v-if=" opcrvpFormPermission || vpopcrHeadPermission">
+       <form-admin-opcr-vp/>
+     </a-collapse-panel>
+     <a-collapse-panel key="3" header="OPCR" v-if="opcrFormPermission || opcrHeadPermission">
+       <form-admin-opcr/>
+     </a-collapse-panel>
+     <a-collapse-panel key="4" header="CPCR">
+       <p>CPCR</p>
+     </a-collapse-panel>
+   </a-collapse>
+ </a-card>
 </template>
 
 <script>
 import { computed, defineComponent, onMounted, ref  } from 'vue';
 import { useStore } from 'vuex'
 import FormAdmin from '@/components/SystemAdmin/AccessRights/Forms/aapcr'
-import FormAdminOpcr from '@/components/SystemAdmin/AccessRights/Forms/opcr'
 import FormAdminOpcrVp from '@/components/SystemAdmin/AccessRights/Forms/opcrvp'
+import FormAdminOpcr from '@/components/SystemAdmin/AccessRights/Forms/opcr'
 
 import { usePermission } from '@/services/functions/permission'
 
@@ -32,7 +31,7 @@ export default defineComponent({
     components: { FormAdmin, FormAdminOpcr, FormAdminOpcrVp },
     setup() {
       const store = useStore()
-      const activeKey = ref([]);
+      const activeKey = ref(['1','2','3','4']);
       const aapcrFormId = 'aapcr'
       const opcrFormId = 'opcr'
       const vpopcrFormId = 'vpopcr'
