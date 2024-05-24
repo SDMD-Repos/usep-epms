@@ -34,6 +34,7 @@ export default defineComponent({
 
     watch(route, to => {
       formId.value = to.params.formId
+      console.log(to.params, "Hello")
     })
 
     // METHODS

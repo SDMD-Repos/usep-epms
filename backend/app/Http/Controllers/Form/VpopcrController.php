@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Form;
 
-use App\Aapcr;
-use App\AapcrDetail;
-use App\FormField;
-use App\FormUnpublishStatus;
+use App\Models\Aapcr;
+use App\Models\AapcrDetail;
+use App\Models\FormField;
+use App\Models\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVpopcr;
 use App\Http\Requests\UnpublishForm;
@@ -14,10 +14,10 @@ use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\PdfTrait;
-use App\VpOpcr;
-use App\VpOpcrDetail;
-use App\VpOpcrDetailMeasure;
-use App\VpOpcrDetailOffice;
+use App\Models\VpOpcr;
+use App\Models\VpOpcrDetail;
+use App\Models\VpOpcrDetailMeasure;
+use App\Models\VpOpcrDetailOffice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -274,7 +274,7 @@ class VpopcrController extends Controller
                         );
                     }
 
-                    if(count($detail)) {
+                    if(count((array)$detail)) {
                         $dataSource[] = $detail; // Add new PI to array
                     }
                 } # end category list loop
@@ -372,7 +372,7 @@ class VpopcrController extends Controller
                         $getParentId = $this->saveVpOpcrDetails($vpopcr->id, $source, $newDetail);
                     }
 
-                    if(isset($source['children']) && count($source['children'])) {
+                    if(isset($source['children']) && count((array)$source['children'])) {
                         $parentAapcrDetailId = $aapcrDetailId;
 
                         foreach($source['children'] as $child) {
@@ -697,7 +697,7 @@ class VpopcrController extends Controller
                         }
                     }
                 } elseif($stored) {
-                    if(count($detail->subDetails)) {
+                    if(count((array)$detail->subDetails)) {
                         $subs = [];
 
                         foreach($detail->subDetails as $subDetail) {
@@ -774,7 +774,7 @@ class VpopcrController extends Controller
             'wasSaved' => $data->wasSaved
         );
 
-        if(count($children)){
+        if(count((array)$children)){
             $details['children'][] = $children;
         }
 
@@ -892,7 +892,7 @@ class VpopcrController extends Controller
                         }
                     }
 
-                    if(isset($source['children']) && count($source['children'])) {
+                    if(isset($source['children']) && count((array)$source['children'])) {
                         foreach($source['children'] as $child) {
                             $isChildNew = strpos($child['id'], 'new') !== false;
 
@@ -1127,7 +1127,7 @@ class VpopcrController extends Controller
                         return in_array((int)$x['office_id'], $offices);
                     });
 
-                    if(count($officesSearch)) {
+                    if(count((array)$officesSearch)) {
                         $data[$key]['hasError'] = true;
                         $errors = [];
 
@@ -1135,7 +1135,7 @@ class VpopcrController extends Controller
                             $vpOfficeName = $savedIndicator->vpOpcr->office_name;
                             $assignedField = $search['field']['code'];
 
-                            if(count($data[$key][$assignedField])) {
+                            if(count((array)$data[$key][$assignedField])) {
                                 $data[$key][$assignedField] = array_filter($data[$key][$assignedField], function($x) use ($search) {
                                     return $x['value'] !== (int)$search['office_id'];
                                 });
@@ -1161,7 +1161,7 @@ class VpopcrController extends Controller
                 }
             }
 
-            if(isset($datum['children']) && count($datum['children'])) {
+            if(isset($datum['children']) && count((array)$datum['children'])) {
                 $this->recursiveIndicatorsChecking($datum['children'], $savedIndicators, $storage);
             }
         }
@@ -1191,7 +1191,7 @@ class VpopcrController extends Controller
                     }
                 }
 
-                if(isset($datum['children']) && count($datum['children'])) {
+                if(isset($datum['children']) && count((array)$datum['children'])) {
                     $this->getIndicatorsByField($datum['children']);
                 }
             }

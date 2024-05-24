@@ -3,8 +3,8 @@
     <div class="card" :class="$style.container">
       <div class="text-dark font-size-32 mb-3">Sign In</div>
       <div class="mb-4">
-        PMAPS ID and Password
-        <br />
+        <!-- EMPLOYEE ID and Password -->
+        <!-- <br /> -->
       </div>
       <a-form
         :model="loginForm"
@@ -15,7 +15,7 @@
         @finishFailed="handleFinishFailed"
       >
         <a-form-item name="pmapsId">
-          <a-input v-model:value="loginForm.pmapsId" placeholder="PMAPS ID" />
+          <a-input v-model:value="loginForm.pmapsId" placeholder="EMPLOYEE ID" />
         </a-form-item>
         <a-form-item name="password">
           <a-input-password v-model:value="loginForm.password" placeholder="Password" />
@@ -58,16 +58,17 @@ export default {
       password: '',
     })
 
-    const changeAuthProvider = value => {
+    const changeAuthProvider = value => { 
       store.commit('CHANGE_SETTING', { setting: 'authProvider', value })
     }
     const handleFinish = values => {
+      // console.log(values);
       store.dispatch('user/LOGIN', { payload: values })
     }
     const handleFinishFailed = errors => {
-      console.log(errors)
+      // console.log(errors)
     }
-
+    
     return {
       settings,
       loading,

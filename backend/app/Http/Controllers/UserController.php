@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\FormAccess;
+use App\Models\FormAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -20,6 +20,7 @@ class UserController extends Controller
      */
     public function login()
     {
+        // if(request()->isMethod("GET")) return null;
         $pmaps_id = request('pmapsId');
         $password = request('password');
 
@@ -44,7 +45,7 @@ class UserController extends Controller
                             'middleName' => $obj->MiddleName,
                             'lastName' => $obj->LastName,
                             'email' => $obj->Email,
-                            'avatar' => $obj->Avatar ?? NULL
+                            // 'avatar' => $obj->Avatar ?? NULL
                         ]
                     );
                 } else {
@@ -70,7 +71,7 @@ class UserController extends Controller
                             'middleName' => $details->MiddleName,
                             'lastName' => $details->LastName,
                             'email' => $details->Email,
-                            'avatar' => $details->Avatar ?? NULL
+                            // 'avatar' => $details->Avatar ?? NULL
                         ]
                     );
                 } else {

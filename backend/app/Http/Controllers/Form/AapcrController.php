@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Form;
 
-use App\Aapcr;
-use App\AapcrDetail;
-use App\AapcrDetailMeasure;
-use App\AapcrDetailOffice;
-use App\AapcrProgramBudget;
-use App\FormField;
-use App\FormUnpublishStatus;
+use App\Models\Aapcr;
+use App\Models\AapcrDetail;
+use App\Models\AapcrDetailMeasure;
+use App\Models\AapcrDetailOffice;
+use App\Models\AapcrProgramBudget;
+use App\Models\FormField;
+use App\Models\FormUnpublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAapcr;
 use App\Http\Requests\UnpublishForm;
@@ -17,8 +17,8 @@ use App\Http\Traits\FileTrait;
 use App\Http\Traits\FormTrait;
 use App\Http\Traits\OfficeTrait;
 use App\Http\Traits\PdfTrait;
-use App\Program;
-use App\SubCategory;
+use App\Models\Program;
+use App\Models\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -88,7 +88,7 @@ class AapcrController extends Controller
                 ['is_active', 1]
             ])->get();
 
-            if(count($hasSavedAapcr)) {
+            if(count((array)$hasSavedAapcr)) {
                 return response()->json('Unable to save this document. A finalized AAPCR has been created for the year '.$year.'.', 409);
             }
 
@@ -173,7 +173,7 @@ class AapcrController extends Controller
                 ]);
             }
 
-            if(isset($values['children']) && count($values['children'])) {
+            if(isset($values['children']) && count((array)$values['children'])) {
 
                 foreach ($values['children'] as $child) {
                     $child['detailId'] = $detail->id;
@@ -346,13 +346,13 @@ class AapcrController extends Controller
         foreach($aapcr->detailParents as $detail) {
             $offices = $this->splitPIOffices($detail->offices, ['origin' => 'aapcr'] );
 
-            $implementing = count($offices) ? $offices['implementing'] : [];
+            $implementing = count((array)$offices) ? $offices['implementing'] : [];
 
             $supporting = $offices['supporting'] ?? [];
 
             $subs = [];
 
-            if(count($detail->subDetails)) {
+            if(count((array)$detail->subDetails)) {
                 foreach($detail->subDetails as $subPI){
 
                     $subPIOffices = $this->splitPIOffices($subPI->offices, ['origin' => 'aapcr']);
@@ -414,7 +414,7 @@ class AapcrController extends Controller
                     'parent_id' => null,
                 );
 
-                if(count($subs)) {
+                if(count((array)$subs)) {
                     $item['children'] = $subs;
                 }
 
@@ -614,7 +614,7 @@ class AapcrController extends Controller
                     ]);
                 }
 
-                if(isset($data['children']) && count($data['children'])) {
+                if(isset($data['children']) && count((array)$data['children'])) {
 
                     foreach ($data['children'] as $child) {
                         $child['detailId'] = $detail->id;
