@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
 	UserController,
-    SettingController
+    SettingController,
+    AppController
 };
 use App\Http\Controllers\Form\{
     AapcrController,
@@ -31,10 +32,11 @@ use App\Http\Controllers\SystemAdmin\{
 Route::group([
     'prefix' => 'auth'
 ], function () {
-
+    Route::get('/login', [UserController::class, 'login'])->name("login");
     Route::group([
         'middleware' => ['cors', 'json.response']
     ], function () {
+        
         Route::post('/login', [UserController::class, 'login']);
     });
 

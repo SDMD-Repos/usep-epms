@@ -89,7 +89,7 @@ import SubMenu from './partials/submenu'
 import Item from './partials/item'
 import { usePermission } from '@/services/functions/permission'
 
-
+console.log(usePermission);
 export default {
   name: 'MenuLeft',
   components: { SubMenu, Item },

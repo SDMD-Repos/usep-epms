@@ -5,11 +5,13 @@ export const usePermission = permission => {
   const store = useStore()
 
   const { 
-    listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request, adminPermission,
+    listCreate, listDelete, listEdit, listAapcr, listOpcrvp, listOpcr, listCpcr, listIpcr, AccessRightsManager, request, adminPermission, adminRequests,
    } = permission
   const accessLists = computed(() => store.getters['user/access'])
   const formAccess = computed(() => store.getters['user/user'].formAccess)
-
+  
+  // console.log(accessLists.value);
+  // console.log(formAccess);
   const admin = accessLists.value.filter(value => {
     return adminPermission ? adminPermission.includes(value.permission_id) : 0
   });

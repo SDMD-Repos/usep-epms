@@ -20,6 +20,7 @@ class UserController extends Controller
      */
     public function login()
     {
+        // if(request()->isMethod("GET")) return null;
         $pmaps_id = request('pmapsId');
         $password = request('password');
 
