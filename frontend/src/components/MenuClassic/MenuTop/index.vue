@@ -58,7 +58,7 @@ import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { default as localStore } from 'store'
 import find from 'lodash/find'
-import { getMenuData } from '@/services/menu'
+import { getMenuData, filterMenuByAccessRights } from '@/services/menu'
 import SubMenu from './partials/submenu'
 import Item from './partials/item'
 import { SettingOutlined, VerticalRightOutlined } from '@ant-design/icons-vue';
@@ -72,7 +72,6 @@ export default {
     const route = useRoute()
     const permission = { adminPermission: ["adminPermission"] }
     const { adminPermissionRef } = usePermission(permission)
-    const menuData = computed(() => filterMenuData(getMenuData))
     const selectedKeys = ref([])
     const openKeys = ref([])
     const settings = computed(() => store.getters.settings)
@@ -82,6 +81,7 @@ export default {
     const pathname = computed(() => route.pathname)
     const routeName = computed(() => route.name)
     const mainStore = computed(() => store.getters.mainStore)
+    const menuData = computed(() => filterMenuByAccessRights(user, getMenuData))
 
     const onCollapse = (collapsed, type) => {
       const value = !settings.value.isMenuCollapsed
@@ -123,28 +123,6 @@ export default {
 
     const handleMenuSettingsClick = e => {
       store.commit('CHANGE_SETTING', { setting: 'menuLayoutType', value: e.key })
-    }
-
-    function filterMenuData(menuData) {
-      if(adminPermissionRef.value==true) {
-        return menuData;
-      }else {
-        const filteredMenu = [];
-        for (let i = 0; i < menuData.length; i++) {
-          const item = menuData[i];
-          if (item.title === 'System Admin' || item.title === 'Access Rights') {
-            // If it's the "System Admin" skip it and its children
-            while (i < menuData.length && menuData[i].title !== 'Access Rights') {
-              // Skip children of "Access Rights" category
-              i++;
-            }
-          } else {
-            // Add non-"System Admin" category or non-category item
-            filteredMenu.push(item);
-          }
-        }
-        return filteredMenu;
-      }
     }
 
     onMounted(() => {
