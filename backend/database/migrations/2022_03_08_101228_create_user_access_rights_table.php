@@ -15,7 +15,7 @@ class CreateUserAccessRightsTable extends Migration
     {
         Schema::create('user_access_rights', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->unsignedBigInteger('user_id');
+            $table->string('user_id', 15);
             $table->integer('access_right_id');
             $table->softDeletes();
             $table->timestamp('created_at')->useCurrent();
