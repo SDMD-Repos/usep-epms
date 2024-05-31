@@ -88,7 +88,7 @@ class AapcrController extends Controller
                 ['is_active', 1]
             ])->get();
 
-            if(count((array)$hasSavedAapcr)) {
+            if($hasSavedAapcr->count()>0) {
                 return response()->json('Unable to save this document. A finalized AAPCR has been created for the year '.$year.'.', 409);
             }
 
