@@ -22,6 +22,7 @@ use App\Models\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 
 class AapcrController extends Controller
@@ -50,6 +51,26 @@ class AapcrController extends Controller
         }
 
     }
+
+    public function print_aapcr() {
+        // Generate a PDF or get the Dompdf instance
+        $aapcr = $this->viewAapcrPdf(1, 1);
+        $pdf = PDF::loadView('print.aapcr', compact('aapcr'))->setPaper("legal", "landscape");
+        // Get the Dompdf options instance
+        $options = $pdf->getDomPDF()->getOptions();
+        
+        // Add multiple options
+        $options->set('margin-top', '0');
+        $options->set('margin-right', '0');
+        $options->set('margin-bottom', '0');
+        $options->set('margin-left', '0');
+        $options->set('dpi', '150');
+
+        // Set the updated options
+        $pdf->getDomPDF()->setOptions($options);
+        return $pdf->stream('aapcr.pdf');
+    }
+
 
     public function getAllAapcrs()
     {
