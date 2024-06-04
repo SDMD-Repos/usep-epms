@@ -141,7 +141,7 @@ class OpcrTemplateController extends Controller
                 ['deleted_at', null],
             ])->get();
 
-            if(count((array)$hasSavedOpcrTemplate)) {
+            if($hasSavedOpcrTemplate->count()>0) {
                 return response()->json('Unable to save this document. A finalized OPCR Template has been created for the year '.$year.'.', 409);
             }
 

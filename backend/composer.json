@@ -7,8 +7,9 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
-        "barryvdh/laravel-dompdf": "^2.1",
+        "barryvdh/laravel-dompdf": "^2.2",
         "daltcore/lara-pdf-merger": "^2.0",
+        "geekcom/phpjasper": "^3.4",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",
         "laravel/passport": "^12.2",

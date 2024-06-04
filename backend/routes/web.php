@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Category;
+use App\Http\Controllers\Form\AapcrController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,5 @@ Route::get('/', function () {
     // return count((array)$category);
     return view('welcome');
 });
+
+Route::get('/print/aapcr', [AapcrController::class, "print_aapcr"]);

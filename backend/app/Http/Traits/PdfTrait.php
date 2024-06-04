@@ -237,7 +237,7 @@ trait PdfTrait {
                 'jsonArrayData' => ['main' => $data, 'programsDataSet' => $programsDataSet],
                 'params' => $params,
             ];
-
+            return $pdfData;
             $file = $this->renderPDFFile($pdfData);
 
             if(!$isPublish) {
