@@ -19,7 +19,7 @@ import { useStore } from 'vuex'
 import { listTableColumns } from '@/services/columns'
 import { useUnpublish, useViewPublishedFiles } from '@/services/functions/formListActions'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
-import { fetchPdfData, viewSavedPdf } from '@/services/api/mainForms/aapcr'
+import { fetchPdfData, viewSavedPdf,viewAapcrPdf} from '@/services/api/mainForms/aapcr'
 import { usePermission } from '@/services/functions/permission'
 import FormListTable from '@/components/Tables/Forms/List'
 import UnpublishedFormsModal from '@/components/Modals/UnpublishedForms'
@@ -90,8 +90,7 @@ export default defineComponent({
 
       if(!fromUnpublished && !data.published_date) {
         store.commit('aapcr/SET_STATE', { loading: true })
-
-        renderer = fetchPdfData(data.id)
+        renderer = viewAapcrPdf(data.id)
       }else if(data.published_date){
         renderer = viewSavedPdf(data.published_file)
       }else {

@@ -20,5 +20,3 @@ Route::get('/', function () {
     // return count((array)$category);
     return view('welcome');
 });
-
-Route::get('/print/aapcr', [AapcrController::class, "print_aapcr"]);

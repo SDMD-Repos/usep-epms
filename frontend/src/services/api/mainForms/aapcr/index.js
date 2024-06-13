@@ -89,3 +89,12 @@ export function viewSavedPdf(fileName) {
     })
     .catch(err => console.log(err))
 }
+
+export function viewAapcrPdf(fileName) {
+  return apiClient
+    .get('/forms/aapcr/print/pdf/' + fileName, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}

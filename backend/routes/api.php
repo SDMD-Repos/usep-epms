@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
-	UserController,
+    UserController,
     SettingController,
     AppController
 };
@@ -36,13 +36,13 @@ Route::group([
     Route::group([
         'middleware' => ['cors', 'json.response']
     ], function () {
-        
+
         Route::post('/login', [UserController::class, 'login']);
     });
 
     Route::group([
-      'middleware' => 'auth:api'
-    ], function() {
+        'middleware' => 'auth:api'
+    ], function () {
         Route::get('/logout', [UserController::class, 'logout']);
         Route::get('/account', [UserController::class, 'account']);
     });
@@ -81,7 +81,7 @@ Route::group([
     Route::post('/update-measure-rating/{id}', [SettingController::class, 'updateMeasureRating']);
     Route::post('/delete-measure-rating/{id}', [SettingController::class, 'deleteMeasureRating']);
 
-    Route::get('/view-measure-pdf/{year}',[AppController::class, 'viewMeasurePDF']);
+    Route::get('/view-measure-pdf/{year}', [AppController::class, 'viewMeasurePDF']);
 
     Route::get('/get-user-form-access', [SettingController::class, 'getUserFormAccess']);
     Route::get('/get-all-spms-forms', [SettingController::class, 'getAllForms']);
@@ -110,7 +110,7 @@ Route::group([
 Route::group([
     'prefix' => 'forms',
     'middleware' => 'auth:api'
-], function() {
+], function () {
 
     Route::get('/viewSavedPdf/{fileName}', [AppController::class, 'viewSavedPdf']);
 
@@ -118,7 +118,7 @@ Route::group([
 
     Route::group([
         'prefix' => 'aapcr',
-    ], function() {
+    ], function () {
         Route::post('/save', [AapcrController::class, 'save']);
         Route::get('/check-saved/{year}', [AapcrController::class, 'checkSaved']);
         Route::get('/list', [AapcrController::class, 'getAllAapcrs']);
@@ -128,13 +128,14 @@ Route::group([
         Route::get('/view/{id}', [AapcrController::class, 'view']);
         Route::get('/viewPdf/{id}', [AppController::class, 'viewAapcrPdf']);
         Route::post('/update/{id}', [AapcrController::class, 'update']);
+        Route::get('/print/pdf/{id}', [AapcrController::class, "print_aapcr"]);
     });
 
     # OPCR (VP) Controller routes
 
     Route::group([
         'prefix' => 'opcrvp'
-    ], function() {
+    ], function () {
         Route::get('/check-saved/{officeId}/{year}', [VpopcrController::class, 'checkSaved']);
         Route::get('/get-aapcr-details/{vpId}/{year}', [VpopcrController::class, 'getAapcrDetails']);
         Route::post('/save', [VpopcrController::class, 'save']);
@@ -151,7 +152,7 @@ Route::group([
     # OPCR & CPCR Form Controller routes
     Route::group([
         'prefix' => 'ocpcr'
-    ], function() {
+    ], function () {
 
         # MAIN FORM
         Route::get('/check-saved/{officeId}/{year}', [OcpcrController::class, 'checkSaved']);
@@ -161,7 +162,7 @@ Route::group([
         # TEMPLATE
         Route::group([
             'prefix' => 'template'
-        ], function()  {
+        ], function () {
             Route::get('/check-saved/{year}', [TemplateController::class, 'opcrCheckSaved']);
             Route::post('/save', [TemplateController::class, 'saveOpcr']);
             Route::get('/list', [TemplateController::class, 'getAllOpcr']);
@@ -178,23 +179,23 @@ Route::group([
 Route::group([
     'prefix' => 'system',
     'middleware' => 'auth:api'
-], function() {
+], function () {
 
     # Access Permission
     Route::get('/permission', [PermissionController::class, 'detailsPermission']);
     Route::post('/save-permission', [PermissionController::class, 'savePermission']);
     Route::get('/get-permission-by-user/{id}', [PermissionController::class, 'fetchPermissionByUser']);
     Route::post('/update-permission', [PermissionController::class, 'updatePermission']);
-    Route::post('/save-office-head',[PermissionController::class, 'saveOfficeHead']);
-    Route::get('/fetch-office-head/{form_id}/{office_id}',[PermissionController::class, 'fetchOfficeHead']);
-    Route::post('/save-office-staff',[PermissionController::class, 'saveOfficeStaff']);
+    Route::post('/save-office-head', [PermissionController::class, 'saveOfficeHead']);
+    Route::get('/fetch-office-head/{form_id}/{office_id}', [PermissionController::class, 'fetchOfficeHead']);
+    Route::post('/save-office-staff', [PermissionController::class, 'saveOfficeStaff']);
     Route::post('/check-access', [PermissionController::class, 'checkAccessByPermissions']);
     Route::get('/check-form-head/{pmaps_id}/{form_id}', [PermissionController::class, 'checkFormHead']);
     Route::get('/check-form-access/{pmaps_id}/{form_id}', [PermissionController::class, 'checkFormAccess']);
 
     Route::group([
         'prefix' => 'requests'
-    ], function() {
+    ], function () {
         Route::get('/get-all-unpublish/{status}', [RequestsController::class, 'getAllUnpublishRequests']);
         Route::post('/update-request-status', [RequestsController::class, 'updateFormRequestStatus']);
         Route::get('/view-unpublished-form/{id}', [RequestsController::class, 'viewUnpublishedForm']);
@@ -204,7 +205,7 @@ Route::group([
 Route::group([
     'prefix' => 'hris',
     'middleware' => 'auth:api'
-], function() {
+], function () {
     Route::post('/get-main-offices-children', [SettingController::class, 'getMainOfficesWithChildren']);
     Route::get('/get-main-offices-only/{officesOnly}', [SettingController::class, 'getMainOfficesOnly']);
     Route::get('/get-personnel-by-office/{id}/{permanentOnly}/{isSubunit}', [SettingController::class, 'getPersonnelByOffice']);
