@@ -18,6 +18,7 @@ module.exports = {
     },
   },
   devServer: {
-    host: '0.0.0.0',
+    host: 'usepepms.local',
+    // port: 8080, // You can change the port if needed
   },
 }

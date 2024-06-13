@@ -38,44 +38,6 @@ export default {
     }
   },
   methods: {
-    // nextPage() {
-    //   this.previewFilePromise.then(adobeViewer => {
-    //     adobeViewer.getAPIs().then(apis => {
-    //       apis.getCurrentPage()
-    //         .then(currentPage => apis.gotoLocation(currentPage + 1))
-    //         .catch(error => console.error(error))
-    //     })
-    //   })
-    // },
-    // previousPage() {
-    //   this.previewFilePromise.then(adobeViewer => {
-    //     adobeViewer.getAPIs().then(apis => {
-    //       apis.getCurrentPage()
-    //         .then(currentPage => {
-    //           if (currentPage > 1) {
-    //             return apis.gotoLocation(currentPage - 1)
-    //           }
-    //         })
-    //         .catch(error => console.error(error))
-    //     })
-    //   })
-    // },
-    // zoomIn() {
-    //   this.previewFilePromise.then(adobeViewer => {
-    //     adobeViewer.getAPIs().then(apis => {
-    //       apis.getZoomAPIs().zoomIn()
-    //         .catch(error => console.error(error))
-    //     })
-    //   })
-    // },
-    // zoomOut() {
-    //   this.previewFilePromise.then(adobeViewer => {
-    //     adobeViewer.getAPIs().then(apis => {
-    //       apis.getZoomAPIs().zoomOut()
-    //         .catch(error => console.error(error))
-    //     })
-    //   })
-    // },
     initializePdf() {
       if (!this.fileUrl) {
         this.$store.commit('aapcr/SET_STATE', {
