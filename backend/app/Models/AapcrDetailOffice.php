@@ -54,15 +54,34 @@ class AapcrDetailOffice extends Model
      */
     public function scopeFilterVpOffices($query, $id)
     {
-        return $query->where(function($officeQ) use ($id) {
+        return $query->where(function ($officeQ) use ($id) {
             $officeQ->where('vp_office_id', '=', $id)
                 ->orWhere('office_id', '=', $id)
-                ->orWhere(function($groupOfcWhere) use ($id) {
+                ->orWhere(function ($groupOfcWhere) use ($id) {
                     $groupOfcWhere->where('is_group', 1)
-                        ->whereHas('group', function($joinOfcQuery) use ($id) {
+                        ->whereHas('group', function ($joinOfcQuery) use ($id) {
                             $joinOfcQuery->where('supervising_id', '=', $id);
                         });
                 });
         });
+    }
+
+    public function getImplementingOfficeDetails($parentId)
+    {
+
+        // dd($parentId);
+        return self::where('detail_id', $parentId)
+            ->where('cascade_to', 1)
+            ->where('office_type_id', 1)
+            ->get();
+    }
+
+
+    public function getSupportOfficeDetails($parentId)
+    {
+        return self::where('detail_id', $parentId)
+            ->where('cascade_to', 2)
+            ->where('office_type_id', 2)
+            ->get();
     }
 }

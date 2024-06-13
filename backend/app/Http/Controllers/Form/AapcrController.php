@@ -22,6 +22,7 @@ use App\Models\SubCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 
 class AapcrController extends Controller
@@ -39,7 +40,7 @@ class AapcrController extends Controller
             return response()->json([
                 'hasSaved' => isset($getSaved->id)
             ], 200);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -48,18 +49,39 @@ class AapcrController extends Controller
 
             return response()->json($e->getMessage(), $status);
         }
-
     }
+
+    public function print_aapcr()
+    {
+        // Generate a PDF or get the Dompdf instance
+        $aapcr = $this->viewAapcrPdf(1, 1);
+        // return $aapcr;
+        $pdf = PDF::loadView('print.aapcr', compact('aapcr'))->setPaper("legal", "landscape");
+        // Get the Dompdf options instance
+        $options = $pdf->getDomPDF()->getOptions();
+
+        // Add multiple options
+        $options->set('margin-top', '0');
+        $options->set('margin-right', '0');
+        $options->set('margin-bottom', '0');
+        $options->set('margin-left', '0');
+        $options->set('dpi', '150');
+
+        // Set the updated options
+        $pdf->getDomPDF()->setOptions($options);
+        return $pdf->stream('aapcr.pdf');
+    }
+
 
     public function getAllAapcrs()
     {
-        try  {
+        try {
             $aapcrList = Aapcr::select("*", "id as key")->with('status')->orderBy('created_at', 'ASC')->get();
 
             return response()->json([
                 'aapcrList' => $aapcrList
             ], 200);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -72,7 +94,7 @@ class AapcrController extends Controller
 
     public function save(StoreAapcr $request)
     {
-        try{
+        try {
             $validated = $request->validated();
 
             $dataSource = $validated['dataSource'];
@@ -88,8 +110,8 @@ class AapcrController extends Controller
                 ['is_active', 1]
             ])->get();
 
-            if(count((array)$hasSavedAapcr)) {
-                return response()->json('Unable to save this document. A finalized AAPCR has been created for the year '.$year.'.', 409);
+            if ($hasSavedAapcr->count() > 0) {
+                return response()->json('Unable to save this document. A finalized AAPCR has been created for the year ' . $year . '.', 409);
             }
 
             DB::beginTransaction();
@@ -100,22 +122,22 @@ class AapcrController extends Controller
             $aapcr->document_name = $documentName;
             $aapcr->finalized_date = ($isFinalized ? Carbon::now() : null);
             $aapcr->create_id = $this->login_user->pmaps_id;
-            $aapcr->history = "Created ". $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+            $aapcr->history = "Created " . $finalizedHistory . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
             if ($aapcr->save()) {
-                foreach($dataSource as $value) {
+                foreach ($dataSource as $value) {
                     $this->saveAapcrDetails($aapcr->id, $value);
                 }
 
                 $this->saveProgramBudgets($aapcr->id, $programBudgets);
-            }else{
+            } else {
                 DB::rollBack();
             }
 
             DB::commit();
 
             return response()->json('AAPCR was saved successfully', 200);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -132,9 +154,9 @@ class AapcrController extends Controller
 
         $detail = new AapcrDetail();
 
-        if(isset($values['subCategory'])){
+        if (isset($values['subCategory'])) {
             $category_id = SubCategory::find($values['subCategory']['value']);
-        }else{
+        } else {
             $category_id = Program::find($values['program']);
         }
 
@@ -145,7 +167,7 @@ class AapcrController extends Controller
         $detail->pi_name = $values['name'];
         $detail->is_header = $values['isHeader'];
 
-        if(!$values['isHeader']) {
+        if (!$values['isHeader']) {
             $detail->target = $values['target'];
             $detail->allocated_budget = $values['budget'];
             $detail->targets_basis = $values['targetsBasis'];
@@ -158,12 +180,12 @@ class AapcrController extends Controller
         $detail->create_id = $this->login_user->pmaps_id;
         $detail->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-        if($detail->save()) {
+        if ($detail->save()) {
             $this->saveMeasures($detail, $values['measures']);
 
             $officeModel = new AapcrDetailOffice();
 
-            foreach($formFields as $formField) {
+            foreach ($formFields as $formField) {
                 $this->saveOffices([
                     'form' => 'aapcr',
                     'model' => $officeModel,
@@ -173,7 +195,7 @@ class AapcrController extends Controller
                 ]);
             }
 
-            if(isset($values['children']) && count((array)$values['children'])) {
+            if (isset($values['children']) && count((array)$values['children'])) {
 
                 foreach ($values['children'] as $child) {
                     $child['detailId'] = $detail->id;
@@ -186,7 +208,7 @@ class AapcrController extends Controller
 
     public function saveProgramBudgets($aapcrId, $budgets)
     {
-        foreach($budgets as $budget) {
+        foreach ($budgets as $budget) {
             $newBudget = new AapcrProgramBudget();
 
             $newBudget->aapcr_id = $aapcrId;
@@ -195,7 +217,7 @@ class AapcrController extends Controller
             $newBudget->create_id = $this->login_user->pmaps_id;
             $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-            if(!$newBudget->save()){
+            if (!$newBudget->save()) {
                 DB::rollBack();
             }
         }
@@ -212,7 +234,7 @@ class AapcrController extends Controller
                 ['is_active', 1]
             ])->whereNotNull('published_date')->first();
 
-            if(!$hasPublished) {
+            if (!$hasPublished) {
                 $aapcr = Aapcr::find($id);
 
                 $aapcr->published_date = Carbon::now();
@@ -227,11 +249,10 @@ class AapcrController extends Controller
                 $aapcr->save();
 
                 return response()->json('AAPCR was published successfully', 200);
-
-            }else{
+            } else {
                 return response()->json('Cannot publish two or more AAPCRs in a year', 400);
             }
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -267,14 +288,14 @@ class AapcrController extends Controller
             $unpublished->create_id = $this->login_user->pmaps_id;
             $unpublished->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-            if(!$unpublished->save()) {
+            if (!$unpublished->save()) {
                 DB::rollBack();
             }
 
             DB::commit();
 
             return response()->json('AAPCR was unpublished successfully', 200);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -303,7 +324,7 @@ class AapcrController extends Controller
             $aapcr->save();
 
             return response()->json("Successfully deactivated", 200);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -323,7 +344,7 @@ class AapcrController extends Controller
 
         $programsSummary = [];
 
-        foreach($programBudgets as $programBudget) {
+        foreach ($programBudgets as $programBudget) {
             $mainCategory = new \stdClass();
 
             $mainCategory->key = $programBudget->program_id;
@@ -343,8 +364,8 @@ class AapcrController extends Controller
         $this->targetsBasisList = []; // Reset $this->targetsBasisList from ConverterTrait
 
         # Loop through AAPCR details
-        foreach($aapcr->detailParents as $detail) {
-            $offices = $this->splitPIOffices($detail->offices, ['origin' => 'aapcr'] );
+        foreach ($aapcr->detailParents as $detail) {
+            $offices = $this->splitPIOffices($detail->offices, ['origin' => 'aapcr']);
 
             $implementing = count((array)$offices) ? $offices['implementing'] : [];
 
@@ -352,8 +373,8 @@ class AapcrController extends Controller
 
             $subs = [];
 
-            if(count((array)$detail->subDetails)) {
-                foreach($detail->subDetails as $subPI){
+            if (count((array)$detail->subDetails)) {
+                foreach ($detail->subDetails as $subPI) {
 
                     $subPIOffices = $this->splitPIOffices($subPI->offices, ['origin' => 'aapcr']);
 
@@ -385,7 +406,6 @@ class AapcrController extends Controller
                     );
 
                     $subs[] = $subItem;
-
                 }
             }
 
@@ -393,7 +413,7 @@ class AapcrController extends Controller
 
             $extracted = $this->extractDetails($detail);
 
-            if(!$detail->parent_id){
+            if (!$detail->parent_id) {
                 $item = array(
                     'key' => $detail->id,
                     'id' => $detail->id,
@@ -414,7 +434,7 @@ class AapcrController extends Controller
                     'parent_id' => null,
                 );
 
-                if(count((array)$subs)) {
+                if (count((array)$subs)) {
                     $item['children'] = $subs;
                 }
 
@@ -451,12 +471,12 @@ class AapcrController extends Controller
 
             $history = "";
 
-            if($isFinalized){
-                if($aapcr->finalized_date !== NULL){
+            if ($isFinalized) {
+                if ($aapcr->finalized_date !== NULL) {
                     $finalized_date = $aapcr->finalized_date;
-                }else{
+                } else {
                     $finalized_date = Carbon::now();
-                    $history = 'Finalized ' . Carbon::now()." by ".$this->login_user->fullname."\n";
+                    $history = 'Finalized ' . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
             }
 
@@ -467,33 +487,33 @@ class AapcrController extends Controller
             $aapcr->finalized_date = $isFinalized ? $finalized_date : null;
             $aapcr->modify_id = $this->login_user->pmaps_id;
 
-            if($aapcr->isDirty('year')){
-                $history .= "Updated year from ".$original['year']." to ".$year." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            if ($aapcr->isDirty('year')) {
+                $history .= "Updated year from " . $original['year'] . " to " . $year . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
             }
 
-            if($aapcr->isDirty('document_name')){
-                $history .= "Updated document name from ".$original['document_name']." to ".$documentName." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+            if ($aapcr->isDirty('document_name')) {
+                $history .= "Updated document name from " . $original['document_name'] . " to " . $documentName . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
             }
 
-            $aapcr->history = $aapcr->history.$history;
+            $aapcr->history = $aapcr->history . $history;
 
-            if($aapcr->save()) {
-                foreach($deletedIds as $deletedId){
+            if ($aapcr->save()) {
+                foreach ($deletedIds as $deletedId) {
                     $deleteAapcr = AapcrDetail::find($deletedId);
 
                     $deleteAapcr->modify_id = $this->login_user->pmaps_id;
-                    $deleteAapcr->history = $deleteAapcr->history."Deleted ". Carbon::now(). " by ".$this->login_user->fullname."\n";
+                    $deleteAapcr->history = $deleteAapcr->history . "Deleted " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-                    if($deleteAapcr->save()){
-                        if(!$deleteAapcr->delete()){
+                    if ($deleteAapcr->save()) {
+                        if (!$deleteAapcr->delete()) {
                             DB::rollBack();
                         }
-                    }else{
+                    } else {
                         DB::rollBack();
                     }
                 }
 
-                foreach($dataSource as $source){
+                foreach ($dataSource as $source) {
                     $this->updateDetails($source, $id);
                 }
 
@@ -505,8 +525,7 @@ class AapcrController extends Controller
             } else {
                 DB::rollBack();
             }
-
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
@@ -524,10 +543,10 @@ class AapcrController extends Controller
 
             $detail = AapcrDetail::find($data['id']);
 
-            if($detail) {
-                if(isset($data['subCategory'])){
+            if ($detail) {
+                if (isset($data['subCategory'])) {
                     $category_id = SubCategory::find($data['subCategory']['value']);
-                }else{
+                } else {
                     $category_id = Program::find($data['program']);
                 }
 
@@ -554,49 +573,49 @@ class AapcrController extends Controller
 
                 $history = '';
 
-                if($detail->isDirty('pi_name')){
-                    $history .= "Updated Performance Indicator from '".$original['pi_name']."' to '".$data['name']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('pi_name')) {
+                    $history .= "Updated Performance Indicator from '" . $original['pi_name'] . "' to '" . $data['name'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('is_header')){
-                    $history .= "Updated is_header from ".$original['is_header']." to ".$isHeader." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('is_header')) {
+                    $history .= "Updated is_header from " . $original['is_header'] . " to " . $isHeader . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('target')){
-                    $history .= "Updated Target from '".$original['target']."' to '".$data['target']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('target')) {
+                    $history .= "Updated Target from '" . $original['target'] . "' to '" . $data['target'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('allocated_budget')){
-                    $history .= "Updated Allocated Budget from '".$original['allocated_budget']."' to '".$data['budget']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('allocated_budget')) {
+                    $history .= "Updated Allocated Budget from '" . $original['allocated_budget'] . "' to '" . $data['budget'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('targets_basis')){
-                    $history .= "Updated Targets Basis from '".$original['targets_basis']."' to '".$data['targetsBasis']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('targets_basis')) {
+                    $history .= "Updated Targets Basis from '" . $original['targets_basis'] . "' to '" . $data['targetsBasis'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('cascading_level')){
-                    $history .= "Updated Cascading Level from '".$original['cascading_level']."' to '".$cascadingLevel."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('cascading_level')) {
+                    $history .= "Updated Cascading Level from '" . $original['cascading_level'] . "' to '" . $cascadingLevel . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('category_id')){
-                    $history .= "Updated Category ID from ".$original['category_id']." to ".$category_id->category->id." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('category_id')) {
+                    $history .= "Updated Category ID from " . $original['category_id'] . " to " . $category_id->category->id . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('sub_category_id')){
-                    $history .= "Updated Sub Category ID from ".$original['sub_category_id']." to ".$subCategory." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('sub_category_id')) {
+                    $history .= "Updated Sub Category ID from " . $original['sub_category_id'] . " to " . $subCategory . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('program_id')){
-                    $history .= "Updated Program ID from ".$original['program_id']." to ".$data['program']." ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('program_id')) {
+                    $history .= "Updated Program ID from " . $original['program_id'] . " to " . $data['program'] . " " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                if($detail->isDirty('other_remarks')){
-                    $history .= "Updated Other Remarks from '".$original['other_remarks']."' to '".$data['remarks']."' ". Carbon::now()." by ".$this->login_user->fullname."\n";
+                if ($detail->isDirty('other_remarks')) {
+                    $history .= "Updated Other Remarks from '" . $original['other_remarks'] . "' to '" . $data['remarks'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
-                $detail->history = $detail->history.$history;
+                $detail->history = $detail->history . $history;
 
-                if(!$detail->save()){
+                if (!$detail->save()) {
                     DB::rollBack();
                 }
 
@@ -604,7 +623,7 @@ class AapcrController extends Controller
 
                 $officeModel = new AapcrDetailOffice();
 
-                foreach($formFields as $formField) {
+                foreach ($formFields as $formField) {
                     $this->updateOffices([
                         'form' => 'aapcr',
                         'model' => $officeModel,
@@ -614,7 +633,7 @@ class AapcrController extends Controller
                     ]);
                 }
 
-                if(isset($data['children']) && count((array)$data['children'])) {
+                if (isset($data['children']) && count((array)$data['children'])) {
 
                     foreach ($data['children'] as $child) {
                         $child['detailId'] = $detail->id;
@@ -622,7 +641,6 @@ class AapcrController extends Controller
                         $this->updateDetails($child, $aapcrId);
                     }
                 }
-
             } else {
                 DB::rollBack();
             }
@@ -641,7 +659,7 @@ class AapcrController extends Controller
                 'program_id' => $budget['mainCategory']['key']
             ])->first();
 
-            if(!isset($programBudget->id)){
+            if (!isset($programBudget->id)) {
                 $newBudget = new AapcrProgramBudget();
 
                 $newBudget->aapcr_id = $aapcrId;
@@ -650,13 +668,15 @@ class AapcrController extends Controller
                 $newBudget->create_id = $this->login_user->pmaps_id;
                 $newBudget->history = "Created " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-                if(!$newBudget->save()){
+                if (!$newBudget->save()) {
                     DB::rollBack();
-                }else{ $ids[] = $newBudget->id; }
-            }else{
+                } else {
+                    $ids[] = $newBudget->id;
+                }
+            } else {
                 $history = "";
 
-                if($programBudget->trashed()){
+                if ($programBudget->trashed()) {
                     $programBudget->restore();
                     $history = "Added " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
@@ -665,14 +685,14 @@ class AapcrController extends Controller
 
                 $programBudget->budget = $budget['categoryBudget'];
 
-                if($programBudget->isDirty('budget')) {
+                if ($programBudget->isDirty('budget')) {
                     $history = "Updated budget from '" . $cachedBudget . "' to '" . $budget['categoryBudget'] . "' " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
                 }
 
                 $programBudget->modify_id = $this->login_user->pmaps_id;
-                $programBudget->history = $programBudget->history.$history;
+                $programBudget->history = $programBudget->history . $history;
 
-                if(!$programBudget->save()){
+                if (!$programBudget->save()) {
                     DB::rollBack();
                 }
 
@@ -682,18 +702,93 @@ class AapcrController extends Controller
 
         $deletedIds = AapcrProgramBudget::where('aapcr_id', $aapcrId)->whereNotIn('id', $ids)->get();
 
-        foreach($deletedIds as $deletedId) {
+        foreach ($deletedIds as $deletedId) {
             $deletedId->updated_at = Carbon::now();
             $deletedId->modify_id = $this->login_user->pmaps_id;
-            $deletedId->history = $deletedId->history."Removed " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
+            $deletedId->history = $deletedId->history . "Removed " . Carbon::now() . " by " . $this->login_user->fullname . "\n";
 
-            if(!$deletedId->save()){
+            if (!$deletedId->save()) {
                 DB::rollBack();
-            }else{
-                if(!$deletedId->delete()){
+            } else {
+                if (!$deletedId->delete()) {
                     DB::rollBack();
                 }
             }
         }
+    }
+
+    public function aapcrChildDetails($aapcr_id)
+    {
+
+        return $this->getChildDetails($aapcr_id);
+    }
+
+    public function getChildDetails($aapcr_id)
+    {
+        $childDetails = AapcrDetail::where([
+            ['aapcr_id', $aapcr_id],
+            ['is_header', 0]
+        ])
+            ->with('subCategory', 'measures')
+            ->get()
+            ->groupBy('sub_category_id'); // Group by sub_category_id instead of subCategory.name
+
+        $result = [];
+
+        foreach ($childDetails as $subCategoryId => $details) {
+            foreach ($details as $child) {
+                $measures = $child->measures->map(function ($measure) {
+                    return $measure->name; // Adjust this according to your actual measure field
+                })->toArray();
+
+                $implementingOffices = $this->aapcrImplementingOffice($child->id)->map(function ($office) {
+                    return [
+                        'id' => $office->id,
+                        'office_name' => $office->office_name,
+                    ];
+                });
+                $supportOffices = $this->aapcrSuuportOffice($child->id)->map(function ($office) {
+                    return [
+                        'id' => $office->id,
+                        'office_name' => $office->office_name,
+                    ];
+                });
+                // Get the subCategory name to include in the result
+                $subCategoryName = $child->subCategory->name ?? '';
+
+                // Initialize subcategory array if not already set
+                if (!isset($result[$subCategoryId])) {
+                    $result[$subCategoryId]['sub_category_name'] = $subCategoryName;
+                    $result[$subCategoryId]['details'] = [];
+                }
+
+                // Add details to the subcategory
+                $result[$subCategoryId]['details'][] = [
+                    'pi_name' => $child->pi_name,
+                    'pi_name_id' => $child->id,
+                    'target' => $child->target,
+                    'target_basis' => $child->targets_basis,
+                    'measures' => $measures,
+                    'implementing_offices' => $implementingOffices,
+                    'support_offices' => $supportOffices,
+                    'other_remarks' => $child->other_remarks
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+
+    public function aapcrImplementingOffice($parent_id)
+    {
+        $officeModel = new AapcrDetailOffice();
+        return $officeModel->getImplementingOfficeDetails($parent_id);
+    }
+
+    public function aapcrSuuportOffice($parent_id)
+    {
+        $officeModel = new AapcrDetailOffice();
+        return $officeModel->getSupportOfficeDetails($parent_id);
     }
 }
