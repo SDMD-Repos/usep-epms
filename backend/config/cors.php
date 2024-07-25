@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8080', 'http://172.16.210.202:8080','http://usepepms.local:8081', 'http://usepepms.local:8080'],
+    'allowed_origins' => ['http://localhost:8080', 'http://172.16.210.202:8080', 'http://usepepms.local:8081', 'http://usepepms.local:8080', 'https://chiciot.usep.edu.ph', 'http://172.16.210.14:7955'],
 
     'allowed_origins_patterns' => [],
 

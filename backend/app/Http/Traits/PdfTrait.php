@@ -320,7 +320,7 @@ trait PdfTrait
                         'pi_name_id' => $detail->id,
                         'target' => $detail->target,
                     ],
-                    'childDetails' => $this->aapcrChildDetails($detail->aapcr_id), // Ensure passing the correct detail ID
+                    // 'childDetails' => $this->aapcrChildDetails($detail->aapcr_id), // Ensure passing the correct detail ID
                 ];
             }
             // dd($data);
