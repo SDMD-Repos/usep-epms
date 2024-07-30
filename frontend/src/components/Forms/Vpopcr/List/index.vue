@@ -23,7 +23,7 @@ import { useRouter } from "vue-router"
 import { listTableColumns } from '@/services/columns'
 import { useViewPublishedFiles } from '@/services/functions/formListActions'
 import { renderPdf } from '@/services/api/mainForms/vpopcr'
-import { viewSavedPdf } from '@/services/api/mainForms/aapcr';
+import { viewSavedPdf,viewVpOpcrPdf } from '@/services/api/mainForms/aapcr';
 import { useUnpublish } from '@/services/functions/formListActions'
 import { usePermission } from '@/services/functions/permission'
 import { getUnpublishedFormData } from '@/services/api/system/requests'
@@ -108,19 +108,15 @@ export default defineComponent({
     const viewPdf = params => {
       const { data } =  params
       const fromUnpublished = typeof params.fromUnpublished !== 'undefined' ? params.fromUnpublished : false
-
       let renderer = null
       const documentName = data.office_name || data.file_name
-
       if(!fromUnpublished && !data.published_date) {
         store.commit('vpopcr/SET_STATE', { loading: true })
-
-        renderer = renderPdf(data.id)
+        renderer = viewVpOpcrPdf(data.id)
       }else if(data.published_date){
-        renderer = viewSavedPdf(data.published_file)
+        renderer = viewVpOpcrPdf(data.id)
       }else {
         _message.loading('Loading...')
-
         renderer = getUnpublishedFormData(data.id)
       }
 

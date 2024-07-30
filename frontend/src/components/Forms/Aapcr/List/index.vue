@@ -87,15 +87,13 @@ export default defineComponent({
 
       let renderer = null
       const documentName = data.document_name || data.file_name
-
       if(!fromUnpublished && !data.published_date) {
         store.commit('aapcr/SET_STATE', { loading: true })
         renderer = viewAapcrPdf(data.id)
       }else if(data.published_date){
-        renderer = viewSavedPdf(data.published_file)
+        renderer = viewSavedPdf(data.id)
       }else {
         _message.loading('Loading...')
-
         renderer = getUnpublishedFormData(data.id)
       }
 

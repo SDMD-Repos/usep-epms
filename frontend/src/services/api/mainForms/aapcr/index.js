@@ -83,16 +83,25 @@ export function update(id, data) {
 
 export function viewSavedPdf(fileName) {
   return apiClient
-    .get('/forms/viewSavedPdf/' + fileName, { responseType: 'blob' })
+    .get('/forms/aapcr/print/pdf/' + fileName, { responseType: 'blob' })
     .then(response => {
       return response.data
     })
     .catch(err => console.log(err))
 }
 
-export function viewAapcrPdf(fileName) {
+export function viewAapcrPdf(id) {
   return apiClient
-    .get('/forms/aapcr/print/pdf/' + fileName, { responseType: 'blob' })
+    .get('/forms/aapcr/print/pdf/' + id, { responseType: 'blob' })
+    .then(response => {
+      return response.data
+    })
+    .catch(err => console.log(err))
+}
+
+export function viewVpOpcrPdf(id) {
+  return apiClient
+    .get('/forms/opcrvp/print/pdf/' + id, { responseType: 'blob' })
     .then(response => {
       return response.data
     })

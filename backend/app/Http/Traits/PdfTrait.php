@@ -11,6 +11,7 @@ use App\Models\Signatory;
 use App\Models\VpOpcr;
 use Illuminate\Support\Facades\Storage;
 use League\CommonMark\Extension\InlinesOnly\ChildRenderer;
+use App\Http\Controllers\Form\AapcrController;
 use PHPJasper\PHPJasper;
 use PDF;
 use LynX39\LaraPdfMerger\Facades\PdfMerger;
@@ -52,11 +53,109 @@ trait PdfTrait
         }
     }
 
-    public function viewSavedPdf($fileName)
+    public function viewSavedPdf($id, $is_publish = 1)
     {
-        $file = storage_path('app/public/uploads/published/' . $fileName);
+        try {
+            $AapcrController = new AapcrController();
+            $aapcr = Aapcr::find($id);
+            $documentName = $aapcr->document_name;
+            $year = $aapcr->year;
+            $signatory = $this->getSignatories($aapcr, "aapcr");
+            $programs = Program::where('year', $year)->whereNull('form_id')->orderBy('category_id', 'asc')->get();
+            $programsDataSet = [];
 
-        return response()->download($file);
+            foreach ($programs as $programKey => $program) {
+                $categoryName = $this->integerToRomanNumeral($program->category->order) . ". " . mb_strtoupper($program->category->name);
+                $programsDataSet[$programKey] = [
+                    'categoryName' => $categoryName,
+                    'categoryPercentage' => $program->category->percentage,
+                    'programName' => $program->name,
+                    'programPercentage' => $program->percentage
+                ];
+            }
+
+            $data = [];
+            $details = $aapcr->details()->where('parent_id', NULL)
+                ->orderBy('category_id', 'ASC')
+                ->orderBy('program_id', 'ASC')
+                ->orderBy('sub_category_id', 'ASC')->get();
+
+            $PICount = 0;
+            $aapcrBudgets = $aapcr->budgets;
+            $tempProgramId = 0;
+            $totalBudget = 0;
+            $processedPrograms = [];
+
+            foreach ($details as $detail) {
+                $budget = 0;
+                $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
+                foreach ($aapcrBudgets as $aapcrBudget) {
+                    if ($aapcrBudget->program_id === $detail->program_id) {
+                        $budget = $aapcrBudget->budget;
+                        $totalBudget += $aapcrBudget->budget;
+                        break;
+                    }
+                }
+
+                if (!isset($data[$function])) {
+                    $data[$function] = [];
+                }
+
+                $data[$function][$detail->program->id] = [
+                    'program' => $detail->program->name,
+                    'program_id' => $detail->program->id,
+                    'total_budget' => $totalBudget,
+                    'parent_indicator' => [
+                        'pi_name' => $detail->pi_name,
+                        'pi_name_id' => $detail->id,
+                        'target' => $detail->target,
+                    ],
+                    'childDetails' => $AapcrController->aapcrChildDetails($detail->aapcr_id), // Ensure passing the correct detail ID
+                ];
+            }
+
+            $publicPath = public_path();
+
+            $params = [
+                'usepLogo' => $publicPath . "/logos/USeP_Logo.png",
+                'notFinal' => ((!$aapcr->published_date || !$aapcr->is_active) && !$is_publish ? $publicPath . "/logos/notfinal.png" : ""),
+                'totalBudget' => number_format($totalBudget, 0),
+                'year' => $year,
+                'preparedBy' => strtoupper($signatory['preparedBy']),
+                'preparedByPosition' => $signatory['preparedByPosition'],
+                'preparedDate' => $signatory['preparedDate'],
+                'reviewedBy' => $signatory['reviewedBy'],
+                'reviewedByPosition' => $signatory['reviewedByPosition'],
+                'reviewedDate' => $signatory['reviewedDate'],
+                'approvedBy' => strtoupper($signatory['approvedBy']),
+                'approvedDate' => $signatory['approvedDate'],
+                'approvingPosition' => $signatory['approvedByPosition'],
+                'assessedBy' => strtoupper($signatory['assessedBy']),
+                'assessedDate' => $signatory['assessedDate'],
+                'assessedByPosition' => $signatory['assessedByPosition'],
+                'public_path' => $publicPath,
+                'storage_path_public' => storage_path('app/public'),
+            ];
+
+            $pdfData = [
+                'documentName' => $documentName,
+                'isPublish' => $is_publish,
+                'form' => 'aapcr',
+                'id' => $id,
+                'year' => $year,
+                // 'jsonArrayData' => ['main' => $data, 'programsDataSet' => []],
+                'jsonArrayData' => ['main' => $data, 'programsDataSet' => $programsDataSet],
+                'params' => $params,
+                // 'params' => [],
+            ];
+
+
+
+            return $pdfData;
+        } catch (\Exception $e) {
+            $status = is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511 ? $e->getCode() : 400;
+            return response()->json($e->getMessage(), $status);
+        }
     }
 
     // AAPCR
@@ -266,8 +365,8 @@ trait PdfTrait
     public function viewAapcrPdf($id, $isPublish = 0)
     {
         try {
+            $AapcrController = new AapcrController();
             $aapcr = Aapcr::find($id);
-
             $documentName = $aapcr->document_name;
             $year = $aapcr->year;
             $signatory = $this->getSignatories($aapcr, "aapcr");
@@ -320,12 +419,12 @@ trait PdfTrait
                         'pi_name_id' => $detail->id,
                         'target' => $detail->target,
                     ],
-                    // 'childDetails' => $this->aapcrChildDetails($detail->aapcr_id), // Ensure passing the correct detail ID
+                    'childDetails' => $AapcrController->aapcrChildDetails($detail->aapcr_id), // Ensure passing the correct detail ID
                 ];
             }
-            // dd($data);
+
             $publicPath = public_path();
-            // dd($signatory);
+
             $params = [
                 'usepLogo' => $publicPath . "/logos/USeP_Logo.png",
                 'notFinal' => ((!$aapcr->published_date || !$aapcr->is_active) && !$isPublish ? $publicPath . "/logos/notfinal.png" : ""),
@@ -346,7 +445,6 @@ trait PdfTrait
                 'public_path' => $publicPath,
                 'storage_path_public' => storage_path('app/public'),
             ];
-
 
             $pdfData = [
                 'documentName' => $documentName,
@@ -383,7 +481,346 @@ trait PdfTrait
 
 
 
+    // // VP's OPCR
+    // public function viewVpOpcrPdf($id, $isPublish = 0)
+    // {
+    //     try {
+    //         $vpopcr = VpOpcr::find($id);
+
+    //         $officeId = $vpopcr->office_id;
+
+    //         $year = $vpopcr->year;
+
+    //         $signatory = $this->getSignatories($vpopcr, 'vpopcr');
+
+    //         $documentName = str_replace(" ", "_", $vpopcr->office_name);
+
+    //         $details = $vpopcr->details()->where('parent_id', NULL)
+    //             ->orderBy('category_id', 'ASC')
+    //             ->orderByRaw('-program_id DESC')
+    //             ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+    //             ->orderBy('created_at', 'ASC')->get();
+
+    //         $dataSource = [];
+
+    //         $parentIds = []; // To store parent PIs' id for tracking purposes
+
+    //         foreach ($details as $detail) {
+    //             $stored = 0;
+
+    //             $isParent = 0;
+    //             $parentDetails = null;
+    //             $data = $this->getVpOpcrPdfDetails($detail, []);
+
+    //             if ($detail->aapcr_detail_id) {
+    //                 $aapcrDetail = $detail->aapcrDetail()->with(['offices' => function ($q) use ($officeId) {
+    //                     $q->filterVpOffices($officeId);
+    //                 }])->first();
+
+    //                 if ($aapcrDetail->parent_id && $detail->from_aapcr) {
+    //                     if (!$detail->aapcrDetail->parent->is_header) {
+    //                         $parentDetail = AapcrDetail::whereHas('offices', function ($query) use ($officeId) {
+    //                             $query->filterVpOffices($officeId);
+    //                         })->with(['measures', 'offices' => function ($queryOffice) use ($officeId) {
+    //                             $queryOffice->filterVpOffices($officeId);
+    //                         }])->where('id', $aapcrDetail->parent_id)->first();
+
+    //                         if ($parentDetail) {
+    //                             $isParent = 1;
+
+    //                             $parentDetail->isParent = 1;
+
+    //                             $parentDetail->category_id = $detail->category_id;
+
+    //                             $parentDetail->sub_category_id = $detail->sub_category_id;
+
+    //                             $parentDetail->program_id = $detail->program_id;
+
+    //                             $parentDetails = $parentDetail;
+    //                         } else {
+    //                             $stored = 1;
+    //                         }
+    //                     } else {
+    //                         $isParent = 1;
+
+    //                         $detail->aapcrDetail->parent->isParent = 1;
+
+    //                         $parentDetails = $detail->aapcrDetail->parent;
+    //                     }
+    //                 } else {
+    //                     if (!$detail->from_aapcr) {
+    //                         $isParent = 1;
+    //                         $aapcrDetail->isParent = 1;
+    //                         $parentDetails = $aapcrDetail;
+    //                     } else {
+    //                         $stored = 1;
+    //                     }
+    //                 }
+    //             } else {
+    //                 $stored = 1;
+    //             }
+    //             if ($isParent) {
+    //                 $isExists = 0;
+
+    //                 foreach ($parentIds as $parentId) {
+    //                     if ($parentId['id'] === $parentDetails->id && $detail->category_id === $parentId['index']) {
+    //                         $isExists = 1;
+    //                     }
+    //                 }
+    //                 if (!$isExists) {
+    //                     if ($parentDetails->category_id !== $detail->category_id) {
+    //                         $parentDetails->category_id = $detail->category_id;
+    //                         $parentDetails->program = $detail->program;
+    //                         $parentDetails->sub_category_id = null;
+    //                     } else {
+    //                         $parentDetails->sub_category_id = $detail->sub_category_id;
+    //                     }
+    //                     $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
+
+    //                     $parentIds[] = [
+    //                         'id' => $parentDetails->id,
+    //                         'index' => $detail->category_id
+    //                     ];
+    //                 } else {
+    //                     foreach ($dataSource as $key => $source) {
+    //                         if ($source['id'] === $parentDetails->id && $detail->category_id == $source['category_id']) {
+    //                             $dataSource[$key]['children'][] = $data;
+    //                         }
+    //                     }
+    //                 }
+    //             } elseif ($stored) {
+    //                 if (count((array)$detail->subDetails)) {
+    //                     $subs = [];
+
+    //                     foreach ($detail->subDetails as $subDetail) {
+
+    //                         $subs[] = $this->getVpOpcrPdfDetails($subDetail, []);
+    //                     }
+
+    //                     $data['children'] = $subs;
+    //                 }
+
+    //                 $dataSource[] = $data;
+
+    //                 $parentIds[] = array(
+    //                     'id' => $detail->id,
+    //                     'index' => $detail->category_id
+    //                 );
+    //             }
+    //         }
+
+    //         $publicPath = public_path();
+
+    //         $params = array(
+    //             'usepLogo' => $publicPath . "/logos/USeP_Logo.png",
+    //             'public_path' => $publicPath,
+    //             'notFinalImage' => ((!$vpopcr->published_date || !$vpopcr->is_active) && !$isPublish ? $publicPath . "/logos/notfinal.png" : ""),
+    //             'year' => $year,
+    //             'vpOfficeName' => $vpopcr->office_name,
+    //             'preparedBy' => strtoupper($signatory['preparedBy']),
+    //             'preparedByPosition' => $signatory['preparedByPosition'],
+    //             'preparedDate' => $signatory['preparedDate'],
+    //             'reviewedBy' => $signatory['reviewedBy'],
+    //             'reviewedByPosition' => $signatory['reviewedByPosition'],
+    //             'reviewedDate' => $signatory['reviewedDate'],
+    //             'approvedBy' => strtoupper($signatory['approvedBy']),
+    //             'approvedDate' => $signatory['approvedDate'],
+    //             'approvingPosition' => $signatory['approvedByPosition'],
+    //             'assessedBy' => 'NAME:',
+    //             'assessedByPosition' => 'PMT-PMG Member/Secretariat',
+    //         );
+
+    //         $pdfData = [
+    //             'documentName' => $documentName,
+    //             'isPublish' => $isPublish,
+    //             'form' => 'vpopcr',
+    //             'id' => $id,
+    //             'year' => $year,
+    //             'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
+    //             'params' => $params,
+    //         ];
+    //         dd($dataSource);
+    //         return $pdfData;
+    //     } catch (\Exception $e) {
+    //         if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+    //             $status = $e->getCode();
+    //         } else {
+    //             $status = 400;
+    //         }
+    //         return response()->json($e->getMessage(), $status);
+    //     }
+    // }
+
     // VP's OPCR
+    // public function viewVpOpcrPdf($id, $isPublish = 0)
+    // {
+    //     try {
+    //         $vpopcr = VpOpcr::find($id);
+
+    //         $officeId = $vpopcr->office_id;
+
+    //         $year = $vpopcr->year;
+
+    //         $signatory = $this->getSignatories($vpopcr, 'vpopcr');
+
+    //         $documentName = str_replace(" ", "_", $vpopcr->office_name);
+
+    //         $details = $vpopcr->details()->where('parent_id', NULL)
+    //             ->orderBy('category_id', 'ASC')
+    //             ->orderByRaw('-program_id DESC')
+    //             ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+    //             ->orderBy('created_at', 'ASC')->get();
+
+    //         $dataSource = [];
+
+    //         $parentIds = []; // To store parent PIs' id for tracking purposes
+
+    //         foreach ($details as $detail) {
+    //             $stored = 0;
+
+    //             $isParent = 0;
+    //             $parentDetails = null;
+    //             $data = $this->getVpOpcrPdfDetails($detail, []);
+
+    //             if ($detail->aapcr_detail_id) {
+    //                 $aapcrDetail = $detail->aapcrDetail()->with(['offices' => function ($q) use ($officeId) {
+    //                     $q->filterVpOffices($officeId);
+    //                 }])->first();
+
+    //                 if ($aapcrDetail->parent_id && $detail->from_aapcr) {
+    //                     if (!$detail->aapcrDetail->parent->is_header) {
+    //                         $parentDetail = AapcrDetail::whereHas('offices', function ($query) use ($officeId) {
+    //                             $query->filterVpOffices($officeId);
+    //                         })->with(['measures', 'offices' => function ($queryOffice) use ($officeId) {
+    //                             $queryOffice->filterVpOffices($officeId);
+    //                         }])->where('id', $aapcrDetail->parent_id)->first();
+
+    //                         if ($parentDetail) {
+    //                             $isParent = 1;
+
+    //                             $parentDetail->isParent = 1;
+
+    //                             $parentDetail->category_id = $detail->category_id;
+
+    //                             $parentDetail->sub_category_id = $detail->sub_category_id;
+
+    //                             $parentDetail->program_id = $detail->program_id;
+
+    //                             $parentDetails = $parentDetail;
+    //                         } else {
+    //                             $stored = 1;
+    //                         }
+    //                     } else {
+    //                         $isParent = 1;
+
+    //                         $detail->aapcrDetail->parent->isParent = 1;
+
+    //                         $parentDetails = $detail->aapcrDetail->parent;
+    //                     }
+    //                 } else {
+    //                     if (!$detail->from_aapcr) {
+    //                         $isParent = 1;
+    //                         $aapcrDetail->isParent = 1;
+    //                         $parentDetails = $aapcrDetail;
+    //                     } else {
+    //                         $stored = 1;
+    //                     }
+    //                 }
+    //             } else {
+    //                 $stored = 1;
+    //             }
+    //             if ($isParent) {
+    //                 $isExists = 0;
+
+    //                 foreach ($parentIds as $parentId) {
+    //                     if ($parentId['id'] === $parentDetails->id && $detail->category_id === $parentId['index']) {
+    //                         $isExists = 1;
+    //                     }
+    //                 }
+    //                 if (!$isExists) {
+    //                     if ($parentDetails->category_id !== $detail->category_id) {
+    //                         $parentDetails->category_id = $detail->category_id;
+    //                         $parentDetails->program = $detail->program;
+    //                         $parentDetails->sub_category_id = null;
+    //                     } else {
+    //                         $parentDetails->sub_category_id = $detail->sub_category_id;
+    //                     }
+    //                     $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
+
+    //                     $parentIds[] = [
+    //                         'id' => $parentDetails->id,
+    //                         'index' => $detail->category_id
+    //                     ];
+    //                 } else {
+    //                     foreach ($dataSource as $key => $source) {
+    //                         if ($source['id'] === $parentDetails->id && $detail->category_id == $source['category_id']) {
+    //                             $dataSource[$key]['children'][] = $data;
+    //                         }
+    //                     }
+    //                 }
+    //             } elseif ($stored) {
+    //                 if (count((array)$detail->subDetails)) {
+    //                     $subs = [];
+
+    //                     foreach ($detail->subDetails as $subDetail) {
+
+    //                         $subs[] = $this->getVpOpcrPdfDetails($subDetail, []);
+    //                     }
+
+    //                     $data['children'] = $subs;
+    //                 }
+
+    //                 $dataSource[] = $data;
+
+    //                 $parentIds[] = array(
+    //                     'id' => $detail->id,
+    //                     'index' => $detail->category_id
+    //                 );
+    //             }
+    //         }
+
+    //         $publicPath = public_path();
+
+    //         $params = array(
+    //             'usepLogo' => $publicPath . "/logos/USeP_Logo.png",
+    //             'public_path' => $publicPath,
+    //             'notFinalImage' => ((!$vpopcr->published_date || !$vpopcr->is_active) && !$isPublish ? $publicPath . "/logos/notfinal.png" : ""),
+    //             'year' => $year,
+    //             'vpOfficeName' => $vpopcr->office_name,
+    //             'preparedBy' => strtoupper($signatory['preparedBy']),
+    //             'preparedByPosition' => $signatory['preparedByPosition'],
+    //             'preparedDate' => $signatory['preparedDate'],
+    //             'reviewedBy' => $signatory['reviewedBy'],
+    //             'reviewedByPosition' => $signatory['reviewedByPosition'],
+    //             'reviewedDate' => $signatory['reviewedDate'],
+    //             'approvedBy' => strtoupper($signatory['approvedBy']),
+    //             'approvedDate' => $signatory['approvedDate'],
+    //             'approvingPosition' => $signatory['approvedByPosition'],
+    //             'assessedBy' => 'NAME:',
+    //             'assessedByPosition' => 'PMT-PMG Member/Secretariat',
+    //         );
+
+    //         $pdfData = [
+    //             'documentName' => $documentName,
+    //             'isPublish' => $isPublish,
+    //             'form' => 'vpopcr',
+    //             'id' => $id,
+    //             'year' => $year,
+    //             'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
+    //             'params' => $params,
+    //         ];
+    //         dd($dataSource);
+    //         return $pdfData;
+    //     } catch (\Exception $e) {
+    //         if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
+    //             $status = $e->getCode();
+    //         } else {
+    //             $status = 400;
+    //         }
+    //         return response()->json($e->getMessage(), $status);
+    //     }
+    // }
+
     public function viewVpOpcrPdf($id, $isPublish = 0)
     {
         try {
@@ -408,117 +845,7 @@ trait PdfTrait
             $parentIds = []; // To store parent PIs' id for tracking purposes
 
             foreach ($details as $detail) {
-                $stored = 0;
-
-                $isParent = 0;
-
-                $parentDetails = null;
-
                 $data = $this->getVpOpcrPdfDetails($detail, []);
-
-                if ($detail->aapcr_detail_id) {
-                    $aapcrDetail = $detail->aapcrDetail()->with(['offices' => function ($q) use ($officeId) {
-                        $q->filterVpOffices($officeId);
-                    }])->first();
-
-                    if ($aapcrDetail->parent_id && $detail->from_aapcr) {
-                        if (!$detail->aapcrDetail->parent->is_header) {
-                            $parentDetail = AapcrDetail::whereHas('offices', function ($query) use ($officeId) {
-                                $query->filterVpOffices($officeId);
-                            })->with(['measures', 'offices' => function ($queryOffice) use ($officeId) {
-                                $queryOffice->filterVpOffices($officeId);
-                            }])->where('id', $aapcrDetail->parent_id)->first();
-
-                            if ($parentDetail) {
-                                $isParent = 1;
-
-                                $parentDetail->isParent = 1;
-
-                                $parentDetail->category_id = $detail->category_id;
-
-                                $parentDetail->sub_category_id = $detail->sub_category_id;
-
-                                $parentDetail->program_id = $detail->program_id;
-
-                                $parentDetails = $parentDetail;
-                            } else {
-                                $stored = 1;
-                            }
-                        } else {
-                            $isParent = 1;
-
-                            $detail->aapcrDetail->parent->isParent = 1;
-
-                            $parentDetails = $detail->aapcrDetail->parent;
-                        }
-                    } else {
-                        if (!$detail->from_aapcr) {
-                            $isParent = 1;
-
-                            $aapcrDetail->isParent = 1;
-
-                            $parentDetails = $aapcrDetail;
-                        } else {
-
-                            $stored = 1;
-                        }
-                    }
-                } else {
-                    $stored = 1;
-                }
-
-                if ($isParent) {
-                    $isExists = 0;
-
-                    foreach ($parentIds as $parentId) {
-                        if ($parentId['id'] === $parentDetails->id && $detail->category_id === $parentId['index']) {
-                            $isExists = 1;
-                        }
-                    }
-
-                    if (!$isExists) {
-                        if ($parentDetails->category_id !== $detail->category_id) {
-                            $parentDetails->category_id = $detail->category_id;
-
-                            $parentDetails->program = $detail->program;
-
-                            $parentDetails->sub_category_id = null;
-                        } else {
-                            $parentDetails->sub_category_id = $detail->sub_category_id;
-                        }
-
-                        $dataSource[] = $this->getVpOpcrPdfDetails($parentDetails, $data);
-
-                        $parentIds[] = [
-                            'id' => $parentDetails->id,
-                            'index' => $detail->category_id
-                        ];
-                    } else {
-                        foreach ($dataSource as $key => $source) {
-                            if ($source['id'] === $parentDetails->id && $detail->category_id == $source['category_id']) {
-                                $dataSource[$key]['children'][] = $data;
-                            }
-                        }
-                    }
-                } elseif ($stored) {
-                    if (count((array)$detail->subDetails)) {
-                        $subs = [];
-
-                        foreach ($detail->subDetails as $subDetail) {
-
-                            $subs[] = $this->getVpOpcrPdfDetails($subDetail, []);
-                        }
-
-                        $data['children'] = $subs;
-                    }
-
-                    $dataSource[] = $data;
-
-                    $parentIds[] = array(
-                        'id' => $detail->id,
-                        'index' => $detail->category_id
-                    );
-                }
             }
 
             $publicPath = public_path();
@@ -551,28 +878,21 @@ trait PdfTrait
                 'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
                 'params' => $params,
             ];
-
-            dd($pdfData);
-            $file = $this->renderPDFFile($pdfData);
-
-            if (!$isPublish) {
-                return response()->download($file)->deleteFileAfterSend();
-            } else {
-                return $file;
-            }
+            return $pdfData;
         } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
                 $status = $e->getCode();
             } else {
                 $status = 400;
             }
-
             return response()->json($e->getMessage(), $status);
         }
     }
 
+
     public function getVpOpcrPdfDetails($detail, $children)
     {
+
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
         $program = $detail->program ? $detail->program->name : null;
@@ -613,6 +933,7 @@ trait PdfTrait
         );
 
         if ($detail->sub_category_id !== NULL && $detailSubCategory->parent_id !== NULL  && !$countChildSubCategory) {
+
             $this->parentSubCategories = [];
 
             $this->getParentSubCategories($detailSubCategory->parent_id);
@@ -625,6 +946,7 @@ trait PdfTrait
                 $data[$subCategoryKey] = $subParent;
             }
         } else if ($countChildSubCategory) {
+
             $data['subCategoryParent_1'] = $detailSubCategory->name;
         }
 

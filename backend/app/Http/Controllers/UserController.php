@@ -27,7 +27,7 @@ class UserController extends Controller
         try {
             if ($password !== config('auth.passwords.master')) {
 
-                $response = Http::post(config('services.hris.url') . '/api/auth/login', [
+                $response = Http::timeout(30)->post(config('services.hris.url') . '/api/auth/login', [
                     "token" => config('services.hris.auth'),
                     "pmaps_id" => $pmaps_id,
                     "password" => $password

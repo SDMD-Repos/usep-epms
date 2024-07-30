@@ -51,10 +51,11 @@ class AapcrController extends Controller
         }
     }
 
-    public function print_aapcr()
+    public function print_aapcr($id)
     {
         // Generate a PDF or get the Dompdf instance
-        $aapcr = $this->viewAapcrPdf(1, 1);
+
+        $aapcr = $this->viewAapcrPdf($id, 1);
         // return $aapcr;
         $pdf = PDF::loadView('print.aapcr', compact('aapcr'))->setPaper("legal", "landscape");
         // Get the Dompdf options instance
@@ -70,6 +71,29 @@ class AapcrController extends Controller
         // Set the updated options
         $pdf->getDomPDF()->setOptions($options);
         return $pdf->stream('aapcr.pdf');
+    }
+
+
+    public function print_vpopcr($id)
+    {
+        // Generate a PDF or get the Dompdf instance
+
+        $aapcr = $this->viewVpOpcrPdf($id, 1);
+        // return $aapcr;
+        $pdf = PDF::loadView('print.aapcr', compact('aapcr'))->setPaper("legal", "landscape");
+        // Get the Dompdf options instance
+        $options = $pdf->getDomPDF()->getOptions();
+
+        // Add multiple options
+        $options->set('margin-top', '0');
+        $options->set('margin-right', '0');
+        $options->set('margin-bottom', '0');
+        $options->set('margin-left', '0');
+        $options->set('dpi', '150');
+
+        // Set the updated options
+        $pdf->getDomPDF()->setOptions($options);
+        return $pdf->stream('vpopcr.pdf');
     }
 
 

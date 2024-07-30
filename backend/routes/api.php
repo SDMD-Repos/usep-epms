@@ -112,7 +112,7 @@ Route::group([
     'middleware' => 'auth:api'
 ], function () {
 
-    Route::get('/viewSavedPdf/{fileName}', [AppController::class, 'viewSavedPdf']);
+    Route::get('/viewSavedPdf/{id}', [AppController::class, 'viewSavedPdf']);
 
     # AAPCR Controller routes
 
@@ -147,6 +147,7 @@ Route::group([
         Route::get('/viewPdf/{id}', [AppController::class, 'viewVpOpcrPdf']);
         Route::post('/update/{id}', [VpopcrController::class, 'update']);
         Route::post('/check-saved-indicators', [VpopcrController::class, 'checkSavedIndicators']);
+        Route::get('/print/pdf/{id}', [AapcrController::class, "print_vpopcr"]);
     });
 
     # OPCR & CPCR Form Controller routes
