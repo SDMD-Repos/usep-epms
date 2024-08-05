@@ -9,6 +9,7 @@ use App\Models\MeasureRating;
 use App\Models\Program;
 use App\Models\Signatory;
 use App\Models\VpOpcr;
+use App\Models\VpOpcrDetail;
 use Illuminate\Support\Facades\Storage;
 use League\CommonMark\Extension\InlinesOnly\ChildRenderer;
 use App\Http\Controllers\Form\AapcrController;
@@ -824,6 +825,7 @@ trait PdfTrait
     public function viewVpOpcrPdf($id, $isPublish = 0)
     {
         try {
+
             $vpopcr = VpOpcr::find($id);
 
             $officeId = $vpopcr->office_id;
@@ -834,18 +836,65 @@ trait PdfTrait
 
             $documentName = str_replace(" ", "_", $vpopcr->office_name);
 
-            $details = $vpopcr->details()->where('parent_id', NULL)
+            $details = $vpopcr->details()
+                ->whereNull('parent_id')  // Exclude entries where parent_id is not null
+                ->whereNotNull('sub_category_id')  // Include entries where sub_category_id is not null
                 ->orderBy('category_id', 'ASC')
                 ->orderByRaw('-program_id DESC')
                 ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
-                ->orderBy('created_at', 'ASC')->get();
-
+                ->orderBy('created_at', 'ASC')
+                ->get();
             $dataSource = [];
 
             $parentIds = []; // To store parent PIs' id for tracking purposes
 
             foreach ($details as $detail) {
-                $data = $this->getVpOpcrPdfDetails($detail, []);
+
+                $dataSource[] = $this->getVpOpcrPdfDetails($detail, []);
+            }
+
+            $details_vpopcr = $vpopcr->details()
+                ->whereNull('parent_id')  // Exclude entries where parent_id is not null
+                ->whereNull('sub_category_id')  // Include entries where sub_category_id is not null
+                ->orderBy('category_id', 'ASC')
+                ->orderByRaw('-program_id DESC')
+                ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+                ->orderBy('created_at', 'ASC')
+                ->get();
+            foreach ($details_vpopcr as $detail) {
+
+                $dataSource[] = $this->getVpOpcrPdfDetails($detail, []);
+            }
+            $mergedData = [];
+
+            foreach ($dataSource as $entry) {
+                foreach ($entry as $mainKey => $mainValue) {
+                    if (!isset($mergedData[$mainKey])) {
+                        $mergedData[$mainKey] = [];
+                    }
+
+                    foreach ($mainValue as $subKey => $subValue) {
+                        $parentIndicatorId = $subValue['parent_indicator']['pi_name_id'];
+                        if (!isset($mergedData[$mainKey][$subKey])) {
+                            $mergedData[$mainKey][$subKey] = [];
+                        }
+
+                        if (!isset($mergedData[$mainKey][$subKey][$parentIndicatorId])) {
+                            $mergedData[$mainKey][$subKey][$parentIndicatorId] = [
+                                "program" => $subValue["program"],
+                                "program_id" => $subValue["program_id"],
+                                "total_budget" => $subValue["total_budget"],
+                                "parent_indicator" => $subValue["parent_indicator"],
+                                "childDetails" => []
+                            ];
+                        }
+
+                        // Merge child details
+                        foreach ($subValue["childDetails"] as $childKey => $childValue) {
+                            $mergedData[$mainKey][$subKey][$parentIndicatorId]["childDetails"][$childKey] = $childValue;
+                        }
+                    }
+                }
             }
 
             $publicPath = public_path();
@@ -875,9 +924,10 @@ trait PdfTrait
                 'form' => 'vpopcr',
                 'id' => $id,
                 'year' => $year,
-                'jsonArrayData' => ['main' => $dataSource, 'programsDataSet' => $this->vpProgramDataSet],
+                'jsonArrayData' => ['main' => $mergedData, 'programsDataSet' => $this->vpProgramDataSet],
                 'params' => $params,
             ];
+            // dd($pdfData);
             return $pdfData;
         } catch (\Exception $e) {
             if (is_numeric($e->getCode()) && $e->getCode() && $e->getCode() < 511) {
@@ -893,91 +943,67 @@ trait PdfTrait
     public function getVpOpcrPdfDetails($detail, $children)
     {
 
+
+        $vpopcrDetails = VpOpcrDetail::where('parent_id', $detail->id)->with(['category', 'program'])
+            ->orderBy('category_id', 'ASC')
+            ->orderByRaw('-program_id DESC')
+            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+        // dd($vpopcrDetails);
+
+
         $function = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
 
         $program = $detail->program ? $detail->program->name : null;
 
-        $measures = '';
+        // $measures = '';
+        // $getOffices = [];
 
-        $getOffices = [];
 
-        if (!$detail->is_header) {
-            $measures = $this->fetchMeasuresPdf($detail->measures);
+        $childDetails = [];
 
-            $getOffices = $this->getOfficesPdf($detail->offices);
+        foreach ($vpopcrDetails as $vpopcrDetail) {
+
+
+            $measuresArray = $vpopcrDetail->measures->toArray();
+            $childDetails[$vpopcrDetail->id] = [
+                'pi_name_id' => $vpopcrDetail->id,
+                'pi_name' => $vpopcrDetail->pi_name,
+                'target' => $vpopcrDetail->target,
+                'target_basis' => $vpopcrDetail->targets_basis,
+                // 'measures' => $measuresArray,
+                // 'implementing_offices' => isset($vpopcrDetail->offices['implementing']) ? implode(", ", $vpopcrDetail->offices['implementing']) : '',
+                // 'support_offices' => isset($vpopcrDetail->offices['supporting']) ? implode(", ", $vpopcrDetail->offices['supporting']) : '',
+                'other_remarks' => $vpopcrDetail->other_remarks,
+            ];
         }
-
-        $detailSubCategory = $detail->subCategory;
-
-        $countChildSubCategory = $detail->sub_category_id ? count((array)$detailSubCategory->childSubCategories) : 0;
-
-        $subCategory = (($detail->sub_category_id && !$countChildSubCategory) ? $detailSubCategory->name : NULL);
-
-        $reversedSubCategories = [];
-
-        $data = array(
-            'id' => $detail->id,
-            'category_id' => $detail->category_id,
-            'category_order' => $detail->category->order,
-            'function' => $function,
-            'program' => $program,
-            'subCategory' => $subCategory,
-            'parentSubCategory' => $detail->sub_category_id ? $detailSubCategory->parent_id : NULL,
-            'pi_name' => $detail->pi_name,
-            'target' => $detail->target,
-            'measures' => $measures ? implode(", ", $measures) : '',
-            'allocatedBudget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
-            'targetsBasis' => $detail->targets_basis,
-            'implementing' => isset($getOffices['implementing']) ? implode(", ", $getOffices['implementing']) : '',
-            'supporting' => isset($getOffices['supporting']) ? implode(", ", $getOffices['supporting']) : '',
-        );
-
-        if ($detail->sub_category_id !== NULL && $detailSubCategory->parent_id !== NULL  && !$countChildSubCategory) {
-
-            $this->parentSubCategories = [];
-
-            $this->getParentSubCategories($detailSubCategory->parent_id);
-
-            $reversedSubCategories = array_reverse($this->parentSubCategories);
-
-            foreach ($reversedSubCategories as $dataKey => $subParent) {
-                $subCategoryKey = "subCategoryParent_" . ($dataKey + 1);
-
-                $data[$subCategoryKey] = $subParent;
-            }
-        } else if ($countChildSubCategory) {
-
-            $data['subCategoryParent_1'] = $detailSubCategory->name;
-        }
-
-        if (count((array)$children)) {
-            $data['children'][] = $children;
-        } else {
-            $data['children'] = null;
-        }
-
-        # OVER-ALL RATING DETAILS
-        $ifSaved = false;
-        if ($program) {
-            $ifSaved = $this->array_any(function ($x, $compare) {
-                return strtolower($x['programName']) === $compare['progName'];
-            }, $this->vpProgramDataSet, ['progName' => strtolower($program)]);
-        }
-
-        if (!$ifSaved && $detail->program) {
-            $categoryName = $this->integerToRomanNumeral($detail->category->order) . ". " . mb_strtoupper($detail->category->name);
-
-            $this->vpProgramDataSet[] = array(
-                'categoryName' => $categoryName,
-                'categoryPercentage' => $detail->category->percentage,
-                'programName' => ucwords($detail->program->name),
-                'programPercentage' => $detail->program->percentage
-            );
-        }
+        return [
+            $function => [$detail->program_id => [
+                'program' => $program,
+                'program_id' => $detail->program_id,
+                'total_budget' => $detail->allocated_budget ? number_format($detail->allocated_budget) : '',
+                'parent_indicator' => [
+                    'pi_name_id' => $detail->id,
+                    'pi_name' => $detail->pi_name,
+                    'target' => $detail->target,
+                ],
+                'childDetails' => $childDetails
+            ]]
+        ];
     }
 
-    public function viewCascadedVpOpcr()
+
+
+    public function getVpOpcrPdfDetailsChildren($parent_id)
     {
+        $vpopcrDetails = VpOpcrDetail::where('parent_id', $parent_id)->with(['category', 'program'])
+            ->orderBy('category_id', 'ASC')
+            ->orderByRaw('-program_id DESC')
+            ->orderByRaw('!ISNULL(sub_category_id), sub_category_id ASC')
+            ->orderBy('created_at', 'ASC')
+            ->get();
     }
 
     public function getSignatories($model, $form)

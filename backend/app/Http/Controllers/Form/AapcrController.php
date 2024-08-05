@@ -78,9 +78,9 @@ class AapcrController extends Controller
     {
         // Generate a PDF or get the Dompdf instance
 
-        $aapcr = $this->viewVpOpcrPdf($id, 1);
+        $vpopcr = $this->viewVpOpcrPdf($id, 1);
         // return $aapcr;
-        $pdf = PDF::loadView('print.aapcr', compact('aapcr'))->setPaper("legal", "landscape");
+        $pdf = PDF::loadView('print.vpopcr', compact('vpopcr'))->setPaper("legal", "landscape");
         // Get the Dompdf options instance
         $options = $pdf->getDomPDF()->getOptions();
 
